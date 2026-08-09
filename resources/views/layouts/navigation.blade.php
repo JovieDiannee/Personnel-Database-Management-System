@@ -61,41 +61,31 @@
                             : 'text-gray-600 hover:bg-green-100 hover:text-green-800'
                         }}"
                     >
-
                         Dashboard
 
                         @if(request()->routeIs('dashboard'))
-
                             <span
                                 class="absolute bottom-0 left-4 right-4 h-1 rounded-t-full bg-green-600"
                             ></span>
-
                         @endif
-
                     </a>
 
-
-                    {{-- Employees --}}
+                    {{-- Data Management --}}
                     <a
-                        href="#"
-                        class="rounded-md px-4 py-3 text-sm font-semibold text-gray-600
-                        transition duration-200
-                        hover:bg-green-100
-                        hover:text-green-800"
+                        href="{{ route('data-management') }}"
+                        class="relative rounded-md px-4 py-3 text-sm font-semibold transition duration-200
+                        {{ request()->routeIs('data-management')
+                            ? 'bg-green-700 text-white'
+                            : 'text-gray-600 hover:bg-green-100 hover:text-green-800'
+                        }}"
                     >
-                        Employees
-                    </a>
+                        Data Management
 
-
-                    {{-- Schools --}}
-                    <a
-                        href="#"
-                        class="rounded-md px-4 py-3 text-sm font-semibold text-gray-600
-                        transition duration-200
-                        hover:bg-green-100
-                        hover:text-green-800"
-                    >
-                        Schools
+                        @if(request()->routeIs('data-management'))
+                            <span
+                                class="absolute bottom-0 left-4 right-4 h-1 rounded-t-full bg-green-600"
+                            ></span>
+                        @endif
                     </a>
 
 
@@ -111,7 +101,6 @@
                     </a>
 
                 </div>
-
             </div>
 
 
