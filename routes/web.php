@@ -19,7 +19,13 @@ Route::middleware('auth')->group(function () {
     
     // Data Management
     Route::get('/data-management', [DataManagementController::class, 'index'])->name('data-management');
+    
+    // Data Management -> Personnel Information
     Route::get('/data-management/personnel', [DataManagementController::class, 'personnel'])->name('data-management.personnel');
+    Route::post('/data-management/personnel/import', [DataManagementController::class,'importPersonnel'])->name('data-management.personnel.import');
+    Route::get('/data-management/personnel/import/preview',[DataManagementController::class, 'personnelImportPreview'])->name('data-management.personnel.import.preview');
+    Route::post('/data-management/personnel/import/confirm', [DataManagementController::class,'confirmPersonnelImport'])->name('data-management.personnel.import.confirm');
+    
     Route::get('/data-management/employment-status',[DataManagementController::class, 'employmentStatus'])->name('data-management.employment-status');
     Route::get('/data-management/plantilla',[DataManagementController::class, 'plantilla'])->name('data-management.plantilla');
     Route::get('/data-management/schools',[DataManagementController::class, 'schools'])->name('data-management.schools');
