@@ -4,15 +4,36 @@
 
         <div class="mx-auto max-w-7xl px-6">
 
-            <div class="mb-8">
-                <h1 class="text-2xl font-bold text-green-900">
-                    Data Management
-                </h1>
+            {{-- PAGE HEADER --}}
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 py-6 text-white shadow-lg">
 
-                <p class="mt-1 text-sm text-gray-500">
-                    Manage and import personnel, school, plantilla, and enrollment data.
-                </p>
+                <div class="flex items-center justify-between px-6 py-5">
+
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">
+                            Data Management
+                        </h1>
+
+                        <p class="mt-1 text-sm text-green-100">
+                            Manage and import personnel, school, plantilla, and enrollment data.
+                        </p>
+                    </div>
+
+                    <a
+                        href="{{ route('dashboard') }}"
+                        class="rounded-md border border-white/30 bg-white/10 px-4 py-2
+                            text-sm font-semibold text-white
+                            backdrop-blur-sm
+                            transition duration-200
+                            hover:bg-white hover:text-green-800"
+                    >
+                        ← Back to Home
+                    </a>
+
+                </div>
+
             </div>
+            <br>
 
             {{-- Personnel Data --}}
             <div class="mb-8">
@@ -31,7 +52,7 @@
 
                         <div class="mt-5">
                             <a
-                                href="#"
+                                href="{{ route('data-management.personnel') }}"
                                 class="inline-flex items-center rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
                             >
                                 Manage Data
@@ -39,7 +60,26 @@
                         </div>
                     </div>
 
+                    {{-- Employment Status Records --}}
+                    <div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+                        <h3 class="text-base font-semibold text-green-900">
+                            Employment Status Records
+                        </h3>
 
+                        <p class="mt-2 text-sm text-gray-500">
+                            Manage records of personnel employment and corresponding personnel assignments.
+                        </p>
+
+                        <div class="mt-5">
+                            <a
+                                href="{{ route('data-management.employment-status') }}"
+                                class="inline-flex items-center rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
+                            >
+                                Manage Data
+                            </a>
+                        </div>
+                    </div>
+                    
                     {{-- Plantilla Position Records --}}
                     <div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
                         <h3 class="text-base font-semibold text-green-900">
@@ -47,12 +87,12 @@
                         </h3>
 
                         <p class="mt-2 text-sm text-gray-500">
-                            Manage records of authorized plantilla positions and corresponding personnel assignments.
+                            Manage records of authorized plantilla item positions.
                         </p>
 
                         <div class="mt-5">
                             <a
-                                href="#"
+                                href="{{ route('data-management.plantilla') }}"
                                 class="inline-flex items-center rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
                             >
                                 Manage Data
@@ -73,7 +113,7 @@
 
                         <div class="mt-5">
                             <a
-                                href="#"
+                                href="{{ route('data-management.schools') }}"
                                 class="inline-flex items-center rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
                             >
                                 Manage Data
@@ -94,7 +134,7 @@
 
                         <div class="mt-5">
                             <a
-                                href="#"
+                                href="{{ route('data-management.medical-allowance') }}"
                                 class="inline-flex items-center rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
                             >
                                 Manage Data
@@ -115,7 +155,7 @@
 
                         <div class="mt-5">
                             <a
-                                href="#"
+                                href="{{ route('data-management.enrollment') }}"
                                 class="inline-flex items-center rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
                             >
                                 Manage Data
