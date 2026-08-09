@@ -35,66 +35,138 @@
             </div>
             <br>
 
-            {{-- IMPORT SECTION --}}
-            <div class="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            @if(session('import_result'))
 
-                <div class="mb-4">
+                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-5">
 
-                    <h2 class="text-lg font-semibold text-gray-800">
-                        Import Personnel Data
-                    </h2>
+                    <h3 class="text-lg font-bold text-green-900">
+                        Import Completed
+                    </h3>
 
-                    <p class="mt-1 text-sm text-gray-500">
-                        Upload an Excel file containing personnel information.
-                    </p>
+                    <div class="mt-3 grid gap-4 sm:grid-cols-3">
+
+                        <div>
+                            <p class="text-sm text-gray-500">
+                                Successfully Imported
+                            </p>
+
+                            <p class="text-2xl font-bold text-green-700">
+                                {{ session('import_result.imported') }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm text-gray-500">
+                                Skipped Records
+                            </p>
+
+                            <p class="text-2xl font-bold text-yellow-600">
+                                {{ session('import_result.skipped') }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm text-gray-500">
+                                Errors
+                            </p>
+
+                            <p class="text-2xl font-bold text-red-600">
+                                {{ count(session('import_result.errors', [])) }}
+                            </p>
+                        </div>
+
+                    </div>
 
                 </div>
 
+            @endif
+
+            <div class="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+
+                <div class="mb-6">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        Import Personnel Information
+                    </h2>
+
+                    <p class="mt-1 text-sm text-gray-500">
+                        Upload an Excel file containing official personnel information
+                        for validation and preview.
+                    </p>
+                </div>
+
+
+                {{-- Validation Errors --}}
+                @if ($errors->any())
+
+                    <div class="mb-5 rounded-lg border border-red-200 bg-red-50 p-4">
+
+                        <div class="font-semibold text-red-800">
+                            Unable to process the file.
+                        </div>
+
+                        <ul class="mt-2 list-disc pl-5 text-sm text-red-700">
+
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+
+                        </ul>
+
+                    </div>
+
+                @endif
+
 
                 <form
-                    action="#"
+                    action="{{ route('data-management.personnel.import') }}"
                     method="POST"
                     enctype="multipart/form-data"
                 >
 
                     @csrf
 
-                    <div class="flex flex-col gap-4 md:flex-row md:items-end">
 
-                        <div class="flex-1">
+                    {{-- Excel File --}}
+                    <div class="mb-6">
 
-                            <label
-                                for="file"
-                                class="mb-2 block text-sm font-medium text-gray-700"
-                            >
-                                Excel File
-                            </label>
+                        <label
+                            for="file"
+                            class="block text-sm font-semibold text-gray-700"
+                        >
+                            Personnel Information Excel File
+                        </label>
 
-                            <input
-                                type="file"
-                                id="file"
-                                name="file"
-                                accept=".xlsx,.xls,.csv"
-                                class="block w-full rounded-md border border-gray-300
-                                       bg-white text-sm text-gray-700
-                                       file:mr-4 file:border-0
-                                       file:bg-green-700
-                                       file:px-4 file:py-2
-                                       file:text-sm file:font-semibold
-                                       file:text-white
-                                       hover:file:bg-green-800"
-                            >
+                        <input
+                            type="file"
+                            id="file"
+                            name="file"
+                            accept=".xlsx,.xls"
+                            required
+                            class="mt-2 block w-full rounded-lg border
+                                border-gray-300 bg-white text-sm
+                                file:mr-4 file:rounded-md file:border-0
+                                file:bg-green-700 file:px-4 file:py-2
+                                file:font-semibold file:text-white
+                                hover:file:bg-green-800"
+                        >
 
-                        </div>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Accepted formats: .xlsx and .xls. Maximum file size: 10 MB.
+                        </p>
 
+                    </div>
+
+
+                    <div class="flex items-center gap-3">
 
                         <button
                             type="submit"
-                            class="rounded-md bg-green-700 px-5 py-2.5
-                                   text-sm font-semibold text-white
-                                   hover:bg-green-800"
+                            class="rounded-lg bg-green-700 px-5 py-2.5
+                                text-sm font-semibold text-white
+                                shadow-sm transition
+                                hover:bg-green-800"
                         >
-                            Upload and Import
+                            Upload & Preview
                         </button>
 
                     </div>
@@ -103,6 +175,7 @@
 
             </div>
 
+            <br>
 
             {{-- RECORDS SECTION --}}
             <div class="rounded-lg border border-gray-200 bg-white shadow-sm">
@@ -240,5 +313,6 @@
         </div>
 
     </div>
+
 
 </x-app-layout>
