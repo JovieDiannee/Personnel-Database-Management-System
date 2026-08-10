@@ -43,207 +43,185 @@
             </div>
 
 
+            @if(session('import_result'))
+
+                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-5">
+
+                    <h3 class="text-lg font-bold text-green-900">
+                        School Import Completed
+                    </h3>
+
+                    <div class="mt-4 grid gap-4 sm:grid-cols-4">
+
+                        <div>
+                            <p class="text-sm text-gray-500">
+                                New Records
+                            </p>
+
+                            <p class="text-2xl font-bold text-green-700">
+                                {{ session('import_result.imported', 0) }}
+                            </p>
+                        </div>
+
+
+                        <div>
+                            <p class="text-sm text-gray-500">
+                                Updated Records
+                            </p>
+
+                            <p class="text-2xl font-bold text-blue-700">
+                                {{ session('import_result.updated', 0) }}
+                            </p>
+                        </div>
+
+
+                        <div>
+                            <p class="text-sm text-gray-500">
+                                Skipped Records
+                            </p>
+
+                            <p class="text-2xl font-bold text-yellow-600">
+                                {{ session('import_result.skipped', 0) }}
+                            </p>
+                        </div>
+
+
+                        <div>
+                            <p class="text-sm text-gray-500">
+                                Errors
+                            </p>
+
+                            <p class="text-2xl font-bold text-red-600">
+                                {{ count(session('import_result.errors', [])) }}
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            @endif
+
+
             {{-- IMPORT SECTION --}}
-            <div class="mb-6 rounded-xl border border-gray-200
-                        bg-white p-6 shadow-sm">
+            <div class="mb-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
 
-                <div class="mb-5">
+                <div class="mb-6">
 
-                    <h2 class="text-lg font-semibold text-gray-800">
-                        Import School Information
+                    <h2 class="text-lg font-bold text-gray-900">
+                        Import School Database
                     </h2>
 
                     <p class="mt-1 text-sm text-gray-500">
-                        Upload an Excel file containing official school
-                        information and records.
+                        Upload an Excel file containing official school information.
                     </p>
 
                 </div>
 
 
+                @if ($errors->any())
+
+                    <div class="mb-5 rounded-lg border border-red-200 bg-red-50 p-4">
+
+                        <div class="font-semibold text-red-800">
+                            Unable to process the file.
+                        </div>
+
+                        <ul class="mt-2 list-disc pl-5 text-sm text-red-700">
+
+                            @foreach ($errors->all() as $error)
+
+                                <li>{{ $error }}</li>
+
+                            @endforeach
+
+                        </ul>
+
+                    </div>
+
+                @endif
+
+
                 <form
-                    action="#"
+                    action="{{ route('data-management.schools.import') }}"
                     method="POST"
                     enctype="multipart/form-data"
                 >
 
                     @csrf
 
-                    <div class="flex flex-col gap-4 md:flex-row md:items-end">
 
-                        <div class="flex-1">
+                    <div class="mb-6">
 
-                            <label
-                                for="file"
-                                class="mb-2 block text-sm font-medium
-                                       text-gray-700"
-                            >
-                                Excel File
-                            </label>
-
-                            <input
-                                type="file"
-                                id="file"
-                                name="file"
-                                accept=".xlsx,.xls,.csv"
-                                class="block w-full rounded-md border
-                                       border-gray-300 bg-white
-                                       text-sm text-gray-700
-                                       file:mr-4
-                                       file:border-0
-                                       file:bg-green-700
-                                       file:px-4
-                                       file:py-2
-                                       file:text-sm
-                                       file:font-semibold
-                                       file:text-white
-                                       hover:file:bg-green-800"
-                            >
-
-                        </div>
-
-
-                        <button
-                            type="submit"
-                            class="rounded-md bg-green-700
-                                   px-5 py-2.5
-                                   text-sm font-semibold text-white
-                                   transition duration-200
-                                   hover:bg-green-800"
+                        <label
+                            for="file"
+                            class="block text-sm font-semibold text-gray-700"
                         >
-                            Upload and Import
-                        </button>
+                            School Database Excel File
+                        </label>
+
+
+                        <input
+                            type="file"
+                            id="file"
+                            name="file"
+                            accept=".xlsx,.xls"
+                            required
+                            class="mt-2 block w-full rounded-lg
+                                border border-gray-300 bg-white text-sm
+                                file:mr-4 file:rounded-md file:border-0
+                                file:bg-green-700 file:px-4 file:py-2
+                                file:font-semibold file:text-white
+                                hover:file:bg-green-800"
+                        >
+
+
+                        <p class="mt-1 text-xs text-gray-500">
+                            Accepted formats: .xlsx and .xls.
+                            Maximum file size: 10 MB.
+                        </p>
 
                     </div>
+
+
+                    <button
+                        type="submit"
+                        class="rounded-lg bg-green-700 px-5 py-2.5
+                            text-sm font-semibold text-white
+                            shadow-sm hover:bg-green-800"
+                    >
+                        Upload & Preview
+                    </button>
 
                 </form>
 
             </div>
 
 
-            {{-- SCHOOL RECORDS TABLE --}}
-            <div class="overflow-hidden rounded-xl
-                        border border-gray-200 bg-white shadow-sm">
+            {{-- RECORDS SECTION --}}
+            <div class="rounded-lg border border-gray-200 bg-white shadow-sm">
 
-
-                {{-- TABLE HEADER --}}
-                <div class="flex items-center justify-between
-                            border-b border-gray-200 p-6">
+                {{-- HEADER --}}
+                <div class="flex items-center justify-between border-b border-gray-200 p-6">
 
                     <div>
 
                         <h2 class="text-lg font-semibold text-gray-800">
-                            School Information Records
+                            School Database Records
                         </h2>
 
                         <p class="mt-1 text-sm text-gray-500">
-                            List of schools maintained in the Schools
-                            Division database.
+                            List of official school information maintained in the system.
                         </p>
 
                     </div>
 
+                    <div class="text-sm text-gray-500">
 
-                    <a
-                        href="#"
-                        class="rounded-md border border-green-700
-                               px-4 py-2 text-sm font-semibold
-                               text-green-700
-                               transition duration-200
-                               hover:bg-green-50"
-                    >
-                        Download Template
-                    </a>
-
-                </div>
-
-
-                {{-- SEARCH AND FILTER --}}
-                <div class="border-b border-gray-200 p-6">
-
-                    <div class="grid gap-4 md:grid-cols-3">
-
-                        {{-- SEARCH --}}
-                        <div>
-
-                            <label
-                                for="search"
-                                class="mb-2 block text-sm font-medium
-                                       text-gray-700"
-                            >
-                                Search School
-                            </label>
-
-                            <input
-                                type="text"
-                                id="search"
-                                name="search"
-                                placeholder="Search school name..."
-                                class="w-full rounded-md border-gray-300
-                                       text-sm shadow-sm
-                                       focus:border-green-600
-                                       focus:ring-green-600"
-                            >
-
-                        </div>
-
-
-                        {{-- DISTRICT --}}
-                        <div>
-
-                            <label
-                                for="district"
-                                class="mb-2 block text-sm font-medium
-                                       text-gray-700"
-                            >
-                                District
-                            </label>
-
-                            <select
-                                id="district"
-                                name="district"
-                                class="w-full rounded-md border-gray-300
-                                       text-sm shadow-sm
-                                       focus:border-green-600
-                                       focus:ring-green-600"
-                            >
-
-                                <option value="">
-                                    All Districts
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        {{-- MUNICIPALITY --}}
-                        <div>
-
-                            <label
-                                for="municipality"
-                                class="mb-2 block text-sm font-medium
-                                       text-gray-700"
-                            >
-                                Municipality
-                            </label>
-
-                            <select
-                                id="municipality"
-                                name="municipality"
-                                class="w-full rounded-md border-gray-300
-                                       text-sm shadow-sm
-                                       focus:border-green-600
-                                       focus:ring-green-600"
-                            >
-
-                                <option value="">
-                                    All Municipalities
-                                </option>
-
-                            </select>
-
-                        </div>
+                        Total:
+                        <span class="font-semibold text-green-700">
+                            {{ $schools->total() }}
+                        </span>
 
                     </div>
 
@@ -259,39 +237,48 @@
 
                             <tr>
 
-                                <th class="px-6 py-3 text-left text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
+                                <th class="px-6 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     School ID
                                 </th>
 
-                                <th class="px-6 py-3 text-left text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
+                                <th class="px-6 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     School Name
                                 </th>
 
-                                <th class="px-6 py-3 text-left text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
+                                <th class="px-6 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     District
                                 </th>
 
-                                <th class="px-6 py-3 text-left text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
+                                <th class="px-6 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     Municipality
                                 </th>
 
-                                <th class="px-6 py-3 text-left text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
+                                <th class="px-6 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+                                    School Area
+                                </th>
+
+                                <th class="px-6 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+                                    Legislative District
+                                </th>
+
+                                <th class="px-6 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     Sector
                                 </th>
 
-                                <th class="px-6 py-3 text-right text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
+                                <th class="px-6 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+                                    Curricular Offering
+                                </th>
+
+                                <th class="px-6 py-3 text-right text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     Action
                                 </th>
 
@@ -302,17 +289,89 @@
 
                         <tbody class="divide-y divide-gray-200 bg-white">
 
-                            <tr>
+                            @forelse ($schools as $school)
 
-                                <td
-                                    colspan="6"
-                                    class="px-6 py-10 text-center
-                                           text-sm text-gray-500"
-                                >
-                                    No school information records found.
-                                </td>
+                                <tr class="hover:bg-gray-50">
 
-                            </tr>
+                                    {{-- SCHOOL ID --}}
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm font-semibold text-gray-900">
+                                        {{ $school->school_id }}
+                                    </td>
+
+
+                                    {{-- SCHOOL NAME --}}
+                                    <td class="px-6 py-4 text-sm text-gray-900">
+
+                                        <div class="font-semibold">
+                                            {{ $school->school_name }}
+                                        </div>
+
+                                    </td>
+
+
+                                    {{-- DISTRICT --}}
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                                        {{ $school->school_district ?? '—' }}
+                                    </td>
+
+
+                                    {{-- MUNICIPALITY --}}
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                                        {{ $school->school_municipality ?? '—' }}
+                                    </td>
+
+                                     {{-- SCHOOL AREA --}}
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                                        {{ $school->school_area ?? '—' }}
+                                    </td>
+
+                                     {{-- LEGISLATIVE DISTRICT --}}
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                                        {{ $school->legislative_district ?? '—' }}
+                                    </td>
+
+                                    {{-- SECTOR --}}
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                                        {{ $school->school_sector ?? '—' }}
+                                    </td>
+
+                                    {{-- SCHOOL CURRICULAR OFFERING --}}
+                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                                        {{ $school->school_curricular_offering ?? '—' }}
+                                    </td>
+
+                                    {{-- ACTION --}}
+                                    <td class="whitespace-nowrap px-6 py-4 text-right">
+
+                                        <a
+                                            href="#"
+                                            class="inline-flex items-center rounded-md
+                                                border border-green-700
+                                                px-3 py-2 text-sm font-semibold
+                                                text-green-700
+                                                hover:bg-green-50"
+                                        >
+                                            View
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            @empty
+
+                                <tr>
+
+                                    <td
+                                        colspan="8"
+                                        class="px-6 py-10 text-center text-sm text-gray-500"
+                                    >
+                                        No school records found.
+                                    </td>
+
+                                </tr>
+
+                            @endforelse
 
                         </tbody>
 
@@ -322,13 +381,15 @@
 
 
                 {{-- PAGINATION --}}
-                <div class="border-t border-gray-200 px-6 py-4">
+                @if ($schools->hasPages())
 
-                    <div class="text-sm text-gray-500">
-                        Showing 0 records
+                    <div class="border-t border-gray-200 px-6 py-4">
+
+                        {{ $schools->links() }}
+
                     </div>
 
-                </div>
+                @endif
 
             </div>
 

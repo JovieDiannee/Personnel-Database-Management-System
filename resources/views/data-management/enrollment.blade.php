@@ -43,6 +43,85 @@
             </div>
 
 
+            @if(session('enrollment_import_result'))
+                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-5">
+
+                    <h3 class="text-lg font-bold text-green-900">
+                        Enrollment Import Completed
+                    </h3>
+
+                    <div class="mt-4 grid gap-4 md:grid-cols-4">
+
+                        <div>
+                            <p class="text-sm text-gray-500">
+                                New Records
+                            </p>
+
+                            <p class="text-2xl font-bold text-green-700">
+                                {{ session('enrollment_import_result.imported') }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm text-gray-500">
+                                Updated Records
+                            </p>
+
+                            <p class="text-2xl font-bold text-blue-700">
+                                {{ session('enrollment_import_result.updated') }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm text-gray-500">
+                                Skipped
+                            </p>
+
+                            <p class="text-2xl font-bold text-yellow-600">
+                                {{ session('enrollment_import_result.skipped') }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm text-gray-500">
+                                Errors
+                            </p>
+
+                            <p class="text-2xl font-bold text-red-600">
+                                {{ count(session('enrollment_import_result.errors', [])) }}
+                            </p>
+                        </div>
+
+                    </div>
+
+                    @if(count(session('enrollment_import_result.errors', [])) > 0)
+
+                        <div class="mt-5 rounded-lg border border-red-200 bg-red-50 p-4">
+
+                            <h4 class="font-semibold text-red-800">
+                                Import Errors
+                            </h4>
+
+                            <ul class="mt-2 list-disc pl-5 text-sm text-red-700">
+
+                                @foreach(session('enrollment_import_result.errors', []) as $error)
+
+                                    <li>
+                                        Row {{ $error['row'] ?? 'N/A' }}:
+                                        {{ $error['message'] ?? 'Unknown error' }}
+                                    </li>
+
+                                @endforeach
+
+                            </ul>
+
+                        </div>
+
+                    @endif
+
+                </div>
+            @endif
+
             {{-- IMPORT SECTION --}}
             <div class="mb-6 rounded-xl border border-gray-200
                         bg-white p-6 shadow-sm">
@@ -54,15 +133,13 @@
                     </h2>
 
                     <p class="mt-1 text-sm text-gray-500">
-                        Upload an Excel file containing official school
-                        enrollment data by school year and grade level.
+                        Upload an Excel file containing school enrollment records.
                     </p>
 
                 </div>
 
-
                 <form
-                    action="#"
+                    action="{{ route('data-management.enrollment.import') }}"
                     method="POST"
                     enctype="multipart/form-data"
                 >
@@ -75,8 +152,7 @@
 
                             <label
                                 for="file"
-                                class="mb-2 block text-sm font-medium
-                                       text-gray-700"
+                                class="mb-2 block text-sm font-medium text-gray-700"
                             >
                                 Excel File
                             </label>
@@ -85,34 +161,47 @@
                                 type="file"
                                 id="file"
                                 name="file"
-                                accept=".xlsx,.xls,.csv"
+                                accept=".xlsx,.xls"
+                                required
                                 class="block w-full rounded-md border
-                                       border-gray-300 bg-white
-                                       text-sm text-gray-700
-                                       file:mr-4
-                                       file:border-0
-                                       file:bg-green-700
-                                       file:px-4
-                                       file:py-2
-                                       file:text-sm
-                                       file:font-semibold
-                                       file:text-white
-                                       hover:file:bg-green-800"
+                                    border-gray-300 bg-white
+                                    text-sm text-gray-700
+                                    file:mr-4
+                                    file:border-0
+                                    file:bg-green-700
+                                    file:px-4
+                                    file:py-2
+                                    file:text-sm
+                                    file:font-semibold
+                                    file:text-white
+                                    hover:file:bg-green-800"
                             >
+
+                            <p class="mt-1 text-xs text-gray-500">
+                                Accepted formats: .xlsx and .xls.
+                                Maximum file size: 10 MB.
+                            </p>
 
                         </div>
 
+                        {{-- BUTTON --}}
+                        <div class="flex items-center gap-3">
 
-                        <button
-                            type="submit"
-                            class="rounded-md bg-green-700
-                                   px-5 py-2.5
-                                   text-sm font-semibold text-white
-                                   transition duration-200
-                                   hover:bg-green-800"
-                        >
-                            Upload and Import
-                        </button>
+                            <button
+                                type="submit"
+                                class="rounded-lg bg-green-700 px-5 py-2.5
+                                    text-sm font-semibold text-white
+                                    shadow-sm transition
+                                    hover:bg-green-800
+                                    focus:outline-none
+                                    focus:ring-2
+                                    focus:ring-green-500
+                                    focus:ring-offset-2"
+                            >
+                                Upload & Preview
+                            </button>
+
+                        </div>
 
                     </div>
 
@@ -295,46 +384,234 @@
                 {{-- TABLE --}}
                 <div class="overflow-x-auto">
 
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="min-w-max w-full divide-y divide-gray-200">
 
-                        <thead class="bg-gray-50">
+                        {{-- TABLE HEADER --}}
+                        <thead class="bg-green-50">
 
-                            <tr>
+                            {{-- GROUPED HEADER --}}
+                            <tr class="border-b border-gray-200">
 
-                                <th class="px-6 py-3 text-left text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
-                                    School
+                                <th
+                                    rowspan="2"
+                                    class="sticky left-0 z-20 min-w-[110px]
+                                        border-r border-gray-200
+                                        bg-green-50 px-4 py-3
+                                        text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600"
+                                >
+                                    School ID
                                 </th>
 
-                                <th class="px-6 py-3 text-left text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
+
+                                <th
+                                    rowspan="2"
+                                    class="sticky left-[110px] z-20 min-w-[300px]
+                                        border-r border-gray-200
+                                        bg-green-50 px-4 py-3
+                                        text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600"
+                                >
+                                    School Name
+                                </th>
+
+
+                                <th
+                                    rowspan="2"
+                                    class="min-w-[120px]
+                                        border-r border-gray-200
+                                        px-4 py-3
+                                        text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600"
+                                >
                                     School Year
                                 </th>
 
-                                <th class="px-6 py-3 text-left text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
-                                    Level
+
+                                {{-- ACTUAL ENROLLMENT GROUP --}}
+
+                                <th
+                                    colspan="13"
+                                    class="border-b border-gray-200
+                                        px-4 py-3 text-center
+                                        text-xs font-bold uppercase
+                                        tracking-wider text-gray-700"
+                                >
+                                    Actual Enrollment
                                 </th>
 
-                                <th class="px-6 py-3 text-left text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
-                                    Grade Level
-                                </th>
 
-                                <th class="px-6 py-3 text-right text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
-                                    Enrollment
-                                </th>
-
-                                <th class="px-6 py-3 text-right text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
+                                <th
+                                    rowspan="2"
+                                    class="min-w-[100px]
+                                        px-4 py-3 text-center
+                                        text-xs font-semibold
+                                        uppercase tracking-wider
+                                        text-gray-600"
+                                >
                                     Action
+                                </th>
+
+                            </tr>
+
+
+                            {{-- GRADE HEADER --}}
+
+                            <tr>
+
+                                {{-- KINDERGARTEN --}}
+
+                                <th
+                                    class="min-w-[80px] border-r border-gray-200
+                                        px-4 py-3 text-center
+                                        text-xs font-semibold
+                                        text-gray-600"
+                                >
+                                    K
+                                </th>
+
+
+                                {{-- GRADE 1 --}}
+
+                                <th
+                                    class="min-w-[80px] border-r border-gray-200
+                                        px-4 py-3 text-center
+                                        text-xs font-semibold
+                                        text-gray-600"
+                                >
+                                    Gr 1
+                                </th>
+
+
+                                {{-- GRADE 2 --}}
+
+                                <th
+                                    class="min-w-[80px] border-r border-gray-200
+                                        px-4 py-3 text-center
+                                        text-xs font-semibold
+                                        text-gray-600"
+                                >
+                                    Gr 2
+                                </th>
+
+
+                                {{-- GRADE 3 --}}
+
+                                <th
+                                    class="min-w-[80px] border-r border-gray-200
+                                        px-4 py-3 text-center
+                                        text-xs font-semibold
+                                        text-gray-600"
+                                >
+                                    Gr 3
+                                </th>
+
+
+                                {{-- GRADE 4 --}}
+
+                                <th
+                                    class="min-w-[80px] border-r border-gray-200
+                                        px-4 py-3 text-center
+                                        text-xs font-semibold
+                                        text-gray-600"
+                                >
+                                    Gr 4
+                                </th>
+
+
+                                {{-- GRADE 5 --}}
+
+                                <th
+                                    class="min-w-[80px] border-r border-gray-200
+                                        px-4 py-3 text-center
+                                        text-xs font-semibold
+                                        text-gray-600"
+                                >
+                                    Gr 5
+                                </th>
+
+
+                                {{-- GRADE 6 --}}
+
+                                <th
+                                    class="min-w-[80px] border-r border-gray-200
+                                        px-4 py-3 text-center
+                                        text-xs font-semibold
+                                        text-gray-600"
+                                >
+                                    Gr 6
+                                </th>
+
+
+                                {{-- GRADE 7 --}}
+
+                                <th
+                                    class="min-w-[80px] border-r border-gray-200
+                                        px-4 py-3 text-center
+                                        text-xs font-semibold
+                                        text-gray-600"
+                                >
+                                    Gr 7
+                                </th>
+
+
+                                {{-- GRADE 8 --}}
+
+                                <th
+                                    class="min-w-[80px] border-r border-gray-200
+                                        px-4 py-3 text-center
+                                        text-xs font-semibold
+                                        text-gray-600"
+                                >
+                                    Gr 8
+                                </th>
+
+
+                                {{-- GRADE 9 --}}
+
+                                <th
+                                    class="min-w-[80px] border-r border-gray-200
+                                        px-4 py-3 text-center
+                                        text-xs font-semibold
+                                        text-gray-600"
+                                >
+                                    Gr 9
+                                </th>
+
+
+                                {{-- GRADE 10 --}}
+
+                                <th
+                                    class="min-w-[80px] border-r border-gray-200
+                                        px-4 py-3 text-center
+                                        text-xs font-semibold
+                                        text-gray-600"
+                                >
+                                    Gr 10
+                                </th>
+
+
+                                {{-- GRADE 11 --}}
+
+                                <th
+                                    class="min-w-[80px] border-r border-gray-200
+                                        px-4 py-3 text-center
+                                        text-xs font-semibold
+                                        text-gray-600"
+                                >
+                                    Gr 11
+                                </th>
+
+
+                                {{-- GRADE 12 --}}
+
+                                <th
+                                    class="min-w-[80px]
+                                        px-4 py-3 text-center
+                                        text-xs font-semibold
+                                        text-gray-600"
+                                >
+                                    Gr 12
                                 </th>
 
                             </tr>
@@ -342,19 +619,241 @@
                         </thead>
 
 
+                        {{-- TABLE BODY --}}
+
                         <tbody class="divide-y divide-gray-200 bg-white">
 
-                            <tr>
+                            @forelse($schools as $school)
 
-                                <td
-                                    colspan="6"
-                                    class="px-6 py-10 text-center
-                                           text-sm text-gray-500"
-                                >
-                                    No enrollment records found.
-                                </td>
+                                <tr class="transition hover:bg-green-50">
 
-                            </tr>
+                                    {{-- SCHOOL ID --}}
+
+                                    <td
+                                        class="sticky left-0 z-10
+                                            border-r border-gray-200
+                                            bg-white px-4 py-4
+                                            text-sm font-semibold text-gray-800"
+                                    >
+                                        {{ $school['school_id'] ?? '—' }}
+                                    </td>
+
+
+                                    {{-- SCHOOL NAME --}}
+
+                                    <td
+                                        class="sticky left-[110px] z-10
+                                            min-w-[300px]
+                                            border-r border-gray-200
+                                            bg-white px-4 py-4
+                                            text-sm font-medium text-gray-800"
+                                    >
+                                        {{ $school['school_name'] ?? '—' }}
+                                    </td>
+
+
+                                    {{-- SCHOOL YEAR --}}
+
+                                    <td
+                                        class="border-r border-gray-200
+                                            px-4 py-4 text-sm
+                                            text-gray-700"
+                                    >
+                                        {{ $school['school_year'] ?? '—' }}
+                                    </td>
+
+
+                                    {{-- KINDERGARTEN --}}
+
+                                    <td class="border-r border-gray-200
+                                            px-4 py-4 text-center text-sm">
+
+                                        {{ collect($school['grades'] ?? [])
+                                            ->firstWhere('name', 'Kindergarten')['count']
+                                            ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- GRADE 1 --}}
+
+                                    <td class="border-r border-gray-200
+                                            px-4 py-4 text-center text-sm">
+
+                                        {{ collect($school['grades'] ?? [])
+                                            ->firstWhere('name', 'Grade 1')['count']
+                                            ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- GRADE 2 --}}
+
+                                    <td class="border-r border-gray-200
+                                            px-4 py-4 text-center text-sm">
+
+                                        {{ collect($school['grades'] ?? [])
+                                            ->firstWhere('name', 'Grade 2')['count']
+                                            ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- GRADE 3 --}}
+
+                                    <td class="border-r border-gray-200
+                                            px-4 py-4 text-center text-sm">
+
+                                        {{ collect($school['grades'] ?? [])
+                                            ->firstWhere('name', 'Grade 3')['count']
+                                            ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- GRADE 4 --}}
+
+                                    <td class="border-r border-gray-200
+                                            px-4 py-4 text-center text-sm">
+
+                                        {{ collect($school['grades'] ?? [])
+                                            ->firstWhere('name', 'Grade 4')['count']
+                                            ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- GRADE 5 --}}
+
+                                    <td class="border-r border-gray-200
+                                            px-4 py-4 text-center text-sm">
+
+                                        {{ collect($school['grades'] ?? [])
+                                            ->firstWhere('name', 'Grade 5')['count']
+                                            ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- GRADE 6 --}}
+
+                                    <td class="border-r border-gray-200
+                                            px-4 py-4 text-center text-sm">
+
+                                        {{ collect($school['grades'] ?? [])
+                                            ->firstWhere('name', 'Grade 6')['count']
+                                            ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- GRADE 7 --}}
+
+                                    <td class="border-r border-gray-200
+                                            px-4 py-4 text-center text-sm">
+
+                                        {{ collect($school['grades'] ?? [])
+                                            ->firstWhere('name', 'Grade 7')['count']
+                                            ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- GRADE 8 --}}
+
+                                    <td class="border-r border-gray-200
+                                            px-4 py-4 text-center text-sm">
+
+                                        {{ collect($school['grades'] ?? [])
+                                            ->firstWhere('name', 'Grade 8')['count']
+                                            ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- GRADE 9 --}}
+
+                                    <td class="border-r border-gray-200
+                                            px-4 py-4 text-center text-sm">
+
+                                        {{ collect($school['grades'] ?? [])
+                                            ->firstWhere('name', 'Grade 9')['count']
+                                            ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- GRADE 10 --}}
+
+                                    <td class="border-r border-gray-200
+                                            px-4 py-4 text-center text-sm">
+
+                                        {{ collect($school['grades'] ?? [])
+                                            ->firstWhere('name', 'Grade 10')['count']
+                                            ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- GRADE 11 --}}
+
+                                    <td class="border-r border-gray-200
+                                            px-4 py-4 text-center text-sm">
+
+                                        {{ collect($school['grades'] ?? [])
+                                            ->firstWhere('name', 'Grade 11')['count']
+                                            ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- GRADE 12 --}}
+
+                                    <td class="px-4 py-4 text-center text-sm">
+
+                                        {{ collect($school['grades'] ?? [])
+                                            ->firstWhere('name', 'Grade 12')['count']
+                                            ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- ACTION --}}
+
+                                    <td class="whitespace-nowrap px-4 py-4 text-center">
+
+                                        <a
+                                            href="#"
+                                            class="inline-flex items-center
+                                                rounded-md border border-green-700
+                                                px-4 py-2 text-sm font-semibold
+                                                text-green-700
+                                                transition duration-200
+                                                hover:bg-green-700
+                                                hover:text-white"
+                                        >
+                                            View
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            @empty
+
+                                <tr>
+
+                                    <td
+                                        colspan="18"
+                                        class="px-6 py-10 text-center
+                                            text-sm text-gray-500"
+                                    >
+                                        No enrollment records found.
+                                    </td>
+
+                                </tr>
+
+                            @endforelse
 
                         </tbody>
 
