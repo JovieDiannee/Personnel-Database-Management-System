@@ -42,78 +42,172 @@
 
             </div>
 
+            @if(session('error'))
 
-            {{-- IMPORT SECTION --}}
-            <div class="mb-6 rounded-xl border border-gray-200
-                        bg-white p-6 shadow-sm">
+                <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-5">
 
-                <div class="mb-5">
-
-                    <h2 class="text-lg font-semibold text-gray-800">
-                        Import Employment Status Records
-                    </h2>
-
-                    <p class="mt-1 text-sm text-gray-500">
-                        Upload an Excel file containing personnel employment
-                        status and assignment information.
+                    <p class="font-semibold text-red-800">
+                        {{ session('error') }}
                     </p>
 
                 </div>
 
+            @endif
 
-                <form
-                    action="#"
-                    method="POST"
-                    enctype="multipart/form-data"
-                >
 
-                    @csrf
+            @if(session('employment_import_result'))
 
-                    <div class="flex flex-col gap-4 md:flex-row md:items-end">
+                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-5">
 
-                        <div class="flex-1">
+                    <h3 class="text-lg font-bold text-green-900">
+                        Employment Import Completed
+                    </h3>
 
-                            <label
-                                for="file"
-                                class="mb-2 block text-sm font-medium text-gray-700"
-                            >
-                                Excel File
-                            </label>
+                    <div class="mt-4 grid gap-4 md:grid-cols-4">
 
-                            <input
-                                type="file"
-                                id="file"
-                                name="file"
-                                accept=".xlsx,.xls,.csv"
-                                class="block w-full rounded-md border
-                                       border-gray-300 bg-white
-                                       text-sm text-gray-700
-                                       file:mr-4
-                                       file:border-0
-                                       file:bg-green-700
-                                       file:px-4
-                                       file:py-2
-                                       file:text-sm
-                                       file:font-semibold
-                                       file:text-white
-                                       hover:file:bg-green-800"
-                            >
+                        <div>
+
+                            <p class="text-sm text-gray-500">
+                                New Records
+                            </p>
+
+                            <p class="text-2xl font-bold text-green-700">
+                                {{ session('employment_import_result.imported') }}
+                            </p>
 
                         </div>
 
 
-                        <button
-                            type="submit"
-                            class="rounded-md bg-green-700
-                                   px-5 py-2.5
-                                   text-sm font-semibold text-white
-                                   transition duration-200
-                                   hover:bg-green-800"
-                        >
-                            Upload and Import
-                        </button>
+                        <div>
+
+                            <p class="text-sm text-gray-500">
+                                Updated Records
+                            </p>
+
+                            <p class="text-2xl font-bold text-blue-700">
+                                {{ session('employment_import_result.updated') }}
+                            </p>
+
+                        </div>
+
+
+                        <div>
+
+                            <p class="text-sm text-gray-500">
+                                Skipped
+                            </p>
+
+                            <p class="text-2xl font-bold text-yellow-600">
+                                {{ session('employment_import_result.skipped') }}
+                            </p>
+
+                        </div>
+
+
+                        <div>
+
+                            <p class="text-sm text-gray-500">
+                                Errors
+                            </p>
+
+                            <p class="text-2xl font-bold text-red-600">
+                                {{ count(session('employment_import_result.errors', [])) }}
+                            </p>
+
+                        </div>
 
                     </div>
+
+
+                    {{-- ERROR DETAILS --}}
+
+                    @if(count(session('employment_import_result.errors', [])) > 0)
+
+                        <div class="mt-5 rounded-lg border border-red-200 bg-red-50 p-4">
+
+                            <h4 class="font-semibold text-red-800">
+                                Import Errors
+                            </h4>
+
+                            <ul class="mt-2 list-disc pl-5 text-sm text-red-700">
+
+                                @foreach(session('employment_import_result.errors', []) as $error)
+
+                                    <li>
+                                        Row {{ $error['row'] }}:
+                                        {{ $error['message'] }}
+                                    </li>
+
+                                @endforeach
+
+                            </ul>
+
+                        </div>
+
+                    @endif
+
+                </div>
+
+            @endif
+
+
+            {{-- IMPORT SECTION --}}
+           <div class="rounded-xl border bg-white p-6 shadow-sm">
+
+                <h2 class="text-lg font-bold text-gray-800">
+                    Import Employment Status
+                </h2>
+
+                <p class="mt-1 text-sm text-gray-500">
+                    Upload the official Employment Status Excel file.
+                </p>
+
+
+                <form
+                    action="{{ route('data-management.employment-status.import') }}"
+                    method="POST"
+                    enctype="multipart/form-data"
+                    class="mt-6"
+                >
+
+                    @csrf
+
+
+                    <label
+                        for="file"
+                        class="block text-sm font-semibold text-gray-700"
+                    >
+                        Employment Status Excel File
+                    </label>
+
+
+                    <input
+                        type="file"
+                        id="file"
+                        name="file"
+                        accept=".xlsx,.xls"
+                        required
+                        class="mt-2 block w-full rounded-lg border border-gray-300 bg-white text-sm
+                            file:mr-4 file:rounded-md file:border-0
+                            file:bg-green-700 file:px-4 file:py-2
+                            file:font-semibold file:text-white
+                            hover:file:bg-green-800"
+                    >
+
+
+                    <p class="mt-2 text-xs text-gray-500">
+                        Accepted formats: .xlsx and .xls. Maximum file size: 10 MB.
+                    </p>
+
+
+                    <button
+                        type="submit"
+                        class="mt-5 rounded-lg bg-green-700 px-5 py-2.5
+                            text-sm font-semibold text-white
+                            hover:bg-green-800"
+                    >
+                        Upload & Preview
+                    </button>
 
                 </form>
 
@@ -160,28 +254,65 @@
                 {{-- SEARCH --}}
                 <div class="border-b border-gray-200 p-6">
 
-                    <div class="max-w-md">
+                    <form
+                        action="{{ route('data-management.employment-status') }}"
+                        method="GET"
+                        class="flex flex-col gap-3 sm:flex-row sm:items-end"
+                    >
 
-                        <label
-                            for="search"
-                            class="mb-2 block text-sm font-medium
-                                   text-gray-700"
-                        >
-                            Search Records
-                        </label>
+                        <div class="w-full max-w-md">
 
-                        <input
-                            type="text"
-                            id="search"
-                            name="search"
-                            placeholder="Search by employee name or number..."
-                            class="w-full rounded-md border-gray-300
-                                   text-sm shadow-sm
-                                   focus:border-green-600
-                                   focus:ring-green-600"
-                        >
+                            <label
+                                for="search"
+                                class="mb-2 block text-sm font-medium text-gray-700"
+                            >
+                                Search Employment Records
+                            </label>
 
-                    </div>
+                            <input
+                                type="text"
+                                id="search"
+                                name="search"
+                                value="{{ $search }}"
+                                placeholder="Search name, email, school, item no., position..."
+                                class="w-full rounded-md border-gray-300
+                                    text-sm shadow-sm
+                                    focus:border-green-600
+                                    focus:ring-green-600"
+                            >
+
+                        </div>
+
+
+                        <div class="flex gap-2">
+
+                            <button
+                                type="submit"
+                                class="rounded-md bg-green-700 px-4 py-2
+                                    text-sm font-semibold text-white
+                                    hover:bg-green-800"
+                            >
+                                Search
+                            </button>
+
+
+                            @if($search !== '')
+
+                                <a
+                                    href="{{ route('data-management.employment-status') }}"
+                                    class="rounded-md border border-gray-300
+                                        bg-white px-4 py-2
+                                        text-sm font-semibold text-gray-700
+                                        hover:bg-gray-50"
+                                >
+                                    Clear
+                                </a>
+
+                            @endif
+
+                        </div>
+
+                    </form>
 
                 </div>
 
@@ -195,39 +326,63 @@
 
                             <tr>
 
-                                <th class="px-6 py-3 text-left text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
-                                    Employee No.
+                                <th class="px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+                                    #
                                 </th>
 
-                                <th class="px-6 py-3 text-left text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     Name
                                 </th>
 
-                                <th class="px-6 py-3 text-left text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+                                    School Name
+                                </th>
+
+                                <th class="px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+                                    Item From School Level
+                                </th>
+
+                                <th class="px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+                                    Plantilla Item No.
+                                </th>
+
+                                <th class="px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+                                    Position Title
+                                </th>
+
+                                <th class="px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     Employment Status
                                 </th>
 
-                                <th class="px-6 py-3 text-left text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
-                                    Position
+                                <th class="px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+                                    Date of Original Appointment
                                 </th>
 
-                                <th class="px-6 py-3 text-left text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
-                                    Office / School
+                                <th class="px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+                                    Date of Last Promotion
                                 </th>
 
-                                <th class="px-6 py-3 text-right text-xs
-                                           font-semibold uppercase
-                                           tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+                                    Warm Body Status
+                                </th>
+
+                                <th class="px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+                                    Nature of Work
+                                </th>
+
+                                <th class="px-4 py-3 text-right text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     Action
                                 </th>
 
@@ -238,17 +393,225 @@
 
                         <tbody class="divide-y divide-gray-200 bg-white">
 
-                            <tr>
+                            @forelse($employmentStatuses as $record)
 
-                                <td
-                                    colspan="6"
-                                    class="px-6 py-10 text-center
-                                           text-sm text-gray-500"
-                                >
-                                    No employment status records found.
-                                </td>
+                                @php
 
-                            </tr>
+                                    $basic = $record->user?->basicInformation;
+
+                                    $plantilla = $record->plantilla;
+
+                                    $school = $record->school;
+
+                                    $name = trim(
+                                        ($basic?->first_name ?? '') . ' ' .
+                                        ($basic?->middle_name ?? '') . ' ' .
+                                        ($basic?->last_name ?? '') . ' ' .
+                                        ($basic?->extension_name ?? '')
+                                    );
+
+                                @endphp
+
+
+                                <tr class="hover:bg-gray-50">
+
+
+                                    {{-- # --}}
+                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500">
+
+                                        {{ $employmentStatuses->firstItem() + $loop->index }}
+
+                                    </td>
+
+
+                                    {{-- NAME --}}
+                                    <td class="min-w-[220px] px-4 py-4">
+
+                                        <div class="text-sm font-semibold text-gray-900">
+
+                                            {{ $name ?: '—' }}
+
+                                        </div>
+
+                                        <div class="mt-1 text-sm text-gray-500">
+
+                                            {{ $record->user?->email ?? '—' }}
+
+                                        </div>
+
+                                    </td>
+
+
+                                    {{-- SCHOOL NAME --}}
+                                    <td class="min-w-[220px] px-4 py-4 text-sm text-gray-700">
+
+                                        {{ $school?->school_name ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- ITEM FROM SCHOOL LEVEL --}}
+                                    <td class="min-w-[180px] px-4 py-4 text-sm text-gray-700">
+
+                                        {{ $plantilla?->item_from_school_level ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- PLANTILLA ITEM NUMBER --}}
+                                    <td class="min-w-[180px] px-4 py-4 text-sm text-gray-700">
+
+                                        {{ $plantilla?->item_number ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- POSITION TITLE --}}
+                                    <td class="min-w-[180px] px-4 py-4 text-sm font-medium text-gray-900">
+
+                                        {{ $plantilla?->position_title ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- EMPLOYMENT STATUS --}}
+                                    <td class="whitespace-nowrap px-4 py-4">
+
+                                        @if($record->employment_status)
+
+                                            <span
+                                                class="inline-flex rounded-full
+                                                    bg-green-100 px-3 py-1
+                                                    text-xs font-semibold
+                                                    text-green-800"
+                                            >
+
+                                                {{ $record->employment_status }}
+
+                                            </span>
+
+                                        @else
+
+                                            <span class="text-sm text-gray-400">
+                                                —
+                                            </span>
+
+                                        @endif
+
+                                    </td>
+
+
+                                    {{-- DATE OF ORIGINAL APPOINTMENT --}}
+                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">
+
+                                        {{ $record->date_of_original_appointment
+                                            ? $record->date_of_original_appointment->format('M d, Y')
+                                            : '—'
+                                        }}
+
+                                    </td>
+
+
+                                    {{-- DATE OF LAST PROMOTION --}}
+                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">
+
+                                        {{ $record->date_of_last_promotion
+                                            ? $record->date_of_last_promotion->format('M d, Y')
+                                            : '—'
+                                        }}
+
+                                    </td>
+
+
+                                    {{-- WARM BODY STATUS --}}
+                                    <td class="whitespace-nowrap px-4 py-4">
+
+                                        @if($record->warm_body_status)
+
+                                            <span
+                                                class="inline-flex rounded-full
+                                                    bg-blue-100 px-3 py-1
+                                                    text-xs font-semibold
+                                                    text-blue-800"
+                                            >
+
+                                                {{ $record->warm_body_status }}
+
+                                            </span>
+
+                                        @else
+
+                                            <span class="text-sm text-gray-400">
+                                                —
+                                            </span>
+
+                                        @endif
+
+                                    </td>
+
+
+                                    {{-- NATURE OF WORK --}}
+                                    <td class="min-w-[160px] px-4 py-4 text-sm text-gray-700">
+
+                                        {{ $record->nature_of_work ?? '—' }}
+
+                                    </td>
+
+
+                                    {{-- ACTION --}}
+                                    <td class="whitespace-nowrap px-4 py-4 text-right">
+
+                                        <a
+                                            href="#"
+                                            class="inline-flex items-center
+                                                rounded-md border
+                                                border-green-700
+                                                px-3 py-2
+                                                text-sm font-semibold
+                                                text-green-700
+                                                hover:bg-green-50"
+                                        >
+                                            View
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+
+                            @empty
+
+                                <tr>
+
+                                    <td
+                                        colspan="12"
+                                        class="px-6 py-12 text-center"
+                                    >
+
+                                        <div class="text-sm font-medium text-gray-700">
+
+                                            No employment records found.
+
+                                        </div>
+
+                                        @if($search !== '')
+
+                                            <div class="mt-1 text-sm text-gray-500">
+
+                                                No records matched your search for
+                                                <span class="font-semibold">
+                                                    "{{ $search }}"
+                                                </span>.
+
+                                            </div>
+
+                                        @endif
+
+                                    </td>
+
+                                </tr>
+
+                            @endforelse
 
                         </tbody>
 
@@ -256,15 +619,52 @@
 
                 </div>
 
-
                 {{-- PAGINATION --}}
-                <div class="border-t border-gray-200 px-6 py-4">
+                    <div class="border-t border-gray-200 px-6 py-4">
 
-                    <div class="text-sm text-gray-500">
-                        Showing 0 records
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+                            <div class="text-sm text-gray-500">
+
+                                @if($employmentStatuses->total() > 0)
+
+                                    Showing
+                                    <span class="font-semibold text-gray-700">
+                                        {{ $employmentStatuses->firstItem() }}
+                                    </span>
+
+                                    to
+
+                                    <span class="font-semibold text-gray-700">
+                                        {{ $employmentStatuses->lastItem() }}
+                                    </span>
+
+                                    of
+
+                                    <span class="font-semibold text-gray-700">
+                                        {{ $employmentStatuses->total() }}
+                                    </span>
+
+                                    records
+
+                                @else
+
+                                    Showing 0 records
+
+                                @endif
+
+                            </div>
+
+
+                            <div>
+
+                                {{ $employmentStatuses->links() }}
+
+                            </div>
+
+                        </div>
+
                     </div>
-
-                </div>
 
             </div>
 

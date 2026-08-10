@@ -243,11 +243,32 @@
 
                                     <th
                                         colspan="1"
-                                        class="bg-green-50 px-4 py-3 text-left
+                                        class="border-r border-gray-300
+                                            bg-green-50 px-4 py-3 text-left
                                             text-xs font-bold uppercase
                                             tracking-wider text-green-900"
                                     >
                                         Professional Information
+                                    </th>
+
+                                    <th
+                                        colspan="7"
+                                        class="border-r border-gray-300
+                                            bg-green-50 px-4 py-3 text-left
+                                            text-xs font-bold uppercase
+                                            tracking-wider text-green-900"
+                                    >
+                                        Home Address
+                                    </th>
+
+                                    <th
+                                        colspan="7"
+                                        class="border-r border-gray-300
+                                            bg-green-50 px-4 py-3 text-left
+                                            text-xs font-bold uppercase
+                                            tracking-wider text-green-900"
+                                    >
+                                        Government Issued IDs
                                     </th>
 
                                 </tr>
@@ -384,10 +405,87 @@
 
 
                                     {{-- Professional --}}
-                                    <th class="px-4 py-3 text-left text-xs
+                                    <th class="border-r border-gray-300
+                                            px-4 py-3 text-left text-xs
                                             font-semibold uppercase
                                             tracking-wider text-gray-600">
                                         Specialization
+                                    </th>
+
+                                    {{-- Home Address --}}
+                                    <th class="px-4 py-3 text-left text-xs
+                                            font-semibold uppercase
+                                            tracking-wider text-gray-600">
+                                        Type
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs
+                                            font-semibold uppercase
+                                            tracking-wider text-gray-600">
+                                        Street
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs
+                                            font-semibold uppercase
+                                            tracking-wider text-gray-600">
+                                        Barangay
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs
+                                            font-semibold uppercase
+                                            tracking-wider text-gray-600">
+                                        Subdivision
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs
+                                            font-semibold uppercase
+                                            tracking-wider text-gray-600">
+                                        Municipality
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs
+                                            font-semibold uppercase
+                                            tracking-wider text-gray-600">
+                                        Province
+                                    </th>
+                                    <th class="border-r border-gray-300
+                                            px-4 py-3 text-left text-xs
+                                            font-semibold uppercase
+                                            tracking-wider text-gray-600">
+                                        Zip Code
+                                    </th>
+
+                                    {{-- Governmenrt Issued IDs --}}
+                                    <th class="px-4 py-3 text-left text-xs
+                                            font-semibold uppercase
+                                            tracking-wider text-gray-600">
+                                        UMID Number
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs
+                                            font-semibold uppercase
+                                            tracking-wider text-gray-600">
+                                        GSIS Number
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs
+                                            font-semibold uppercase
+                                            tracking-wider text-gray-600">
+                                        PhilSys Number
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs
+                                            font-semibold uppercase
+                                            tracking-wider text-gray-600">
+                                        Pag-ibig Number
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs
+                                            font-semibold uppercase
+                                            tracking-wider text-gray-600">
+                                        TIN Number
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs
+                                            font-semibold uppercase
+                                            tracking-wider text-gray-600">
+                                        Philhealth Number
+                                    </th>
+                                    <th class="border-r border-gray-300
+                                            px-4 py-3 text-left text-xs
+                                            font-semibold uppercase
+                                            tracking-wider text-gray-600">
+                                        Employee Number
                                     </th>
 
                                 </tr>
@@ -591,10 +689,107 @@
                                             PROFESSIONAL INFORMATION
                                         ================================================== --}}
 
-                                        <td class="whitespace-nowrap px-4 py-3
+                                        <td class="border-r border-gray-200
+                                                whitespace-nowrap px-4 py-3
                                                 text-sm text-gray-700">
 
                                             {{ $row['specialization'] }}
+
+                                        </td>
+
+                                        {{-- =================================================
+                                            HOME ADDRESS INFORMATION
+                                        ================================================== --}}
+
+                                        <td class="whitespace-nowrap px-4 py-3
+                                                text-sm text-gray-700">
+
+                                            {{ $row['address_type'] }}
+
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-3
+                                                text-sm text-gray-700">
+
+                                            {{ $row['street'] }}
+
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-3
+                                                text-sm text-gray-700">
+
+                                            {{ $row['brgy'] }}
+
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-3
+                                                text-sm text-gray-700">
+
+                                            {{ $row['subd_village'] }}
+
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-3
+                                                text-sm text-gray-700">
+
+                                            {{ $row['municipality_city'] }}
+
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-3
+                                                text-sm text-gray-700">
+
+                                            {{ $row['province'] }}
+
+                                        </td>
+                                        <td class="border-r border-gray-200
+                                                whitespace-nowrap px-4 py-3
+                                                text-sm text-gray-700">
+
+                                            {{ $row['zip_postal'] }}
+
+                                        </td>
+
+                                        {{-- =================================================
+                                            GOVERNMENT ISSUED IDS INFORMATION
+                                        ================================================== --}}
+
+                                        <td class="whitespace-nowrap px-4 py-3
+                                                text-sm text-gray-700">
+
+                                            {{ $row['umid_no'] }}
+
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-3
+                                                text-sm text-gray-700">
+
+                                            {{ $row['gsis_no'] }}
+
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-3
+                                                text-sm text-gray-700">
+
+                                            {{ $row['philsys_no'] }}
+
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-3
+                                                text-sm text-gray-700">
+
+                                            {{ $row['pagibig_no'] }}
+
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-3
+                                                text-sm text-gray-700">
+
+                                            {{ $row['tin_no'] }}
+
+                                        </td>
+                                        <td class="whitespace-nowrap px-4 py-3
+                                                text-sm text-gray-700">
+
+                                            {{ $row['philhealth_no'] }}
+
+                                        </td>
+                                        <td class="border-r border-gray-200
+                                                whitespace-nowrap px-4 py-3
+                                                text-sm text-gray-700">
+
+                                            {{ $row['employee_id'] }}
 
                                         </td>
 

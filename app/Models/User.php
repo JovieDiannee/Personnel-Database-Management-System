@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -23,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -51,5 +53,15 @@ class User extends Authenticatable
     public function basicInformation(): HasOne
     {
         return $this->hasOne(BasicInformation::class, 'users_id');
+    }
+
+    public function employmentStatus(): HasOne
+    {
+        return $this->hasOne(EmploymentStatus::class,'users_id');
+    }
+
+    public function medicalAllowance(): HasOne
+    {
+        return $this->hasOne(MedicalAllowance::class, 'users_id');
     }
 }
