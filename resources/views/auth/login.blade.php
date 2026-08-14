@@ -71,7 +71,7 @@
             {{-- =====================================================
                 RIGHT SIDE - LOGIN
             ====================================================== --}}
-            <div class="flex items-center justify-center bg-white px-8 py-12 sm:px-14 lg:w-3/5 lg:px-14">
+            <div class="flex items-center justify-center bg-white px-8 py-12 sm:px-14 lg:px-16">
 
                 <div class="w-full max-w-md">
 
@@ -80,12 +80,18 @@
                     <div class="mb-10">
 
                         <p class="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-green-700">
-                            Department of Education <br>Schools Division of Leyte
+                            Department of Education - Schools Division of Leyte
                         </p>
 
-                        <p class="mt-1 whitespace-nowrap text-[16px] font-bold text-black sm:text-[18px] lg:text-[22px] xl:text-[24px]">
-                            PERSONNEL DATABASE MANAGEMENT SYSTEM
-                        </p>
+                        <h1 class="text-4xl font-bold leading-tight text-gray-900">
+                            Personnel Database
+                        </h1>
+
+                        <h2 class="mt-1 text-3xl font-semibold text-black-700">
+                            Management System
+                        </h2>
+
+                        <br>
                     </div>
 
 
@@ -240,3 +246,4 @@
 
 
 </x-guest-layout>
+
