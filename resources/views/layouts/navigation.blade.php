@@ -343,23 +343,13 @@
             </a>
 
             <a
-                href="#"
+                href="{{ route('data-management') }}"
                 class="rounded-md px-4 py-3 text-sm font-semibold text-gray-600
                 transition duration-200
                 hover:bg-green-100
                 hover:text-green-800"
             >
-                Employees
-            </a>
-
-            <a
-                href="#"
-                class="rounded-md px-4 py-3 text-sm font-semibold text-gray-600
-                transition duration-200
-                hover:bg-green-100
-                hover:text-green-800"
-            >
-                Schools
+                Data Management
             </a>
 
             <a
