@@ -46,4 +46,9 @@ class BasicInformation extends Model
     {
         return $this->hasOne(EmploymentStatus::class,'users_id');
     }
+
+    public function issuedId(): HasOne
+    {
+        return $this->hasOne(IssuedId::class,'basic_information_id','id');
+    }
 }

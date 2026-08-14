@@ -9,37 +9,69 @@
 
 
             {{-- =====================================================
-                LEFT SIDE - LOGO
+            LEFT SIDE - LOGO
             ====================================================== --}}
-            <div class="relative flex min-h-[500px] items-center justify-center overflow-hidden bg-gradient-to-br from-green-800 via-green-700 to-emerald-600 p-10 lg:min-h-[650px]">
 
-                {{-- Decorative Circles --}}
-                <div class="absolute -left-32 -top-32 h-96 w-96 rounded-full border-[40px] border-white/10">
-                </div>
+            <div class="relative flex h-full items-center justify-center overflow-hidden bg-white-800 px-8 lg:w-2/5">
 
-                <div class="absolute -bottom-40 -right-32 h-96 w-96 rounded-full border-[40px] border-white/10">
-                </div>
+                {{-- Decorative Circle - Top Left --}}
+                <div
+                    class="absolute -left-32 -top-32
+                        h-[420px] w-[420px]
+                        rounded-full
+                        border-[45px]
+                        border-white/5"
+                ></div>
+
+                {{-- Decorative Circle - Bottom Right --}}
+                <div
+                    class="absolute -bottom-40 -right-40
+                        h-[500px] w-[500px]
+                        rounded-full
+                        border-[50px]
+                        border-white/5"
+                ></div>
+
+                {{-- Small Decorative Circle --}}
+                <div
+                    class="absolute left-1/4 top-1/4
+                        h-24 w-24
+                        rounded-full
+                        bg-white/5
+                        blur-sm"
+                ></div>
 
 
-                {{-- Logo --}}
+                {{-- LOGO CONTENT --}}
                 <div class="relative z-10 flex flex-col items-center text-center">
 
-                    <img
-                        src="{{ asset('images/pdms-logo.png') }}"
-                        alt="Personnel Database Management System Logo"
-                        class="h-72 w-72 object-contain drop-shadow-2xl sm:h-80 sm:w-80 lg:h-[420px] lg:w-[420px]"
-                    >
+                    {{-- Logo --}}
+                    <div class="flex items-center justify-center">
 
-                    
+                        <img
+                            src="{{ asset('images/pdms-logo.png') }}"
+                            alt="Personnel Database Management System Logo"
+                            class="h-64 w-64
+                                object-contain
+                                sm:h-72 sm:w-72
+                                lg:h-[360px] lg:w-[360px]"
+                        >
+
+                    </div>
+
+                    {{-- FOOTER --}}
+                    <p class="mt-8 text-center text-xs text-gray-400">
+                        © {{ date('Y') }} Personnel Database Management System | @joviegayo
+                    </p>
+
                 </div>
-
             </div>
 
 
             {{-- =====================================================
                 RIGHT SIDE - LOGIN
             ====================================================== --}}
-            <div class="flex items-center justify-center bg-white px-8 py-12 sm:px-14 lg:px-16">
+            <div class="flex items-center justify-center bg-white px-8 py-12 sm:px-14 lg:w-3/5 lg:px-14">
 
                 <div class="w-full max-w-md">
 
@@ -48,18 +80,12 @@
                     <div class="mb-10">
 
                         <p class="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-green-700">
-                            Department of Education - Schools Division of Leyte
+                            Department of Education <br>Schools Division of Leyte
                         </p>
 
-                        <h1 class="text-4xl font-bold leading-tight text-gray-900">
-                            Personnel Database
-                        </h1>
-
-                        <h2 class="mt-1 text-3xl font-semibold text-black-700">
-                            Management System
-                        </h2>
-
-                        <br>
+                        <p class="mt-1 whitespace-nowrap text-[16px] font-bold text-black sm:text-[18px] lg:text-[22px] xl:text-[24px]">
+                            PERSONNEL DATABASE MANAGEMENT SYSTEM
+                        </p>
                     </div>
 
 
@@ -201,12 +227,6 @@
                         </p>
 
                     </div>
-
-
-                    {{-- FOOTER --}}
-                    <p class="mt-8 text-center text-xs text-gray-400">
-                        © {{ date('Y') }} Personnel Database Management System
-                    </p>
 
                 </div>
 

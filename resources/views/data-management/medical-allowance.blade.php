@@ -134,54 +134,329 @@
                         </div>
 
                     </a>
+                </div>
 
+            </div>
 
-                    {{-- TAB 3: IMPORT --}}
-                    <a
-                        href="{{ route('data-management.medical-allowance') }}#import"
-                        class="flex flex-1 items-center justify-center gap-2
-                            border-b-2 border-transparent
-                            bg-white px-5 py-4
-                            text-center text-sm font-semibold
-                            text-gray-700
-                            transition duration-200
-                            hover:bg-green-50
-                            hover:text-green-800"
-                    >
+            
+            {{-- GENERAL ERROR --}}
+            @if(session('error'))
 
-                        {{-- ICON --}}
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 16V4
-                                m0 0L8 8
-                                m4-4l4 4
-                                M5 12v6a2 2 0 002 2h10
-                                a2 2 0 002-2v-6"
-                            />
-                        </svg>
+                <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-5">
 
-                        <div>
-                            <span class="block">
-                                Import Records
-                            </span>
-
-                            <span class="mt-0.5 block text-xs font-normal text-gray-500">
-                                Upload Excel data
-                            </span>
-                        </div>
-
-                    </a>
+                    <p class="font-semibold text-red-800">
+                        {{ session('error') }}
+                    </p>
 
                 </div>
+
+            @endif
+
+
+            {{-- MEDICAL ALLOWANCE IMPORT RESULT --}}
+            @if(session('medical_allowance_import_result'))
+
+                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-5">
+
+                    <h3 class="text-lg font-bold text-green-900">
+                        Medical Allowance Import Completed
+                    </h3>
+
+                    <div class="mt-4 grid gap-4 md:grid-cols-4">
+
+                        {{-- NEW RECORDS --}}
+                        <div>
+
+                            <p class="text-sm text-gray-500">
+                                New Records
+                            </p>
+
+                            <p class="text-2xl font-bold text-green-700">
+                                {{ session('medical_allowance_import_result.imported') }}
+                            </p>
+
+                        </div>
+
+
+                        {{-- UPDATED RECORDS --}}
+                        <div>
+
+                            <p class="text-sm text-gray-500">
+                                Updated Records
+                            </p>
+
+                            <p class="text-2xl font-bold text-blue-700">
+                                {{ session('medical_allowance_import_result.updated') }}
+                            </p>
+
+                        </div>
+
+
+                        {{-- SKIPPED --}}
+                        <div>
+
+                            <p class="text-sm text-gray-500">
+                                Skipped
+                            </p>
+
+                            <p class="text-2xl font-bold text-yellow-600">
+                                {{ session('medical_allowance_import_result.skipped') }}
+                            </p>
+
+                        </div>
+
+
+                        {{-- ERRORS --}}
+                        <div>
+
+                            <p class="text-sm text-gray-500">
+                                Errors
+                            </p>
+
+                            <p class="text-2xl font-bold text-red-600">
+                                {{ count(session('medical_allowance_import_result.errors', [])) }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- ERROR DETAILS --}}
+                    @if(count(session('medical_allowance_import_result.errors', [])) > 0)
+
+                        <div class="mt-5 rounded-lg border border-red-200 bg-red-50 p-4">
+
+                            <h4 class="font-semibold text-red-800">
+                                Import Errors
+                            </h4>
+
+                            <ul class="mt-2 list-disc pl-5 text-sm text-red-700">
+
+                                @foreach(session('medical_allowance_import_result.errors', []) as $error)
+
+                                    <li>
+
+                                        Row {{ $error['row'] ?? 'N/A' }}:
+                                        {{ $error['message'] ?? 'Unknown error' }}
+
+                                    </li>
+
+                                @endforeach
+
+                            </ul>
+
+                        </div>
+
+                    @endif
+
+                </div>
+
+            @endif
+
+
+            {{-- ========================================================= --}}
+            {{-- IMPORT SECTION --}}
+            {{-- ========================================================= --}}
+
+            <div id="import" class="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+
+                <div class="mb-5">
+
+                    <h2 class="text-lg font-semibold text-gray-800">
+                        Import Medical Allowance Records
+                    </h2>
+
+                    <p class="mt-1 text-sm text-gray-500">
+                        Upload an Excel file containing personnel medical
+                        allowance records.
+                    </p>
+
+                </div>
+
+
+                <form
+                    action="{{ route('data-management.medical-allowance.import') }}"
+                    method="POST"
+                    enctype="multipart/form-data"
+                    >
+
+                    @csrf
+
+                    <div class="flex flex-col gap-3 md:flex-row md:items-center">
+
+                        {{-- EXCEL FILE LABEL --}}
+                        <label
+                            for="file"
+                            class="shrink-0 text-sm font-semibold text-gray-700"
+                        >
+                            EXCEL FILE
+                        </label>
+
+
+                        {{-- CUSTOM FILE INPUT --}}
+                        <div class="relative flex h-10 flex-1">
+
+                            {{-- REAL FILE INPUT --}}
+                            <input
+                                type="file"
+                                id="file"
+                                name="file"
+                                accept=".xlsx,.xls"
+                                required
+                                class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                                onchange="document.getElementById('file-name').textContent =
+                                    this.files.length ? this.files[0].name : 'No file selected'"
+                            >
+
+
+                            {{-- CUSTOM FILE DISPLAY --}}
+                            <div
+                                class="flex h-full w-full items-center overflow-hidden
+                                    rounded-lg border border-gray-300
+                                    bg-white shadow-sm"
+                            >
+
+                                {{-- BROWSE BUTTON --}}
+                                <span
+                                    class="flex h-full shrink-0 items-center
+                                        border-r border-green-200
+                                        bg-green-50
+                                        px-4
+                                        text-sm font-semibold
+                                        text-green-700"
+                                >
+                                    Browse...
+                                </span>
+
+
+                                {{-- FILE NAME --}}
+                                <span
+                                    id="file-name"
+                                    class="truncate px-4 text-sm text-gray-500"
+                                >
+                                    No file selected
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- ACTION BUTTONS --}}
+                        <div class="flex shrink-0 items-center gap-2">
+
+                            {{-- UPLOAD BUTTON --}}
+                            <button
+                                type="submit"
+                                class="flex h-10 items-center justify-center gap-2
+                                    rounded-lg
+                                    bg-green-700
+                                    px-5
+                                    text-sm
+                                    font-semibold
+                                    text-white
+                                    shadow-sm
+                                    transition
+                                    duration-200
+                                    hover:bg-green-800
+                                    focus:outline-none
+                                    focus:ring-2
+                                    focus:ring-green-500
+                                    focus:ring-offset-2"
+                                >
+
+                                {{-- UPLOAD ICON --}}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M12 3v10m0-10L8 7m4-4l4 4"
+                                    />
+
+                                </svg>
+
+                                Upload & Preview
+
+                            </button>
+
+                            {{-- DOWNLOAD TEMPLATE --}}
+                            <a
+                                href="{{ route('data-management.medical-allowance.template') }}"
+                                class="flex h-10 items-center justify-center gap-2
+                                    rounded-lg
+                                    border border-green-700
+                                    bg-white
+                                    px-4
+                                    text-sm
+                                    font-semibold
+                                    text-green-700
+                                    shadow-sm
+                                    transition
+                                    duration-200
+                                    hover:bg-green-50
+                                    focus:outline-none
+                                    focus:ring-2
+                                    focus:ring-green-500
+                                    focus:ring-offset-2"
+                                >
+
+                                {{-- DOWNLOAD ICON --}}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M12 3v12m0 0l-4-4m4 4l4-4"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M5 21h14"
+                                    />
+                                </svg>
+
+                                Download Template
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                    {{-- HELP TEXT --}}
+                    <p class="mt-1.5 text-xs text-gray-500">
+
+                        Accepted formats:
+                        <span class="font-medium">.xlsx</span>
+                        and
+                        <span class="font-medium">.xls</span>.
+                        Maximum file size:
+                        <span class="font-medium">10 MB</span>.
+
+                    </p>
+
+                </form>
 
             </div>
 
@@ -693,220 +968,7 @@
 
 
             </div>
-            <br>
-
-            
-            {{-- GENERAL ERROR --}}
-            @if(session('error'))
-
-                <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-5">
-
-                    <p class="font-semibold text-red-800">
-                        {{ session('error') }}
-                    </p>
-
-                </div>
-
-            @endif
-
-
-            {{-- MEDICAL ALLOWANCE IMPORT RESULT --}}
-            @if(session('medical_allowance_import_result'))
-
-                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-5">
-
-                    <h3 class="text-lg font-bold text-green-900">
-                        Medical Allowance Import Completed
-                    </h3>
-
-                    <div class="mt-4 grid gap-4 md:grid-cols-4">
-
-                        {{-- NEW RECORDS --}}
-                        <div>
-
-                            <p class="text-sm text-gray-500">
-                                New Records
-                            </p>
-
-                            <p class="text-2xl font-bold text-green-700">
-                                {{ session('medical_allowance_import_result.imported') }}
-                            </p>
-
-                        </div>
-
-
-                        {{-- UPDATED RECORDS --}}
-                        <div>
-
-                            <p class="text-sm text-gray-500">
-                                Updated Records
-                            </p>
-
-                            <p class="text-2xl font-bold text-blue-700">
-                                {{ session('medical_allowance_import_result.updated') }}
-                            </p>
-
-                        </div>
-
-
-                        {{-- SKIPPED --}}
-                        <div>
-
-                            <p class="text-sm text-gray-500">
-                                Skipped
-                            </p>
-
-                            <p class="text-2xl font-bold text-yellow-600">
-                                {{ session('medical_allowance_import_result.skipped') }}
-                            </p>
-
-                        </div>
-
-
-                        {{-- ERRORS --}}
-                        <div>
-
-                            <p class="text-sm text-gray-500">
-                                Errors
-                            </p>
-
-                            <p class="text-2xl font-bold text-red-600">
-                                {{ count(session('medical_allowance_import_result.errors', [])) }}
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    {{-- ERROR DETAILS --}}
-                    @if(count(session('medical_allowance_import_result.errors', [])) > 0)
-
-                        <div class="mt-5 rounded-lg border border-red-200 bg-red-50 p-4">
-
-                            <h4 class="font-semibold text-red-800">
-                                Import Errors
-                            </h4>
-
-                            <ul class="mt-2 list-disc pl-5 text-sm text-red-700">
-
-                                @foreach(session('medical_allowance_import_result.errors', []) as $error)
-
-                                    <li>
-
-                                        Row {{ $error['row'] ?? 'N/A' }}:
-                                        {{ $error['message'] ?? 'Unknown error' }}
-
-                                    </li>
-
-                                @endforeach
-
-                            </ul>
-
-                        </div>
-
-                    @endif
-
-                </div>
-
-            @endif
-
-
-            {{-- ========================================================= --}}
-            {{-- IMPORT SECTION --}}
-            {{-- ========================================================= --}}
-
-            <div id="import" class="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-
-                <div class="mb-5">
-
-                    <h2 class="text-lg font-semibold text-gray-800">
-                        Import Medical Allowance Records
-                    </h2>
-
-                    <p class="mt-1 text-sm text-gray-500">
-                        Upload an Excel file containing personnel medical
-                        allowance records.
-                    </p>
-
-                </div>
-
-
-                <form
-                    action="{{ route('data-management.medical-allowance.import') }}"
-                    method="POST"
-                    enctype="multipart/form-data"
-                >
-
-                    @csrf
-
-                    <div class="flex flex-col gap-4 md:flex-row md:items-end">
-
-                        {{-- FILE --}}
-                        <div class="flex-1">
-
-                            <label
-                                for="file"
-                                class="mb-2 block text-sm font-medium text-gray-700"
-                            >
-                                Excel File
-                            </label>
-
-                            <input
-                                type="file"
-                                id="file"
-                                name="file"
-                                accept=".xlsx,.xls"
-                                required
-                                class="block w-full rounded-md border
-                                    border-gray-300 bg-white
-                                    text-sm text-gray-700
-                                    file:mr-4
-                                    file:border-0
-                                    file:bg-green-700
-                                    file:px-4
-                                    file:py-2
-                                    file:text-sm
-                                    file:font-semibold
-                                    file:text-white
-                                    hover:file:bg-green-800"
-                            >
-
-                            <p class="mt-1 text-xs text-gray-500">
-                                Accepted formats: .xlsx and .xls.
-                                Maximum file size: 10 MB.
-                            </p>
-
-                        </div>
-
-
-                        {{-- BUTTON --}}
-                        <div class="flex items-center gap-3">
-
-                            <button
-                                type="submit"
-                                class="rounded-lg bg-green-700 px-5 py-2.5
-                                    text-sm font-semibold text-white
-                                    shadow-sm transition
-                                    hover:bg-green-800
-                                    focus:outline-none
-                                    focus:ring-2
-                                    focus:ring-green-500
-                                    focus:ring-offset-2"
-                            >
-                                Upload & Preview
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </form>
-
-            </div>
-
         </div>
-
     </div>
 
 </x-app-layout>

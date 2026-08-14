@@ -19,4 +19,13 @@ class PersonnelInformationImport implements ToCollection, WithHeadingRow
     {
         return $this->rows ?? collect();
     }
+
+    /**
+     * Excel Row 4 contains the column headers.
+     * Data starts at Row 5.
+     */
+    public function headingRow(): int
+    {
+        return 4;
+    }
 }

@@ -150,48 +150,178 @@
 
                     @csrf
 
+                                        <div class="flex flex-col gap-3 md:flex-row md:items-center">
 
-                    <div class="mb-6">
-
+                        {{-- EXCEL FILE LABEL --}}
                         <label
                             for="file"
-                            class="block text-sm font-semibold text-gray-700"
+                            class="shrink-0 text-sm font-semibold text-gray-700"
                         >
-                            School Database Excel File
+                            EXCEL FILE
                         </label>
 
 
-                        <input
-                            type="file"
-                            id="file"
-                            name="file"
-                            accept=".xlsx,.xls"
-                            required
-                            class="mt-2 block w-full rounded-lg
-                                border border-gray-300 bg-white text-sm
-                                file:mr-4 file:rounded-md file:border-0
-                                file:bg-green-700 file:px-4 file:py-2
-                                file:font-semibold file:text-white
-                                hover:file:bg-green-800"
-                        >
+                        {{-- CUSTOM FILE INPUT --}}
+                        <div class="relative flex h-10 flex-1">
+
+                            {{-- REAL FILE INPUT --}}
+                            <input
+                                type="file"
+                                id="file"
+                                name="file"
+                                accept=".xlsx,.xls"
+                                required
+                                class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                                onchange="document.getElementById('file-name').textContent =
+                                    this.files.length ? this.files[0].name : 'No file selected'"
+                            >
 
 
-                        <p class="mt-1 text-xs text-gray-500">
-                            Accepted formats: .xlsx and .xls.
-                            Maximum file size: 10 MB.
-                        </p>
+                            {{-- CUSTOM FILE DISPLAY --}}
+                            <div
+                                class="flex h-full w-full items-center overflow-hidden
+                                    rounded-lg border border-gray-300
+                                    bg-white shadow-sm"
+                            >
+
+                                {{-- BROWSE BUTTON --}}
+                                <span
+                                    class="flex h-full shrink-0 items-center
+                                        border-r border-green-200
+                                        bg-green-50
+                                        px-4
+                                        text-sm font-semibold
+                                        text-green-700"
+                                >
+                                    Browse...
+                                </span>
+
+
+                                {{-- FILE NAME --}}
+                                <span
+                                    id="file-name"
+                                    class="truncate px-4 text-sm text-gray-500"
+                                >
+                                    No file selected
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- ACTION BUTTONS --}}
+                        <div class="flex shrink-0 items-center gap-2">
+
+                            {{-- UPLOAD BUTTON --}}
+                            <button
+                                type="submit"
+                                class="flex h-10 items-center justify-center gap-2
+                                    rounded-lg
+                                    bg-green-700
+                                    px-5
+                                    text-sm
+                                    font-semibold
+                                    text-white
+                                    shadow-sm
+                                    transition
+                                    duration-200
+                                    hover:bg-green-800
+                                    focus:outline-none
+                                    focus:ring-2
+                                    focus:ring-green-500
+                                    focus:ring-offset-2"
+                                >
+
+                                {{-- UPLOAD ICON --}}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M12 3v10m0-10L8 7m4-4l4 4"
+                                    />
+
+                                </svg>
+
+                                Upload & Preview
+
+                            </button>
+
+                            {{-- DOWNLOAD TEMPLATE --}}
+                            <a
+                                href="{{ route('data-management.school-database.download-template') }}"
+                                class="flex h-10 items-center justify-center gap-2
+                                    rounded-lg
+                                    border border-green-700
+                                    bg-white
+                                    px-4
+                                    text-sm
+                                    font-semibold
+                                    text-green-700
+                                    shadow-sm
+                                    transition
+                                    duration-200
+                                    hover:bg-green-50
+                                    focus:outline-none
+                                    focus:ring-2
+                                    focus:ring-green-500
+                                    focus:ring-offset-2"
+                                >
+
+                                {{-- DOWNLOAD ICON --}}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M12 3v12m0 0l-4-4m4 4l4-4"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M5 21h14"
+                                    />
+                                </svg>
+
+                                Download Template
+
+                            </a>
+
+                        </div>
 
                     </div>
 
+                    {{-- HELP TEXT --}}
+                    <p class="mt-1.5 text-xs text-gray-500">
 
-                    <button
-                        type="submit"
-                        class="rounded-lg bg-green-700 px-5 py-2.5
-                            text-sm font-semibold text-white
-                            shadow-sm hover:bg-green-800"
-                    >
-                        Upload & Preview
-                    </button>
+                        Accepted formats:
+                        <span class="font-medium">.xlsx</span>
+                        and
+                        <span class="font-medium">.xls</span>.
+                        Maximum file size:
+                        <span class="font-medium">10 MB</span>.
+
+                    </p>
 
                 </form>
 
