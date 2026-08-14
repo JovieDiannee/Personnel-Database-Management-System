@@ -16,9 +16,9 @@ class EnrollmentImport implements ToCollection
         $records = [];
         $errors = [];
 
-        foreach ($rows->skip(1) as $index => $row) {
+        foreach ($rows->slice(4) as $index => $row) {
 
-            $excelRow = $index + 2;
+            $excelRow = $index + 5;
 
             try {
 

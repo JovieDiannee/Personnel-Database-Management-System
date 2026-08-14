@@ -20,6 +20,13 @@ use App\Models\SchoolDb;
 use App\Models\SchoolYear;
 use App\Models\GradeLevel;
 use Carbon\Carbon;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use App\Exports\EnrollmentTemplateExport;
 
 class DataManagementController extends Controller
 {
@@ -33,27 +40,16 @@ class DataManagementController extends Controller
     |
     |--------------------------------------------------------------------------
     |  
-    |   START OF EMPLOYMENT STATUS RECORDS FUNCTIONS
+    |   START OF PERSONNEL INFORMATION FUNCTIONS
     */
 
     public function personnel()
     {
-        $personnel = \App\Models\BasicInformation::with('user')
-            ->orderBy('last_name')
-            ->orderBy('first_name')
+        $personnel = \App\Models\BasicInformation::with(['user', 'issuedId'])
+            ->orderBy('created_at', 'desc')
             ->paginate(20);
         return view('data-management.personnel', compact('personnel'));
     }
-
-    // public function viewPersonnel()
-    // {
-    //     $personnel = \App\Models\BasicInformation::with('user')
-    //         ->orderBy('last_name')
-    //         ->orderBy('first_name')
-    //         ->paginate(20);
-
-    //     return view('data-management.personnel-list', compact('personnel'));
-    // }
 
     public function importPersonnel(Request $request)
     {
@@ -154,7 +150,31 @@ class DataManagementController extends Controller
 
         foreach ($rows as $index => $row) {
 
-            $excelRow = $index + 2;
+            /*
+        |--------------------------------------------------------------------------
+        | Skip Completely Empty Rows
+        |--------------------------------------------------------------------------
+        */
+
+        $isEmptyRow = $row->filter(function ($value) {
+
+            return trim((string) $value) !== '';
+
+            })->isEmpty();
+
+            if ($isEmptyRow) {
+                continue;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Actual Excel Row Number
+            |--------------------------------------------------------------------------
+            */
+
+            $excelRow = $index + 5;
+            $dataRowNumber = $index + 1;
 
             $email = trim((string) ($row['email'] ?? ''));
             $firstName = trim((string) ($row['first_name'] ?? ''));
@@ -179,7 +199,7 @@ class DataManagementController extends Controller
             $birthDate = $this->parseBirthDate($row['birth_date'] ?? null);
 
             $previewRows[] = [
-                'excel_row' => $excelRow,
+                'excel_row' => $dataRowNumber,
                 'email' => $email,
                 'first_name' => $firstName,
                 'middle_name' => $row['middle_name'] ?? null,
@@ -284,12 +304,6 @@ class DataManagementController extends Controller
             return null;
         }
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Store Information in the Database
-    |--------------------------------------------------------------------------
-    */
 
     public function confirmPersonnelImport(Request $request)
     {
@@ -715,7 +729,548 @@ class DataManagementController extends Controller
             ]);
     }
 
+    public function downloadPersonnelBasicInformationTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
 
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setTitle('Personnel Basic Information');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TITLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->mergeCells('A1:AG1');
+
+        $sheet->setCellValue(
+            'A1',
+            'PERSONNEL BASIC INFORMATION RECORDS'
+        );
+
+        $sheet->getStyle('A1')->applyFromArray([
+
+            'font' => [
+                'bold' => true,
+                'size' => 14,
+                'color' => [
+                    'rgb' => 'FFFFFF'
+                ],
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '15803D'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(1)->setRowHeight(28);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | INSTRUCTIONS
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->mergeCells('A2:AG2');
+
+        $sheet->setCellValue(
+            'A2',
+            'Please do not modify the column headers. Enter one personnel record per row.'
+        );
+
+        $sheet->getStyle('A2')->applyFromArray([
+
+            'font' => [
+                'italic' => true,
+                'size' => 10,
+                'color' => [
+                    'rgb' => '666666'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(2)->setRowHeight(22);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COLUMN HEADERS
+        |--------------------------------------------------------------------------
+        */
+
+        $headers = [
+
+            'A4'  => 'email',
+            'B4'  => 'first_name',
+            'C4'  => 'middle_name',
+            'D4'  => 'last_name',
+            'E4'  => 'extension_name',
+            'F4'  => 'sex',
+            'G4'  => 'birth_place',
+            'H4'  => 'birth_date',
+            'I4'  => 'civil_status',
+            'J4'  => 'religion',
+            'K4'  => 'citizenship',
+            'L4'  => 'mode_of_citizenship',
+            'M4'  => 'height_m',
+            'N4'  => 'weight_kg',
+            'O4'  => 'blood_type',
+            'P4'  => 'mobile_number',
+            'Q4'  => 'telephone_number',
+            'R4'  => 'specialization',
+            'S4'  => 'address_type',
+            'T4'  => 'street',
+            'U4'  => 'brgy',
+            'V4'  => 'subd_village',
+            'W4'  => 'municipality_city',
+            'X4'  => 'province',
+            'Y4'  => 'zip_postal',
+            'Z4'  => 'umid_no',
+            'AA4' => 'gsis_no',
+            'AB4' => 'philsys_no',
+            'AC4' => 'pagibig_no',
+            'AD4' => 'tin_no',
+            'AE4' => 'philhealth_no',
+            'AF4' => 'employee_id',
+
+        ];
+
+        foreach ($headers as $cell => $value) {
+
+            $sheet->setCellValue(
+                $cell,
+                $value
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HEADER STYLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A4:AF4')->applyFromArray([
+
+            'font' => [
+                'bold' => true,
+                'color' => [
+                    'rgb' => 'FFFFFF'
+                ],
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '166534'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ],
+
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => 'D1D5DB'
+                    ],
+                ],
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(4)->setRowHeight(45);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAMPLE DATA
+        |--------------------------------------------------------------------------
+        */
+
+        $sampleData = [
+
+            'A5'  => 'example@deped.gov.ph',
+            'B5'  => 'Jovie',
+            'C5'  => 'Cabrera',
+            'D5'  => 'Gayo',
+            'E5'  => '',
+            'F5'  => 'Male',
+            'G5'  => 'Hilongos, Leyte',
+            'H5'  => '01/15/1990',
+            'I5'  => 'Single',
+            'J5'  => 'Roman Catholic',
+            'K5'  => 'Filipino',
+            'L5'  => 'By Birth',
+            'M5'  => '1.50',
+            'N5'  => '50',
+            'O5'  => 'A+',
+            'P5'  => '09171234567',
+            'Q5'  => '',
+            'R5'  => 'Information Technology',
+            'S5'  => 'Permanent',
+            'T5'  => 'P. Burgos Street',
+            'U5'  => 'Talisay',
+            'V5'  => '',
+            'W5'  => 'Hilongos',
+            'X5'  => 'Leyte',
+            'Y5'  => '6524',
+            'Z5'  => '',
+            'AA5' => '',
+            'AB5' => '',
+            'AC5' => '',
+            'AD5' => '',
+            'AE5' => '',
+            'AF5' => 'EMP-000001',
+
+        ];
+
+        foreach ($sampleData as $cell => $value) {
+
+            $sheet->setCellValue(
+                $cell,
+                $value
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAMPLE DATA STYLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A5:AF5')->applyFromArray([
+
+            'font' => [
+                'color' => [
+                    'rgb' => '6B7280'
+                ],
+                'italic' => true,
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => 'F9FAFB'
+                ],
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SEX DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $sexValidation = new DataValidation();
+
+        $sexValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Sex')
+            ->setError('Please select a valid sex.')
+            ->setFormula1(
+                '"Male,Female"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CIVIL STATUS DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $civilStatusValidation = new DataValidation();
+
+        $civilStatusValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Civil Status')
+            ->setError('Please select a valid civil status.')
+            ->setFormula1(
+                '"Single,Married,Widowed,Separated,Annulled"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | MODE OF CITIZENSHIP DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $citizenshipValidation = new DataValidation();
+
+        $citizenshipValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Citizenship Mode')
+            ->setError('Please select a valid mode of citizenship.')
+            ->setFormula1(
+                '"By Birth,By Naturalization"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BLOOD TYPE DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $bloodTypeValidation = new DataValidation();
+
+        $bloodTypeValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Blood Type')
+            ->setError('Please select a valid blood type.')
+            ->setFormula1(
+                '"A+,A-,B+,B-,AB+,AB-,O+,O-"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADDRESS TYPE DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $addressTypeValidation = new DataValidation();
+
+        $addressTypeValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Address Type')
+            ->setError('Please select a valid address type.')
+            ->setFormula1(
+                '"Permanent,Present"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | APPLY DROPDOWNS
+        |--------------------------------------------------------------------------
+        |
+        | Apply validation to rows 5-1000.
+        |
+        */
+
+        for ($row = 5; $row <= 1000; $row++) {
+
+            // Sex
+            $sheet
+                ->getCell("F{$row}")
+                ->setDataValidation(
+                    clone $sexValidation
+                );
+
+            // Civil Status
+            $sheet
+                ->getCell("I{$row}")
+                ->setDataValidation(
+                    clone $civilStatusValidation
+                );
+
+            // Mode of Citizenship
+            $sheet
+                ->getCell("L{$row}")
+                ->setDataValidation(
+                    clone $citizenshipValidation
+                );
+
+            // Blood Type
+            $sheet
+                ->getCell("O{$row}")
+                ->setDataValidation(
+                    clone $bloodTypeValidation
+                );
+
+            // Address Type
+            $sheet
+                ->getCell("S{$row}")
+                ->setDataValidation(
+                    clone $addressTypeValidation
+                );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BORDERS FOR DATA AREA
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A4:AF1000')->applyFromArray([
+
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => 'E5E7EB'
+                    ],
+                ],
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COLUMN WIDTHS
+        |--------------------------------------------------------------------------
+        */
+
+        $widths = [
+
+            'A'  => 32,
+            'B'  => 20,
+            'C'  => 20,
+            'D'  => 20,
+            'E'  => 18,
+            'F'  => 12,
+            'G'  => 25,
+            'H'  => 18,
+            'I'  => 18,
+            'J'  => 22,
+            'K'  => 18,
+            'L'  => 25,
+            'M'  => 15,
+            'N'  => 15,
+            'O'  => 15,
+            'P'  => 20,
+            'Q'  => 20,
+            'R'  => 28,
+            'S'  => 20,
+            'T'  => 25,
+            'U'  => 25,
+            'V'  => 25,
+            'W'  => 25,
+            'X'  => 22,
+            'Y'  => 15,
+            'Z'  => 20,
+            'AA' => 20,
+            'AB' => 20,
+            'AC' => 20,
+            'AD' => 20,
+            'AE' => 20,
+            'AF' => 20,
+
+        ];
+
+        foreach ($widths as $column => $width) {
+
+            $sheet
+                ->getColumnDimension($column)
+                ->setWidth($width);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TEXT FORMAT FOR IDENTIFICATION NUMBERS
+        |--------------------------------------------------------------------------
+        |
+        | Prevent Excel from removing leading zeroes.
+        |
+        */
+
+        $sheet
+            ->getStyle('P5:AF1000')
+            ->getNumberFormat()
+            ->setFormatCode('@');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | FREEZE HEADER
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->freezePane('A5');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AUTO FILTER
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->setAutoFilter('A4:AF1000');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DOWNLOAD
+        |--------------------------------------------------------------------------
+        */
+
+        $fileName =
+            'PDMS_Personnel_Basic_Information_Template.xlsx';
+
+        $writer = new Xlsx($spreadsheet);
+
+        return response()->streamDownload(
+            function () use ($writer) {
+
+                $writer->save('php://output');
+
+            },
+            $fileName,
+            [
+                'Content-Type' =>
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]
+        );
+    }
 
     
     /*   
@@ -969,7 +1524,29 @@ class DataManagementController extends Controller
 
         foreach ($rows as $index => $row) {
 
-            $excelRow = $index + 2;
+            /*
+            |--------------------------------------------------------------------------
+            | Skip Completely Empty Rows
+            |--------------------------------------------------------------------------
+            */
+
+            $isEmptyRow = $row->filter(function ($value) {
+                return trim((string) $value) !== '';
+            })->isEmpty();
+
+            if ($isEmptyRow) {
+                continue;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Actual Excel Row Number
+            |--------------------------------------------------------------------------
+            */
+
+            $excelRow = $index + 5;
+            $dataRowNumber = $index + 1;
 
             /*
             |--------------------------------------------------------------------------
@@ -1160,7 +1737,7 @@ class DataManagementController extends Controller
 
             $previewRows[] = [
 
-                'excel_row' => $excelRow,
+                'excel_row' => $dataRowNumber,
 
                 'user_id' => $user->id,
 
@@ -1324,17 +1901,407 @@ class DataManagementController extends Controller
     {
         $records = session('employment_status_import_records');
 
+        /*
+        |--------------------------------------------------------------------------
+        | CHECK IMPORT RECORDS
+        |--------------------------------------------------------------------------
+        */
+
         if (!$records || count($records) === 0) {
 
             return redirect()
                 ->route('data-management.employment-status')
-                ->with('error', 'No employment records available for import.');
+                ->with(
+                    'error',
+                    'No employment records available for import.'
+                );
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | VARIABLES
+        |--------------------------------------------------------------------------
+        */
 
         $imported = 0;
         $updated = 0;
         $skipped = 0;
+
         $errors = [];
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | STEP 1
+        | CHECK DUPLICATE EMAIL / PLANTILLA IN EXCEL
+        |--------------------------------------------------------------------------
+        |
+        | Rules:
+        |
+        | ONE EMAIL     = ONE PLANTILLA
+        | ONE PLANTILLA = ONE EMAIL
+        |
+        |--------------------------------------------------------------------------
+        */
+
+        $emailPlantillas = [];
+        $plantillaEmails = [];
+
+        $duplicateErrors = [];
+
+
+        foreach ($records as $index => $record) {
+
+            $excelRow =
+                $record['excel_row'] ?? ($index + 2);
+
+
+            $email = strtolower(
+                trim(
+                    (string) ($record['email'] ?? '')
+                )
+            );
+
+
+            $plantillaDbId =
+                trim(
+                    (string) (
+                        $record['plantilla_db_id'] ?? ''
+                    )
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Ignore empty values here
+            |--------------------------------------------------------------------------
+            |
+            | These will be validated again during actual import.
+            |
+            */
+
+            if ($email === '' || $plantillaDbId === '') {
+                continue;
+            }
+
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CHECK 1:
+            | SAME EMAIL WITH DIFFERENT PLANTILLA
+            |--------------------------------------------------------------------------
+            */
+
+            if (isset($emailPlantillas[$email])) {
+
+                $previousPlantilla =
+                    $emailPlantillas[$email]['plantilla'];
+
+                $previousRow =
+                    $emailPlantillas[$email]['row'];
+
+
+                if ($previousPlantilla !== $plantillaDbId) {
+
+                    $duplicateErrors[] = [
+
+                        'row' => $excelRow,
+
+                        'email' => $email,
+
+                        'plantilla' => $plantillaDbId,
+
+                        'message' =>
+                            "Email {$email} is assigned to more "
+                            . "than one Plantilla. "
+                            . "Row {$previousRow} has Plantilla "
+                            . "{$previousPlantilla}, while row "
+                            . "{$excelRow} has Plantilla "
+                            . "{$plantillaDbId}."
+
+                    ];
+                }
+            }
+
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CHECK 2:
+            | SAME PLANTILLA WITH DIFFERENT EMAIL
+            |--------------------------------------------------------------------------
+            */
+
+            if (isset($plantillaEmails[$plantillaDbId])) {
+
+                $previousEmail =
+                    $plantillaEmails[$plantillaDbId]['email'];
+
+                $previousRow =
+                    $plantillaEmails[$plantillaDbId]['row'];
+
+
+                if ($previousEmail !== $email) {
+
+                    $duplicateErrors[] = [
+
+                        'row' => $excelRow,
+
+                        'email' => $email,
+
+                        'plantilla' => $plantillaDbId,
+
+                        'message' =>
+                            "Duplicate Plantilla {$plantillaDbId}. "
+                            . "It is assigned to {$previousEmail} "
+                            . "in Excel row {$previousRow}, "
+                            . "but row {$excelRow} is assigned to "
+                            . "{$email}."
+
+                    ];
+                }
+            }
+
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | STORE FOR NEXT COMPARISON
+            |--------------------------------------------------------------------------
+            */
+
+            $emailPlantillas[$email] = [
+
+                'plantilla' =>
+                    $plantillaDbId,
+
+                'row' =>
+                    $excelRow,
+
+            ];
+
+
+            $plantillaEmails[$plantillaDbId] = [
+
+                'email' =>
+                    $email,
+
+                'row' =>
+                    $excelRow,
+
+            ];
+        }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | STEP 2
+        | CHECK DUPLICATE PLANTILLA ALREADY IN DATABASE
+        |--------------------------------------------------------------------------
+        |
+        | This checks whether the Plantilla is already assigned
+        | to another employee in employment_status.
+        |
+        |--------------------------------------------------------------------------
+        */
+
+        foreach ($records as $index => $record) {
+
+            $excelRow =
+                $record['excel_row'] ?? ($index + 2);
+
+
+            $email = strtolower(
+                trim(
+                    (string) ($record['email'] ?? '')
+                )
+            );
+
+
+            $plantillaDbId =
+                trim(
+                    (string) (
+                        $record['plantilla_db_id'] ?? ''
+                    )
+                );
+
+
+            if ($email === '' || $plantillaDbId === '') {
+                continue;
+            }
+
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | FIND USER
+            |--------------------------------------------------------------------------
+            */
+
+            $user = DB::table('users')
+                ->where('email', $email)
+                ->first();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | USER DOES NOT EXIST
+            |--------------------------------------------------------------------------
+            |
+            | This will also be handled during the actual import,
+            | so don't duplicate the error here.
+            |
+            */
+
+            if (!$user) {
+                continue;
+            }
+
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | FIND OTHER EMPLOYEE USING SAME PLANTILLA
+            |--------------------------------------------------------------------------
+            */
+
+            $existingPlantilla =
+                DB::table('employment_status')
+                    ->join(
+                        'users',
+                        'users.id',
+                        '=',
+                        'employment_status.users_id'
+                    )
+                    ->where(
+                        'employment_status.plantilla_db_id',
+                        $plantillaDbId
+                    )
+                    ->where(
+                        'employment_status.users_id',
+                        '!=',
+                        $user->id
+                    )
+                    ->select(
+                        'users.email',
+                        'employment_status.plantilla_db_id'
+                    )
+                    ->first();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | DUPLICATE FOUND IN DATABASE
+            |--------------------------------------------------------------------------
+            */
+
+            if ($existingPlantilla) {
+
+                $existingEmail =
+                    strtolower(
+                        trim(
+                            (string) $existingPlantilla->email
+                        )
+                    );
+
+
+                $duplicateErrors[] = [
+
+                    'row' =>
+                        $excelRow,
+
+                    'email' =>
+                        $email,
+
+                    'plantilla' =>
+                        $plantillaDbId,
+
+                    'message' =>
+                        "Duplicate Plantilla {$plantillaDbId}. "
+                        . "It is already assigned in the database "
+                        . "to {$existingEmail}, but Excel row "
+                        . "{$excelRow} is assigned to {$email}."
+
+                ];
+            }
+        }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | STEP 3
+        | REMOVE DUPLICATE ERROR MESSAGES
+        |--------------------------------------------------------------------------
+        */
+
+        $duplicateErrors = collect(
+            $duplicateErrors
+        )
+            ->unique(function ($error) {
+
+                return
+                    ($error['row'] ?? '') . '|' .
+                    ($error['email'] ?? '') . '|' .
+                    ($error['plantilla'] ?? '') . '|' .
+                    ($error['message'] ?? '');
+
+            })
+            ->values()
+            ->toArray();
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | STEP 4
+        | STOP IMPORT IF DUPLICATE PLANTILLA FOUND
+        |--------------------------------------------------------------------------
+        */
+
+        if (count($duplicateErrors) > 0) {
+
+            return redirect()
+                ->route(
+                    'data-management.employment-status'
+                )
+                ->with(
+                    'employment_import_result',
+                    [
+
+                        'imported' => 0,
+
+                        'updated' => 0,
+
+                        'skipped' =>
+                            count($records),
+
+                        'errors' =>
+                            $duplicateErrors,
+
+                        'duplicate_plantilla' =>
+                            true,
+
+                    ]
+                )
+                ->with(
+                    'error',
+                    'Import stopped. Duplicate Plantilla assignment(s) were found. No records were imported or updated.'
+                );
+        }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | STEP 5
+        | ACTUAL IMPORT / UPDATE
+        |--------------------------------------------------------------------------
+        */
 
         DB::beginTransaction();
 
@@ -1346,120 +2313,216 @@ class DataManagementController extends Controller
 
                     /*
                     |--------------------------------------------------------------------------
-                    | Find User
+                    | EXCEL ROW
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $excelRow =
+                        $record['excel_row'] ?? ($index + 2);
+
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | EMAIL
                     |--------------------------------------------------------------------------
                     */
 
                     $email = trim(
-                        $record['email'] ?? ''
+                        (string) (
+                            $record['email'] ?? ''
+                        )
                     );
+
 
                     if ($email === '') {
 
                         $skipped++;
 
                         $errors[] = [
+
                             'row' =>
-                                $record['excel_row'] ?? ($index + 2),
+                                $excelRow,
 
                             'message' =>
                                 'Email address is missing.'
+
                         ];
 
                         continue;
                     }
 
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | PLANTILLA
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $plantillaDbId =
+                        trim(
+                            (string) (
+                                $record['plantilla_db_id'] ?? ''
+                            )
+                        );
+
+
+                    if ($plantillaDbId === '') {
+
+                        $skipped++;
+
+                        $errors[] = [
+
+                            'row' =>
+                                $excelRow,
+
+                            'message' =>
+                                'Plantilla Item is missing.'
+
+                        ];
+
+                        continue;
+                    }
+
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | FIND USER
+                    |--------------------------------------------------------------------------
+                    */
+
                     $user = DB::table('users')
-                        ->where('email', $email)
+                        ->where(
+                            'email',
+                            $email
+                        )
                         ->first();
+
 
                     if (!$user) {
 
                         $skipped++;
 
                         $errors[] = [
+
                             'row' =>
-                                $record['excel_row'] ?? ($index + 2),
+                                $excelRow,
 
                             'message' =>
                                 "Email {$email} does not exist in the users table."
+
                         ];
 
                         continue;
                     }
 
+
+
                     /*
                     |--------------------------------------------------------------------------
-                    | Check Existing Employment Record
+                    | CHECK EXISTING EMPLOYMENT RECORD
                     |--------------------------------------------------------------------------
                     */
 
-                    $existing = DB::table('employment_status')
-                        ->where('users_id', $user->id)
-                        ->first();
+                    $existing =
+                        DB::table('employment_status')
+                            ->where(
+                                'users_id',
+                                $user->id
+                            )
+                            ->first();
+
+
 
                     /*
                     |--------------------------------------------------------------------------
-                    | Employment Data
+                    | EMPLOYMENT DATA
                     |--------------------------------------------------------------------------
                     */
 
                     $employmentData = [
 
                         'plantilla_db_id' =>
-                            $record['plantilla_db_id'] ?? null,
+                            $plantillaDbId,
 
                         'school_db_id' =>
                             $record['school_db_id'] ?? null,
 
                         'date_of_original_appointment' =>
-                            $record['date_of_original_appointment'] ?? null,
+                            $record[
+                                'date_of_original_appointment'
+                            ] ?? null,
 
                         'date_of_last_promotion' =>
-                            $record['date_of_last_promotion'] ?? null,
+                            $record[
+                                'date_of_last_promotion'
+                            ] ?? null,
 
                         'employment_status' =>
-                            $record['employment_status'] ?? null,
+                            $record[
+                                'employment_status'
+                            ] ?? null,
 
                         'warm_body_status' =>
-                            $record['warm_body_status'] ?? null,
+                            $record[
+                                'warm_body_status'
+                            ] ?? null,
 
                         'nature_of_work' =>
-                            $record['nature_of_work'] ?? null,
+                            $record[
+                                'nature_of_work'
+                            ] ?? null,
 
                         'source_of_fund' =>
-                            $record['source_of_fund'] ?? null,
+                            $record[
+                                'source_of_fund'
+                            ] ?? null,
 
                         'monthly_salary' =>
-                            $record['monthly_salary'] !== ''
+                            ($record['monthly_salary'] ?? '') !== ''
                                 ? $record['monthly_salary']
                                 : null,
 
                         'contract_duration' =>
-                            $record['contract_duration'] ?? null,
+                            $record[
+                                'contract_duration'
+                            ] ?? null,
 
-                        'updated_at' => now(),
+                        'updated_at' =>
+                            now(),
+
                     ];
+
+
 
                     /*
                     |--------------------------------------------------------------------------
-                    | UPDATE EXISTING RECORD
+                    | UPDATE
                     |--------------------------------------------------------------------------
                     */
 
                     if ($existing) {
 
                         DB::table('employment_status')
-                            ->where('id', $existing->id)
-                            ->update($employmentData);
+                            ->where(
+                                'id',
+                                $existing->id
+                            )
+                            ->update(
+                                $employmentData
+                            );
 
                         $updated++;
 
                     }
 
+
+
                     /*
                     |--------------------------------------------------------------------------
-                    | CREATE NEW RECORD
+                    | CREATE
                     |--------------------------------------------------------------------------
                     */
 
@@ -1471,73 +2534,622 @@ class DataManagementController extends Controller
                         $employmentData['created_at'] =
                             now();
 
+
                         DB::table('employment_status')
-                            ->insert($employmentData);
+                            ->insert(
+                                $employmentData
+                            );
 
                         $imported++;
                     }
+
+
 
                 } catch (\Throwable $e) {
 
                     $skipped++;
 
                     $errors[] = [
+
                         'row' =>
-                            $record['excel_row'] ?? ($index + 2),
+                            $record['excel_row']
+                            ?? ($index + 2),
 
                         'message' =>
                             $e->getMessage()
+
                     ];
                 }
             }
 
-            DB::commit();
+
 
             /*
             |--------------------------------------------------------------------------
-            | Remove Temporary Session Data
+            | COMMIT
             |--------------------------------------------------------------------------
             */
 
-            session()->forget(
-                'employment_status_import_records'
-            );
+            DB::commit();
 
-            session()->forget(
-                'employment_status_import_errors'
-            );
+
 
             /*
             |--------------------------------------------------------------------------
-            | Return Result
+            | REMOVE TEMPORARY SESSION DATA
+            |--------------------------------------------------------------------------
+            */
+
+            session()->forget([
+                'employment_status_import_records',
+                'employment_status_import_errors',
+            ]);
+
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | RETURN RESULT
             |--------------------------------------------------------------------------
             */
 
             return redirect()
-                ->route('data-management.employment-status')
-                ->with('employment_import_result', [
+                ->route(
+                    'data-management.employment-status'
+                )
+                ->with(
+                    'employment_import_result',
+                    [
 
-                    'imported' => $imported,
+                        'imported' =>
+                            $imported,
 
-                    'updated' => $updated,
+                        'updated' =>
+                            $updated,
 
-                    'skipped' => $skipped,
+                        'skipped' =>
+                            $skipped,
 
-                    'errors' => $errors,
-                ]);
+                        'errors' =>
+                            $errors,
+
+                        'duplicate_plantilla' =>
+                            false,
+
+                    ]
+                );
+
 
         } catch (\Throwable $e) {
 
+            /*
+            |--------------------------------------------------------------------------
+            | ROLLBACK
+            |--------------------------------------------------------------------------
+            */
+
             DB::rollBack();
 
+
             return redirect()
-                ->route('data-management.employment-status')
+                ->route(
+                    'data-management.employment-status'
+                )
                 ->with(
                     'error',
                     'Employment Status import failed: '
                     . $e->getMessage()
                 );
         }
+    }
+
+    public function downloadEmploymentStatusTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setTitle('Employment Status');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TITLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->mergeCells('A1:K1');
+
+        $sheet->setCellValue(
+            'A1',
+            'EMPLOYMENT STATUS RECORDS'
+        );
+
+        $sheet->getStyle('A1')->applyFromArray([
+
+            'font' => [
+                'bold' => true,
+                'size' => 14,
+                'color' => [
+                    'rgb' => 'FFFFFF'
+                ],
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '15803D'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(1)->setRowHeight(28);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | INSTRUCTIONS
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->mergeCells('A2:K2');
+
+        $sheet->setCellValue(
+            'A2',
+            'Please do not modify the column headers. Enter one personnel employment record per row.'
+        );
+
+        $sheet->getStyle('A2')->applyFromArray([
+
+            'font' => [
+                'italic' => true,
+                'size' => 10,
+                'color' => [
+                    'rgb' => '666666'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(2)->setRowHeight(22);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COLUMN HEADERS
+        |--------------------------------------------------------------------------
+        */
+
+        $headers = [
+
+            'A4' => 'email',
+
+            'B4' => 'item_number',
+
+            'C4' => 'school_id',
+
+            'D4' => 'date_of_original_appointment',
+
+            'E4' => 'date_of_last_promotion',
+
+            'F4' => 'employment_status',
+
+            'G4' => 'warm_body_status',
+
+            'H4' => 'nature_of_work',
+
+            'I4' => 'source_of_fund',
+
+            'J4' => 'monthly_salary',
+
+            'K4' => 'contract_duration',
+
+        ];
+
+        foreach ($headers as $cell => $value) {
+
+            $sheet->setCellValue(
+                $cell,
+                $value
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HEADER STYLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A4:K4')->applyFromArray([
+
+            'font' => [
+                'bold' => true,
+                'color' => [
+                    'rgb' => 'FFFFFF'
+                ],
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '166534'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ],
+
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => 'D1D5DB'
+                    ],
+                ],
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(4)->setRowHeight(40);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAMPLE DATA
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->setCellValue(
+            'A5',
+            'example@deped.gov.ph'
+        );
+
+        $sheet->setCellValue(
+            'B5',
+            'OSEC-DESCB-TCH1-123456-2026'
+        );
+
+        $sheet->setCellValue(
+            'C5',
+            '123456'
+        );
+
+        $sheet->setCellValue(
+            'D5',
+            '01/15/2020'
+        );
+
+        $sheet->setCellValue(
+            'E5',
+            '01/15/2024'
+        );
+
+        $sheet->setCellValue(
+            'F5',
+            'Permanent'
+        );
+
+        $sheet->setCellValue(
+            'G5',
+            'Original'
+        );
+
+        $sheet->setCellValue(
+            'H5',
+            'Teaching Services'
+        );
+
+        $sheet->setCellValue(
+            'I5',
+            'General Fund'
+        );
+
+        $sheet->setCellValue(
+            'J5',
+            30000
+        );
+
+        $sheet->setCellValue(
+            'K5',
+            'Permanent'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAMPLE DATA STYLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A5:K5')->applyFromArray([
+
+            'font' => [
+                'color' => [
+                    'rgb' => '6B7280'
+                ],
+                'italic' => true,
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => 'F9FAFB'
+                ],
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | EMPLOYMENT STATUS DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $employmentStatusValidation = new DataValidation();
+
+        $employmentStatusValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Employment Status')
+            ->setError(
+                'Please select a valid employment status.'
+            )
+            ->setFormula1(
+                '"Permanent,Temporary,Contractual,Job Order,Casual"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | WARM BODY STATUS DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $warmBodyValidation = new DataValidation();
+
+        $warmBodyValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Warm Body Status')
+            ->setError(
+                'Please select a valid warm body status.'
+            )
+            ->setFormula1(
+                '"Original,Detailed,Borrowed"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | NATURE OF WORK DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $natureOfWorkValidation = new DataValidation();
+
+        $natureOfWorkValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Nature of Work')
+            ->setError(
+                'Please select a valid nature of work.'
+            )
+            ->setFormula1(
+                '"School Administration,Teaching Services"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SOURCE OF FUND DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $sourceOfFundValidation = new DataValidation();
+
+        $sourceOfFundValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Source of Fund')
+            ->setError(
+                'Please select a valid source of fund.'
+            )
+            ->setFormula1(
+                '"Plantilla, MOOE Fund, LGU Fund"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | APPLY DROPDOWNS
+        |--------------------------------------------------------------------------
+        |
+        | Apply validation to rows 5-1000.
+        |
+        */
+
+        for ($row = 5; $row <= 1000; $row++) {
+
+            /*
+            | Employment Status
+            */
+
+            $sheet
+                ->getCell("F{$row}")
+                ->setDataValidation(
+                    clone $employmentStatusValidation
+                );
+
+
+            /*
+            | Warm Body Status
+            */
+
+            $sheet
+                ->getCell("G{$row}")
+                ->setDataValidation(
+                    clone $warmBodyValidation
+                );
+
+
+            /*
+            | Nature of Work
+            */
+
+            $sheet
+                ->getCell("H{$row}")
+                ->setDataValidation(
+                    clone $natureOfWorkValidation
+                );
+
+
+            /*
+            | Source of Fund
+            */
+
+            $sheet
+                ->getCell("I{$row}")
+                ->setDataValidation(
+                    clone $sourceOfFundValidation
+                );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BORDERS FOR DATA AREA
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A4:K1000')->applyFromArray([
+
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => 'E5E7EB'
+                    ],
+                ],
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COLUMN WIDTH
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getColumnDimension('A')
+            ->setWidth(32);
+
+        $sheet->getColumnDimension('B')
+            ->setWidth(20);
+
+        $sheet->getColumnDimension('C')
+            ->setWidth(18);
+
+        $sheet->getColumnDimension('D')
+            ->setWidth(28);
+
+        $sheet->getColumnDimension('E')
+            ->setWidth(25);
+
+        $sheet->getColumnDimension('F')
+            ->setWidth(22);
+
+        $sheet->getColumnDimension('G')
+            ->setWidth(22);
+
+        $sheet->getColumnDimension('H')
+            ->setWidth(20);
+
+        $sheet->getColumnDimension('I')
+            ->setWidth(22);
+
+        $sheet->getColumnDimension('J')
+            ->setWidth(18);
+
+        $sheet->getColumnDimension('K')
+            ->setWidth(22);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | FREEZE HEADER
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->freezePane('A5');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AUTO FILTER
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->setAutoFilter('A4:K1000');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DOWNLOAD
+        |--------------------------------------------------------------------------
+        */
+
+        $fileName =
+            'PDMS_Employment_Status_Template.xlsx';
+
+        $writer = new Xlsx($spreadsheet);
+
+        return response()->streamDownload(
+            function () use ($writer) {
+
+                $writer->save('php://output');
+
+            },
+            $fileName,
+            [
+                'Content-Type' =>
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]
+        );
     }
 
 
@@ -1559,7 +3171,6 @@ class DataManagementController extends Controller
 
         return view('data-management.plantilla', compact('plantillas'));
     }
-
 
     public function importPlantilla(Request $request)
     {
@@ -1683,11 +3294,26 @@ class DataManagementController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Excel Row Number
+            | Skip Completely Empty Rows
             |--------------------------------------------------------------------------
             */
 
-            $excelRow = $index + 2;
+            $isEmptyRow = $row->filter(function ($value) {
+                return trim((string) $value) !== '';
+            })->isEmpty();
+
+            if ($isEmptyRow) {
+                continue;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Count Only Actual Data Rows
+            |--------------------------------------------------------------------------
+            */
+
+            $excelRow = $index + 5;
+            $dataRowNumber = $index + 1;
 
 
             /*
@@ -1749,7 +3375,7 @@ class DataManagementController extends Controller
 
             $previewRows[] = [
 
-                'excel_row' => $excelRow,
+                'excel_row' => $dataRowNumber,
 
                 'item_number' =>
                     $itemNumber ?: null,
@@ -2082,6 +3708,446 @@ class DataManagementController extends Controller
         }
     }
 
+    public function downloadPlantillaDatabaseTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setTitle('Plantilla Database');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TITLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->mergeCells('A1:I1');
+
+        $sheet->setCellValue(
+            'A1',
+            'PLANTILLA DATABASE RECORDS'
+        );
+
+        $sheet->getStyle('A1')->applyFromArray([
+
+            'font' => [
+                'bold' => true,
+                'size' => 14,
+                'color' => [
+                    'rgb' => 'FFFFFF'
+                ],
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '15803D'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(1)->setRowHeight(28);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | INSTRUCTIONS
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->mergeCells('A2:I2');
+
+        $sheet->setCellValue(
+            'A2',
+            'Please do not modify the column headers. Enter one plantilla record per row.'
+        );
+
+        $sheet->getStyle('A2')->applyFromArray([
+
+            'font' => [
+                'italic' => true,
+                'size' => 10,
+                'color' => [
+                    'rgb' => '666666'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(2)->setRowHeight(22);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COLUMN HEADERS
+        |--------------------------------------------------------------------------
+        */
+
+        $headers = [
+
+            'A4' => 'item_number',
+
+            'B4' => 'item_from',
+
+            'C4' => 'item_from_school_level',
+
+            'D4' => 'position_title',
+
+            'E4' => 'salary_grade',
+
+            'F4' => 'area_code',
+
+            'G4' => 'area_type',
+
+            'H4' => 'plantilla_level',
+
+            'I4' => 'pppa_attribution',
+
+        ];
+
+        foreach ($headers as $cell => $value) {
+
+            $sheet->setCellValue(
+                $cell,
+                $value
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HEADER STYLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A4:I4')->applyFromArray([
+
+            'font' => [
+                'bold' => true,
+                'color' => [
+                    'rgb' => 'FFFFFF'
+                ],
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '166534'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ],
+
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => 'D1D5DB'
+                    ],
+                ],
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(4)->setRowHeight(35);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAMPLE DATA
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->setCellValue(
+            'A5',
+            'OSEC-DESCB-TCH1-123456-2026'
+        );
+
+        $sheet->setCellValue(
+            'B5',
+            'DepEd'
+        );
+
+        $sheet->setCellValue(
+            'C5',
+            'Elementary'
+        );
+
+        $sheet->setCellValue(
+            'D5',
+            'Teacher I'
+        );
+
+        $sheet->setCellValue(
+            'E5',
+            '11'
+        );
+
+        $sheet->setCellValue(
+            'F5',
+            '08-LEY'
+        );
+
+        $sheet->setCellValue(
+            'G5',
+            'Leyte'
+        );
+
+        $sheet->setCellValue(
+            'H5',
+            'Elementary'
+        );
+
+        $sheet->setCellValue(
+            'I5',
+            'PPPA'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAMPLE DATA STYLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A5:I5')->applyFromArray([
+
+            'font' => [
+                'color' => [
+                    'rgb' => '6B7280'
+                ],
+                'italic' => true,
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => 'F9FAFB'
+                ],
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ITEM FROM SCHOOL LEVEL DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $schoolLevelValidation = new DataValidation();
+
+        $schoolLevelValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid School Level')
+            ->setError(
+                'Please select a valid school level.'
+            )
+            ->setFormula1(
+                '"Elementary,Junior High School,Senior High School"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AREA TYPE DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $areaTypeValidation = new DataValidation();
+
+        $areaTypeValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Area Type')
+            ->setError(
+                'Please select a valid area type.'
+            )
+            ->setFormula1(
+                '"Urban,Rural"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PLANTILLA LEVEL DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $plantillaLevelValidation = new DataValidation();
+
+        $plantillaLevelValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Plantilla Level')
+            ->setError(
+                'Please select a valid plantilla level.'
+            )
+            ->setFormula1(
+                '"Teaching,Non-Teaching"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | APPLY VALIDATIONS
+        |--------------------------------------------------------------------------
+        |
+        | Apply dropdowns to rows 5-1000.
+        |
+        */
+
+        for ($row = 5; $row <= 1000; $row++) {
+
+            $sheet
+                ->getCell("C{$row}")
+                ->setDataValidation(
+                    clone $schoolLevelValidation
+                );
+
+            $sheet
+                ->getCell("G{$row}")
+                ->setDataValidation(
+                    clone $areaTypeValidation
+                );
+
+            $sheet
+                ->getCell("H{$row}")
+                ->setDataValidation(
+                    clone $plantillaLevelValidation
+                );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BORDERS FOR DATA AREA
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A4:I1000')->applyFromArray([
+
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => 'E5E7EB'
+                    ],
+                ],
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COLUMN WIDTH
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getColumnDimension('A')
+            ->setWidth(20);
+
+        $sheet->getColumnDimension('B')
+            ->setWidth(18);
+
+        $sheet->getColumnDimension('C')
+            ->setWidth(28);
+
+        $sheet->getColumnDimension('D')
+            ->setWidth(30);
+
+        $sheet->getColumnDimension('E')
+            ->setWidth(15);
+
+        $sheet->getColumnDimension('F')
+            ->setWidth(18);
+
+        $sheet->getColumnDimension('G')
+            ->setWidth(20);
+
+        $sheet->getColumnDimension('H')
+            ->setWidth(22);
+
+        $sheet->getColumnDimension('I')
+            ->setWidth(22);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | FREEZE HEADER
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->freezePane('A5');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AUTO FILTER
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->setAutoFilter('A4:I1000');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DOWNLOAD
+        |--------------------------------------------------------------------------
+        */
+
+        $fileName =
+            'PDMS_Plantilla_Database_Template.xlsx';
+
+        $writer = new Xlsx($spreadsheet);
+
+        return response()->streamDownload(
+            function () use ($writer) {
+
+                $writer->save('php://output');
+
+            },
+            $fileName,
+            [
+                'Content-Type' =>
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]
+        );
+    }
+
     /*   
     |   END  OF PLANTILLA POSITION RECORDS FUNCTIONS
     |
@@ -2221,11 +4287,27 @@ class DataManagementController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Excel Row Number
+            | Skip Completely Empty Rows
             |--------------------------------------------------------------------------
             */
 
-            $excelRow = $index + 2;
+            $isEmptyRow = $row->filter(function ($value) {
+                return trim((string) $value) !== '';
+            })->isEmpty();
+
+            if ($isEmptyRow) {
+                continue;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Actual Excel Row Number
+            |--------------------------------------------------------------------------
+            */
+
+            $excelRow = $index + 5;
+            $dataRowNumber = $index + 1;
 
 
             /*
@@ -2281,7 +4363,7 @@ class DataManagementController extends Controller
 
             $previewRows[] = [
 
-                'excel_row' => $excelRow,
+                'excel_row' => $dataRowNumber,
 
                 'school_id' =>
                     $schoolId ?: null,
@@ -2627,6 +4709,405 @@ class DataManagementController extends Controller
         }
     }
 
+    public function downloadSchoolDatabaseTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setTitle('School Database');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TITLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->mergeCells('A1:H1');
+
+        $sheet->setCellValue(
+            'A1',
+            'SCHOOL DATABASE RECORDS'
+        );
+
+        $sheet->getStyle('A1')->applyFromArray([
+
+            'font' => [
+                'bold' => true,
+                'size' => 14,
+                'color' => [
+                    'rgb' => 'FFFFFF'
+                ],
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '15803D'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(1)->setRowHeight(28);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | INSTRUCTIONS
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->mergeCells('A2:H2');
+
+        $sheet->setCellValue(
+            'A2',
+            'Please do not modify the column headers. Enter one school record per row.'
+        );
+
+        $sheet->getStyle('A2')->applyFromArray([
+
+            'font' => [
+                'italic' => true,
+                'size' => 10,
+                'color' => [
+                    'rgb' => '666666'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(2)->setRowHeight(22);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COLUMN HEADERS
+        |--------------------------------------------------------------------------
+        */
+
+        $headers = [
+
+            'A4' => 'school_id',
+
+            'B4' => 'school_name',
+
+            'C4' => 'school_area',
+
+            'D4' => 'legislative_district',
+
+            'E4' => 'school_district',
+
+            'F4' => 'school_municipality',
+
+            'G4' => 'school_sector',
+
+            'H4' => 'school_curricular_offering',
+
+        ];
+
+        foreach ($headers as $cell => $value) {
+
+            $sheet->setCellValue(
+                $cell,
+                $value
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HEADER STYLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A4:H4')->applyFromArray([
+
+            'font' => [
+                'bold' => true,
+                'color' => [
+                    'rgb' => 'FFFFFF'
+                ],
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '166534'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => 'D1D5DB'
+                    ],
+                ],
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(4)->setRowHeight(30);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAMPLE DATA
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->setCellValue(
+            'A5',
+            '123456'
+        );
+
+        $sheet->setCellValue(
+            'B5',
+            'Sample Elementary School'
+        );
+
+        $sheet->setCellValue(
+            'C5',
+            'Leyte Area'
+        );
+
+        $sheet->setCellValue(
+            'D5',
+            '1st Legislative District'
+        );
+
+        $sheet->setCellValue(
+            'E5',
+            'Hilongos District'
+        );
+
+        $sheet->setCellValue(
+            'F5',
+            'Hilongos'
+        );
+
+        $sheet->setCellValue(
+            'G5',
+            'Public'
+        );
+
+        $sheet->setCellValue(
+            'H5',
+            'Elementary'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAMPLE DATA STYLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A5:H5')->applyFromArray([
+
+            'font' => [
+                'color' => [
+                    'rgb' => '6B7280'
+                ],
+                'italic' => true,
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => 'F9FAFB'
+                ],
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SCHOOL SECTOR DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $sectorValidation = new DataValidation();
+
+        $sectorValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid School Sector')
+            ->setError(
+                'Please select a valid school sector.'
+            )
+            ->setFormula1(
+                '"Public,Private"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SCHOOL AREA DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $areaValidation = new DataValidation();
+
+        $areaValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid School Area')
+            ->setError(
+                'Please select a valid school area.'
+            )
+            ->setFormula1(
+                '"Urban,Rural"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | APPLY DROPDOWNS
+        |--------------------------------------------------------------------------
+        |
+        | Apply validation to rows 5-1000.
+        |
+        */
+
+        for ($row = 5; $row <= 1000; $row++) {
+
+            $sheet
+                ->getCell("C{$row}")
+                ->setDataValidation(
+                    clone $areaValidation
+                );
+
+            $sheet
+                ->getCell("G{$row}")
+                ->setDataValidation(
+                    clone $sectorValidation
+                );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BORDERS FOR DATA AREA
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A4:H1000')->applyFromArray([
+
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => 'E5E7EB'
+                    ],
+                ],
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COLUMN WIDTH
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getColumnDimension('A')
+            ->setWidth(18);
+
+        $sheet->getColumnDimension('B')
+            ->setWidth(35);
+
+        $sheet->getColumnDimension('C')
+            ->setWidth(20);
+
+        $sheet->getColumnDimension('D')
+            ->setWidth(25);
+
+        $sheet->getColumnDimension('E')
+            ->setWidth(25);
+
+        $sheet->getColumnDimension('F')
+            ->setWidth(25);
+
+        $sheet->getColumnDimension('G')
+            ->setWidth(18);
+
+        $sheet->getColumnDimension('H')
+            ->setWidth(35);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | FREEZE HEADER
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->freezePane('A5');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AUTO FILTER
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->setAutoFilter('A4:H1000');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DOWNLOAD
+        |--------------------------------------------------------------------------
+        */
+
+        $fileName =
+            'PDMS_School_Database_Template.xlsx';
+
+        $writer = new Xlsx($spreadsheet);
+
+        return response()->streamDownload(
+            function () use ($writer) {
+
+                $writer->save('php://output');
+
+            },
+            $fileName,
+            [
+                'Content-Type' =>
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]
+        );
+    }
+
     /*   
     |   END  OF SCHOOL INFORMATION RECORDS FUNCTIONS
     |
@@ -2751,6 +5232,12 @@ class DataManagementController extends Controller
 
     public function importMedicalAllowance(Request $request)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Uploaded File
+        |--------------------------------------------------------------------------
+        */
+
         $request->validate([
             'file' => [
                 'required',
@@ -2760,6 +5247,13 @@ class DataManagementController extends Controller
             ],
         ]);
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Read Excel
+        |--------------------------------------------------------------------------
+        */
+
         $collections = Excel::toCollection(
             new MedicalAllowanceImport,
             $request->file('file')
@@ -2767,13 +5261,23 @@ class DataManagementController extends Controller
 
         $rows = $collections->first();
 
-        if ($rows->isEmpty()) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Empty File
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$rows || $rows->isEmpty()) {
+
             return back()
                 ->withErrors([
-                    'file' => 'The uploaded Excel file contains no records.'
+                    'file' =>
+                        'The uploaded Excel file contains no records.'
                 ])
                 ->withInput();
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -2782,22 +5286,49 @@ class DataManagementController extends Controller
         */
 
         $requiredColumns = [
+
             'email',
+
             'mode_of_availment',
+
             'disbursement_status',
+
         ];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get Headers
+        |--------------------------------------------------------------------------
+        |
+        | Because MedicalAllowanceImport uses WithHeadingRow
+        | and headingRow() returns 4, the rows already contain
+        | the headers from Excel Row 4.
+        |
+        */
 
         $firstRow = $rows->first();
 
         $missingColumns = [];
 
+
         foreach ($requiredColumns as $column) {
 
-            if (!array_key_exists($column, $firstRow->toArray())) {
+            if (!array_key_exists(
+                $column,
+                $firstRow->toArray()
+            )) {
+
                 $missingColumns[] = $column;
             }
-
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Invalid Header
+        |--------------------------------------------------------------------------
+        */
 
         if (!empty($missingColumns)) {
 
@@ -2806,9 +5337,11 @@ class DataManagementController extends Controller
                     'file' =>
                         'The Excel file is missing the following columns: '
                         . implode(', ', $missingColumns)
+                        . '. Please use the official Medical Allowance template.'
                 ])
                 ->withInput();
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -2817,11 +5350,28 @@ class DataManagementController extends Controller
         */
 
         $previewRows = [];
+
         $errors = [];
+
 
         foreach ($rows as $index => $row) {
 
-            $excelRow = $index + 2;
+            /*
+            |--------------------------------------------------------------------------
+            | IMPORTANT:
+            | WithHeadingRow uses Row 4 as the header.
+            | Therefore first data row is Excel Row 5.
+            |
+            */
+
+            $excelRow = $index + 5;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Read Values
+            |--------------------------------------------------------------------------
+            */
 
             $email = trim(
                 (string) ($row['email'] ?? '')
@@ -2835,6 +5385,23 @@ class DataManagementController extends Controller
                 (string) ($row['disbursement_status'] ?? '')
             );
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Skip Completely Empty Rows
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $email === '' &&
+                $modeOfAvailment === '' &&
+                $disbursementStatus === ''
+            ) {
+
+                continue;
+            }
+
+
             /*
             |--------------------------------------------------------------------------
             | Validate Email
@@ -2844,17 +5411,27 @@ class DataManagementController extends Controller
             if ($email === '') {
 
                 $errors[] = [
+
                     'row' => $excelRow,
-                    'message' => 'Email is required.'
+
+                    'message' =>
+                        'Email is required.'
+
                 ];
 
-            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            } elseif (!filter_var(
+                $email,
+                FILTER_VALIDATE_EMAIL
+            )) {
 
                 $errors[] = [
-                    'row' => $excelRow,
-                    'message' => "Invalid email address: {$email}."
-                ];
 
+                    'row' => $excelRow,
+
+                    'message' =>
+                        "Invalid email address: {$email}."
+
+                ];
             }
 
 
@@ -2866,19 +5443,26 @@ class DataManagementController extends Controller
 
             $user = null;
 
+
             if ($email !== '') {
 
-                $user = User::where('email', $email)->first();
+                $user = User::where(
+                    'email',
+                    $email
+                )->first();
+
 
                 if (!$user) {
 
                     $errors[] = [
+
                         'row' => $excelRow,
-                        'message' => "No personnel account found for {$email}."
+
+                        'message' =>
+                            "No personnel account found for {$email}."
+
                     ];
-
                 }
-
             }
 
 
@@ -2890,17 +5474,23 @@ class DataManagementController extends Controller
 
             $previewRows[] = [
 
-                'excel_row' => $excelRow,
+                'excel_row' =>
+                    $excelRow,
 
-                'email' => $email,
+                'email' =>
+                    $email,
 
-                'user_id' => $user?->id,
+                'user_id' =>
+                    $user?->id,
 
-                'name' => $user?->name,
+                'name' =>
+                    $user?->name,
 
-                'mode_of_availment' => $modeOfAvailment,
+                'mode_of_availment' =>
+                    $modeOfAvailment,
 
-                'disbursement_status' => $disbursementStatus,
+                'disbursement_status' =>
+                    $disbursementStatus,
 
             ];
         }
@@ -2913,15 +5503,26 @@ class DataManagementController extends Controller
         */
 
         session([
-            'medical_allowance_import_records' => $previewRows,
-            'medical_allowance_import_errors' => $errors,
+
+            'medical_allowance_import_records' =>
+                $previewRows,
+
+            'medical_allowance_import_errors' =>
+                $errors,
+
         ]);
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect to Preview
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()->route(
             'data-management.medical-allowance.import.preview'
         );
-    }   
+    } 
 
     public function medicalAllowanceImportPreview()
     {
@@ -3371,6 +5972,355 @@ class DataManagementController extends Controller
         );
     }
 
+    public function downloadMedicalAllowanceTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setTitle('Medical Allowance');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TITLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->mergeCells('A1:C1');
+
+        $sheet->setCellValue(
+            'A1',
+            'MEDICAL ALLOWANCE RECORDS'
+        );
+
+        $sheet->getStyle('A1')->applyFromArray([
+
+            'font' => [
+                'bold' => true,
+                'size' => 14,
+                'color' => [
+                    'rgb' => 'FFFFFF'
+                ],
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '15803D'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(1)->setRowHeight(28);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | INSTRUCTIONS
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->mergeCells('A2:C2');
+
+        $sheet->setCellValue(
+            'A2',
+            'Please do not modify the column headers. Enter one personnel record per row.'
+        );
+
+        $sheet->getStyle('A2')->applyFromArray([
+
+            'font' => [
+                'italic' => true,
+                'size' => 10,
+                'color' => [
+                    'rgb' => '666666'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(2)->setRowHeight(22);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COLUMN HEADERS
+        |--------------------------------------------------------------------------
+        */
+
+        $headers = [
+
+            'A4' => 'email',
+
+            'B4' => 'mode_of_availment',
+
+            'C4' => 'disbursement_status',
+
+        ];
+
+        foreach ($headers as $cell => $value) {
+
+            $sheet->setCellValue(
+                $cell,
+                $value
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HEADER STYLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A4:C4')->applyFromArray([
+
+            'font' => [
+                'bold' => true,
+                'color' => [
+                    'rgb' => 'FFFFFF'
+                ],
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '166534'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => 'D1D5DB'
+                    ],
+                ],
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(4)->setRowHeight(25);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAMPLE DATA
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->setCellValue(
+            'A5',
+            'example@deped.gov.ph'
+        );
+
+        $sheet->setCellValue(
+            'B5',
+            'Group Availment (HMO)'
+        );
+
+        $sheet->setCellValue(
+            'C5',
+            'Paid'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAMPLE DATA STYLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A5:C5')->applyFromArray([
+
+            'font' => [
+                'color' => [
+                    'rgb' => '6B7280'
+                ],
+                'italic' => true,
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => 'F9FAFB'
+                ],
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | MODE OF AVAILMENT DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $modeValidation = new DataValidation();
+
+        $modeValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Mode of Availment')
+            ->setError(
+                'Please select a valid mode of availment.'
+            )
+            ->setFormula1(
+                '"Group Availment (HMO),Individual Availment (HMO),Individual Availment (Medical Expenses)"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DISBURSEMENT STATUS DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $statusValidation = new DataValidation();
+
+        $statusValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Disbursement Status')
+            ->setError(
+                'Please select Paid or Pending.'
+            )
+            ->setFormula1(
+                '"Paid,Pending"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | APPLY DROPDOWNS
+        |--------------------------------------------------------------------------
+        |
+        | Apply to rows 5-1000.
+        |
+        */
+
+        for ($row = 5; $row <= 1000; $row++) {
+
+            $sheet
+                ->getCell("B{$row}")
+                ->setDataValidation(
+                    clone $modeValidation
+                );
+
+            $sheet
+                ->getCell("C{$row}")
+                ->setDataValidation(
+                    clone $statusValidation
+                );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BORDERS FOR DATA AREA
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A4:C1000')->applyFromArray([
+
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => 'E5E7EB'
+                    ],
+                ],
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COLUMN WIDTH
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getColumnDimension('A')
+            ->setWidth(35);
+
+        $sheet->getColumnDimension('B')
+            ->setWidth(45);
+
+        $sheet->getColumnDimension('C')
+            ->setWidth(25);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | FREEZE HEADER
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->freezePane('A5');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AUTO FILTER
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->setAutoFilter('A4:C1000');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DOWNLOAD
+        |--------------------------------------------------------------------------
+        */
+
+        $fileName =
+            'PDMS_Medical_Allowance_Template.xlsx';
+
+        $writer = new Xlsx($spreadsheet);
+
+        return response()->streamDownload(
+            function () use ($writer) {
+
+                $writer->save('php://output');
+
+            },
+            $fileName,
+            [
+                'Content-Type' =>
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]
+        );
+    }
+
 
     /*   
     |   END  OF MEDICAL ALLOWANCE RECORDS FUNCTIONS
@@ -3757,6 +6707,392 @@ class DataManagementController extends Controller
                     $e->getMessage()
                 );
         }
+    }
+
+    public function downloadEnrollmentTemplate()
+    {
+        $spreadsheet = new Spreadsheet();
+
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setTitle('Enrollment');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TITLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->mergeCells('A1:D1');
+
+        $sheet->setCellValue(
+            'A1',
+            'ENROLLMENT RECORDS'
+        );
+
+        $sheet->getStyle('A1')->applyFromArray([
+
+            'font' => [
+                'bold' => true,
+                'size' => 14,
+                'color' => [
+                    'rgb' => 'FFFFFF'
+                ],
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '15803D'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(1)->setRowHeight(28);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | INSTRUCTIONS
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->mergeCells('A2:D2');
+
+        $sheet->setCellValue(
+            'A2',
+            'Please do not modify the column headers. Enter one enrollment record per row.'
+        );
+
+        $sheet->getStyle('A2')->applyFromArray([
+
+            'font' => [
+                'italic' => true,
+                'size' => 10,
+                'color' => [
+                    'rgb' => '666666'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(2)->setRowHeight(22);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COLUMN HEADERS
+        |--------------------------------------------------------------------------
+        */
+
+        $headers = [
+
+            'A4' => 'school_id',
+
+            'B4' => 'school_year',
+
+            'C4' => 'grade_level',
+
+            'D4' => 'enrollment_count',
+
+        ];
+
+        foreach ($headers as $cell => $value) {
+
+            $sheet->setCellValue(
+                $cell,
+                $value
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HEADER STYLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A4:D4')->applyFromArray([
+
+            'font' => [
+                'bold' => true,
+                'color' => [
+                    'rgb' => 'FFFFFF'
+                ],
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => '166534'
+                ],
+            ],
+
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => 'D1D5DB'
+                    ],
+                ],
+            ],
+
+        ]);
+
+        $sheet->getRowDimension(4)->setRowHeight(25);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAMPLE DATA
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->setCellValue(
+            'A5',
+            '123456'
+        );
+
+        $sheet->setCellValue(
+            'B5',
+            '2025-2026'
+        );
+
+        $sheet->setCellValue(
+            'C5',
+            'Kindergarten'
+        );
+
+        $sheet->setCellValue(
+            'D5',
+            35
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAMPLE DATA STYLE
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A5:D5')->applyFromArray([
+
+            'font' => [
+                'color' => [
+                    'rgb' => '6B7280'
+                ],
+                'italic' => true,
+            ],
+
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => 'F9FAFB'
+                ],
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SCHOOL YEAR DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $schoolYearValidation = new DataValidation();
+
+        $schoolYearValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid School Year')
+            ->setError(
+                'Please select a valid school year.'
+            )
+            ->setFormula1(
+                '"2025-2026,2026-2027"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | GRADE LEVEL DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $gradeLevelValidation = new DataValidation();
+
+        $gradeLevelValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Grade Level')
+            ->setError(
+                'Please select a valid grade level.'
+            )
+            ->setFormula1(
+                '"Kindergarten,Grade 1,Grade 2,Grade 3,Grade 4,Grade 5,Grade 6,Grade 7,Grade 8,Grade 9,Grade 10,Grade 11,Grade 12"'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ENROLLMENT COUNT VALIDATION
+        |--------------------------------------------------------------------------
+        */
+
+        $enrollmentValidation = new DataValidation();
+
+        $enrollmentValidation
+            ->setType(DataValidation::TYPE_WHOLE)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setOperator(DataValidation::OPERATOR_GREATERTHANOREQUAL)
+            ->setFormula1('0')
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setErrorTitle('Invalid Enrollment Count')
+            ->setError(
+                'Enrollment count must be a whole number greater than or equal to 0.'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | APPLY DROPDOWNS / VALIDATION
+        |--------------------------------------------------------------------------
+        |
+        | Apply to rows 5-1000.
+        |
+        */
+
+        for ($row = 5; $row <= 1000; $row++) {
+
+            $sheet
+                ->getCell("B{$row}")
+                ->setDataValidation(
+                    clone $schoolYearValidation
+                );
+
+            $sheet
+                ->getCell("C{$row}")
+                ->setDataValidation(
+                    clone $gradeLevelValidation
+                );
+
+            $sheet
+                ->getCell("D{$row}")
+                ->setDataValidation(
+                    clone $enrollmentValidation
+                );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BORDERS FOR DATA AREA
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getStyle('A4:D1000')->applyFromArray([
+
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => [
+                        'rgb' => 'E5E7EB'
+                    ],
+                ],
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | COLUMN WIDTH
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->getColumnDimension('A')
+            ->setWidth(18);
+
+        $sheet->getColumnDimension('B')
+            ->setWidth(20);
+
+        $sheet->getColumnDimension('C')
+            ->setWidth(25);
+
+        $sheet->getColumnDimension('D')
+            ->setWidth(22);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | FREEZE HEADER
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->freezePane('A5');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AUTO FILTER
+        |--------------------------------------------------------------------------
+        */
+
+        $sheet->setAutoFilter('A4:D1000');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DOWNLOAD
+        |--------------------------------------------------------------------------
+        */
+
+        $fileName =
+            'PDMS_Enrollment_Template.xlsx';
+
+        $writer = new Xlsx($spreadsheet);
+
+        return response()->streamDownload(
+            function () use ($writer) {
+
+                $writer->save('php://output');
+
+            },
+            $fileName,
+            [
+                'Content-Type' =>
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]
+        );
     }
 
 
