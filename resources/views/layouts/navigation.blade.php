@@ -1,218 +1,327 @@
 <nav
-    x-data="{ open: false }"
-    class="sticky top-0 z-50 border-b-4 border-green-700 bg-white shadow-md"
+    class="sticky top-0 z-40
+           h-16 border-b border-green-100
+           bg-white shadow-sm"
 >
 
-    {{-- TOP NAVIGATION --}}
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div
+        class="flex h-full items-center
+               justify-end px-6"
+    >
 
-        <div class="flex h-20 items-center justify-between">
+        <div class="flex items-center gap-5">
 
-            {{-- LEFT SIDE --}}
-            <div class="flex items-center">
 
-                {{-- LOGO AND BRAND --}}
-                <a
-                    href="{{ route('dashboard') }}"
-                    class="flex items-center gap-3"
+            {{-- =================================================
+                NOTIFICATION
+            ================================================== --}}
+
+            <button
+                type="button"
+                class="relative flex h-10 w-10
+                       items-center justify-center
+                       rounded-lg text-gray-600
+                       transition
+                       hover:bg-green-50
+                       hover:text-green-700"
                 >
 
-                    {{-- Logo --}}
-                    <div class="flex h-14 w-14 items-center justify-center">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                >
 
-                        <img
-                            src="{{ asset('images/pdms-logo.png') }}"
-                            alt="PDMS Logo"
-                            class="h-full w-full object-contain"
-                        >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15 17h5l-1.405-1.405A2.032
+                           2.032 0 0118 14.158V11a6.002
+                           6.002 0 00-4-5.659V5a2 2
+                           0 10-4 0v.341C7.67 6.165
+                           6 8.388 6 11v3.159c0
+                           .538-.214 1.055-.595
+                           1.436L4 17h5"
+                    />
 
-                    </div>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M13.73 21a2 2 0 01-3.46 0"
+                    />
 
-
-                    {{-- Brand Name --}}
-                    <div class="border-l-2 border-green-600 pl-3">
-
-                        <div class="text-xs font-bold uppercase tracking-widest text-green-700">
-                            Personnel Unit
-                        </div>
-
-                        <div class="text-lg font-bold leading-tight text-gray-800">
-                            Personnel Database
-                        </div>
-
-                        <div class="text-xs font-medium text-gray-500">
-                            Management System
-                        </div>
-
-                    </div>
-
-                </a>
+                </svg>
 
 
-                {{-- DESKTOP NAVIGATION --}}
-                <div class="ml-12 hidden items-center gap-1 sm:flex">
+                <span
+                    class="absolute right-1 top-1
+                           h-2.5 w-2.5 rounded-full
+                           bg-green-600 ring-2 ring-white"
+                ></span>
 
-                    {{-- Dashboard --}}
-                    <a
-                        href="{{ route('dashboard') }}"
-                        class="relative rounded-md px-4 py-3 text-sm font-semibold transition duration-200
-                        {{ request()->routeIs('dashboard')
-                            ? 'bg-green-700 text-white'
-                            : 'text-gray-600 hover:bg-green-100 hover:text-green-800'
-                        }}"
-                    >
-                        Dashboard
-
-                        @if(request()->routeIs('dashboard'))
-                            <span
-                                class="absolute bottom-0 left-4 right-4 h-1 rounded-t-full bg-green-600"
-                            ></span>
-                        @endif
-                    </a>
-
-                    {{-- Data Management --}}
-                    <a
-                        href="{{ route('data-management') }}"
-                        class="relative rounded-md px-4 py-3 text-sm font-semibold transition duration-200
-                        {{ request()->routeIs('data-management')
-                            ? 'bg-green-700 text-white'
-                            : 'text-gray-600 hover:bg-green-100 hover:text-green-800'
-                        }}"
-                    >
-                        Data Management
-
-                        @if(request()->routeIs('data-management'))
-                            <span
-                                class="absolute bottom-0 left-4 right-4 h-1 rounded-t-full bg-green-600"
-                            ></span>
-                        @endif
-                    </a>
+            </button>
 
 
-                    {{-- HR Transactions --}}
-                    <a
-                        href="#"
-                        class="rounded-md px-4 py-3 text-sm font-semibold text-gray-600
-                        transition duration-200
-                        hover:bg-green-100
-                        hover:text-green-800"
-                    >
-                        HR Transactions
-                    </a>
+            {{-- =================================================
+                PROFILE DROPDOWN
+            ================================================== --}}
 
-                </div>
-            </div>
+            <div
+                class="relative"
+                x-data="{ open: false }"
+                @click.outside="open = false"
+            >
 
 
-            {{-- RIGHT SIDE --}}
-            <div class="hidden items-center gap-5 sm:flex">
+                {{-- =================================================
+                    PROFILE BUTTON
+                ================================================== --}}
 
-                {{-- Notification --}}
                 <button
                     type="button"
-                    class="relative rounded-lg p-2 text-gray-500 transition hover:bg-green-50 hover:text-green-700"
-                >
+                    @click="open = !open"
+                    class="flex items-center gap-3
+                        rounded-xl px-2 py-1.5
+                        transition
+                        hover:bg-green-50
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-green-500
+                        focus:ring-offset-2"
+                    >
 
+                    {{-- PROFILE PICTURE --}}
+                    @if(Auth::user()->profile_picture)
+
+                        <img
+                            src="{{ asset('storage/' . Auth::user()->profile_picture) }}"
+                            alt="{{ Auth::user()->name }}"
+                            class="h-10 w-10 rounded-full
+                                object-cover
+                                ring-2 ring-green-200"
+                        >
+
+                    @else
+
+                        <div
+                            class="flex h-10 w-10
+                                items-center justify-center
+                                rounded-full bg-green-100
+                                text-green-700
+                                ring-2 ring-green-200"
+                        >
+
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                            >
+
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M15.75 6a3.75 3.75
+                                    0 11-7.5 0
+                                    3.75 3.75 0 017.5 0z
+                                    M4.5 20.25a8.25 8.25
+                                    0 0115 0"
+                                />
+
+                            </svg>
+
+                        </div>
+
+                    @endif
+
+
+                    {{-- USER DETAILS --}}
+                    <div class="hidden text-right sm:block">
+
+                        <p
+                            class="max-w-48 truncate text-sm
+                                font-semibold text-gray-800"
+                        >
+                            {{ Auth::user()->name }}
+                        </p>
+
+                        <p
+                            class="max-w-48 truncate text-xs
+                                text-gray-500"
+                        >
+                            {{ Auth::user()->email }}
+                        </p>
+
+                    </div>
+
+
+                    {{-- ARROW --}}
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        class="h-6 w-6"
+                        class="h-4 w-4 text-gray-400
+                            transition-transform duration-200"
+                        :class="{ 'rotate-180': open }"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
-                        stroke-width="1.7"
+                        stroke-width="1.8"
                     >
 
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            d="M15 17h5l-1.5-2V9a6.5 6.5 0 00-13 0v6L4 17h5m6 0a3 3 0 01-6 0"
+                            d="M6 9l6 6 6-6"
                         />
 
                     </svg>
 
-
-                    {{-- Notification Badge --}}
-                    <span
-                        class="absolute right-1 top-1 h-2 w-2 rounded-full bg-green-600"
-                    ></span>
-
                 </button>
 
 
-                {{-- USER DROPDOWN --}}
-                <x-dropdown align="right" width="72">
+                {{-- =================================================
+                    DROPDOWN MENU
+                ================================================== --}}
 
-                    <x-slot name="trigger">
+                <div
+                    x-show="open"
+                    x-transition:enter="transition ease-out duration-150"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-100"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
 
-                        <button
-                            type="button"
-                            class="flex items-center gap-3 rounded-lg px-3 py-2
-                                transition hover:bg-green-50"
-                        >
+                    class="absolute right-0 z-50 mt-3 w-64
+                        origin-top-right overflow-hidden
+                        rounded-xl bg-white
+                        shadow-xl ring-1 ring-gray-200"
+                    style="display: none;"
+                >
 
-                            {{-- User Details --}}
-                            <div class="text-right">
 
-                                <div class="whitespace-nowrap text-sm font-semibold text-gray-800">
+                    {{-- =================================================
+                        DROPDOWN HEADER
+                    ================================================== --}}
+
+                    <div
+                        class="border-b border-green-100
+                            bg-green-50 px-4 py-4"
+                    >
+
+                        <div class="flex items-center gap-3">
+
+                            {{-- PROFILE IMAGE --}}
+                            @if(Auth::user()->profile_picture)
+
+                                <img
+                                    src="{{ asset('storage/' . Auth::user()->profile_picture) }}"
+                                    alt="{{ Auth::user()->name }}"
+                                    class="h-11 w-11 rounded-full
+                                        object-cover
+                                        ring-2 ring-green-200"
+                                >
+
+                            @else
+
+                                <div
+                                    class="flex h-11 w-11
+                                        items-center justify-center
+                                        rounded-full bg-white
+                                        text-green-700
+                                        ring-2 ring-green-200"
+                                >
+
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-6 w-6"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                    >
+
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M15.75 6a3.75 3.75
+                                            0 11-7.5 0
+                                            3.75 3.75 0 017.5 0z
+                                            M4.5 20.25a8.25 8.25
+                                            0 0115 0"
+                                        />
+
+                                    </svg>
+
+                                </div>
+
+                            @endif
+
+
+                            <div class="min-w-0">
+
+                                <p
+                                    class="truncate text-sm
+                                        font-bold text-gray-800"
+                                >
                                     {{ Auth::user()->name }}
-                                </div>
+                                </p>
 
-                                <div class="whitespace-nowrap text-xs text-gray-500">
+                                <p
+                                    class="truncate text-xs
+                                        text-gray-500"
+                                >
                                     {{ Auth::user()->email }}
-                                </div>
+                                </p>
 
-                            </div>
+                                <p
+                                    class="mt-1 text-[10px]
+                                        font-bold uppercase
+                                        tracking-wider text-green-700"
+                                >
+                                    {{ str_replace('_', ' ', Auth::user()->role) }}
+                                </p>
 
-
-                            {{-- Arrow --}}
-                            <svg
-                                class="h-4 w-4 shrink-0 text-gray-500"
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                            >
-
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                    clip-rule="evenodd"
-                                />
-
-                            </svg>
-
-                        </button>
-
-                    </x-slot>
-
-
-                    <x-slot name="content">
-
-                        {{-- Account Header --}}
-                        <div class="border-b border-gray-100 bg-green-50 px-4 py-3">
-
-                            <div class="text-xs font-bold uppercase tracking-wider text-green-700">
-                                Account
-                            </div>
-
-                            <div class="mt-1 font-semibold text-gray-800">
-                                {{ Auth::user()->name }}
-                            </div>
-
-                            <div class="mt-1 text-xs text-gray-500">
-                                {{ Auth::user()->email }}
                             </div>
 
                         </div>
 
+                    </div>
 
-                        {{-- Profile --}}
-                        <x-dropdown-link :href="route('profile.edit')">
 
-                            <span class="flex items-center gap-2">
+                    {{-- =================================================
+                        MENU ITEMS
+                    ================================================== --}}
+
+                    <div class="p-2">
+
+
+                        {{-- PROFILE --}}
+                        <a
+                            href="{{ route('profile.edit') }}"
+                            class="flex items-center gap-3
+                                rounded-lg px-3 py-2.5
+                                text-sm font-medium
+                                text-gray-700
+                                transition
+                                hover:bg-green-50
+                                hover:text-green-700"
+                        >
+
+                            <span
+                                class="flex h-9 w-9
+                                    items-center justify-center
+                                    rounded-lg bg-green-50
+                                    text-green-700"
+                            >
 
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5 text-green-700"
+                                    class="h-5 w-5"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -222,29 +331,104 @@
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a8.25 8.25 0 0115 0"
+                                        d="M15.75 6a3.75 3.75
+                                        0 11-7.5 0
+                                        3.75 3.75 0 017.5 0z
+                                        M4.5 20.25a8.25 8.25
+                                        0 0115 0"
                                     />
 
                                 </svg>
 
+                            </span>
+
+                            <span>
                                 Profile
+                            </span>
+
+                        </a>
+
+
+                        {{-- CHANGE PASSWORD --}}
+                        <a
+                            href="{{ route('profile.edit') }}#password"
+                            class="flex items-center gap-3
+                                rounded-lg px-3 py-2.5
+                                text-sm font-medium
+                                text-gray-700
+                                transition
+                                hover:bg-green-50
+                                hover:text-green-700"
+                        >
+
+                            <span
+                                class="flex h-9 w-9
+                                    items-center justify-center
+                                    rounded-lg bg-green-50
+                                    text-green-700"
+                            >
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M16.5 10.5V6.75
+                                        a4.5 4.5 0 00-9 0v3.75
+                                        m-.75 0h10.5A2.25
+                                        2.25 0 0119.5 12.75v6
+                                        A2.25 2.25 0 0117.25 21
+                                        h-10.5a2.25 2.25 0
+                                        01-2.25-2.25v-6A2.25
+                                        2.25 0 014.5 10.5z"
+                                    />
+
+                                </svg>
 
                             </span>
 
-                        </x-dropdown-link>
+                            <span>
+                                Change Password
+                            </span>
+
+                        </a>
 
 
-                        {{-- Logout --}}
-                        <form method="POST" action="{{ route('logout') }}">
+                        {{-- DIVIDER --}}
+                        <div class="my-2 border-t border-gray-100"></div>
+
+
+                        {{-- LOGOUT --}}
+                        <form
+                            method="POST"
+                            action="{{ route('logout') }}"
+                        >
 
                             @csrf
 
-                            <x-dropdown-link
-                                :href="route('logout')"
-                                onclick="event.preventDefault(); this.closest('form').submit();"
+                            <button
+                                type="submit"
+                                class="flex w-full items-center gap-3
+                                    rounded-lg px-3 py-2.5
+                                    text-sm font-medium
+                                    text-red-600
+                                    transition
+                                    hover:bg-red-50"
                             >
 
-                                <span class="flex items-center gap-2 text-red-600">
+                                <span
+                                    class="flex h-9 w-9
+                                        items-center justify-center
+                                        rounded-lg bg-red-50
+                                        text-red-600"
+                                >
 
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -258,159 +442,35 @@
                                         <path
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
-                                            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3-3H9m0 0l3-3m-3 3l3 3"
+                                            d="M15.75 9V5.25A2.25
+                                            2.25 0 0013.5 3h-6A2.25
+                                            2.25 0 005.25 5.25v13.5
+                                            A2.25 2.25 0 007.5 21h6
+                                            a2.25 2.25 0 002.25-2.25V15"
+                                        />
+
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M12 12h9m0 0l-3-3m3 3l-3 3"
                                         />
 
                                     </svg>
 
-                                    Log Out
-
                                 </span>
 
-                            </x-dropdown-link>
+                                <span>
+                                    Logout
+                                </span>
+
+                            </button>
 
                         </form>
 
-                    </x-slot>
 
-                </x-dropdown>
-
-            </div>
-
-
-            {{-- MOBILE BUTTON --}}
-            <div class="flex items-center sm:hidden">
-
-                <button
-                    @click="open = ! open"
-                    type="button"
-                    class="rounded-lg p-2 text-gray-600 transition hover:bg-green-50 hover:text-green-700"
-                >
-
-                    <svg
-                        class="h-7 w-7"
-                        stroke="currentColor"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                    >
-
-                        <path
-                            :class="{ 'hidden': open, 'inline-flex': !open }"
-                            class="inline-flex"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"
-                        />
-
-                        <path
-                            :class="{ 'hidden': !open, 'inline-flex': open }"
-                            class="hidden"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"
-                        />
-
-                    </svg>
-
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- MOBILE NAVIGATION --}}
-    <div
-        :class="{ 'block': open, 'hidden': !open }"
-        class="hidden border-t border-green-100 bg-white sm:hidden"
-    >
-
-        <div class="space-y-1 px-4 pb-4 pt-3">
-
-            <a
-                href="{{ route('dashboard') }}"
-                class="relative rounded-md px-4 py-3 text-sm font-semibold transition duration-200
-                {{ request()->routeIs('dashboard')
-                    ? 'bg-green-700 text-white'
-                    : 'text-gray-600 hover:bg-green-100 hover:text-green-800'
-                }}"
-            >
-                Dashboard
-            </a>
-
-            <a
-                href="{{ route('data-management') }}"
-                class="rounded-md px-4 py-3 text-sm font-semibold text-gray-600
-                transition duration-200
-                hover:bg-green-100
-                hover:text-green-800"
-            >
-                Data Management
-            </a>
-
-            <a
-                href="#"
-                class="rounded-md px-4 py-3 text-sm font-semibold text-gray-600
-                transition duration-200
-                hover:bg-green-100
-                hover:text-green-800"
-            >
-                HR Transactions
-            </a>
-
-        </div>
-
-
-        {{-- MOBILE USER --}}
-        <div class="border-t border-green-100 bg-green-50 px-4 py-4">
-
-            <div class="flex items-center gap-3">
-
-                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-green-700 font-bold text-white">
-                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                </div>
-
-                <div>
-
-                    <div class="font-semibold text-gray-800">
-                        {{ Auth::user()->name }}
-                    </div>
-
-                    <div class="text-sm text-gray-500">
-                        {{ Auth::user()->email }}
                     </div>
 
                 </div>
-
-            </div>
-
-
-            <div class="mt-4 space-y-1">
-
-                <a
-                    href="{{ route('profile.edit') }}"
-                    class="block rounded-lg px-4 py-2 text-gray-700 hover:bg-white hover:text-green-700"
-                >
-                    Profile
-                </a>
-
-
-                <form method="POST" action="{{ route('logout') }}">
-
-                    @csrf
-
-                    <button
-                        type="submit"
-                        class="w-full rounded-lg px-4 py-2 text-left text-red-600 hover:bg-white"
-                    >
-                        Log Out
-                    </button>
-
-                </form>
 
             </div>
 

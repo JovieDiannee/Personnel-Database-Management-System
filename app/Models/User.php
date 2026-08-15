@@ -25,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'profile_picture',
     ];
 
     /**
@@ -63,5 +64,22 @@ class User extends Authenticatable
     public function medicalAllowance(): HasOne
     {
         return $this->hasOne(MedicalAllowance::class, 'users_id');
+    }
+
+    // Authorization | Role-Based Access Control (RBAC)
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'Super Admin';
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'Admin';
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === 'User';
     }
 }
