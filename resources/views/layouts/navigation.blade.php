@@ -73,7 +73,7 @@
                 class="relative"
                 x-data="{ open: false }"
                 @click.outside="open = false"
-            >
+                >
 
 
                 {{-- =================================================
