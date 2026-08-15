@@ -3,14 +3,16 @@
 ====================================================== --}}
 
 <aside
-    class="fixed inset-y-0 left-0 z-50
+    class="fixed left-0 top-16 bottom-0 z-40
            flex flex-col
+           overflow-hidden
            border-r border-green-100
-           bg-white shadow-xl
-           transition-all duration-300"
+           bg-white
+           shadow-sm
+           transition-all duration-300 ease-in-out"
 
     :class="sidebarOpen ? 'w-72' : 'w-20'"
-    >   
+    >
 
 
     {{-- =================================================
