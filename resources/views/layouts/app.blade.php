@@ -5,13 +5,20 @@
 
     <meta charset="utf-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
 
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta
+        name="csrf-token"
+        content="{{ csrf_token() }}"
+    >
 
     <title>
         {{ config('app.name', 'Personnel Database Management System') }}
     </title>
+
 
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -20,6 +27,7 @@
         href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap"
         rel="stylesheet"
     />
+
 
     {{-- Scripts --}}
     @vite([
@@ -30,85 +38,29 @@
 </head>
 
 
-<body class="font-sans antialiased">
+<body
+    class="font-sans antialiased bg-gray-50"
+    x-data="{ sidebarOpen: true }"
+>
 
-    {{-- =====================================================
-        GLOBAL SIDEBAR STATE
-    ====================================================== --}}
+    {{-- LEFT SIDEBAR --}}
+    @include('layouts.sidebar')
 
+
+    {{-- MAIN AREA --}}
     <div
-        x-data="{ sidebarOpen: true }"
-        class="min-h-screen bg-gray-50"
+        class="min-h-screen transition-all duration-300"
+        :class="sidebarOpen ? 'lg:ml-72' : 'lg:ml-20'"
     >
 
-
-        {{-- =====================================================
-            LEFT SIDEBAR
-        ====================================================== --}}
-
-        @include('layouts.sidebar')
+        {{-- TOP BAR --}}
+        @include('layouts.navigation')
 
 
-        {{-- =====================================================
-            RIGHT SIDE APPLICATION AREA
-        ====================================================== --}}
-
-        <div
-            class="min-h-screen transition-all duration-300"
-
-            :class="sidebarOpen
-                ? 'ml-[320px]'
-                : 'ml-[88px]'"
-        >
-
-
-            {{-- =================================================
-                TOP NAVIGATION
-            ================================================== --}}
-
-            @include('layouts.navigation')
-
-
-            {{-- =================================================
-                PAGE HEADING
-            ================================================== --}}
-
-            @isset($header)
-
-                <header
-                    class="border-b-4
-                           border-green-700
-                           bg-white
-                           shadow-sm"
-                >
-
-                    <div
-                        class="mx-auto max-w-7xl
-                               px-4 py-6
-                               sm:px-6 lg:px-8"
-                    >
-
-                        {{ $header }}
-
-                    </div>
-
-                </header>
-
-            @endisset
-
-
-            {{-- =================================================
-                PAGE CONTENT
-            ================================================== --}}
-
-            <main>
-
-                {{ $slot }}
-
-            </main>
-
-
-        </div>
+        {{-- CONTENT --}}
+        <main>
+            {{ $slot }}
+        </main>
 
     </div>
 
