@@ -13,6 +13,9 @@
         {{ config('app.name', 'Personnel Database Management System') }}
     </title>
 
+     {{-- FAVICON --}}
+    <link rel="icon" type="image/png" href="{{ asset('images/pdms-favicon.png') }}">
+
     <link rel="preconnect" href="https://fonts.bunny.net">
 
     <link

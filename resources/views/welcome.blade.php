@@ -7,7 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<title>{{ config('app.name', 'Personnel Database Management System') }}</title>
+    <title>{{ config('app.name', 'Personnel Database Management System') }}</title>
+
+    {{-- FAVICON --}}
+    <link rel="icon" type="image/png" href="{{ asset('images/pdms-favicon.png') }}">
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 
