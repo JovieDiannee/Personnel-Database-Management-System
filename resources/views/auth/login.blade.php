@@ -8,64 +8,79 @@
         <div class="grid w-full max-w-6xl overflow-hidden rounded-3xl bg-white shadow-2xl lg:grid-cols-2">
 
 
-            {{-- =====================================================
-            LEFT SIDE - LOGO
-            ====================================================== --}}
+        {{-- =====================================================
+            LEFT SIDE - LOGOS
+        ====================================================== --}}
 
-            <div class="relative flex h-full items-center justify-center overflow-hidden bg-white-800 px-8 lg:w-2/5">
+        <div class="relative flex min-h-[500px] w-full items-center justify-center overflow-hidden bg-gradient-to-b from-white via-white to-green-50 px-8 lg:min-h-full">
 
-                {{-- Decorative Circle - Top Left --}}
-                <div
-                    class="absolute -left-32 -top-32
-                        h-[420px] w-[420px]
-                        rounded-full
-                        border-[45px]
-                        border-white/5"
-                ></div>
+            <div class="flex w-full flex-col items-center justify-center text-center">
 
-                {{-- Decorative Circle - Bottom Right --}}
-                <div
-                    class="absolute -bottom-40 -right-40
-                        h-[500px] w-[500px]
-                        rounded-full
-                        border-[50px]
-                        border-white/5"
-                ></div>
+                {{-- =====================================================
+                    GOVERNMENT / OFFICE LOGOS
+                ====================================================== --}}
 
-                {{-- Small Decorative Circle --}}
-                <div
-                    class="absolute left-1/4 top-1/4
-                        h-24 w-24
-                        rounded-full
-                        bg-white/5
-                        blur-sm"
-                ></div>
+                <div class="flex items-center justify-center gap-6 sm:gap-8">
 
+                    {{-- Bagong Pilipinas / Government Logo --}}
+                    <img
+                        src="{{ asset('images/bagong-pilipinas.png') }}"
+                        alt="Bagong Pilipinas"
+                        class="h-16 w-16 object-contain sm:h-20 sm:w-20"
+                    >
 
-                {{-- LOGO CONTENT --}}
-                <div class="relative z-10 flex flex-col items-center text-center">
+                    {{-- DepEd Logo --}}
+                    <img
+                        src="{{ asset('images/deped-logo-2.png') }}"
+                        alt="Department of Education"
+                        class="h-16 w-24 object-contain sm:h-20 sm:w-28"
+                    >
 
-                    {{-- Logo --}}
-                    <div class="flex items-center justify-center">
-
-                        <img
-                            src="{{ asset('images/pdms-logo.png') }}"
-                            alt="Personnel Database Management System Logo"
-                            class="h-64 w-64
-                                object-contain
-                                sm:h-72 sm:w-72
-                                lg:h-[360px] lg:w-[360px]"
-                        >
-
-                    </div>
-
-                    {{-- FOOTER --}}
-                    <p class="mt-8 text-center text-xs text-gray-400">
-                        © {{ date('Y') }} Personnel Database Management System | @joviegayo
-                    </p>
+                    {{-- Schools Division of Leyte --}}
+                    <img
+                        src="{{ asset('images/deped-leyte-logo.png') }}"
+                        alt="Schools Division of Leyte"
+                        class="h-16 w-16 object-contain sm:h-20 sm:w-20"
+                    >
 
                 </div>
+
+
+                {{-- =====================================================
+                    SMALL SYSTEM LABEL
+                ====================================================== --}}
+
+                <p class="mt-5 text-xs font-semibold uppercase tracking-[0.25em] text-green-700">
+                    DEPARTMENT OF EDUCATION - SCHOOLS DIVISION OF LEYTE
+                </p>
+
+
+                {{-- =====================================================
+                    PDMS LOGO
+                ====================================================== --}}
+
+                <img
+                    src="{{ asset('images/pdms-logo.png') }}"
+                    alt="Personnel Database Management System Logo"
+                    class="mt-3 h-[380px] w-[380px]
+                        object-contain
+                        sm:h-[420px] sm:w-[420px]
+                        lg:h-[450px] lg:w-[450px]"
+                >
+
+
+
+                {{-- =====================================================
+                    FOOTER
+                ====================================================== --}}
+
+                <p class="mt-5 text-xs text-gray-400">
+                    © {{ date('Y') }} Personnel Unit | PDMS | @joviegayo
+                </p>
+
             </div>
+
+        </div>
 
 
             {{-- =====================================================
@@ -80,7 +95,7 @@
                     <div class="mb-10">
 
                         <p class="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-green-700">
-                            Department of Education - Schools Division of Leyte
+                            SCHOOLS DIVISION OF LEYTE - PERSONNEL UNIT
                         </p>
 
                         <h1 class="text-4xl font-bold leading-tight text-gray-900">
@@ -90,8 +105,6 @@
                         <h2 class="mt-1 text-3xl font-semibold text-black-700">
                             Management System
                         </h2>
-
-                        <br>
                     </div>
 
 
