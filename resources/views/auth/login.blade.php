@@ -50,7 +50,7 @@
                     SMALL SYSTEM LABEL
                 ====================================================== --}}
 
-                <p class="mt-5 text-xs font-semibold uppercase tracking-[0.25em] text-green-700">
+                <p class="mt-5 text-xs font-semibold uppercase tracking-[0.25em] text-black-700">
                     DEPARTMENT OF EDUCATION - SCHOOLS DIVISION OF LEYTE
                 </p>
 
@@ -67,17 +67,6 @@
                         sm:h-[420px] sm:w-[420px]
                         lg:h-[450px] lg:w-[450px]"
                 >
-
-
-
-                {{-- =====================================================
-                    FOOTER
-                ====================================================== --}}
-
-                <p class="mt-5 text-xs text-gray-400">
-                    © {{ date('Y') }} Personnel Unit | PDMS | @joviegayo
-                </p>
-
             </div>
 
         </div>
@@ -246,6 +235,14 @@
                         </p>
 
                     </div>
+
+                    {{-- =====================================================
+                        FOOTER
+                    ====================================================== --}}
+
+                    <p class="mt-5 text-xs text-gray-400 text-center">
+                        © {{ date('Y') }} Personnel Unit | PDMS | @joviegayo
+                    </p>
 
                 </div>
 
