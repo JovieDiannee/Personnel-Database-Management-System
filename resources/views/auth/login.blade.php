@@ -12,7 +12,17 @@
             LEFT SIDE - LOGOS
         ====================================================== --}}
 
-        <div class="relative flex min-h-[500px] w-full items-center justify-center overflow-hidden bg-gradient-to-b from-white via-white to-green-50 px-8 lg:min-h-full">
+        <div
+            class="relative flex min-h-[500px] w-full
+                items-center justify-center
+                overflow-hidden
+                bg-gradient-to-b from-white via-white to-green-50
+                px-8
+                pt-10
+                sm:pt-12
+                lg:pt-0
+                lg:min-h-full"
+            >
 
             <div class="flex w-full flex-col items-center justify-center text-center">
 

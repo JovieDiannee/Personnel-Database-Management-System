@@ -83,7 +83,6 @@
                 class="flex h-9 w-9 shrink-0
                     items-center justify-center
                     rounded-lg
-                    border border-white/10
                     bg-white/10
                     text-white
                     backdrop-blur-sm
