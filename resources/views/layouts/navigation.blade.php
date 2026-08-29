@@ -1,7 +1,9 @@
 <nav
     class="sticky top-0 z-40
-           h-16 border-b border-green-100
-           bg-white shadow-sm"
+           h-16
+           border-green-700/50
+           bg-gradient-to-br from-green-950 via-green-900 to-green-800
+           text-white shadow-md"
 >
 
     <div
@@ -20,7 +22,7 @@
                 type="button"
                 class="relative flex h-10 w-10
                        items-center justify-center
-                       rounded-lg text-gray-600
+                       rounded-lg text-white
                        transition
                        hover:bg-green-50
                        hover:text-green-700"
@@ -145,14 +147,14 @@
 
                         <p
                             class="max-w-48 truncate text-sm
-                                font-semibold text-gray-800"
-                        >
+                                font-semibold text-white"
+                            >
                             {{ Auth::user()->name }}
                         </p>
 
                         <p
                             class="max-w-48 truncate text-xs
-                                text-gray-500"
+                                text-white"
                         >
                             {{ Auth::user()->email }}
                         </p>

@@ -2,18 +2,108 @@
 
 <div class="mx-auto max-w-7xl px-6 py-8">
 
-    {{-- HEADER --}}
-    <div class="mb-6 rounded-2xl bg-green-800 p-6 text-white">
+    {{-- BREADCRUMB TRAIL --}}
+    <div class="mb-4">
 
-        <h1 class="text-2xl font-bold">
-            Employment Status Import Preview
-        </h1>
+        <nav
+            class="flex items-center text-sm"
+            aria-label="Breadcrumb"
+        >
 
-        <p class="mt-1 text-green-100">
-            Review the employment information before confirming the import.
-        </p>
+            {{-- Home --}}
+            <a
+                href="{{ route('dashboard') }}"
+                class="flex items-center font-medium text-gray-500
+                    transition hover:text-green-700"
+            >
+                <svg
+                    class="mr-1.5 h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M3 12l9-9 9 9M5 10v10h14V10M9 20v-6h6v6"
+                    />
+                </svg>
 
-    </div>
+                Dashboard
+            </a>
+
+            {{-- Separator --}}
+            <svg
+                class="mx-2 h-4 w-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                />
+            </svg>
+
+            {{-- Data Management --}}
+            <a
+                href="{{ route('data-management') }}"
+                class="font-medium text-gray-500
+                    transition hover:text-green-700"
+            >
+                Data Management
+            </a>
+
+            {{-- Separator --}}
+            <svg
+                class="mx-2 h-4 w-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                />
+            </svg>
+
+            {{-- Employment Status --}}
+            <a
+                href="{{ route('data-management.employment-status') }}"
+                class="font-medium text-gray-500
+                    transition hover:text-green-700"
+            >
+                Employment Status
+            </a>
+
+            {{-- Separator --}}
+            <svg
+                class="mx-2 h-4 w-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                />
+            </svg>
+
+            {{-- Current Page --}}
+            <span class="font-semibold text-green-800">
+                Upload Preview
+            </span>
+
+        </nav>
+
+</div>
 
 
     {{-- ERRORS --}}
