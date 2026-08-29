@@ -1272,6 +1272,44 @@ class DataManagementController extends Controller
         );
     }
 
+    public function updateUserAccess(Request $request, $person)
+    {
+        $validated = $request->validate([
+            'role' => 'required|in:user,super_admin',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $personnel = \App\Models\BasicInformation::findOrFail($person);
+
+        $user = $personnel->user;
+
+        // Make sure the personnel has a user account
+        if (!$user) {
+            return back()->with(
+                'error',
+                'This personnel record does not have a user account.'
+            );
+        }
+
+        // Prevent Super Admin from changing their own account
+        if ($user->id === auth()->id()) {
+            return back()->with(
+                'error',
+                'You cannot change your own role or account status.'
+            );
+        }
+
+        $user->update([
+            'role' => $validated['role'],
+            'status' => $validated['status'],
+        ]);
+
+        return back()->with(
+            'success',
+            'User access has been updated successfully.'
+        );
+    }
+
     
     /*   
     |   END  OF PERSONNEL INFORMATION FUNCTIONS

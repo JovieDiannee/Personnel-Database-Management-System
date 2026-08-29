@@ -6,7 +6,7 @@
 
 
             {{-- PAGE HEADER --}}
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 py-6 text-white shadow-lg">
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 py-4 text-white shadow-lg">
 
                 <div class="relative flex items-center justify-between px-6 py-5">
 
@@ -468,15 +468,15 @@
             <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
 
                 {{-- HEADER --}}
-                <div class="flex flex-col gap-4 border-b border-gray-200 p-6 md:flex-row md:items-center md:justify-between bg-green-400">
+                <div class="flex flex-col gap-4 border-b border-gray-200 p-6 md:flex-row md:items-center md:justify-between bg-green-800">
 
                     <div>
 
-                        <h2 class="text-lg font-semibold text-gray-800">
+                        <h2 class="text-lg font-semibold text-white">
                             Medical Allowance Records
                         </h2>
 
-                        <p class="mt-1 text-sm text-gray-500">
+                        <p class="mt-1 text-sm text-white">
                             List of personnel medical allowance records and
                             related employment information.
                         </p>

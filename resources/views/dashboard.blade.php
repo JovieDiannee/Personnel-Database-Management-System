@@ -50,321 +50,226 @@
 
         </div>
 
-        {{-- =====================================================
-            PERSONNEL AND SCHOOL STATISTICS
-        ====================================================== --}}
-        <div>
-            <div class="mb-4 text-center">
-
-                <h3 class="text-lg font-bold text-gray-800">
-                    PERSONNEL AND SCHOOL STATISTICS
-                </h3>
-
-                <p class="text-sm text-gray-500">
-                    Summary of current personnel and school records
-                </p>
-
-            </div>
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-
-
-                {{-- PLANTILLA-BASED EMPLOYEES --}}
-                <div class="rounded-2xl border-l-4 border-green-600 bg-white p-6 shadow-sm ring-1 ring-green-100">
-
-                    <div class="flex items-start justify-between">
-
-                        <div>
-
-                            <p class="text-sm font-medium text-gray-500">
-                                Plantilla-Based Employees
-                            </p>
-
-                            <p class="mt-3 text-4xl font-bold text-green-800">
-                                {{ $plantillaEmployees ?? '21,183' }}
-                            </p>
-
-                        </div>
-
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
-
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6 text-green-700"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="1.5"
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM4 21a8 8 0 0116 0"
-                                />
-                            </svg>
-
-                        </div>
-
-                    </div>
-
-                    <div class="mt-4 border-t border-gray-100 pt-3">
-
-                        <a
-                            href="#"
-                            class="text-sm font-medium text-green-700 hover:text-green-900"
-                        >
-                            View personnel →
-                        </a>
-
-                    </div>
-
-                </div>
-
-
-                {{-- OTHER FUNDS --}}
-                <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-
-                    <div class="flex items-start justify-between">
-
-                        <div>
-
-                            <p class="text-sm font-medium text-gray-500">
-                                Other Funds Employees
-                            </p>
-
-                            <p class="mt-3 text-4xl font-bold text-green-800">
-                                {{ $otherFundsEmployees ?? 430 }}
-                            </p>
-
-                        </div>
-
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
-
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6 text-blue-700"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="1.5"
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V6m0 12v-2m0-10a9 9 0 100 18 9 9 0 000-18z"
-                                />
-                            </svg>
-
-                        </div>
-
-                    </div>
-
-                    <div class="mt-4 border-t border-gray-100 pt-3">
-
-                        <a
-                            href="#"
-                            class="text-sm font-medium text-blue-700 hover:text-blue-900"
-                        >
-                            View personnel →
-                        </a>
-
-                    </div>
-
-                </div>
-
-
-                {{-- NUMBER OF SCHOOLS --}}
-                <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-
-                    <div class="flex items-start justify-between">
-
-                        <div>
-
-                            <p class="text-sm font-medium text-gray-500">
-                                Number of Schools
-                            </p>
-
-                            <p class="mt-3 text-4xl font-bold text-green-800">
-                                {{ $numberOfSchools ?? '1,378' }}
-                            </p>
-
-                        </div>
-
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100">
-
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6 text-amber-700"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="1.5"
-                                    d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-5h6v5M8 10h.01M12 10h.01M16 10h.01"
-                                />
-                            </svg>
-
-                        </div>
-
-                    </div>
-
-                    <div class="mt-4 border-t border-gray-100 pt-3">
-
-                        <a
-                            href="#"
-                            class="text-sm font-medium text-amber-700 hover:text-amber-900"
-                        >
-                            View schools →
-                        </a>
-
-                    </div>
-
-                </div>
-
-
-                {{-- HR TRANSACTIONS --}}
-                <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-
-                    <div class="flex items-start justify-between">
-
-                        <div>
-
-                            <p class="text-sm font-medium text-gray-500">
-                                HR Transactions
-                            </p>
-
-                            <p class="mt-3 text-4xl font-bold text-green-800">
-                                {{ $hrTransactions ?? '4,582' }}
-                            </p>
-
-                        </div>
-
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100">
-
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6 text-purple-700"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="1.5"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6l4 4v12a2 2 0 01-2 2z"
-                                />
-                            </svg>
-
-                        </div>
-
-                    </div>
-
-                    <div class="mt-4 border-t border-gray-100 pt-3">
-
-                        <a
-                            href="#"
-                            class="text-sm font-medium text-purple-700 hover:text-purple-900"
-                        >
-                            View transactions →
-                        </a>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        {{-- =====================================================
-            TEACHER REQUIREMENT ANALYSIS SCHOOL YEAR 2026-2027 
-        ====================================================== --}}
-
-        <div class="mt-10">
-            {{-- SECTION TITLE --}}
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-6 py-4 text-white shadow-lg">
-
-                <div class="text-center">
-
-                    {{-- LINE 1 --}}
-                    <h3 class="text-xl font-bold uppercase tracking-wide text-white">
-                        Teacher Requirement Analysis School Year 2026–2027
+            {{-- =====================================================
+                PERSONNEL AND SCHOOL STATISTICS
+            ====================================================== --}}
+            <div>
+                <div class="mb-4 text-center">
+
+                    <h3 class="text-lg font-bold text-gray-800">
+                        PERSONNEL AND SCHOOL STATISTICS
                     </h3>
 
-                    {{-- LINE 2 --}}
-                    <p class="mt-1 text-sm text-green-100">
-                        ELEMENTARY LEVEL &nbsp;•&nbsp; Teacher Inventory, Excess, and Shortage
+                    <p class="text-sm text-gray-500">
+                        Summary of current personnel and school records
                     </p>
 
                 </div>
-
-            </div>
-            <br>
-            {{-- =================================================
-                THREE CARDS - HORIZONTAL
-            ================================================== --}}
-            <div class="flex w-full flex-nowrap gap-6">
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 
 
-                {{-- =================================================
-                    TEACHER INVENTORY
-                ================================================== --}}
-                <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    {{-- PLANTILLA-BASED EMPLOYEES --}}
+                    <div class="rounded-2xl border-l-4 border-green-600 bg-white p-6 shadow-sm ring-1 ring-green-100">
 
-                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-start justify-between">
 
-                        <div class="min-w-0 flex-1">
+                            <div>
 
-                            <p class="text-sm font-medium text-gray-500">
-                                Teacher Inventory
-                            </p>
+                                <p class="text-sm font-medium text-gray-500">
+                                    Plantilla-Based Employees
+                                </p>
 
-                            <p class="mt-2 text-3xl font-bold text-green-700">
-                                9
-                            </p>
+                                <p class="mt-3 text-4xl font-bold text-green-800">
+                                    {{ $plantillaEmployees ?? '21,183' }}
+                                </p>
 
-                            <p class="mt-1 text-xs text-gray-400">
-                                Total number of teachers in the school
-                            </p>
+                            </div>
+
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6 text-green-700"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="1.5"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM4 21a8 8 0 0116 0"
+                                    />
+                                </svg>
+
+                            </div>
 
                         </div>
 
+                        <div class="mt-4 border-t border-gray-100 pt-3">
 
-                        {{-- ICON --}}
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">
-
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="1.8"
+                            <a
+                                href="{{ route('data-management.personnel') }}"
+                                class="text-sm font-medium text-green-700 hover:text-green-900"
                             >
+                                View personnel →
+                            </a>
 
-                                {{-- Users --}}
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"
-                                />
+                        </div>
 
-                                <circle
-                                    cx="9"
-                                    cy="7"
-                                    r="4"
-                                />
+                    </div>
 
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"
-                                />
 
-                            </svg>
+                    {{-- OTHER FUNDS --}}
+                    <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
+
+                        <div class="flex items-start justify-between">
+
+                            <div>
+
+                                <p class="text-sm font-medium text-gray-500">
+                                    Other Funds Employees
+                                </p>
+
+                                <p class="mt-3 text-4xl font-bold text-green-800">
+                                    {{ $otherFundsEmployees ?? 430 }}
+                                </p>
+
+                            </div>
+
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6 text-blue-700"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="1.5"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V6m0 12v-2m0-10a9 9 0 100 18 9 9 0 000-18z"
+                                    />
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                        <div class="mt-4 border-t border-gray-100 pt-3">
+
+                            <a
+                                href="{{ route('data-management.personnel') }}"
+                                class="text-sm font-medium text-blue-700 hover:text-blue-900"
+                            >
+                                View personnel →
+                            </a>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- NUMBER OF SCHOOLS --}}
+                    <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
+
+                        <div class="flex items-start justify-between">
+
+                            <div>
+
+                                <p class="text-sm font-medium text-gray-500">
+                                    Number of Schools
+                                </p>
+
+                                <p class="mt-3 text-4xl font-bold text-green-800">
+                                    {{ $numberOfSchools ?? '1,378' }}
+                                </p>
+
+                            </div>
+
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6 text-amber-700"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="1.5"
+                                        d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-5h6v5M8 10h.01M12 10h.01M16 10h.01"
+                                    />
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                        <div class="mt-4 border-t border-gray-100 pt-3">
+
+                            <a
+                                href="{{ route('data-management.schools') }}"
+                                class="text-sm font-medium text-amber-700 hover:text-amber-900"
+                            >
+                                View schools →
+                            </a>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- HR TRANSACTIONS --}}
+                    <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
+
+                        <div class="flex items-start justify-between">
+
+                            <div>
+
+                                <p class="text-sm font-medium text-gray-500">
+                                    HR Transactions
+                                </p>
+
+                                <p class="mt-3 text-4xl font-bold text-green-800">
+                                    {{ $hrTransactions ?? '4,582' }}
+                                </p>
+
+                            </div>
+
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6 text-purple-700"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="1.5"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6l4 4v12a2 2 0 01-2 2z"
+                                    />
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                        <div class="mt-4 border-t border-gray-100 pt-3">
+
+                            <a
+                                href="#"
+                                class="text-sm font-medium text-purple-700 hover:text-purple-900"
+                            >
+                                View transactions →
+                            </a>
 
                         </div>
 
@@ -372,34 +277,941 @@
 
                 </div>
 
+            </div>
 
+            {{-- =====================================================
+                TEACHER REQUIREMENT ANALYSIS SCHOOL YEAR 2026-2027 
+            ====================================================== --}}
 
+            <div class="mt-10">
+                {{-- SECTION TITLE --}}
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-6 py-4 text-white shadow-lg">
+
+                    <div class="text-center">
+
+                        {{-- LINE 1 --}}
+                        <h3 class="text-xl font-bold uppercase tracking-wide text-white">
+                            Teacher Requirement Analysis School Year 2026–2027
+                        </h3>
+
+                        {{-- LINE 2 --}}
+                        <p class="mt-1 text-sm text-green-100">
+                            ELEMENTARY LEVEL &nbsp;•&nbsp; Teacher Inventory, Excess, and Shortage
+                        </p>
+
+                    </div>
+
+                </div>
+                <br>
                 {{-- =================================================
-                    EXCESS TEACHERS
+                    THREE CARDS - HORIZONTAL
                 ================================================== --}}
-                <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+                <div class="flex w-full flex-nowrap gap-6">
 
-                    <div class="flex items-start justify-between gap-4">
 
-                        <div class="min-w-0 flex-1">
+                    {{-- =================================================
+                        TEACHER INVENTORY
+                    ================================================== --}}
+                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+
+                        <div class="flex items-start justify-between gap-4">
+
+                            <div class="min-w-0 flex-1">
+
+                                <p class="text-sm font-medium text-gray-500">
+                                    Teacher Inventory
+                                </p>
+
+                                <p class="mt-2 text-3xl font-bold text-green-700">
+                                    9
+                                </p>
+
+                                <p class="mt-1 text-xs text-gray-400">
+                                    Total number of teachers in the school
+                                </p>
+
+                            </div>
+
+
+                            {{-- ICON --}}
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+
+                                    {{-- Users --}}
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"
+                                    />
+
+                                    <circle
+                                        cx="9"
+                                        cy="7"
+                                        r="4"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"
+                                    />
+
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    {{-- =================================================
+                        EXCESS TEACHERS
+                    ================================================== --}}
+                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+
+                        <div class="flex items-start justify-between gap-4">
+
+                            <div class="min-w-0 flex-1">
+
+                                <p class="text-sm font-medium text-gray-500">
+                                    No. of Excess Teachers
+                                </p>
+
+                                <p class="mt-2 text-3xl font-bold text-amber-600">
+                                    2
+                                </p>
+
+                                <p class="mt-1 text-xs text-gray-400">
+                                    Teachers exceeding the required number
+                                </p>
+
+                            </div>
+
+
+                            {{-- ICON --}}
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+
+                                    {{-- Trending Up --}}
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M3 17l6-6 4 4 8-8"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M15 7h6v6"
+                                    />
+
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    {{-- =================================================
+                        TEACHER SHORTAGE
+                    ================================================== --}}
+                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+
+                        <div class="flex items-start justify-between gap-4">
+
+                            <div class="min-w-0 flex-1">
+
+                                <p class="text-sm font-medium text-gray-500">
+                                    No. of Teacher Shortage
+                                </p>
+
+                                <p class="mt-2 text-3xl font-bold text-red-600">
+                                    0
+                                </p>
+
+                                <p class="mt-1 text-xs text-gray-400">
+                                    Additional teachers needed
+                                </p>
+
+                            </div>
+
+
+                            {{-- ICON --}}
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+
+                                    {{-- Warning --}}
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M12 9v4m0 4h.01"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+                                    />
+
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+            {{-- =====================================================
+                TEACHER REQUIREMENT ANALYSIS SCHOOL YEAR 2026-2027
+            ====================================================== --}}
+
+            <div class="mt-10">
+
+
+                {{-- THREE LEVEL CARDS --}}
+                <div class="flex gap-6">
+
+
+                    {{-- =================================================
+                        ENROLLMENT COUNT
+                    ================================================== --}}
+                    <div class="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
+
+                        {{-- Card Header --}}
+                        <div class="flex items-center justify-between bg-green-700 px-5 py-4 text-white">
+
+                            <div>
+
+                                <h4 class="text-lg font-bold">
+                                    ENROLLMENT COUNT S.Y. 2025-2026
+                                </h4>
+
+                                <p class="text-xs text-green-100">
+                                    ELEMENTARY LEVEL &nbsp;•&nbsp;Kinder to Grade 12
+                                </p>
+
+                            </div>
+
+
+                            {{-- School Icon --}}
+                            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-5h6v5M8 10h.01M12 10h.01M16 10h.01"
+                                    />
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- Grade Levels --}}
+                        <div class="p-5">
+
+                            <div class="space-y-3">
+
+                                @foreach([
+                                    'Kinder',
+                                    'Grade 1',
+                                    'Grade 2',
+                                    'Grade 3',
+                                    'Grade 4',
+                                    'Grade 5',
+                                    'Grade 6',
+                                    'Grade 7',
+                                    'Grade 8',
+                                    'Grade 9',
+                                    'Grade 10',
+                                    'Grade 11',
+                                    'Grade 12'
+                                ] as $grade)
+
+                                    <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+
+                                        <span class="text-sm font-medium text-gray-600">
+                                            {{ $grade }}
+                                        </span>
+
+                                        <span class="font-bold text-green-700">
+                                            0
+                                        </span>
+
+                                    </div>
+
+                                @endforeach
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    {{-- =================================================
+                        TEACHER COUNT PER POSITION
+                    ================================================== --}}
+                    <div class="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
+
+                        {{-- Card Header --}}
+                        <div class="flex items-center justify-between bg-green-800 px-5 py-4 text-white">
+
+                            <div>
+
+                                <h4 class="text-lg font-bold">
+                                    TEACHER COUNT PER POSITION
+                                </h4>
+
+                                <p class="text-xs text-blue-100">
+                                    ELEMENTARY LEVEL &nbsp;•&nbsp;Teachers Position
+                                </p>
+
+                            </div>
+
+
+                            {{-- School Icon --}}
+                            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"
+                                    />
+
+                                    <circle
+                                        cx="9"
+                                        cy="7"
+                                        r="4"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"
+                                    />
+
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- Grade Levels --}}
+                        <div class="p-5">
+
+                            <div class="space-y-3">
+
+                                @foreach([
+                                    'Teacher I',
+                                    'Teacher II',
+                                    'Teacher III',
+                                    'Teacher IV',
+                                    'Teacher V',
+                                    'Teacher VI',
+                                    'Master Teacher I',
+                                    'Master Teacher II',
+                                    'Master Teacher III',
+                                    'Master Teacher IV',
+                                ] as $position)
+
+                                    <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+
+                                        <span class="text-sm font-medium text-gray-600">
+                                            {{ $position }}
+                                        </span>
+
+                                        <span class="font-bold text-green-800">
+                                            0
+                                        </span>
+
+                                    </div>
+
+                                @endforeach
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    {{-- =================================================
+                        3RD CARD
+                        TEACHER COUNT PER SPECIALIZATION
+                    ================================================== --}}
+
+                    <div class="min-w-0 flex-1 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
+
+                        {{-- CARD HEADER --}}
+                        <div class="flex items-center justify-between bg-green-700 px-5 py-4 text-white">
+
+                            <div>
+
+                                <h4 class="text-lg font-bold">
+                                    TEACHER SPECIALIZATION
+                                </h4>
+
+                                <p class="text-xs text-green-100">
+                                    ELEMENTARY LEVEL &nbsp;•&nbsp; List of Specialization
+                                </p>
+
+                            </div>
+
+
+                            {{-- ICON --}}
+                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"
+                                    />
+
+                                    <circle
+                                        cx="9"
+                                        cy="7"
+                                        r="4"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"
+                                    />
+
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- CARD CONTENT --}}
+                        <div class="p-5">
+
+
+
+                            {{-- SPECIALIZATION COUNTS --}}
+                            <div class="space-y-2">
+
+
+                                {{-- EARLY CHILDHOOD --}}
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+
+                                    <span class="text-xs font-medium text-gray-600">
+                                        Early Childhood Education
+                                    </span>
+
+                                    <span class="text-sm font-bold text-green-700">
+                                        1,245
+                                    </span>
+
+                                </div>
+
+
+                                {{-- ENGLISH --}}
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+
+                                    <span class="text-xs font-medium text-gray-600">
+                                        English
+                                    </span>
+
+                                    <span class="text-sm font-bold text-green-700">
+                                        1,586
+                                    </span>
+
+                                </div>
+
+
+                                {{-- FILIPINO --}}
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+
+                                    <span class="text-xs font-medium text-gray-600">
+                                        Filipino
+                                    </span>
+
+                                    <span class="text-sm font-bold text-green-700">
+                                        1,372
+                                    </span>
+
+                                </div>
+
+
+                                {{-- GENERAL EDUCATION --}}
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+
+                                    <span class="text-xs font-medium text-gray-600">
+                                        General Education
+                                    </span>
+
+                                    <span class="text-sm font-bold text-green-700">
+                                        2,418
+                                    </span>
+
+                                </div>
+
+
+                                {{-- MATHEMATICS --}}
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+
+                                    <span class="text-xs font-medium text-gray-600">
+                                        Mathematics
+                                    </span>
+
+                                    <span class="text-sm font-bold text-green-700">
+                                        1,634
+                                    </span>
+
+                                </div>
+
+
+                                {{-- GENERAL SCIENCE --}}
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+
+                                    <span class="text-xs font-medium text-gray-600">
+                                        General Science
+                                    </span>
+
+                                    <span class="text-sm font-bold text-green-700">
+                                        1,285
+                                    </span>
+
+                                </div>
+
+
+                                {{-- PHYSICAL SCIENCE --}}
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+
+                                    <span class="text-xs font-medium text-gray-600">
+                                        Physical Science
+                                    </span>
+
+                                    <span class="text-sm font-bold text-green-700">
+                                        864
+                                    </span>
+
+                                </div>
+
+
+                                {{-- VALUES EDUCATION --}}
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+
+                                    <span class="text-xs font-medium text-gray-600">
+                                        Values Education
+                                    </span>
+
+                                    <span class="text-sm font-bold text-green-700">
+                                        742
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                            <br>
+                            {{-- =============================================
+                                GREEN DIVIDER
+                            ============================================== --}}
+
+                            <div class="my-5">
+
+                                {{-- GREEN LINE --}}
+                                <div class="h-1 w-full rounded-full bg-green-800"></div>
+
+
+                                {{-- PRIORITY SPECIALIZATIONS LABEL --}}
+                                <div class="mt-4 flex items-center gap-3">
+
+                                    <div class="h-px flex-1 bg-gray-300"></div>
+
+                                    <span class="rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-green-800">
+                                        Priority Specializations
+                                    </span>
+
+                                    <div class="h-px flex-1 bg-gray-300"></div>
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- =============================================
+                                PRIORITY SPECIALIZATIONS
+                                NO COUNTS
+                            ============================================== --}}
+
+                            <div class="space-y-2">
+
+
+                                {{-- 1 --}}
+                                <div class="flex items-center gap-3 rounded-lg bg-green-50 px-3 py-2">
+
+                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-700 text-xs font-bold text-white">
+                                        1
+                                    </span>
+
+                                    <span class="text-xs font-semibold text-gray-700">
+                                        English
+                                    </span>
+
+                                </div>
+
+
+                                {{-- 2 --}}
+                                <div class="flex items-center gap-3 rounded-lg bg-green-50 px-3 py-2">
+
+                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-700 text-xs font-bold text-white">
+                                        2
+                                    </span>
+
+                                    <span class="text-xs font-semibold text-gray-700">
+                                        Math
+                                    </span>
+
+                                </div>
+
+
+                                {{-- 3 --}}
+                                <div class="flex items-center gap-3 rounded-lg bg-green-50 px-3 py-2">
+
+                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-700 text-xs font-bold text-white">
+                                        3
+                                    </span>
+
+                                    <span class="text-xs font-semibold text-gray-700">
+                                        Science
+                                    </span>
+
+                                </div>
+
+
+                                {{-- 4 --}}
+                                <div class="flex items-center gap-3 rounded-lg bg-green-50 px-3 py-2">
+
+                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-700 text-xs font-bold text-white">
+                                        4
+                                    </span>
+
+                                    <span class="text-xs font-semibold text-gray-700">
+                                        Filipino
+                                    </span>
+
+                                </div>
+
+
+                                {{-- 5 --}}
+                                <div class="flex items-center gap-3 rounded-lg bg-green-50 px-3 py-2">
+
+                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-700 text-xs font-bold text-white">
+                                        5
+                                    </span>
+
+                                    <span class="text-xs font-semibold text-gray-700">
+                                        MAPEH
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {{-- =====================================================
+                MEDICAL ALLOWANCE REPORT
+            ====================================================== --}}
+
+            <div>
+                {{-- SECTION TITLE --}}
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-6 py-4 text-white shadow-lg">
+
+                    <div class="text-center">
+
+                        {{-- LINE 1 --}}
+                        <h3 class="text-xl font-bold uppercase tracking-wide text-white">
+                            Medical Allowance Report School Year 2026–2027
+                        </h3>
+
+                        {{-- LINE 2 --}}
+                        <p class="mt-1 text-sm text-green-100">
+                            Summary of personnel medical allowance availments
+                        </p>
+
+                    </div>
+
+                </div>
+                <br>
+                
+
+                {{-- 3 CARDS IN ONE ROW --}}
+                <div class="flex w-full flex-nowrap gap-6">
+
+
+                    {{-- =================================================
+                        GROUP AVAILMENT
+                    ================================================== --}}
+                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+
+                        <div class="flex items-start justify-between gap-4">
+
+                            <div class="min-w-0 flex-1">
+
+                                <p class="text-sm font-medium text-gray-500">
+                                    Group Availment (HMO)
+                                </p>
+
+                                <p class="mt-2 text-3xl font-bold text-green-700">
+                                    51
+                                </p>
+
+                                <p class="mt-1 text-xs text-gray-400">
+                                    Personnel enrolled in the group medical program
+                                </p>
+
+                            </div>
+
+
+                            {{-- ICON --}}
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M3 21h18M5 21V7a2 2 0 012-2h2v4h6V5h2a2 2 0 012 2v14M9 21v-4h6v4"
+                                    />
+
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    {{-- =================================================
+                        INDIVIDUAL AVAILMENT HMO
+                    ================================================== --}}
+                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+
+                        <div class="flex items-start justify-between gap-4">
+
+                            <div class="min-w-0 flex-1">
+
+                                <p class="text-sm font-medium text-gray-500">
+                                    Individual Availment (HMO)
+                                </p>
+
+                                <p class="mt-2 text-3xl font-bold text-blue-600">
+                                    24
+                                </p>
+
+                                <p class="mt-1 text-xs text-gray-400">
+                                    Personnel utilizing HMO medical benefits
+                                </p>
+
+                            </div>
+
+
+                            {{-- ICON --}}
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M20 8h-3V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2v-8a2 2 0 00-2-2zM9 6h6v2H9V6zm3 5v2m-2-1h4"
+                                    />
+
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    {{-- =================================================
+                        INDIVIDUAL MEDICAL EXPENSES
+                    ================================================== --}}
+                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+
+                        <div class="flex items-start justify-between gap-4">
+
+                            <div class="min-w-0 flex-1">
+
+                                <p class="text-sm font-medium text-gray-500">
+                                    Individual Medical Expenses
+                                </p>
+
+                                <p class="mt-2 text-3xl font-bold text-red-600">
+                                    44
+                                </p>
+
+                                <p class="mt-1 text-xs text-gray-400">
+                                    Requested Reimbursement of Medical Expenses
+                                </p>
+
+                            </div>
+
+
+                            {{-- ICON --}}
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M20 8h-3V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2v-8a2 2 0 00-2-2zM9 6h6v2H9V6zm3 5v2m-2-1h4"
+                                    />
+
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+            
+
+            {{-- =====================================================
+                REQUEST STATUS SUMMARY
+            ====================================================== --}}
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-6 py-4 text-white shadow-lg">
+                <h3 class="mb-4 text-lg font-bold text-gray-800 text-center text-white">
+                    PERSONNEL TRANSACTION REQUEST
+                </h3>
+            </div>
+            <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+                {{-- PENDING --}}
+                <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+
+                    <div class="flex items-center justify-between">
+
+                        <div>
 
                             <p class="text-sm font-medium text-gray-500">
-                                No. of Excess Teachers
+                                Pending
                             </p>
 
                             <p class="mt-2 text-3xl font-bold text-amber-600">
-                                2
+                                12
                             </p>
 
                             <p class="mt-1 text-xs text-gray-400">
-                                Teachers exceeding the required number
+                                Awaiting approval
                             </p>
 
                         </div>
 
 
-                        {{-- ICON --}}
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -407,22 +1219,13 @@
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
-                                stroke-width="1.8"
                             >
-
-                                {{-- Trending Up --}}
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    d="M3 17l6-6 4 4 8-8"
+                                    stroke-width="1.8"
+                                    d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"
                                 />
-
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M15 7h6v6"
-                                />
-
                             </svg>
 
                         </div>
@@ -432,619 +1235,29 @@
                 </div>
 
 
+                {{-- APPROVED --}}
+                <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
 
-                {{-- =================================================
-                    TEACHER SHORTAGE
-                ================================================== --}}
-                <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    <div class="flex items-center justify-between">
 
-                    <div class="flex items-start justify-between gap-4">
-
-                        <div class="min-w-0 flex-1">
+                        <div>
 
                             <p class="text-sm font-medium text-gray-500">
-                                No. of Teacher Shortage
-                            </p>
-
-                            <p class="mt-2 text-3xl font-bold text-red-600">
-                                0
-                            </p>
-
-                            <p class="mt-1 text-xs text-gray-400">
-                                Additional teachers needed
-                            </p>
-
-                        </div>
-
-
-                        {{-- ICON --}}
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
-
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                            >
-
-                                {{-- Warning --}}
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M12 9v4m0 4h.01"
-                                />
-
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-                                />
-
-                            </svg>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-            </div>
-
-        </div>
-
-        {{-- =====================================================
-            TEACHER REQUIREMENT ANALYSIS SCHOOL YEAR 2026-2027
-        ====================================================== --}}
-
-        <div class="mt-10">
-
-
-            {{-- THREE LEVEL CARDS --}}
-            <div class="flex gap-6">
-
-
-                {{-- =================================================
-                    ENROLLMENT COUNT
-                ================================================== --}}
-                <div class="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
-
-                    {{-- Card Header --}}
-                    <div class="flex items-center justify-between bg-green-700 px-5 py-4 text-white">
-
-                        <div>
-
-                            <h4 class="text-lg font-bold">
-                                ENROLLMENT COUNT S.Y. 2025-2026
-                            </h4>
-
-                            <p class="text-xs text-green-100">
-                                ELEMENTARY LEVEL &nbsp;•&nbsp;Kinder to Grade 12
-                            </p>
-
-                        </div>
-
-
-                        {{-- School Icon --}}
-                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15">
-
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-5h6v5M8 10h.01M12 10h.01M16 10h.01"
-                                />
-                            </svg>
-
-                        </div>
-
-                    </div>
-
-
-                    {{-- Grade Levels --}}
-                    <div class="p-5">
-
-                        <div class="space-y-3">
-
-                            @foreach([
-                                'Kinder',
-                                'Grade 1',
-                                'Grade 2',
-                                'Grade 3',
-                                'Grade 4',
-                                'Grade 5',
-                                'Grade 6',
-                                'Grade 7',
-                                'Grade 8',
-                                'Grade 9',
-                                'Grade 10',
-                                'Grade 11',
-                                'Grade 12'
-                            ] as $grade)
-
-                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-
-                                    <span class="text-sm font-medium text-gray-600">
-                                        {{ $grade }}
-                                    </span>
-
-                                    <span class="font-bold text-green-700">
-                                        0
-                                    </span>
-
-                                </div>
-
-                            @endforeach
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-                {{-- =================================================
-                    TEACHER COUNT PER POSITION
-                ================================================== --}}
-                <div class="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
-
-                    {{-- Card Header --}}
-                    <div class="flex items-center justify-between bg-green-800 px-5 py-4 text-white">
-
-                        <div>
-
-                            <h4 class="text-lg font-bold">
-                                TEACHER COUNT PER POSITION
-                            </h4>
-
-                            <p class="text-xs text-blue-100">
-                                ELEMENTARY LEVEL &nbsp;•&nbsp;Teachers Position
-                            </p>
-
-                        </div>
-
-
-                        {{-- School Icon --}}
-                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15">
-
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                            >
-
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"
-                                />
-
-                                <circle
-                                    cx="9"
-                                    cy="7"
-                                    r="4"
-                                />
-
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"
-                                />
-
-                            </svg>
-
-                        </div>
-
-                    </div>
-
-
-                    {{-- Grade Levels --}}
-                    <div class="p-5">
-
-                        <div class="space-y-3">
-
-                            @foreach([
-                                'Teacher I',
-                                'Teacher II',
-                                'Teacher III',
-                                'Teacher IV',
-                                'Teacher V',
-                                'Teacher VI',
-                                'Master Teacher I',
-                                'Master Teacher II',
-                                'Master Teacher III',
-                                'Master Teacher IV',
-                            ] as $position)
-
-                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-
-                                    <span class="text-sm font-medium text-gray-600">
-                                        {{ $position }}
-                                    </span>
-
-                                    <span class="font-bold text-green-800">
-                                        0
-                                    </span>
-
-                                </div>
-
-                            @endforeach
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-
-                {{-- =================================================
-                    3RD CARD
-                    TEACHER COUNT PER SPECIALIZATION
-                ================================================== --}}
-
-                <div class="min-w-0 flex-1 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
-
-                    {{-- CARD HEADER --}}
-                    <div class="flex items-center justify-between bg-green-700 px-5 py-4 text-white">
-
-                        <div>
-
-                            <h4 class="text-lg font-bold">
-                                TEACHER SPECIALIZATION
-                            </h4>
-
-                            <p class="text-xs text-green-100">
-                                ELEMENTARY LEVEL &nbsp;•&nbsp; List of Specialization
-                            </p>
-
-                        </div>
-
-
-                        {{-- ICON --}}
-                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15">
-
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                            >
-
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"
-                                />
-
-                                <circle
-                                    cx="9"
-                                    cy="7"
-                                    r="4"
-                                />
-
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"
-                                />
-
-                            </svg>
-
-                        </div>
-
-                    </div>
-
-
-                    {{-- CARD CONTENT --}}
-                    <div class="p-5">
-
-
-
-                        {{-- SPECIALIZATION COUNTS --}}
-                        <div class="space-y-2">
-
-
-                            {{-- EARLY CHILDHOOD --}}
-                            <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-
-                                <span class="text-xs font-medium text-gray-600">
-                                    Early Childhood Education
-                                </span>
-
-                                <span class="text-sm font-bold text-green-700">
-                                    1,245
-                                </span>
-
-                            </div>
-
-
-                            {{-- ENGLISH --}}
-                            <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-
-                                <span class="text-xs font-medium text-gray-600">
-                                    English
-                                </span>
-
-                                <span class="text-sm font-bold text-green-700">
-                                    1,586
-                                </span>
-
-                            </div>
-
-
-                            {{-- FILIPINO --}}
-                            <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-
-                                <span class="text-xs font-medium text-gray-600">
-                                    Filipino
-                                </span>
-
-                                <span class="text-sm font-bold text-green-700">
-                                    1,372
-                                </span>
-
-                            </div>
-
-
-                            {{-- GENERAL EDUCATION --}}
-                            <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-
-                                <span class="text-xs font-medium text-gray-600">
-                                    General Education
-                                </span>
-
-                                <span class="text-sm font-bold text-green-700">
-                                    2,418
-                                </span>
-
-                            </div>
-
-
-                            {{-- MATHEMATICS --}}
-                            <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-
-                                <span class="text-xs font-medium text-gray-600">
-                                    Mathematics
-                                </span>
-
-                                <span class="text-sm font-bold text-green-700">
-                                    1,634
-                                </span>
-
-                            </div>
-
-
-                            {{-- GENERAL SCIENCE --}}
-                            <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-
-                                <span class="text-xs font-medium text-gray-600">
-                                    General Science
-                                </span>
-
-                                <span class="text-sm font-bold text-green-700">
-                                    1,285
-                                </span>
-
-                            </div>
-
-
-                            {{-- PHYSICAL SCIENCE --}}
-                            <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-
-                                <span class="text-xs font-medium text-gray-600">
-                                    Physical Science
-                                </span>
-
-                                <span class="text-sm font-bold text-green-700">
-                                    864
-                                </span>
-
-                            </div>
-
-
-                            {{-- VALUES EDUCATION --}}
-                            <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-
-                                <span class="text-xs font-medium text-gray-600">
-                                    Values Education
-                                </span>
-
-                                <span class="text-sm font-bold text-green-700">
-                                    742
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                        <br>
-                        {{-- =============================================
-                            GREEN DIVIDER
-                        ============================================== --}}
-
-                        <div class="my-5">
-
-                            {{-- GREEN LINE --}}
-                            <div class="h-1 w-full rounded-full bg-green-800"></div>
-
-
-                            {{-- PRIORITY SPECIALIZATIONS LABEL --}}
-                            <div class="mt-4 flex items-center gap-3">
-
-                                <div class="h-px flex-1 bg-gray-300"></div>
-
-                                <span class="rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-green-800">
-                                    Priority Specializations
-                                </span>
-
-                                <div class="h-px flex-1 bg-gray-300"></div>
-
-                            </div>
-
-                        </div>
-
-
-                        {{-- =============================================
-                            PRIORITY SPECIALIZATIONS
-                            NO COUNTS
-                        ============================================== --}}
-
-                        <div class="space-y-2">
-
-
-                            {{-- 1 --}}
-                            <div class="flex items-center gap-3 rounded-lg bg-green-50 px-3 py-2">
-
-                                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-700 text-xs font-bold text-white">
-                                    1
-                                </span>
-
-                                <span class="text-xs font-semibold text-gray-700">
-                                    English
-                                </span>
-
-                            </div>
-
-
-                            {{-- 2 --}}
-                            <div class="flex items-center gap-3 rounded-lg bg-green-50 px-3 py-2">
-
-                                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-700 text-xs font-bold text-white">
-                                    2
-                                </span>
-
-                                <span class="text-xs font-semibold text-gray-700">
-                                    Math
-                                </span>
-
-                            </div>
-
-
-                            {{-- 3 --}}
-                            <div class="flex items-center gap-3 rounded-lg bg-green-50 px-3 py-2">
-
-                                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-700 text-xs font-bold text-white">
-                                    3
-                                </span>
-
-                                <span class="text-xs font-semibold text-gray-700">
-                                    Science
-                                </span>
-
-                            </div>
-
-
-                            {{-- 4 --}}
-                            <div class="flex items-center gap-3 rounded-lg bg-green-50 px-3 py-2">
-
-                                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-700 text-xs font-bold text-white">
-                                    4
-                                </span>
-
-                                <span class="text-xs font-semibold text-gray-700">
-                                    Filipino
-                                </span>
-
-                            </div>
-
-
-                            {{-- 5 --}}
-                            <div class="flex items-center gap-3 rounded-lg bg-green-50 px-3 py-2">
-
-                                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-700 text-xs font-bold text-white">
-                                    5
-                                </span>
-
-                                <span class="text-xs font-semibold text-gray-700">
-                                    MAPEH
-                                </span>
-
-                            </div>
-
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {{-- =====================================================
-            MEDICAL ALLOWANCE REPORT
-        ====================================================== --}}
-
-        <div>
-            {{-- SECTION TITLE --}}
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-6 py-4 text-white shadow-lg">
-
-                <div class="text-center">
-
-                    {{-- LINE 1 --}}
-                    <h3 class="text-xl font-bold uppercase tracking-wide text-white">
-                        Medical Allowance Report School Year 2026–2027
-                    </h3>
-
-                    {{-- LINE 2 --}}
-                    <p class="mt-1 text-sm text-green-100">
-                        Summary of personnel medical allowance availments
-                    </p>
-
-                </div>
-
-            </div>
-            <br>
-            
-
-            {{-- 3 CARDS IN ONE ROW --}}
-            <div class="flex w-full flex-nowrap gap-6">
-
-
-                {{-- =================================================
-                    GROUP AVAILMENT
-                ================================================== --}}
-                <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-
-                    <div class="flex items-start justify-between gap-4">
-
-                        <div class="min-w-0 flex-1">
-
-                            <p class="text-sm font-medium text-gray-500">
-                                Group Availment (HMO)
+                                Approved
                             </p>
 
                             <p class="mt-2 text-3xl font-bold text-green-700">
-                                51
+                                48
                             </p>
 
                             <p class="mt-1 text-xs text-gray-400">
-                                Personnel enrolled in the group medical program
+                                Successfully approved
                             </p>
 
                         </div>
 
 
-                        {{-- ICON --}}
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-700">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -1052,15 +1265,13 @@
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
-                                stroke-width="1.8"
                             >
-
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    d="M3 21h18M5 21V7a2 2 0 012-2h2v4h6V5h2a2 2 0 012 2v14M9 21v-4h6v4"
+                                    stroke-width="1.8"
+                                    d="M5 13l4 4L19 7"
                                 />
-
                             </svg>
 
                         </div>
@@ -1070,33 +1281,29 @@
                 </div>
 
 
+                {{-- SUBMITTED --}}
+                <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
 
-                {{-- =================================================
-                    INDIVIDUAL AVAILMENT HMO
-                ================================================== --}}
-                <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    <div class="flex items-center justify-between">
 
-                    <div class="flex items-start justify-between gap-4">
-
-                        <div class="min-w-0 flex-1">
+                        <div>
 
                             <p class="text-sm font-medium text-gray-500">
-                                Individual Availment (HMO)
+                                Submitted
                             </p>
 
                             <p class="mt-2 text-3xl font-bold text-blue-600">
-                                24
+                                27
                             </p>
 
                             <p class="mt-1 text-xs text-gray-400">
-                                Personnel utilizing HMO medical benefits
+                                Recently submitted
                             </p>
 
                         </div>
 
 
-                        {{-- ICON --}}
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -1104,15 +1311,13 @@
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
-                                stroke-width="1.8"
                             >
-
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    d="M20 8h-3V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2v-8a2 2 0 00-2-2zM9 6h6v2H9V6zm3 5v2m-2-1h4"
+                                    stroke-width="1.8"
+                                    d="M12 19V5m0 0l-6 6m6-6l6 6"
                                 />
-
                             </svg>
 
                         </div>
@@ -1122,33 +1327,29 @@
                 </div>
 
 
+                {{-- DISAPPROVED --}}
+                <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
 
-                {{-- =================================================
-                    INDIVIDUAL MEDICAL EXPENSES
-                ================================================== --}}
-                <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    <div class="flex items-center justify-between">
 
-                    <div class="flex items-start justify-between gap-4">
-
-                        <div class="min-w-0 flex-1">
+                        <div>
 
                             <p class="text-sm font-medium text-gray-500">
-                                Individual Medical Expenses
+                                Disapproved
                             </p>
 
                             <p class="mt-2 text-3xl font-bold text-red-600">
-                                44
+                                8
                             </p>
 
                             <p class="mt-1 text-xs text-gray-400">
-                                Requested Reimbursement of Medical Expenses
+                                Not approved
                             </p>
 
                         </div>
 
 
-                        {{-- ICON --}}
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 text-red-600">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -1156,15 +1357,13 @@
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
-                                stroke-width="1.8"
                             >
-
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    d="M20 8h-3V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2v-8a2 2 0 00-2-2zM9 6h6v2H9V6zm3 5v2m-2-1h4"
+                                    stroke-width="1.8"
+                                    d="M6 18L18 6M6 6l12 12"
                                 />
-
                             </svg>
 
                         </div>
@@ -1173,288 +1372,90 @@
 
                 </div>
 
-
-            </div>
-
-        </div>
-        
-
-        {{-- =====================================================
-            REQUEST STATUS SUMMARY
-        ====================================================== --}}
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-6 py-4 text-white shadow-lg">
-            <h3 class="mb-4 text-lg font-bold text-gray-800 text-center text-white">
-                PERSONNEL TRANSACTION REQUEST
-            </h3>
-        </div>
-        <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-
-            {{-- PENDING --}}
-            <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
-
-                <div class="flex items-center justify-between">
-
-                    <div>
-
-                        <p class="text-sm font-medium text-gray-500">
-                            Pending
-                        </p>
-
-                        <p class="mt-2 text-3xl font-bold text-amber-600">
-                            12
-                        </p>
-
-                        <p class="mt-1 text-xs text-gray-400">
-                            Awaiting approval
-                        </p>
-
-                    </div>
-
-
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
-
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-6 w-6"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.8"
-                                d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"
-                            />
-                        </svg>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            {{-- APPROVED --}}
-            <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
-
-                <div class="flex items-center justify-between">
-
-                    <div>
-
-                        <p class="text-sm font-medium text-gray-500">
-                            Approved
-                        </p>
-
-                        <p class="mt-2 text-3xl font-bold text-green-700">
-                            48
-                        </p>
-
-                        <p class="mt-1 text-xs text-gray-400">
-                            Successfully approved
-                        </p>
-
-                    </div>
-
-
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-700">
-
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-6 w-6"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.8"
-                                d="M5 13l4 4L19 7"
-                            />
-                        </svg>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            {{-- SUBMITTED --}}
-            <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
-
-                <div class="flex items-center justify-between">
-
-                    <div>
-
-                        <p class="text-sm font-medium text-gray-500">
-                            Submitted
-                        </p>
-
-                        <p class="mt-2 text-3xl font-bold text-blue-600">
-                            27
-                        </p>
-
-                        <p class="mt-1 text-xs text-gray-400">
-                            Recently submitted
-                        </p>
-
-                    </div>
-
-
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
-
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-6 w-6"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.8"
-                                d="M12 19V5m0 0l-6 6m6-6l6 6"
-                            />
-                        </svg>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            {{-- DISAPPROVED --}}
-            <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
-
-                <div class="flex items-center justify-between">
-
-                    <div>
-
-                        <p class="text-sm font-medium text-gray-500">
-                            Disapproved
-                        </p>
-
-                        <p class="mt-2 text-3xl font-bold text-red-600">
-                            8
-                        </p>
-
-                        <p class="mt-1 text-xs text-gray-400">
-                            Not approved
-                        </p>
-
-                    </div>
-
-
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 text-red-600">
-
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-6 w-6"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.8"
-                                d="M6 18L18 6M6 6l12 12"
-                            />
-                        </svg>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-        <br>
-
-
-        {{-- =====================================================
-            QUICK ACTIONS
-        ====================================================== --}}
-        <div>
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-6 py-4 text-white shadow-lg">
-                <h3 class="mb-4 text-lg font-bold text-gray-800 text-center text-white">
-                    QUICK ACTIONS
-                </h3>
             </div>
             <br>
+        
+        @if(auth()->user()->role === 'super_admin')
+            {{-- =====================================================
+                QUICK ACTIONS
+            ====================================================== --}}
+            <div>
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-6 py-4 text-white shadow-lg">
+                    <h3 class="mb-4 text-lg font-bold text-gray-800 text-center text-white">
+                        QUICK ACTIONS
+                    </h3>
+                </div>
+                <br>
 
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
-                <a
-                    href="#"
-                    class="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-green-500 hover:shadow-md"
-                >
+                    <a
+                        href="#"
+                        class="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-green-500 hover:shadow-md"
+                    >
 
-                    <p class="font-semibold text-gray-800">
-                        Add Employee
-                    </p>
+                        <p class="font-semibold text-gray-800">
+                            Add Employee
+                        </p>
 
-                    <p class="mt-1 text-sm text-gray-500">
-                        Create a new personnel profile
-                    </p>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Create a new personnel profile
+                        </p>
 
-                </a>
-
-
-                <a
-                    href="#"
-                    class="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-green-500 hover:shadow-md"
-                >
-
-                    <p class="font-semibold text-gray-800">
-                        View Employees
-                    </p>
-
-                    <p class="mt-1 text-sm text-gray-500">
-                        Browse personnel records
-                    </p>
-
-                </a>
+                    </a>
 
 
-                <a
-                    href="#"
-                    class="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-green-500 hover:shadow-md"
-                >
+                    <a
+                        href="#"
+                        class="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-green-500 hover:shadow-md"
+                    >
 
-                    <p class="font-semibold text-gray-800">
-                        HR Transactions
-                    </p>
+                        <p class="font-semibold text-gray-800">
+                            View Employees
+                        </p>
 
-                    <p class="mt-1 text-sm text-gray-500">
-                        Manage personnel requests
-                    </p>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Browse personnel records
+                        </p>
 
-                </a>
+                    </a>
 
 
-                <a
-                    href="#"
-                    class="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-green-500 hover:shadow-md"
-                >
+                    <a
+                        href="#"
+                        class="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-green-500 hover:shadow-md"
+                    >
 
-                    <p class="font-semibold text-gray-800">
-                        Generate Reports
-                    </p>
+                        <p class="font-semibold text-gray-800">
+                            HR Transactions
+                        </p>
 
-                    <p class="mt-1 text-sm text-gray-500">
-                        View and generate reports
-                    </p>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Manage personnel requests
+                        </p>
 
-                </a>
+                    </a>
+
+
+                    <a
+                        href="#"
+                        class="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-green-500 hover:shadow-md"
+                    >
+
+                        <p class="font-semibold text-gray-800">
+                            Generate Reports
+                        </p>
+
+                        <p class="mt-1 text-sm text-gray-500">
+                            View and generate reports
+                        </p>
+
+                    </a>
+
+                </div>
 
             </div>
-
-        </div>
+        @endif
 
     </div>
 

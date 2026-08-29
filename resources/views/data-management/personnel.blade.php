@@ -498,18 +498,6 @@
                                     Name
                                 </th>
 
-                                {{-- Sex --}}
-                                <th class="px-6 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
-                                    Sex
-                                </th>
-
-                                {{-- Birth Date --}}
-                                <th class="px-6 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
-                                    Birth Date
-                                </th>
-
                                 {{-- Mobile Number --}}
                                 <th class="px-6 py-3 text-left text-xs font-semibold
                                         uppercase tracking-wider text-gray-600">
@@ -535,9 +523,15 @@
                                 </th>
 
                                 {{-- Action --}}
-                                <th class="px-6 py-3 text-right text-xs font-semibold
+                                @if (auth()->user()->role === 'super_admin')
+                                    <th class="px-6 py-3 text-center text-xs font-semibold
+                                            uppercase tracking-wider text-gray-600">
+                                        User Status
+                                    </th>
+                                @endif
+                                <th class="px-6 py-3 text-center text-xs font-semibold
                                         uppercase tracking-wider text-gray-600">
-                                    Action
+                                    Profile
                                 </th>
 
                             </tr>
@@ -581,32 +575,46 @@
 
                                     </td>
 
-
-                                    {{-- Sex --}}
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
-                                        {{ $person->sex ?? '—' }}
-                                    </td>
-
-
-                                    {{-- Birth Date --}}
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
-
-                                        @if ($person->birth_date)
-                                            {{ \Carbon\Carbon::parse($person->birth_date)->format('d/m/Y') }}
-                                        @else
-                                            —
-                                        @endif
-
-                                    </td>
-
                                     {{-- mobile_number --}}
                                     <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
                                         {{ $person->mobile_number ?? '—' }}
                                     </td>
 
-                                    {{-- user_role --}}
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
-                                        {{ $person->user->role ?? '—' }}
+                                    {{-- USER ROLE --}}
+                                    <td class="whitespace-nowrap px-6 py-4">
+
+                                        @if ($person->user?->role === 'super_admin')
+
+                                            <span class="inline-flex items-center rounded-full
+                                                        bg-amber-100 px-3 py-1
+                                                        text-xs font-semibold text-amber-700">
+                                                Super Admin
+                                            </span>
+
+                                        @elseif ($person->user?->role === 'admin')
+                                            
+                                            <span class="inline-flex items-center rounded-full
+                                                        bg-purple-100 px-3 py-1
+                                                        text-xs font-semibold text-purple-700">
+                                                Admin
+                                            </span>
+
+                                        @elseif ($person->user?->role === 'user')
+
+                                            <span class="inline-flex items-center rounded-full
+                                                        bg-blue-100 px-3 py-1
+                                                        text-xs font-semibold text-blue-700">
+                                                User
+                                            </span>
+
+                                        @else
+
+                                            <span class="text-sm text-gray-500">
+                                                —
+                                            </span>
+
+                                        @endif
+
                                     </td>
 
 
@@ -633,8 +641,31 @@
                                         }}
 
                                     </td>
+                                    
+                                    {{-- Action --}}
 
+                                    @if (auth()->user()->role === 'super_admin')
+                                        <td class="whitespace-nowrap px-6 py-4 text-right">
 
+                                            
+
+                                            <button
+                                                type="button"
+                                                onclick="openAccessModal(
+                                                    {{ $person->id }},
+                                                    '{{ $person->user?->role ?? 'user' }}',
+                                                    '{{ $person->user?->status ?? 'active' }}'
+                                                )"
+                                                class="inline-flex items-center rounded-md
+                                                bg-green-700 px-4 py-2
+                                                text-sm font-semibold text-white
+                                                transition hover:bg-green-800"
+                                            >
+                                                Access
+                                            </button>
+                                        </td>
+                                    @endif
+                                    
                                     {{-- Action --}}
                                     <td class="whitespace-nowrap px-6 py-4 text-right">
 
@@ -645,7 +676,7 @@
                                                 text-sm font-semibold text-white
                                                 transition hover:bg-green-800"
                                         >
-                                            View Profile
+                                            View
                                         </a>
 
                                     </td>
@@ -699,3 +730,209 @@
 
 
 </x-app-layout>
+
+
+
+{{-- ACCESS MODAL --}}
+<div
+    id="accessModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center
+           bg-black/50 px-4 backdrop-blur-sm"
+>
+
+    <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl">
+
+        {{-- HEADER --}}
+        <div class="flex items-center justify-between
+                    border-b border-gray-200 px-6 py-5">
+
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">
+                    Manage User Access
+                </h3>
+
+                <p class="mt-1 text-sm text-gray-500">
+                    Update role and account status.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                onclick="closeAccessModal()"
+                class="rounded-lg p-2 text-gray-400
+                       hover:bg-gray-100 hover:text-gray-600"
+            >
+                ✕
+            </button>
+
+        </div>
+
+
+        {{-- FORM --}}
+        <form
+            id="accessForm"
+            method="POST"
+            class="p-6"
+        >
+
+            @csrf
+            @method('PATCH')
+
+
+            {{-- ROLE --}}
+            <div>
+
+                <label
+                    for="role"
+                    class="mb-2 block text-sm font-medium text-gray-700"
+                >
+                    User Role
+                </label>
+
+                <select
+                    id="role"
+                    name="role"
+                    class="block w-full rounded-lg border-gray-300
+                           text-sm shadow-sm
+                           focus:border-green-600
+                           focus:ring-green-600"
+                >
+
+                    <option value="user">
+                        User
+                    </option>
+
+                    <option value="super_admin">
+                        Super Admin
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            {{-- STATUS --}}
+            <div class="mt-5">
+
+                <label
+                    for="status"
+                    class="mb-2 block text-sm font-medium text-gray-700"
+                >
+                    Account Status
+                </label>
+
+                <select
+                    id="status"
+                    name="status"
+                    class="block w-full rounded-lg border-gray-300
+                           text-sm shadow-sm
+                           focus:border-green-600
+                           focus:ring-green-600"
+                >
+
+                    <option value="active">
+                        Active
+                    </option>
+
+                    <option value="inactive">
+                        Inactive
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            {{-- WARNING --}}
+            <div class="mt-5 rounded-lg border border-yellow-200
+                        bg-yellow-50 p-4">
+
+                <p class="text-xs leading-relaxed text-yellow-800">
+
+                    <strong>Note:</strong>
+                    Changing the user's role will change the areas
+                    of the system they can access.
+
+                </p>
+
+            </div>
+
+
+            {{-- BUTTONS --}}
+            <div class="mt-6 flex justify-end gap-3">
+
+                <button
+                    type="button"
+                    onclick="closeAccessModal()"
+                    class="rounded-lg border border-gray-300
+                           bg-white px-5 py-2.5
+                           text-sm font-semibold text-gray-700
+                           hover:bg-gray-50"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="rounded-lg bg-green-700
+                           px-5 py-2.5
+                           text-sm font-semibold text-white
+                           hover:bg-green-800"
+                >
+                    Save Changes
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function openAccessModal(personId, role, status)
+{
+    const modal = document.getElementById('accessModal');
+    const form = document.getElementById('accessForm');
+
+    const roleSelect = document.getElementById('role');
+    const statusSelect = document.getElementById('status');
+
+    // Set form action
+    form.action =
+        `/data-management/personnel/${personId}/access`;
+
+    // Set current values
+    roleSelect.value = role;
+    statusSelect.value = status;
+
+    // Show modal
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+
+function closeAccessModal()
+{
+    const modal = document.getElementById('accessModal');
+
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+
+// Close when clicking outside
+document
+    .getElementById('accessModal')
+    .addEventListener('click', function (event) {
+
+        if (event.target === this) {
+            closeAccessModal();
+        }
+
+    });
+
+</script>

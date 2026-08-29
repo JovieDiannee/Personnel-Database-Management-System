@@ -226,7 +226,7 @@
                                 <div
                                     class="flex items-end gap-1.5"
                                     style="display: flex; flex-direction: row;"
-                                >
+                                    >
 
                                     {{-- SEARCH --}}
                                     <div style="width: 185px;">
@@ -305,43 +305,48 @@
 
 
                                     {{-- BUTTONS --}}
-                                    <div class="flex items-center gap-2 pt-6">
+<div class="flex items-end gap-2">
+    {{-- SEARCH --}}
+    <button
+        type="submit"
+        class="h-10 rounded-lg
+               bg-white
+               px-4
+               text-xs
+               font-semibold
+               text-green-800
+               shadow-sm
+               transition-all
+               duration-200
+               hover:bg-green-50
+               hover:shadow-md
+               focus:outline-none
+               focus:ring-2
+               focus:ring-white/50"
+    >
+        Search
+    </button>
 
-                                        {{-- SEARCH --}}
-                                        <button
-                                            type="submit"
-                                            class="h-8 translate-y-3 rounded-md
-                                                bg-white
-                                                px-3
-                                                text-xs
-                                                font-semibold
-                                                text-green-800
-                                                shadow-sm
-                                                transition
-                                                hover:bg-green-50"
-                                        >
-                                            Search
-                                        </button>
-
-                                        {{-- RESET --}}
-                                        <a
-                                            href="{{ route('data-management.medical-allowance.report') }}"
-                                            class="flex h-8 translate-y-3 items-center
-                                                rounded-md
-                                                border border-white/40
-                                                bg-white/10
-                                                px-3
-                                                text-xs
-                                                font-semibold
-                                                text-white
-                                                transition
-                                                hover:bg-white
-                                                hover:text-green-800"
-                                        >
-                                            Reset
-                                        </a>
-
-                                    </div>
+    {{-- RESET --}}
+    <a
+        href="{{ route('data-management.medical-allowance.report') }}"
+        class="flex h-10 items-center justify-center
+               rounded-lg
+               border border-white/50
+               bg-white/10
+               px-4
+               text-xs
+               font-semibold
+               text-white
+               transition-all
+               duration-200
+               hover:bg-white
+               hover:text-green-800
+               hover:shadow-md"
+    >
+        Reset
+    </a>
+</div>
 
                                 </div>
 

@@ -71,6 +71,16 @@ Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
 
 });
 
+// ============================================================
+// SUPER ADMIN ONLY - Change User Role
+// ============================================================
+
+Route::middleware(['auth', 'role:super_admin'])->group(function () {
+
+    Route::patch('/data-management/personnel/{person}/access',[DataManagementController::class, 'updateUserAccess'])->name('data-management.personnel.update.access');
+
+});
+
 
 
 require __DIR__.'/auth.php';
