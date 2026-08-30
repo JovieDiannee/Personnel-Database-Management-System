@@ -695,19 +695,23 @@
                                     @if (auth()->user()->role === 'super_admin')
                                         <td class="whitespace-nowrap px-6 py-4 text-right">
 
-                                            
+                                            @php
+                                                $personName = trim(collect([
+                                                    $person->first_name,
+                                                    $person->middle_name,
+                                                    $person->last_name,
+                                                ])->filter()->join(' '));
+                                            @endphp
 
                                             <button
                                                 type="button"
-                                                onclick="openAccessModal(
-                                                    {{ $person->id }},
-                                                    '{{ $person->user?->role ?? 'user' }}',
-                                                    '{{ $person->user?->status ?? 'active' }}'
-                                                )"
-                                                class="inline-flex items-center rounded-md
-                                                bg-green-700 px-4 py-2
-                                                text-sm font-semibold text-white
-                                                transition hover:bg-green-800"
+                                                data-person-id="{{ $person->id }}"
+                                                data-person-name="{{ $personName }}"
+                                                data-role="{{ $person->user?->role ?? 'user' }}"
+                                                data-status="{{ $person->user?->status ?? 'active' }}"
+                                                onclick="openAccessModal(this)"
+                                                class="inline-flex items-center rounded-md bg-green-700 px-4 py-2
+                                                    text-sm font-semibold text-white transition hover:bg-green-800"
                                             >
                                                 Access
                                             </button>
@@ -799,6 +803,8 @@
                     Manage User Access
                 </h3>
 
+                <p id="accessPersonName" class="mt-1 text-sm font-semibold text-green-700"></p>
+
                 <p class="mt-1 text-sm text-gray-500">
                     Update role and account status.
                 </p>
@@ -848,6 +854,10 @@
 
                     <option value="user">
                         User
+                    </option>
+
+                    <option value="admin">
+                        Admin
                     </option>
 
                     <option value="super_admin">
@@ -941,46 +951,53 @@
 
 <script>
 
-function openAccessModal(personId, role, status)
-{
-    const modal = document.getElementById('accessModal');
-    const form = document.getElementById('accessForm');
 
-    const roleSelect = document.getElementById('role');
-    const statusSelect = document.getElementById('status');
+    function openAccessModal(button) {
+        const modal = document.getElementById('accessModal');
+        const form = document.getElementById('accessForm');
 
-    // Set form action
-    form.action =
-        `/data-management/personnel/${personId}/access`;
+        const personId = button.dataset.personId;
+        const personName = button.dataset.personName;
+        const role = button.dataset.role;
+        const status = button.dataset.status;
 
-    // Set current values
-    roleSelect.value = role;
-    statusSelect.value = status;
+        form.action = `/data-management/personnel/${personId}/access`;
 
-    // Show modal
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-}
+        document.getElementById('accessPersonName').textContent = personName;
+        document.getElementById('role').value = role;
+        document.getElementById('status').value = status;
 
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
 
-function closeAccessModal()
-{
-    const modal = document.getElementById('accessModal');
+    function closeAccessModal() {
+        const modal = document.getElementById('accessModal');
 
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-}
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
 
 
-// Close when clicking outside
-document
-    .getElementById('accessModal')
-    .addEventListener('click', function (event) {
 
-        if (event.target === this) {
-            closeAccessModal();
-        }
+    function closeAccessModal()
+    {
+        const modal = document.getElementById('accessModal');
 
-    });
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+
+    // Close when clicking outside
+    document
+        .getElementById('accessModal')
+        .addEventListener('click', function (event) {
+
+            if (event.target === this) {
+                closeAccessModal();
+            }
+
+        });
 
 </script>

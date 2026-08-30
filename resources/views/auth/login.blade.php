@@ -17,9 +17,9 @@
                 items-center justify-center
                 overflow-hidden
                 bg-gradient-to-b from-white via-white to-green-50
-                px-8
-                pt-10
-                sm:pt-12
+                px-6
+                pt-6
+                sm:pt-8
                 lg:pt-0
                 lg:min-h-full"
             >

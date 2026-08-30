@@ -85,37 +85,24 @@
                 <button
                     type="button"
                     @click="open = !open"
-                    class="flex items-center gap-3
-                        rounded-xl px-2 py-1.5
-                        transition
-                        hover:bg-green-50
-                        focus:outline-none
-                        focus:ring-2
-                        focus:ring-green-500
+                    class="group flex items-center gap-3 rounded-xl px-2 py-1.5
+                        transition hover:bg-green-50
+                        focus:outline-none focus:ring-2 focus:ring-green-500
                         focus:ring-offset-2"
-                    >
-
+                >
                     {{-- PROFILE PICTURE --}}
-                    @if(Auth::user()->profile_picture)
-
+                    @if (Auth::user()->profile_picture)
                         <img
                             src="{{ asset('storage/' . Auth::user()->profile_picture) }}"
                             alt="{{ Auth::user()->name }}"
-                            class="h-10 w-10 rounded-full
-                                object-cover
-                                ring-2 ring-green-200"
+                            class="h-10 w-10 rounded-full object-cover ring-2 ring-green-200"
                         >
-
                     @else
-
                         <div
-                            class="flex h-10 w-10
-                                items-center justify-center
-                                rounded-full bg-green-100
-                                text-green-700
+                            class="flex h-10 w-10 items-center justify-center
+                                rounded-full bg-green-100 text-green-700
                                 ring-2 ring-green-200"
                         >
-
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 class="h-5 w-5"
@@ -124,64 +111,51 @@
                                 stroke="currentColor"
                                 stroke-width="1.8"
                             >
-
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    d="M15.75 6a3.75 3.75
-                                    0 11-7.5 0
+                                    d="M15.75 6a3.75 3.75 0 11-7.5 0
                                     3.75 3.75 0 017.5 0z
-                                    M4.5 20.25a8.25 8.25
-                                    0 0115 0"
+                                    M4.5 20.25a8.25 8.25 0 0115 0"
                                 />
-
                             </svg>
-
                         </div>
-
                     @endif
-
 
                     {{-- USER DETAILS --}}
                     <div class="hidden text-right sm:block">
-
                         <p
-                            class="max-w-48 truncate text-sm
-                                font-semibold text-white"
-                            >
+                            class="max-w-48 truncate text-sm font-semibold text-white
+                                transition-colors group-hover:text-green-700"
+                        >
                             {{ Auth::user()->name }}
                         </p>
 
                         <p
-                            class="max-w-48 truncate text-xs
-                                text-white"
+                            class="max-w-48 truncate text-xs text-white
+                                transition-colors group-hover:text-green-600"
                         >
                             {{ Auth::user()->email }}
                         </p>
-
                     </div>
-
 
                     {{-- ARROW --}}
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        class="h-4 w-4 text-gray-400
-                            transition-transform duration-200"
+                        class="h-4 w-4 text-gray-300 transition duration-200
+                            group-hover:text-green-700"
                         :class="{ 'rotate-180': open }"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                         stroke-width="1.8"
                     >
-
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             d="M6 9l6 6 6-6"
                         />
-
                     </svg>
-
                 </button>
 
 

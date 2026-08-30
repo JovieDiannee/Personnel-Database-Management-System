@@ -1275,7 +1275,7 @@ class DataManagementController extends Controller
     public function updateUserAccess(Request $request, $person)
     {
         $validated = $request->validate([
-            'role' => 'required|in:user,super_admin',
+            'role' => 'required|in:user,admin,super_admin',
             'status' => 'required|in:active,inactive',
         ]);
 
