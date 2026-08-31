@@ -669,13 +669,17 @@
                                     {{-- Status --}}
                                     <td class="whitespace-nowrap px-6 py-4">
 
-                                        <span
-                                            class="inline-flex rounded-full bg-green-100
-                                                px-3 py-1 text-xs font-semibold
-                                                text-green-800"
-                                        >
-                                            Active
-                                        </span>
+                                        @if ($person->user?->status === 'active')
+                                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1
+                                                        text-xs font-semibold text-green-800">
+                                                Active
+                                            </span>
+                                        @elseif ($person->user?->status === 'inactive')
+                                            <span class="inline-flex rounded-full bg-red-100 px-3 py-1
+                                                        text-xs font-semibold text-red-700">
+                                                Inactive
+                                            </span>
+                                        @endif
 
                                     </td>
 
@@ -790,7 +794,7 @@
     id="accessModal"
     class="fixed inset-0 z-50 hidden items-center justify-center
            bg-black/50 px-4 backdrop-blur-sm"
->
+    >
 
     <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl">
 
@@ -803,11 +807,10 @@
                     Manage User Access
                 </h3>
 
-                <p id="accessPersonName" class="mt-1 text-sm font-semibold text-green-700"></p>
-
                 <p class="mt-1 text-sm text-gray-500">
                     Update role and account status.
                 </p>
+                
             </div>
 
             <button
@@ -836,6 +839,10 @@
             {{-- ROLE --}}
             <div>
 
+                <p class="text-sm font-semibold text-green-700">
+    SELECTED USER: <span id="accessPersonName"></span>
+</p>
+                <br>
                 <label
                     for="role"
                     class="mb-2 block text-sm font-medium text-gray-700"

@@ -1279,23 +1279,41 @@ class DataManagementController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
+        // A Super Admin account must always remain active.
+        if (
+            $validated['role'] === 'super_admin' &&
+            $validated['status'] === 'inactive'
+        ) {
+            return back()->with(
+                'error',
+                'A Super Admin account must remain active.'
+            );
+        }
+
         $personnel = \App\Models\BasicInformation::findOrFail($person);
 
         $user = $personnel->user;
 
-        // Make sure the personnel has a user account
-        if (!$user) {
+        if (! $user) {
             return back()->with(
                 'error',
                 'This personnel record does not have a user account.'
             );
         }
 
-        // Prevent Super Admin from changing their own account
+        // Prevent a Super Admin from changing their own account.
         if ($user->id === auth()->id()) {
             return back()->with(
                 'error',
                 'You cannot change your own role or account status.'
+            );
+        }
+
+        // Protect existing Super Admin accounts from being demoted or disabled.
+        if ($user->role === 'super_admin') {
+            return back()->with(
+                'error',
+                'Super Admin accounts cannot be changed from this screen.'
             );
         }
 
@@ -1306,7 +1324,7 @@ class DataManagementController extends Controller
 
         return back()->with(
             'success',
-            'User access has been updated successfully.'
+            'User role and account status updated successfully.'
         );
     }
 

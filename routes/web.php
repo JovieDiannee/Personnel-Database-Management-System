@@ -82,5 +82,13 @@ Route::middleware(['auth', 'role:super_admin'])->group(function () {
 });
 
 
+// ============================================================
+// HR TRANSACRTIONS - PENDING FEATURES
+// ============================================================
+
+Route::view('/hr-transactions/personnel-requests','errors.503',[],503)->name('hr-transactions.personnel-requests');
+Route::view('/hr-transactions/service-records','errors.503',[],503)->name('hr-transactions.service-records');
+Route::view('/hr-transactions/other-transactions','errors.503',[],503)->name('hr-transactions.other-transactions');
+
 
 require __DIR__.'/auth.php';

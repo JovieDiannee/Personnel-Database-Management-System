@@ -558,7 +558,7 @@
             >
 
                 <a
-                    href="#"
+                    href="{{ route('hr-transactions.personnel-requests') }}"
                     class="block rounded-lg px-3 py-2.5
                            text-sm text-gray-500
                            transition hover:bg-green-50
@@ -569,7 +569,7 @@
 
 
                 <a
-                    href="#"
+                    href="{{ route('hr-transactions.service-records') }}"
                     class="block rounded-lg px-3 py-2.5
                            text-sm text-gray-500
                            transition hover:bg-green-50
@@ -580,7 +580,7 @@
 
 
                 <a
-                    href="#"
+                    href="{{ route('hr-transactions.other-transactions') }}"
                     class="block rounded-lg px-3 py-2.5
                            text-sm text-gray-500
                            transition hover:bg-green-50

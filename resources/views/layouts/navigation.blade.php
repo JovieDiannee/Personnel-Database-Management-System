@@ -72,79 +72,167 @@
             ================================================== --}}
 
             <div
-                class="relative"
-                x-data="{ open: false }"
-                @click.outside="open = false"
+    class="relative"
+    x-data="{ open: false, profileHover: false }"
+    @click.outside="open = false"
+>
+    {{-- PROFILE BUTTON --}}
+    <button
+        type="button"
+        @click="open = !open"
+        @mouseenter="profileHover = true"
+        @mouseleave="profileHover = false"
+        :style="profileHover
+            ? 'background-color: #f0fdf4;'
+            : 'background-color: transparent;'"
+        class="flex items-center gap-3 rounded-xl px-2 py-1.5 transition
+               focus:outline-none focus:ring-2 focus:ring-green-500
+               focus:ring-offset-2"
+    >
+        {{-- PROFILE PICTURE --}}
+        @if (Auth::user()->profile_picture)
+            <img
+                src="{{ asset('storage/' . Auth::user()->profile_picture) }}"
+                alt="{{ Auth::user()->name }}"
+                class="h-10 w-10 rounded-full object-cover ring-2 ring-green-200"
+            >
+        @else
+            <div
+                class="flex h-10 w-10 items-center justify-center
+                       rounded-full bg-green-100 text-green-700 ring-2 ring-green-200"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.8"
                 >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15.75 6a3.75 3.75 0 11-7.5 0
+                           3.75 3.75 0 017.5 0z
+                           M4.5 20.25a8.25 8.25 0 0115 0"
+                    />
+                </svg>
+            </div>
+        @endif
 
+        {{-- USER DETAILS --}}
+        <div class="hidden text-right sm:block">
+            <p
+                :style="profileHover ? 'color: #166534;' : 'color: white;'"
+                class="max-w-48 truncate text-sm font-semibold transition-colors"
+            >
+                {{ Auth::user()->name }}
+            </p>
 
-                {{-- =================================================
-                    PROFILE BUTTON
-                ================================================== --}}
+            <p
+                :style="profileHover ? 'color: #15803d;' : 'color: white;'"
+                class="max-w-48 truncate text-xs transition-colors"
+            >
+                {{ Auth::user()->email }}
+            </p>
+        </div>
 
-                <button
-                    type="button"
-                    @click="open = !open"
-                    class="group flex items-center gap-3 rounded-xl px-2 py-1.5
-                        transition hover:bg-green-50
-                        focus:outline-none focus:ring-2 focus:ring-green-500
-                        focus:ring-offset-2"
-                >
-                    {{-- PROFILE PICTURE --}}
-                    @if (Auth::user()->profile_picture)
-                        <img
-                            src="{{ asset('storage/' . Auth::user()->profile_picture) }}"
-                            alt="{{ Auth::user()->name }}"
-                            class="h-10 w-10 rounded-full object-cover ring-2 ring-green-200"
+        {{-- ARROW --}}
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            :style="profileHover ? 'color: #166534;' : 'color: white;'"
+            class="h-4 w-4 transition duration-200"
+            :class="{ 'rotate-180': open }"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="1.8"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6 9l6 6 6-6"
+            />
+        </svg>
+    </button>
+
+    {{-- DROPDOWN MENU --}}
+    <div
+        x-show="open"
+        x-transition:enter="transition ease-out duration-150"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-100"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95"
+        class="absolute right-0 z-50 mt-3 w-64 origin-top-right
+               overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-gray-200"
+        style="display: none;"
+    >
+        {{-- DROPDOWN HEADER --}}
+        <div class="border-b border-green-100 bg-green-50 px-4 py-4">
+            <div class="flex items-center gap-3">
+                @if (Auth::user()->profile_picture)
+                    <img
+                        src="{{ asset('storage/' . Auth::user()->profile_picture) }}"
+                        alt="{{ Auth::user()->name }}"
+                        class="h-11 w-11 rounded-full object-cover ring-2 ring-green-200"
+                    >
+                @else
+                    <div
+                        class="flex h-11 w-11 items-center justify-center
+                               rounded-full bg-white text-green-700 ring-2 ring-green-200"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="1.8"
                         >
-                    @else
-                        <div
-                            class="flex h-10 w-10 items-center justify-center
-                                rounded-full bg-green-100 text-green-700
-                                ring-2 ring-green-200"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M15.75 6a3.75 3.75 0 11-7.5 0
-                                    3.75 3.75 0 017.5 0z
-                                    M4.5 20.25a8.25 8.25 0 0115 0"
-                                />
-                            </svg>
-                        </div>
-                    @endif
-
-                    {{-- USER DETAILS --}}
-                    <div class="hidden text-right sm:block">
-                        <p
-                            class="max-w-48 truncate text-sm font-semibold text-white
-                                transition-colors group-hover:text-green-700"
-                        >
-                            {{ Auth::user()->name }}
-                        </p>
-
-                        <p
-                            class="max-w-48 truncate text-xs text-white
-                                transition-colors group-hover:text-green-600"
-                        >
-                            {{ Auth::user()->email }}
-                        </p>
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M15.75 6a3.75 3.75 0 11-7.5 0
+                                   3.75 3.75 0 017.5 0z
+                                   M4.5 20.25a8.25 8.25 0 0115 0"
+                            />
+                        </svg>
                     </div>
+                @endif
 
-                    {{-- ARROW --}}
+                <div class="min-w-0">
+                    <p class="truncate text-sm font-bold text-gray-800">
+                        {{ Auth::user()->name }}
+                    </p>
+
+                    <p class="truncate text-xs text-gray-500">
+                        {{ Auth::user()->email }}
+                    </p>
+
+                    <p class="mt-1 text-[10px] font-bold uppercase tracking-wider text-green-700">
+                        {{ str_replace('_', ' ', Auth::user()->role) }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        {{-- MENU ITEMS --}}
+        <div class="p-2">
+            <a
+                href="{{ route('profile.edit') }}"
+                class="flex items-center gap-3 rounded-lg px-3 py-2.5
+                       text-sm font-medium text-gray-700 transition
+                       hover:bg-green-50 hover:text-green-700"
+            >
+                <span
+                    class="flex h-9 w-9 items-center justify-center
+                           rounded-lg bg-green-50 text-green-700"
+                >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        class="h-4 w-4 text-gray-300 transition duration-200
-                            group-hover:text-green-700"
-                        :class="{ 'rotate-180': open }"
+                        class="h-5 w-5"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -153,302 +241,93 @@
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            d="M6 9l6 6 6-6"
+                            d="M15.75 6a3.75 3.75 0 11-7.5 0
+                               3.75 3.75 0 017.5 0z
+                               M4.5 20.25a8.25 8.25 0 0115 0"
                         />
                     </svg>
-                </button>
+                </span>
 
+                <span>Profile</span>
+            </a>
 
-                {{-- =================================================
-                    DROPDOWN MENU
-                ================================================== --}}
-
-                <div
-                    x-show="open"
-                    x-transition:enter="transition ease-out duration-150"
-                    x-transition:enter-start="opacity-0 scale-95"
-                    x-transition:enter-end="opacity-100 scale-100"
-                    x-transition:leave="transition ease-in duration-100"
-                    x-transition:leave-start="opacity-100 scale-100"
-                    x-transition:leave-end="opacity-0 scale-95"
-
-                    class="absolute right-0 z-50 mt-3 w-64
-                        origin-top-right overflow-hidden
-                        rounded-xl bg-white
-                        shadow-xl ring-1 ring-gray-200"
-                    style="display: none;"
+            <a
+                href="{{ route('profile.edit') }}#password"
+                class="flex items-center gap-3 rounded-lg px-3 py-2.5
+                       text-sm font-medium text-gray-700 transition
+                       hover:bg-green-50 hover:text-green-700"
+            >
+                <span
+                    class="flex h-9 w-9 items-center justify-center
+                           rounded-lg bg-green-50 text-green-700"
                 >
-
-
-                    {{-- =================================================
-                        DROPDOWN HEADER
-                    ================================================== --}}
-
-                    <div
-                        class="border-b border-green-100
-                            bg-green-50 px-4 py-4"
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.8"
                     >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75
+                               m-.75 0h10.5A2.25 2.25 0 0119.5 12.75v6
+                               A2.25 2.25 0 0117.25 21h-10.5
+                               a2.25 2.25 0 01-2.25-2.25v-6
+                               A2.25 2.25 0 014.5 10.5z"
+                        />
+                    </svg>
+                </span>
 
-                        <div class="flex items-center gap-3">
+                <span>Change Password</span>
+            </a>
 
-                            {{-- PROFILE IMAGE --}}
-                            @if(Auth::user()->profile_picture)
+            <div class="my-2 border-t border-gray-100"></div>
 
-                                <img
-                                    src="{{ asset('storage/' . Auth::user()->profile_picture) }}"
-                                    alt="{{ Auth::user()->name }}"
-                                    class="h-11 w-11 rounded-full
-                                        object-cover
-                                        ring-2 ring-green-200"
-                                >
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
 
-                            @else
-
-                                <div
-                                    class="flex h-11 w-11
-                                        items-center justify-center
-                                        rounded-full bg-white
-                                        text-green-700
-                                        ring-2 ring-green-200"
-                                >
-
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="h-6 w-6"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        stroke-width="1.8"
-                                    >
-
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M15.75 6a3.75 3.75
-                                            0 11-7.5 0
-                                            3.75 3.75 0 017.5 0z
-                                            M4.5 20.25a8.25 8.25
-                                            0 0115 0"
-                                        />
-
-                                    </svg>
-
-                                </div>
-
-                            @endif
-
-
-                            <div class="min-w-0">
-
-                                <p
-                                    class="truncate text-sm
-                                        font-bold text-gray-800"
-                                >
-                                    {{ Auth::user()->name }}
-                                </p>
-
-                                <p
-                                    class="truncate text-xs
-                                        text-gray-500"
-                                >
-                                    {{ Auth::user()->email }}
-                                </p>
-
-                                <p
-                                    class="mt-1 text-[10px]
-                                        font-bold uppercase
-                                        tracking-wider text-green-700"
-                                >
-                                    {{ str_replace('_', ' ', Auth::user()->role) }}
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    {{-- =================================================
-                        MENU ITEMS
-                    ================================================== --}}
-
-                    <div class="p-2">
-
-
-                        {{-- PROFILE --}}
-                        <a
-                            href="{{ route('profile.edit') }}"
-                            class="flex items-center gap-3
-                                rounded-lg px-3 py-2.5
-                                text-sm font-medium
-                                text-gray-700
-                                transition
-                                hover:bg-green-50
-                                hover:text-green-700"
+                <button
+                    type="submit"
+                    class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5
+                           text-sm font-medium text-red-600 transition hover:bg-red-50"
+                >
+                    <span
+                        class="flex h-9 w-9 items-center justify-center
+                               rounded-lg bg-red-50 text-red-600"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="1.8"
                         >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6
+                                   A2.25 2.25 0 005.25 5.25v13.5
+                                   A2.25 2.25 0 007.5 21h6
+                                   a2.25 2.25 0 002.25-2.25V15"
+                            />
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 12h9m0 0l-3-3m3 3l-3 3"
+                            />
+                        </svg>
+                    </span>
 
-                            <span
-                                class="flex h-9 w-9
-                                    items-center justify-center
-                                    rounded-lg bg-green-50
-                                    text-green-700"
-                            >
-
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                >
-
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M15.75 6a3.75 3.75
-                                        0 11-7.5 0
-                                        3.75 3.75 0 017.5 0z
-                                        M4.5 20.25a8.25 8.25
-                                        0 0115 0"
-                                    />
-
-                                </svg>
-
-                            </span>
-
-                            <span>
-                                Profile
-                            </span>
-
-                        </a>
-
-
-                        {{-- CHANGE PASSWORD --}}
-                        <a
-                            href="{{ route('profile.edit') }}#password"
-                            class="flex items-center gap-3
-                                rounded-lg px-3 py-2.5
-                                text-sm font-medium
-                                text-gray-700
-                                transition
-                                hover:bg-green-50
-                                hover:text-green-700"
-                        >
-
-                            <span
-                                class="flex h-9 w-9
-                                    items-center justify-center
-                                    rounded-lg bg-green-50
-                                    text-green-700"
-                            >
-
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                >
-
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M16.5 10.5V6.75
-                                        a4.5 4.5 0 00-9 0v3.75
-                                        m-.75 0h10.5A2.25
-                                        2.25 0 0119.5 12.75v6
-                                        A2.25 2.25 0 0117.25 21
-                                        h-10.5a2.25 2.25 0
-                                        01-2.25-2.25v-6A2.25
-                                        2.25 0 014.5 10.5z"
-                                    />
-
-                                </svg>
-
-                            </span>
-
-                            <span>
-                                Change Password
-                            </span>
-
-                        </a>
-
-
-                        {{-- DIVIDER --}}
-                        <div class="my-2 border-t border-gray-100"></div>
-
-
-                        {{-- LOGOUT --}}
-                        <form
-                            method="POST"
-                            action="{{ route('logout') }}"
-                        >
-
-                            @csrf
-
-                            <button
-                                type="submit"
-                                class="flex w-full items-center gap-3
-                                    rounded-lg px-3 py-2.5
-                                    text-sm font-medium
-                                    text-red-600
-                                    transition
-                                    hover:bg-red-50"
-                            >
-
-                                <span
-                                    class="flex h-9 w-9
-                                        items-center justify-center
-                                        rounded-lg bg-red-50
-                                        text-red-600"
-                                >
-
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="h-5 w-5"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        stroke-width="1.8"
-                                    >
-
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M15.75 9V5.25A2.25
-                                            2.25 0 0013.5 3h-6A2.25
-                                            2.25 0 005.25 5.25v13.5
-                                            A2.25 2.25 0 007.5 21h6
-                                            a2.25 2.25 0 002.25-2.25V15"
-                                        />
-
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M12 12h9m0 0l-3-3m3 3l-3 3"
-                                        />
-
-                                    </svg>
-
-                                </span>
-
-                                <span>
-                                    Logout
-                                </span>
-
-                            </button>
-
-                        </form>
-
-
-                    </div>
-
-                </div>
-
-            </div>
+                    <span>Logout</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
 
         </div>
 
