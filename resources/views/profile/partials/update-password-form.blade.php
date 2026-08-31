@@ -1,4 +1,4 @@
-<section>
+<section id="password">
 
     <header>
         <h2 class="text-lg font-medium text-gray-900">
@@ -136,7 +136,7 @@
     ====================================================== --}}
     <form
         method="post"
-        action="{{ route('password.update') }}"
+        action="{{ route('password.update') }}#password"
         class="mt-6 space-y-6"
     >
 
@@ -145,7 +145,9 @@
         @method('put')
 
 
-        {{-- Current Password --}}
+        {{-- =====================================================
+            CURRENT PASSWORD
+        ====================================================== --}}
         <div>
 
             <x-input-label
@@ -153,13 +155,99 @@
                 :value="__('Current Password')"
             />
 
-            <x-text-input
-                id="current_password"
-                name="current_password"
-                type="password"
-                class="mt-1 block w-full"
-                autocomplete="current-password"
-            />
+
+            <div class="relative mt-1">
+
+                <x-text-input
+                    id="current_password"
+                    name="current_password"
+                    type="password"
+                    class="block w-full pr-12"
+                    autocomplete="current-password"
+                />
+
+
+                {{-- Eye Button --}}
+                <button
+                    type="button"
+                    onclick="togglePassword(
+                        'current_password',
+                        'currentPasswordEye',
+                        'currentPasswordEyeOff'
+                    )"
+                    class="absolute inset-y-0 right-0
+                           flex w-12 items-center justify-center
+                           text-gray-400
+                           transition
+                           hover:text-green-700
+                           focus:outline-none"
+                >
+
+                    {{-- Eye --}}
+                    <svg
+                        id="currentPasswordEye"
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M2.25 12s3.75-6 9.75-6
+                               9.75 6 9.75 6
+                               -3.75 6-9.75 6
+                               S2.25 12 2.25 12z"
+                        />
+
+                        <circle
+                            cx="12"
+                            cy="12"
+                            r="2.5"
+                        />
+                    </svg>
+
+
+                    {{-- Eye Off --}}
+                    <svg
+                        id="currentPasswordEyeOff"
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="hidden h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M3 3l18 18"
+                        />
+
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M10.7 10.7a2 2 0 002.6 2.6"
+                        />
+
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M9.9 4.3A9.6 9.6 0 0112 4
+                               c6 0 9.75 8 9.75 8
+                               a17.3 17.3 0 01-3.1 4.1
+                               M6.2 6.2C3.7 8 2.25 12 2.25 12
+                               S6 20 12 20
+                               c1.7 0 3.2-.5 4.5-1.2"
+                        />
+                    </svg>
+
+                </button>
+
+            </div>
+
 
             <x-input-error
                 :messages="$errors->updatePassword->get('current_password')"
@@ -169,7 +257,9 @@
         </div>
 
 
-        {{-- New Password --}}
+        {{-- =====================================================
+            NEW PASSWORD
+        ====================================================== --}}
         <div>
 
             <x-input-label
@@ -177,13 +267,99 @@
                 :value="__('New Password')"
             />
 
-            <x-text-input
-                id="password"
-                name="password"
-                type="password"
-                class="mt-1 block w-full"
-                autocomplete="new-password"
-            />
+
+            <div class="relative mt-1">
+
+                <x-text-input
+                    id="password"
+                    name="password"
+                    type="password"
+                    class="block w-full pr-12"
+                    autocomplete="new-password"
+                />
+
+
+                {{-- Eye Button --}}
+                <button
+                    type="button"
+                    onclick="togglePassword(
+                        'password',
+                        'passwordEye',
+                        'passwordEyeOff'
+                    )"
+                    class="absolute inset-y-0 right-0
+                           flex w-12 items-center justify-center
+                           text-gray-400
+                           transition
+                           hover:text-green-700
+                           focus:outline-none"
+                >
+
+                    {{-- Eye --}}
+                    <svg
+                        id="passwordEye"
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M2.25 12s3.75-6 9.75-6
+                               9.75 6 9.75 6
+                               -3.75 6-9.75 6
+                               S2.25 12 2.25 12z"
+                        />
+
+                        <circle
+                            cx="12"
+                            cy="12"
+                            r="2.5"
+                        />
+                    </svg>
+
+
+                    {{-- Eye Off --}}
+                    <svg
+                        id="passwordEyeOff"
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="hidden h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M3 3l18 18"
+                        />
+
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M10.7 10.7a2 2 0 002.6 2.6"
+                        />
+
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M9.9 4.3A9.6 9.6 0 0112 4
+                               c6 0 9.75 8 9.75 8
+                               a17.3 17.3 0 01-3.1 4.1
+                               M6.2 6.2C3.7 8 2.25 12 2.25 12
+                               S6 20 12 20
+                               c1.7 0 3.2-.5 4.5-1.2"
+                        />
+                    </svg>
+
+                </button>
+
+            </div>
+
 
             <x-input-error
                 :messages="$errors->updatePassword->get('password')"
@@ -193,7 +369,9 @@
         </div>
 
 
-        {{-- Confirm Password --}}
+        {{-- =====================================================
+            CONFIRM PASSWORD
+        ====================================================== --}}
         <div>
 
             <x-input-label
@@ -201,13 +379,99 @@
                 :value="__('Confirm Password')"
             />
 
-            <x-text-input
-                id="password_confirmation"
-                name="password_confirmation"
-                type="password"
-                class="mt-1 block w-full"
-                autocomplete="new-password"
-            />
+
+            <div class="relative mt-1">
+
+                <x-text-input
+                    id="password_confirmation"
+                    name="password_confirmation"
+                    type="password"
+                    class="block w-full pr-12"
+                    autocomplete="new-password"
+                />
+
+
+                {{-- Eye Button --}}
+                <button
+                    type="button"
+                    onclick="togglePassword(
+                        'password_confirmation',
+                        'confirmPasswordEye',
+                        'confirmPasswordEyeOff'
+                    )"
+                    class="absolute inset-y-0 right-0
+                           flex w-12 items-center justify-center
+                           text-gray-400
+                           transition
+                           hover:text-green-700
+                           focus:outline-none"
+                >
+
+                    {{-- Eye --}}
+                    <svg
+                        id="confirmPasswordEye"
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M2.25 12s3.75-6 9.75-6
+                               9.75 6 9.75 6
+                               -3.75 6-9.75 6
+                               S2.25 12 2.25 12z"
+                        />
+
+                        <circle
+                            cx="12"
+                            cy="12"
+                            r="2.5"
+                        />
+                    </svg>
+
+
+                    {{-- Eye Off --}}
+                    <svg
+                        id="confirmPasswordEyeOff"
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="hidden h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M3 3l18 18"
+                        />
+
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M10.7 10.7a2 2 0 002.6 2.6"
+                        />
+
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M9.9 4.3A9.6 9.6 0 0112 4
+                               c6 0 9.75 8 9.75 8
+                               a17.3 17.3 0 01-3.1 4.1
+                               M6.2 6.2C3.7 8 2.25 12 2.25 12
+                               S6 20 12 20
+                               c1.7 0 3.2-.5 4.5-1.2"
+                        />
+                    </svg>
+
+                </button>
+
+            </div>
+
 
             <x-input-error
                 :messages="$errors->updatePassword->get('password_confirmation')"
@@ -217,7 +481,9 @@
         </div>
 
 
-        {{-- Submit --}}
+        {{-- =====================================================
+            SUBMIT
+        ====================================================== --}}
         <div class="flex items-center gap-4">
 
             <button
@@ -264,5 +530,49 @@
         </div>
 
     </form>
+
+
+    {{-- =====================================================
+        SHOW / HIDE PASSWORD SCRIPT
+    ====================================================== --}}
+    <script>
+
+        function togglePassword(
+            inputId,
+            eyeId,
+            eyeOffId
+        ) {
+
+            const input =
+                document.getElementById(inputId);
+
+            const eye =
+                document.getElementById(eyeId);
+
+            const eyeOff =
+                document.getElementById(eyeOffId);
+
+
+            if (input.type === 'password') {
+
+                input.type = 'text';
+
+                eye.classList.add('hidden');
+
+                eyeOff.classList.remove('hidden');
+
+            } else {
+
+                input.type = 'password';
+
+                eye.classList.remove('hidden');
+
+                eyeOff.classList.add('hidden');
+
+            }
+
+        }
+
+    </script>
 
 </section>

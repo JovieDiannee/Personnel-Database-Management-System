@@ -1,208 +1,277 @@
 <x-guest-layout>
 
-    <div class="min-h-screen bg-gradient-to-br from-green-950 via-green-900 to-emerald-800 px-4 py-8">
+    <div class="min-h-screen bg-green-900 px-4 py-8">
 
-        <div class="mx-auto flex min-h-screen max-w-6xl items-center justify-center">
+        <div class="mx-auto flex min-h-screen max-w-5xl items-center justify-center">
 
             <div
-                class="grid w-full overflow-hidden rounded-3xl
-                       bg-white shadow-2xl
-                       lg:grid-cols-[42%_58%]"
+                class="w-full max-w-xl overflow-hidden
+                       rounded-3xl bg-white shadow-2xl"
             >
 
                 {{-- =====================================================
-                LEFT SIDE
+                HEADER
                 ====================================================== --}}
                 <div
-                    class="relative hidden overflow-hidden
-                           bg-gradient-to-br from-green-800 to-emerald-700
-                           px-10 py-12 text-white
-                           lg:flex lg:flex-col lg:justify-between"
+                    class="relative bg-green-800
+                           px-6 py-8 text-center"
                 >
 
                     {{-- Decorative Circles --}}
                     <div
-                        class="absolute -left-28 -top-28
-                               h-80 w-80 rounded-full
-                               border-[40px] border-white/10"
+                        class="absolute -left-16 -top-16
+                               h-40 w-40 rounded-full
+                               border-[28px] border-white/10"
                     ></div>
 
                     <div
-                        class="absolute -bottom-32 -right-28
-                               h-96 w-96 rounded-full
-                               border-[45px] border-white/10"
+                        class="absolute -bottom-20 -right-16
+                               h-44 w-44 rounded-full
+                               border-[30px] border-white/10"
                     ></div>
 
 
-                    {{-- Brand --}}
                     <div class="relative z-10">
 
-                        <img
-                            src="{{ asset('images/pdms-logo.png') }}"
-                            alt="PDMS Logo"
-                            class="h-28 w-28 object-contain"
+                        {{-- LOGO --}}
+                        <div
+                            class="mx-auto flex h-24 w-24
+                                   items-center justify-center
+                                   rounded-full bg-white
+                                   p-2 shadow-lg"
                         >
+                            <img
+                                src="{{ asset('images/pdms-favicon.png') }}"
+                                alt="PDMS Logo"
+                                class="h-full w-full object-contain"
+                            >
+                        </div>
 
+
+                        {{-- TITLE --}}
+                        <h1
+                            class="mt-5 text-2xl
+                                   font-bold text-white
+                                   sm:text-3xl"
+                        >
+                            Reset Your Password
+                        </h1>
+
+
+                        {{-- SYSTEM NAME --}}
                         <p
-                            class="mt-8 text-xs font-bold uppercase
-                                   tracking-[0.25em] text-green-200"
+                            class="mt-2 text-sm
+                                   font-medium text-green-100"
                         >
-                            Department of Education
-                        </p>
-
-                        <h2 class="mt-3 text-3xl font-bold leading-tight">
-                            Personnel Database
-                            Management System
-                        </h2>
-
-                        <p class="mt-4 max-w-sm text-sm leading-6 text-green-100">
-                            Create a new password for your account to continue
-                            accessing the Personnel Database Management System.
+                            Personnel Database Management System
                         </p>
 
                     </div>
-
-
-                    {{-- Footer --}}
-                    <p class="relative z-10 text-xs text-green-100/70">
-                        © {{ date('Y') }} DepEd Leyte Division • Personnel Unit
-                    </p>
 
                 </div>
 
 
                 {{-- =====================================================
-                RIGHT SIDE
+                BODY
                 ====================================================== --}}
-                <div class="flex items-center justify-center px-6 py-10 sm:px-10 lg:px-14">
+                <div class="px-6 py-8 sm:px-10">
 
-                    <div class="w-full max-w-lg">
+                    {{-- INTRODUCTION --}}
+                    <div class="mb-7 text-center">
+
+                        <p
+                            class="mx-auto max-w-md
+                                   text-sm leading-6 text-gray-500"
+                        >
+                            Enter your new password below and confirm it
+                            to complete your password reset.
+                        </p>
+
+                    </div>
 
 
-                        {{-- ICON --}}
+                    {{-- =====================================================
+                    VALIDATION ERRORS
+                    ====================================================== --}}
+                    @if ($errors->any())
+
                         <div
-                            class="mb-6 flex h-14 w-14 items-center justify-center
-                                   rounded-2xl bg-green-100 text-green-700"
+                            class="mb-6 rounded-xl
+                                   border border-red-200
+                                   bg-red-50 px-4 py-3"
                         >
 
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-7 w-7"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M15.75 5.25a3.75 3.75 0 11-7.5 0
-                                       3.75 3.75 0 017.5 0z"
-                                />
+                            <p class="text-sm font-bold text-red-800">
+                                Please check the following:
+                            </p>
 
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M12 9v3m0 0l-2 2m2-2l2 2M6 21h12
-                                       a2 2 0 002-2v-5a2 2 0 00-2-2H6
-                                       a2 2 0 00-2 2v5a2 2 0 002 2z"
-                                />
-                            </svg>
+                            <ul
+                                class="mt-2 list-disc space-y-1
+                                       pl-5 text-xs text-red-700"
+                            >
+                                @foreach ($errors->all() as $error)
+
+                                    <li>{{ $error }}</li>
+
+                                @endforeach
+                            </ul>
 
                         </div>
 
+                    @endif
 
-                        {{-- TITLE --}}
-                        <div class="mb-8">
 
-                            <p
-                                class="text-xs font-bold uppercase
-                                       tracking-[0.2em] text-green-700"
+                    {{-- =====================================================
+                    FORM
+                    ====================================================== --}}
+                    <form
+                        method="POST"
+                        action="{{ route('password.store') }}"
+                    >
+
+                        @csrf
+
+
+                        {{-- RESET TOKEN --}}
+                        <input
+                            type="hidden"
+                            name="token"
+                            value="{{ $request->route('token') }}"
+                        >
+
+
+                        {{-- =====================================================
+                        EMAIL
+                        ====================================================== --}}
+                        <div>
+
+                            <label
+                                for="email"
+                                class="mb-2 block
+                                       text-sm font-semibold
+                                       text-gray-700"
                             >
-                                Account Security
-                            </p>
+                                Email Address
+                            </label>
 
-                            <h1 class="mt-2 text-3xl font-bold text-gray-900">
-                                Reset Your Password
-                            </h1>
-
-                            <p class="mt-2 text-sm leading-6 text-gray-500">
-                                Enter and confirm your new password below.
-                            </p>
-
-                        </div>
-
-
-                        {{-- VALIDATION ERRORS --}}
-                        @if ($errors->any())
 
                             <div
-                                class="mb-6 rounded-xl border border-red-200
-                                       bg-red-50 px-4 py-3"
-                            >
-                                <ul class="list-disc pl-5 text-sm text-red-700">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-
-                        @endif
-
-
-                        {{-- RESET FORM --}}
-                        <form method="POST" action="{{ route('password.store') }}">
-
-                            @csrf
-
-                            {{-- Password Reset Token --}}
-                            <input
-                                type="hidden"
-                                name="token"
-                                value="{{ $request->route('token') }}"
+                                class="flex w-full overflow-hidden
+                                       rounded-xl border border-gray-300
+                                       bg-gray-50 shadow-sm"
                             >
 
-
-                            {{-- EMAIL --}}
-                            <div>
-
-                                <label
-                                    for="email"
-                                    class="mb-2 block text-sm font-semibold text-gray-700"
+                                {{-- EMAIL ICON --}}
+                                <div
+                                    class="flex h-12 w-12 shrink-0
+                                           items-center justify-center
+                                           border-r border-gray-200
+                                           bg-gray-50 text-gray-400"
                                 >
-                                    Email Address
-                                </label>
 
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M3 6.75A2.25 2.25 0 015.25 4.5h13.5
+                                               A2.25 2.25 0 0121 6.75v10.5
+                                               a2.25 2.25 0 01-2.25 2.25H5.25
+                                               A2.25 2.25 0 013 17.25V6.75z"
+                                        />
+
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M3.75 6.75L12 12l8.25-5.25"
+                                        />
+                                    </svg>
+
+                                </div>
+
+
+                                {{-- EMAIL INPUT --}}
                                 <input
                                     id="email"
                                     type="email"
                                     name="email"
                                     value="{{ old('email', $request->email) }}"
                                     required
-                                    autofocus
-                                    autocomplete="username"
                                     readonly
-                                    class="block w-full rounded-xl
-                                           border border-gray-300
-                                           bg-gray-50 px-4 py-3.5
-                                           text-sm text-gray-700
-                                           shadow-sm
-                                           focus:border-green-600
-                                           focus:ring-green-600"
+                                    autocomplete="username"
+                                    class="h-12 min-w-0 flex-1
+                                           border-0 bg-gray-50 px-4
+                                           text-sm text-gray-600
+                                           focus:outline-none
+                                           focus:ring-0"
                                 >
 
                             </div>
 
+                        </div>
 
-                            {{-- PASSWORD --}}
-                            <div class="mt-5">
 
-                                <label
-                                    for="password"
-                                    class="mb-2 block text-sm font-semibold text-gray-700"
+                        {{-- =====================================================
+                        NEW PASSWORD
+                        ====================================================== --}}
+                        <div class="mt-5">
+
+                            <label
+                                for="password"
+                                class="mb-2 block
+                                       text-sm font-semibold
+                                       text-gray-700"
+                            >
+                                New Password
+                            </label>
+
+
+                            <div
+                                class="flex w-full overflow-hidden
+                                       rounded-xl border border-gray-300
+                                       bg-white shadow-sm
+                                       focus-within:border-green-600
+                                       focus-within:ring-2
+                                       focus-within:ring-green-600/20"
+                            >
+
+                                {{-- PASSWORD ICON --}}
+                                <div
+                                    class="flex h-12 w-12 shrink-0
+                                           items-center justify-center
+                                           border-r border-gray-200
+                                           bg-gray-50 text-gray-400"
                                 >
-                                    New Password
-                                </label>
+
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M8.25 10.5V7.5
+                                               a3.75 3.75 0 117.5 0v3
+                                               M6.75 10.5h10.5
+                                               A1.75 1.75 0 0119 12.25v7
+                                               A1.75 1.75 0 0117.25 21H6.75
+                                               A1.75 1.75 0 015 19.25v-7
+                                               A1.75 1.75 0 016.75 10.5z"
+                                        />
+                                    </svg>
+
+                                </div>
+
 
                                 <input
                                     id="password"
@@ -211,27 +280,107 @@
                                     required
                                     autocomplete="new-password"
                                     placeholder="Enter new password"
-                                    class="block w-full rounded-xl
-                                           border border-gray-300
-                                           px-4 py-3.5
-                                           text-sm
-                                           shadow-sm
-                                           focus:border-green-600
-                                           focus:ring-green-600"
+                                    class="h-12 min-w-0 flex-1
+                                           border-0 bg-white px-4
+                                           text-sm text-gray-700
+                                           focus:outline-none focus:ring-0"
                                 >
+
+
+                                {{-- SHOW PASSWORD --}}
+                                <button
+                                    type="button"
+                                    onclick="togglePassword('password')"
+                                    class="flex h-12 w-12 shrink-0
+                                           items-center justify-center
+                                           text-gray-400 transition
+                                           hover:text-green-700"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M2.25 12s3.75-6 9.75-6
+                                               9.75 6 9.75 6
+                                               -3.75 6-9.75 6
+                                               S2.25 12 2.25 12z"
+                                        />
+
+                                        <circle
+                                            cx="12"
+                                            cy="12"
+                                            r="2.5"
+                                        />
+                                    </svg>
+                                </button>
 
                             </div>
 
+                        </div>
 
-                            {{-- CONFIRM PASSWORD --}}
-                            <div class="mt-5">
 
-                                <label
-                                    for="password_confirmation"
-                                    class="mb-2 block text-sm font-semibold text-gray-700"
+                        {{-- =====================================================
+                        CONFIRM PASSWORD
+                        ====================================================== --}}
+                        <div class="mt-5">
+
+                            <label
+                                for="password_confirmation"
+                                class="mb-2 block
+                                       text-sm font-semibold
+                                       text-gray-700"
+                            >
+                                Confirm New Password
+                            </label>
+
+
+                            <div
+                                class="flex w-full overflow-hidden
+                                       rounded-xl border border-gray-300
+                                       bg-white shadow-sm
+                                       focus-within:border-green-600
+                                       focus-within:ring-2
+                                       focus-within:ring-green-600/20"
+                            >
+
+                                {{-- PASSWORD ICON --}}
+                                <div
+                                    class="flex h-12 w-12 shrink-0
+                                           items-center justify-center
+                                           border-r border-gray-200
+                                           bg-gray-50 text-gray-400"
                                 >
-                                    Confirm Password
-                                </label>
+
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M8.25 10.5V7.5
+                                               a3.75 3.75 0 117.5 0v3
+                                               M6.75 10.5h10.5
+                                               A1.75 1.75 0 0119 12.25v7
+                                               A1.75 1.75 0 0117.25 21H6.75
+                                               A1.75 1.75 0 015 19.25v-7
+                                               A1.75 1.75 0 016.75 10.5z"
+                                        />
+                                    </svg>
+
+                                </div>
+
 
                                 <input
                                     id="password_confirmation"
@@ -240,86 +389,221 @@
                                     required
                                     autocomplete="new-password"
                                     placeholder="Re-enter new password"
-                                    class="block w-full rounded-xl
-                                           border border-gray-300
-                                           px-4 py-3.5
-                                           text-sm
-                                           shadow-sm
-                                           focus:border-green-600
-                                           focus:ring-green-600"
+                                    class="h-12 min-w-0 flex-1
+                                           border-0 bg-white px-4
+                                           text-sm text-gray-700
+                                           focus:outline-none focus:ring-0"
                                 >
 
-                            </div>
 
-
-                            {{-- PASSWORD NOTE --}}
-                            <div
-                                class="mt-5 rounded-xl border border-green-100
-                                       bg-green-50 px-4 py-3"
-                            >
-
-                                <p class="text-xs leading-5 text-green-800">
-                                    Use a strong password that you do not use on other accounts.
-                                </p>
-
-                            </div>
-
-
-                            {{-- SUBMIT --}}
-                            <button
-                                type="submit"
-                                class="mt-7 flex w-full items-center justify-center gap-2
-                                       rounded-xl bg-green-700
-                                       px-5 py-3.5
-                                       text-base font-bold text-white
-                                       shadow-lg shadow-green-700/20
-                                       transition
-                                       hover:bg-green-800
-                                       focus:outline-none
-                                       focus:ring-2 focus:ring-green-600
-                                       focus:ring-offset-2"
-                            >
-
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
+                                {{-- SHOW PASSWORD --}}
+                                <button
+                                    type="button"
+                                    onclick="togglePassword('password_confirmation')"
+                                    class="flex h-12 w-12 shrink-0
+                                           items-center justify-center
+                                           text-gray-400 transition
+                                           hover:text-green-700"
                                 >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75
-                                           M6.75 10.5h10.5A1.75 1.75 0 0119
-                                           12.25v7A1.75 1.75 0 0117.25 21H6.75
-                                           A1.75 1.75 0 015 19.25v-7
-                                           A1.75 1.75 0 016.75 10.5z"
-                                    />
-                                </svg>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M2.25 12s3.75-6 9.75-6
+                                               9.75 6 9.75 6
+                                               -3.75 6-9.75 6
+                                               S2.25 12 2.25 12z"
+                                        />
 
-                                Reset Password
+                                        <circle
+                                            cx="12"
+                                            cy="12"
+                                            r="2.5"
+                                        />
+                                    </svg>
+                                </button>
 
-                            </button>
-
-                        </form>
-
-
-                        {{-- BACK TO LOGIN --}}
-                        <div class="mt-6 text-center">
-
-                            <a
-                                href="{{ route('login') }}"
-                                class="text-sm font-semibold text-green-700
-                                       hover:text-green-900"
-                            >
-                                ← Back to Sign In
-                            </a>
+                            </div>
 
                         </div>
 
+
+                        {{-- =====================================================
+                        SECURITY NOTE
+                        ====================================================== --}}
+                        <div
+                            class="mt-6 rounded-xl
+                                   border border-green-200
+                                   bg-green-50 px-4 py-4"
+                        >
+
+                            <div class="flex items-start gap-3">
+
+                                <div
+                                    class="flex h-8 w-8 shrink-0
+                                           items-center justify-center
+                                           rounded-full bg-green-100
+                                           text-green-700"
+                                >
+
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M12 3l7.5 3v5.25
+                                               c0 4.67-3.178 8.924-7.5
+                                               10.125C7.678 20.174
+                                               4.5 15.92 4.5
+                                               11.25V6L12 3z"
+                                        />
+
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M9.75 12.75l1.5 1.5 3-3"
+                                        />
+                                    </svg>
+
+                                </div>
+
+
+                                <div>
+
+                                    <p
+                                        class="text-sm font-semibold
+                                               text-green-900"
+                                    >
+                                        Create a Strong Password
+                                    </p>
+
+                                    <p
+                                        class="mt-1 text-xs
+                                               leading-5 text-green-800"
+                                    >
+                                        Use a password that you do not use
+                                        on other accounts and keep your
+                                        credentials confidential.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- =====================================================
+                        RESET BUTTON
+                        ====================================================== --}}
+                        <button
+                            type="submit"
+                            class="mt-6 flex h-12 w-full
+                                   items-center justify-center gap-2
+                                   rounded-xl bg-green-700
+                                   px-5
+                                   text-sm font-bold text-white
+                                   shadow-md transition
+                                   hover:bg-green-800
+                                   focus:outline-none
+                                   focus:ring-2
+                                   focus:ring-green-600
+                                   focus:ring-offset-2"
+                        >
+
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M8.25 10.5V7.5
+                                       a3.75 3.75 0 117.5 0v3
+                                       M6.75 10.5h10.5
+                                       A1.75 1.75 0 0119 12.25v7
+                                       A1.75 1.75 0 0117.25 21H6.75
+                                       A1.75 1.75 0 015 19.25v-7
+                                       A1.75 1.75 0 016.75 10.5z"
+                                />
+                            </svg>
+
+                            Reset Password
+
+                        </button>
+
+                    </form>
+
+
+                    {{-- =====================================================
+                    BACK TO LOGIN
+                    ====================================================== --}}
+                    <div class="mt-6 text-center">
+
+                        <a
+                            href="{{ route('login') }}"
+                            class="inline-flex items-center gap-2
+                                   text-sm font-semibold
+                                   text-green-700 transition
+                                   hover:text-green-900"
+                        >
+
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M10.5 19.5L3 12m0
+                                       0l7.5-7.5M3 12h18"
+                                />
+                            </svg>
+
+                            Back to Sign In
+
+                        </a>
+
                     </div>
+
+                </div>
+
+
+                {{-- =====================================================
+                FOOTER
+                ====================================================== --}}
+                <div
+                    class="border-t border-gray-100
+                           bg-gray-50 px-6 py-4
+                           text-center"
+                >
+
+                    <p class="text-[11px] leading-5 text-gray-400">
+                        © {{ date('Y') }}
+                        Department of Education - Leyte Division
+                        • Personnel Unit • @joviegayo
+                    </p>
 
                 </div>
 
@@ -328,5 +612,23 @@
         </div>
 
     </div>
+
+
+    {{-- SHOW/HIDE PASSWORD --}}
+    <script>
+
+        function togglePassword(id) {
+
+            const input =
+                document.getElementById(id);
+
+            input.type =
+                input.type === 'password'
+                    ? 'text'
+                    : 'password';
+
+        }
+
+    </script>
 
 </x-guest-layout>

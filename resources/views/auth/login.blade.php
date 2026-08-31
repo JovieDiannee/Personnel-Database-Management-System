@@ -175,16 +175,101 @@
                             </div>
 
 
-                            <x-text-input
-                                id="password"
-                                class="mt-2 block w-full rounded-xl border-gray-300 px-4 py-3.5
-                                       focus:border-green-600 focus:ring-green-600"
-                                type="password"
-                                name="password"
-                                required
-                                autocomplete="current-password"
-                                placeholder="Enter your password"
-                            />
+                            {{-- PASSWORD INPUT WITH SHOW / HIDE --}}
+                            <div class="relative mt-2">
+
+                                <x-text-input
+                                    id="password"
+                                    class="block w-full rounded-xl border-gray-300
+                                        px-4 py-3.5 pr-12
+                                        focus:border-green-600
+                                        focus:ring-green-600"
+                                    type="password"
+                                    name="password"
+                                    required
+                                    autocomplete="current-password"
+                                    placeholder="Enter your password"
+                                />
+
+
+                                {{-- SHOW / HIDE PASSWORD BUTTON --}}
+                                <button
+                                    type="button"
+                                    onclick="toggleLoginPassword()"
+                                    class="absolute inset-y-0 right-0
+                                        flex w-12 items-center justify-center
+                                        text-gray-400
+                                        transition
+                                        hover:text-green-700
+                                        focus:outline-none"
+                                    aria-label="Show or hide password"
+                                >
+
+                                    {{-- EYE ICON --}}
+                                    <svg
+                                        id="loginEyeIcon"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M2.25 12s3.75-6 9.75-6
+                                            9.75 6 9.75 6
+                                            -3.75 6-9.75 6
+                                            S2.25 12 2.25 12z"
+                                        />
+
+                                        <circle
+                                            cx="12"
+                                            cy="12"
+                                            r="2.5"
+                                        />
+                                    </svg>
+
+
+                                    {{-- EYE OFF ICON --}}
+                                    <svg
+                                        id="loginEyeOffIcon"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="hidden h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M3 3l18 18"
+                                        />
+
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M10.7 10.7a2 2 0 002.6 2.6"
+                                        />
+
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M9.9 4.3A9.6 9.6 0 0112 4
+                                            c6 0 9.75 8 9.75 8
+                                            a17.3 17.3 0 01-3.1 4.1
+                                            M6.2 6.2C3.7 8 2.25 12 2.25 12
+                                            S6 20 12 20
+                                            c1.7 0 3.2-.5 4.5-1.2"
+                                        />
+                                    </svg>
+
+                                </button>
+
+                            </div>
+
 
                             <x-input-error
                                 :messages="$errors->get('password')"
@@ -192,7 +277,6 @@
                             />
 
                         </div>
-
 
                         {{-- REMEMBER ME --}}
                         <div class="mt-5 flex items-center">
@@ -267,3 +351,35 @@
 
 </x-guest-layout>
 
+<script>
+    function toggleLoginPassword() {
+
+        const password =
+            document.getElementById('password');
+
+        const eye =
+            document.getElementById('loginEyeIcon');
+
+        const eyeOff =
+            document.getElementById('loginEyeOffIcon');
+
+
+        if (password.type === 'password') {
+
+            password.type = 'text';
+
+            eye.classList.add('hidden');
+
+            eyeOff.classList.remove('hidden');
+
+        } else {
+
+            password.type = 'password';
+
+            eye.classList.remove('hidden');
+
+            eyeOff.classList.add('hidden');
+
+        }
+    }
+</script>
