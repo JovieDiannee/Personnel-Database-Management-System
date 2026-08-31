@@ -840,8 +840,8 @@
             <div>
 
                 <p class="text-sm font-semibold text-green-700">
-    SELECTED USER: <span id="accessPersonName"></span>
-</p>
+                    SELECTED USER: <span id="accessPersonName"></span>
+                </p>
                 <br>
                 <label
                     for="role"
