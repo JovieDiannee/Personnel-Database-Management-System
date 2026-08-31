@@ -29,8 +29,10 @@ Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
     Route::post('/data-management/personnel/import', [DataManagementController::class,'importPersonnel'])->name('data-management.personnel.import');
     Route::get('/data-management/personnel/import/preview',[DataManagementController::class, 'personnelImportPreview'])->name('data-management.personnel.import.preview');
     Route::post('/data-management/personnel/import/confirm', [DataManagementController::class,'confirmPersonnelImport'])->name('data-management.personnel.import.confirm');
-    Route::get('/data-management/personnel/individualRecords',[DataManagementController::class, 'viewIndividualRecords'])->name('data-management.personnel.view.individual.records');
+    //Route::get('/data-management/personnel/individualRecords',[DataManagementController::class, 'viewIndividualRecords'])->name('data-management.personnel.view.individual.records');
     Route::get('/data-management/personnel-basic-information/download-template',[DataManagementController::class, 'downloadPersonnelBasicInformationTemplate'])->name('data-management.personnel-basic-information.download-template');
+    Route::get('/data-management/personnel/{person}/edit',[DataManagementController::class, 'editPersonnel'])->name('data-management.personnel.edit');
+    Route::put('/data-management/personnel/{person}',[DataManagementController::class, 'updatePersonnel'])->name('data-management.personnel.update');
 
     // Data Management -> Employment Status
     Route::get('/data-management/employment-status',[DataManagementController::class, 'employmentStatus'])->name('data-management.employment-status');

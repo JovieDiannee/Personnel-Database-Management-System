@@ -726,7 +726,7 @@
                                     <td class="whitespace-nowrap px-6 py-4 text-right">
 
                                         <a
-                                            href="{{ route('data-management.personnel.view.individual.records', $person->id) }}"
+                                            href="{{ route('data-management.personnel.edit', $person->id) }}"
                                             class="inline-flex items-center rounded-md
                                                 bg-green-700 px-4 py-2
                                                 text-sm font-semibold text-white

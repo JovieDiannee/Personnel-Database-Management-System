@@ -493,7 +493,7 @@
 
             <p>
                 © {{ date('Y') }} Personnel Database Management System.
-                All rights reserved.
+                All rights reserved. Jovelyn C. Gayo
             </p>
 
             <p class="mt-2">

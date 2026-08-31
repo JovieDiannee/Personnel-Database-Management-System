@@ -1328,6 +1328,270 @@ class DataManagementController extends Controller
         );
     }
 
+    public function editPersonnel($id)
+    {
+        $person = \App\Models\BasicInformation::with([
+            'user',
+            'issuedId',
+            'employmentStatus',
+        ])->findOrFail($id);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Address
+        |--------------------------------------------------------------------------
+        */
+
+        $addresses = DB::table('address')
+            ->where('basic_information_id', $person->id)
+            ->get();
+
+        return view(
+            'data-management.personnel-edit',
+            compact(
+                'person',
+                'addresses'
+            )
+        );
+    }
+
+    public function updatePersonnel(Request $request, $id)
+    {
+        $person = \App\Models\BasicInformation::findOrFail($id);
+
+        $validated = $request->validate([
+
+            'email' => [
+                'required',
+                'email',
+            ],
+
+            'first_name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'middle_name' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'last_name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'extension_name' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+
+            'sex' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+
+            'birth_place' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'birth_date' => [
+                'nullable',
+                'date',
+            ],
+
+            'civil_status' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+
+            'religion' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'citizenship' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'mode_of_citizenship' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'height_m' => [
+                'nullable',
+                'numeric',
+            ],
+
+            'weight_kg' => [
+                'nullable',
+                'numeric',
+            ],
+
+            'blood_type' => [
+                'nullable',
+                'string',
+                'max:10',
+            ],
+
+            'mobile_number' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+
+            'telephone_number' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+
+            'specialization' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'employee_id' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+        ]);
+
+
+        DB::transaction(function () use ($person, $validated) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | BASIC INFORMATION
+            |--------------------------------------------------------------------------
+            */
+
+            $person->update([
+
+                'first_name' =>
+                    $validated['first_name'],
+
+                'middle_name' =>
+                    $validated['middle_name'] ?? null,
+
+                'last_name' =>
+                    $validated['last_name'],
+
+                'extension_name' =>
+                    $validated['extension_name'] ?? null,
+
+                'sex' =>
+                    $validated['sex'] ?? null,
+
+                'birth_place' =>
+                    $validated['birth_place'] ?? null,
+
+                'birth_date' =>
+                    $validated['birth_date'] ?? null,
+
+                'civil_status' =>
+                    $validated['civil_status'] ?? null,
+
+                'religion' =>
+                    $validated['religion'] ?? null,
+
+                'citizenship' =>
+                    $validated['citizenship'] ?? null,
+
+                'mode_of_citizenship' =>
+                    $validated['mode_of_citizenship'] ?? null,
+
+                'height_m' =>
+                    $validated['height_m'] ?? null,
+
+                'weight_kg' =>
+                    $validated['weight_kg'] ?? null,
+
+                'blood_type' =>
+                    $validated['blood_type'] ?? null,
+
+                'mobile_number' =>
+                    $validated['mobile_number'] ?? null,
+
+                'telephone_number' =>
+                    $validated['telephone_number'] ?? null,
+
+                'specialization' =>
+                    $validated['specialization'] ?? null,
+
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | USER EMAIL
+            |--------------------------------------------------------------------------
+            */
+
+            if ($person->user) {
+
+                $person->user->update([
+                    'email' => $validated['email'],
+                ]);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ISSUED ID
+            |--------------------------------------------------------------------------
+            */
+
+            if ($person->issuedId) {
+
+                $person->issuedId->update([
+                    'employee_id' =>
+                        $validated['employee_id'] ?? null,
+                ]);
+
+            } else {
+
+                \App\Models\IssuedId::create([
+
+                    'basic_information_id' =>
+                        $person->id,
+
+                    'employee_id' =>
+                        $validated['employee_id'] ?? null,
+
+                ]);
+            }
+
+        });
+
+
+        return redirect()
+            ->route(
+                'data-management.personnel.edit',
+                $person->id
+            )
+            ->with(
+                'success',
+                'Personnel information updated successfully.'
+            );
+    }
+
     
     /*   
     |   END  OF PERSONNEL INFORMATION FUNCTIONS
