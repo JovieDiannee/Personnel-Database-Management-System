@@ -512,6 +512,90 @@
 
             <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
 
+                {{-- UPDATE NOTIFICATION --}}
+                @if (session('success'))
+                    <div
+                        id="update-notification"
+                        tabindex="-1"
+                        x-data="{ show: true }"
+                        x-init="
+                            $nextTick(() => {
+                                setTimeout(() => {
+                                    $el.scrollIntoView({
+                                        behavior: 'smooth',
+                                        block: 'center'
+                                    });
+
+                                    $el.focus({ preventScroll: true });
+                                }, 200);
+                            });
+
+                            setTimeout(() => show = false, 6000);
+                        "
+                        x-show="show"
+                        x-transition
+                        class="mb-4 flex items-start justify-between rounded-lg
+                            border border-green-200 bg-green-50 text-green-800
+                            focus:outline-none focus:ring-2 focus:ring-green-500
+                            focus:ring-offset-2"
+                        style="padding: 14px 18px;"
+                        role="alert"
+                    >
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="flex h-8 w-8 shrink-0 items-center justify-center
+                                    rounded-full bg-green-100"
+                            >
+                                <svg
+                                    class="h-5 w-5 text-green-700"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M5 13l4 4L19 7"
+                                    />
+                                </svg>
+                            </div>
+
+                            <div>
+                                <p class="text-sm font-semibold">
+                                    Update successful
+                                </p>
+
+                                <p class="mt-0.5 text-sm text-green-700">
+                                    {{ session('success') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            @click="show = false"
+                            class="ml-4 rounded-md p-1 text-green-600
+                                hover:bg-green-100 hover:text-green-800"
+                            aria-label="Close notification"
+                        >
+                            <svg
+                                class="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                @endif
+
                 {{-- HEADER --}}
                 <div class="flex flex-col gap-4 border-b border-gray-200 p-6 md:flex-row md:items-center md:justify-between bg-green-800">
 
@@ -519,6 +603,16 @@
 
                         <h2 class="text-lg font-semibold text-white">
                             Medical Allowance Records
+
+                            @if (auth()->user()->role === 'admin')
+                                (
+                                    {{ auth()->user()->employmentStatus?->school?->school_name ?? 'No assigned school' }}
+                                    -
+                                    {{ auth()->user()->employmentStatus?->school?->school_district ?? 'No district' }}
+                                )
+                            @elseif (auth()->user()->role === 'super_admin')
+                                (All Schools)
+                            @endif
                         </h2>
 
                         <p class="mt-1 text-sm text-white">
@@ -603,108 +697,77 @@
 
                 {{-- TABLE --}}
                 <div class="overflow-x-auto">
-
                     <table class="min-w-full divide-y divide-gray-200">
-
                         <thead class="bg-green-50">
-
                             <tr>
-
                                 {{-- NAME --}}
-                                <th class="min-w-[220px] px-4 py-3 text-left text-xs
-                                        font-semibold uppercase tracking-wider text-gray-600">
+                                <th class="min-w-[220px] px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     Name and Email
                                 </th>
 
+                                @if (auth()->user()->role === 'super_admin')
+                                    {{-- SCHOOL --}}
+                                    <th class="min-w-[220px] px-4 py-3 text-left text-xs font-semibold
+                                            uppercase tracking-wider text-gray-600">
+                                        School Name
+                                    </th>
 
-                                {{-- SCHOOL --}}
-                                <th class="min-w-[220px] px-4 py-3 text-left text-xs
-                                        font-semibold uppercase tracking-wider text-gray-600">
-                                    School Name
-                                </th>
+                                    {{-- DISTRICT --}}
+                                    <th class="min-w-[140px] px-4 py-3 text-left text-xs font-semibold
+                                            uppercase tracking-wider text-gray-600">
+                                        District
+                                    </th>
 
-
-                                {{-- DISTRICT --}}
-                                <th class="min-w-[140px] px-4 py-3 text-left text-xs
-                                        font-semibold uppercase tracking-wider text-gray-600">
-                                    District
-                                </th>
-
-
-                                {{-- SCHOOL LEVEL --}}
-                                <th class="min-w-[180px] px-4 py-3 text-left text-xs
-                                        font-semibold uppercase tracking-wider text-gray-600">
-                                    Item From School Level
-                                </th>
-
+                                    {{-- SCHOOL LEVEL --}}
+                                    <th class="min-w-[180px] px-4 py-3 text-left text-xs font-semibold
+                                            uppercase tracking-wider text-gray-600">
+                                        Item From School Level
+                                    </th>
+                                @endif
 
                                 {{-- ITEM NUMBER --}}
-                                <th class="min-w-[180px] px-4 py-3 text-left text-xs
-                                        font-semibold uppercase tracking-wider text-gray-600">
+                                <th class="min-w-[180px] px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     Plantilla Item No.
                                 </th>
 
-
                                 {{-- POSITION --}}
-                                <th class="min-w-[200px] px-4 py-3 text-left text-xs
-                                        font-semibold uppercase tracking-wider text-gray-600">
+                                <th class="min-w-[200px] px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     Position Title
                                 </th>
 
-
                                 {{-- EMPLOYMENT STATUS --}}
-                                <th class="min-w-[160px] px-4 py-3 text-left text-xs
-                                        font-semibold uppercase tracking-wider text-gray-600">
+                                <th class="min-w-[160px] px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     Employment Status
                                 </th>
 
-
-                                {{-- ORIGINAL APPOINTMENT --}}
-                                <th class="min-w-[190px] px-4 py-3 text-left text-xs
-                                        font-semibold uppercase tracking-wider text-gray-600">
-                                    Date of Original Appointment
-                                </th>
-
-
                                 {{-- GROUP AVAILMENT --}}
-                                <th class="min-w-[200px] px-4 py-3 text-left text-xs
-                                        font-semibold uppercase tracking-wider text-gray-600">
-                                    Group Availment
+                                <th class="min-w-[200px] px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+                                    Medical Allowance Mode Availment
                                 </th>
-
 
                                 {{-- DISBURSEMENT --}}
-                                <th class="min-w-[180px] px-4 py-3 text-left text-xs
-                                        font-semibold uppercase tracking-wider text-gray-600">
+                                <th class="min-w-[180px] px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     Disbursement Status
                                 </th>
 
-
                                 {{-- ACTION --}}
-                                <th class="min-w-[100px] px-4 py-3 text-right text-xs
-                                        font-semibold uppercase tracking-wider text-gray-600">
+                                <th class="min-w-[100px] px-4 py-3 text-center text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
                                     Action
                                 </th>
-
                             </tr>
-
                         </thead>
 
-
                         <tbody class="divide-y divide-gray-200 bg-white">
-
-                            @forelse($medicalAllowances as $record)
-
+                            @forelse ($medicalAllowances as $record)
                                 @php
-
-                                    /*
-                                    |--------------------------------------------------------------------------
-                                    | Personnel
-                                    |--------------------------------------------------------------------------
-                                    */
-
                                     $basic = $record->user?->basicInformation;
-
 
                                     $name = trim(
                                         ($basic?->first_name ?? '') . ' ' .
@@ -713,264 +776,506 @@
                                         ($basic?->extension_name ?? '')
                                     );
 
-
-                                    /*
-                                    |--------------------------------------------------------------------------
-                                    | Employment
-                                    |--------------------------------------------------------------------------
-                                    */
-
                                     $employment = $record->user?->employmentStatus;
+                                    $plantilla = $employment?->plantilla;
+                                    $school = $employment?->school;
 
+                                    $disbursementStatus = strtolower(
+                                        trim($record->disbursement_status ?? '')
+                                    );
+                                @endphp
 
-                                    /*
-                        |--------------------------------------------------------------------------
-                        | Plantilla
-                        |--------------------------------------------------------------------------
-                        */
-
-                        $plantilla = $employment?->plantilla;
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | School
-                        |--------------------------------------------------------------------------
-                        */
-
-                        $school = $employment?->school;
-
-                        @endphp
-
-
-                                <tr class="hover:bg-gray-50">
-
-
+                                <tr
+                                    class="hover:bg-gray-50"
+                                    x-data="{ updateModalOpen: false }"
+                                >
                                     {{-- NAME + EMAIL --}}
                                     <td class="min-w-[220px] px-4 py-4">
-
                                         <div class="text-sm font-semibold text-gray-900">
-
                                             {{ $name ?: '—' }}
-
                                         </div>
-
 
                                         <div class="mt-1 break-words text-sm text-gray-500">
-
                                             {{ $record->user?->email ?? '—' }}
-
                                         </div>
-
                                     </td>
 
+                                    @if (auth()->user()->role === 'super_admin')
+                                        {{-- SCHOOL NAME --}}
+                                        <td class="min-w-[220px] px-4 py-4 text-sm text-gray-700">
+                                            {{ $school?->school_name ?? '—' }}
+                                        </td>
 
-                                    {{-- SCHOOL NAME --}}
-                                    <td class="min-w-[220px] px-4 py-4 text-sm text-gray-700">
+                                        {{-- DISTRICT --}}
+                                        <td class="min-w-[140px] px-4 py-4 text-sm text-gray-700">
+                                            {{ $school?->school_district ?? '—' }}
+                                        </td>
 
-                                        {{ $school?->school_name ?? '—' }}
-
-                                    </td>
-
-
-                                    {{-- DISTRICT --}}
-                                    <td class="px-4 py-4 text-sm text-gray-700">
-
-                                        {{ $school?->district ?? '—' }}
-
-                                    </td>
-
-
-                                    {{-- ITEM FROM SCHOOL LEVEL --}}
-                                    <td class="px-4 py-4 text-sm text-gray-700">
-
-                                        {{ $plantilla?->item_from_school_level ?? '—' }}
-
-                                    </td>
-
+                                        {{-- ITEM FROM SCHOOL LEVEL --}}
+                                        <td class="min-w-[180px] px-4 py-4 text-sm text-gray-700">
+                                            {{ $plantilla?->item_from_school_level ?? '—' }}
+                                        </td>
+                                    @endif
 
                                     {{-- PLANTILLA ITEM NO. --}}
-                                    <td class="px-4 py-4 text-sm text-gray-700">
-
+                                    <td class="min-w-[180px] px-4 py-4 text-sm text-gray-700">
                                         {{ $plantilla?->item_number ?? '—' }}
-
                                     </td>
-
 
                                     {{-- POSITION TITLE --}}
-                                    <td class="px-4 py-4 text-sm font-medium text-gray-900">
-
+                                    <td class="min-w-[200px] px-4 py-4 text-sm font-medium text-gray-900">
                                         {{ $plantilla?->position_title ?? '—' }}
-
                                     </td>
-
 
                                     {{-- EMPLOYMENT STATUS --}}
-                                    <td class="px-4 py-4">
-
-                                        @if($employment?->employment_status)
-
-                                            <span
-                                                class="inline-flex rounded-full
-                                                    bg-green-100 px-3 py-1
-                                                    text-xs font-semibold
-                                                    text-green-700"
-                                            >
-
+                                    <td class="min-w-[160px] px-4 py-4">
+                                        @if ($employment?->employment_status)
+                                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1
+                                                        text-xs font-semibold text-green-700">
                                                 {{ $employment->employment_status }}
-
                                             </span>
-
                                         @else
-
-                                            <span class="text-sm text-gray-400">
-                                                —
-                                            </span>
-
+                                            <span class="text-sm text-gray-400">—</span>
                                         @endif
-
                                     </td>
-
-
-                                    {{-- DATE OF ORIGINAL APPOINTMENT --}}
-                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">
-
-                                        {{ $employment?->date_of_original_appointment
-                                            ? \Carbon\Carbon::parse(
-                                                $employment->date_of_original_appointment
-                                            )->format('M d, Y')
-                                            : '—'
-                                        }}
-
-                                    </td>
-
 
                                     {{-- GROUP AVAILMENT --}}
                                     <td class="min-w-[200px] px-4 py-4 text-sm text-gray-700">
-
                                         {{ $record->mode_of_availment ?? '—' }}
-
                                     </td>
-
 
                                     {{-- DISBURSEMENT STATUS --}}
-                                    <td class="px-4 py-4">
-
-                                        @if($record->disbursement_status)
-
-                                            @php
-
-                                                $status = strtolower(
-                                                    trim($record->disbursement_status)
-                                                );
-
-                                            @endphp
-
-
-                                            @if($status === 'paid')
-
-                                                <span
-                                                    class="inline-flex rounded-full
-                                                        bg-green-100 px-3 py-1
-                                                        text-xs font-semibold
-                                                        text-green-700"
-                                                >
+                                    <td class="min-w-[180px] px-4 py-4">
+                                        @if ($record->disbursement_status)
+                                            @if ($disbursementStatus === 'paid')
+                                                <span class="inline-flex rounded-full bg-green-100 px-3 py-1
+                                                            text-xs font-semibold text-green-700">
                                                     {{ $record->disbursement_status }}
                                                 </span>
-
-                                            @elseif($status === 'pending')
-
-                                                <span
-                                                    class="inline-flex rounded-full
-                                                        bg-yellow-100 px-3 py-1
-                                                        text-xs font-semibold
-                                                        text-yellow-700"
-                                                >
+                                            @elseif ($disbursementStatus === 'pending')
+                                                <span class="inline-flex rounded-full bg-yellow-100 px-3 py-1
+                                                            text-xs font-semibold text-yellow-700">
                                                     {{ $record->disbursement_status }}
                                                 </span>
-
                                             @else
-
-                                                <span
-                                                    class="inline-flex rounded-full
-                                                        bg-gray-100 px-3 py-1
-                                                        text-xs font-semibold
-                                                        text-gray-700"
-                                                >
+                                                <span class="inline-flex rounded-full bg-gray-100 px-3 py-1
+                                                            text-xs font-semibold text-gray-700">
                                                     {{ $record->disbursement_status }}
                                                 </span>
-
                                             @endif
-
                                         @else
-
-                                            <span class="text-sm text-gray-400">
-                                                —
-                                            </span>
-
+                                            <span class="text-sm text-gray-400">—</span>
                                         @endif
-
                                     </td>
-
 
                                     {{-- ACTION --}}
-                                    <td class="whitespace-nowrap px-4 py-4 text-right">
-
-                                        <a
-                                            href="#"
-                                            class="inline-flex items-center
-                                                rounded-md border
-                                                border-green-700
-                                                px-3 py-2
-                                                text-sm font-semibold
-                                                text-green-700
-                                                hover:bg-green-50"
+                                    <td class="whitespace-nowrap px-4 py-4 text-center">
+                                        <button
+                                            type="button"
+                                            @click="updateModalOpen = true"
+                                            class="inline-flex items-center rounded-md bg-green-700
+                                                px-4 py-2 text-sm font-semibold text-white
+                                                transition hover:bg-green-800"
                                         >
-                                            View
-                                        </a>
+                                            Update
+                                        </button>
 
+                                        {{-- UPDATE MODAL --}}
+                                        <template x-teleport="body">
+                                            <div
+                                                x-cloak
+                                                x-show="updateModalOpen"
+                                                x-transition.opacity
+                                                @keydown.escape.window="updateModalOpen = false"
+                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                                                role="dialog"
+                                                aria-modal="true"
+                                                aria-labelledby="update-availment-title-{{ $record->id }}"
+                                            >
+                                                <div
+                                                    x-show="updateModalOpen"
+                                                    x-transition.scale.origin.center
+                                                    @click.outside="updateModalOpen = false"
+                                                    class="w-full overflow-hidden rounded-xl bg-white text-left shadow-2xl"
+                                                    style="max-width: 420px;"
+                                                >
+                                                    {{-- GREEN HEADER --}}
+                                                    <div class="flex items-start justify-between bg-green-700 px-5 py-4">
+                                                        <div class="min-w-0 pr-4">
+                                                            <h3
+                                                                id="update-availment-title-{{ $record->id }}"
+                                                                class="text-base font-semibold text-white"
+                                                            >
+                                                                Update Medical Allowance Availment
+                                                            </h3>
+
+                                                            <p class="mt-1 truncate text-sm text-green-100">
+                                                                Name: {{ $name ?: 'Unknown personnel' }}
+                                                            </p>
+                                                        </div>
+
+                                                        <button
+                                                            type="button"
+                                                            @click="updateModalOpen = false"
+                                                            class="flex h-8 w-8 shrink-0 items-center justify-center
+                                                                rounded-full text-green-100 transition
+                                                                hover:bg-green-800 hover:text-white"
+                                                            aria-label="Close modal"
+                                                        >
+                                                            <svg
+                                                                class="h-5 w-5"
+                                                                fill="none"
+                                                                viewBox="0 0 24 24"
+                                                                stroke="currentColor"
+                                                            >
+                                                                <path
+                                                                    stroke-linecap="round"
+                                                                    stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M6 18 18 6M6 6l12 12"
+                                                                />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+
+                                                    {{-- FORM --}}
+                                                    <form
+                                                        method="POST"
+                                                        action="{{ route(
+                                                            'medical-allowance.update-availment',
+                                                            $record
+                                                        ) }}"
+                                                    >
+                                                        @csrf
+                                                        @method('PATCH')
+
+                                                        <div class="space-y-4 px-5 py-5">
+                                                            {{-- SCHOOL AND DISTRICT DETAILS --}}
+                                                            <div
+                                                                class="rounded-lg border border-green-100 bg-green-50"
+                                                                style="padding: 18px 20px;"
+                                                                >
+                                                                <div class="space-y-4">
+                                                                    {{-- SCHOOL --}}
+                                                                    <div style="padding-bottom: 12px;">
+                                                                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                                            School
+                                                                        </p>
+
+                                                                        <p class="mt-1 text-sm font-medium text-gray-800">
+                                                                            {{ $school?->school_name ?? '—' }}
+                                                                        </p>
+                                                                    </div>
+
+                                                                    {{-- DISTRICT --}}
+                                                                    <div
+                                                                        class="border-t border-green-100"
+                                                                        style="padding-top: 12px;"
+                                                                    >
+                                                                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                                                            District
+                                                                        </p>
+
+                                                                        <p class="mt-1 text-sm font-medium text-gray-800">
+                                                                            {{ $school?->school_district ?? '—' }}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <br>
+
+                                                            {{-- =====================================================
+                                                                MODE OF AVAILMENT
+                                                            ====================================================== --}}
+                                                            <div
+                                                                x-data="{
+                                                                    originalMode: @js($record->mode_of_availment),
+                                                                    selectedMode: @js($record->mode_of_availment),
+
+                                                                    /*
+                                                                    |--------------------------------------------------------------------------
+                                                                    | INVALID CHANGES
+                                                                    |--------------------------------------------------------------------------
+                                                                    |
+                                                                    | 1. Group Availment → Individual Availment = NOT ALLOWED
+                                                                    | 2. Not Eligible → Individual Availment = NOT ALLOWED
+                                                                    |
+                                                                    */
+                                                                    get isInvalid() {
+
+                                                                        return (
+                                                                            this.originalMode === 'Group Availment (HMO)' &&
+                                                                            this.selectedMode === 'Individual Availment (HMO)'
+                                                                        ) || (
+                                                                            this.originalMode === 'Not Eligible' &&
+                                                                            this.selectedMode === 'Individual Availment (HMO)'
+                                                                        );
+                                                                    },
+
+                                                                    /*
+                                                                    |--------------------------------------------------------------------------
+                                                                    | CHECK IF VALUE CHANGED
+                                                                    |--------------------------------------------------------------------------
+                                                                    */
+                                                                    get hasChanged() {
+                                                                        return this.originalMode !== this.selectedMode;
+                                                                    },
+
+                                                                    /*
+                                                                    |--------------------------------------------------------------------------
+                                                                    | VALIDATION MESSAGE
+                                                                    |--------------------------------------------------------------------------
+                                                                    */
+                                                                    get validationMessage() {
+
+                                                                        if (
+                                                                            this.originalMode === 'Group Availment (HMO)' &&
+                                                                            this.selectedMode === 'Individual Availment (HMO)'
+                                                                        ) {
+                                                                            return 'Group Availment (HMO) cannot be changed to Individual Availment (HMO).';
+                                                                        }
+
+                                                                        if (
+                                                                            this.originalMode === 'Not Eligible' &&
+                                                                            this.selectedMode === 'Individual Availment (HMO)'
+                                                                        ) {
+                                                                            return 'Not Eligible cannot be changed to Individual Availment (HMO).';
+                                                                        }
+
+                                                                        return '';
+                                                                    }
+                                                                }"
+
+                                                                class="rounded-lg border border-gray-200 bg-white"
+                                                                style="padding: 18px 20px;"
+                                                            >
+
+
+                                                                {{-- =====================================================
+                                                                    LABEL
+                                                                ====================================================== --}}
+                                                                <label
+                                                                    for="mode_of_availment_{{ $record->id }}"
+                                                                    class="mb-2 block text-sm font-semibold text-gray-700"
+                                                                >
+                                                                    Mode of Availment
+                                                                    <span class="text-red-500">*</span>
+                                                                </label>
+
+
+                                                                {{-- =====================================================
+                                                                    SELECT
+                                                                ====================================================== --}}
+                                                                <select
+                                                                    id="mode_of_availment_{{ $record->id }}"
+                                                                    name="mode_of_availment"
+                                                                    x-model="selectedMode"
+                                                                    required
+
+                                                                    :class="isInvalid
+                                                                        ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
+                                                                        : 'border-gray-300 focus:border-green-600 focus:ring-green-200'"
+
+                                                                    class="w-full rounded-lg border bg-white
+                                                                        px-3 py-2.5 text-sm text-gray-900
+                                                                        focus:outline-none focus:ring-2"
+                                                                >
+
+                                                                    <option value="Group Availment (HMO)">
+                                                                        Group Availment (HMO)
+                                                                    </option>
+
+                                                                    <option value="Individual Availment (HMO)">
+                                                                        Individual Availment (HMO)
+                                                                    </option>
+
+                                                                    <option value="Not Eligible">
+                                                                        Not Eligible
+                                                                    </option>
+
+                                                                </select>
+
+
+                                                                {{-- =====================================================
+                                                                    REAL-TIME ERROR MESSAGE
+                                                                ====================================================== --}}
+                                                                <div
+                                                                    x-cloak
+                                                                    x-show="isInvalid"
+                                                                    x-transition
+
+                                                                    class="mt-3 flex items-start gap-3
+                                                                        rounded-lg border border-red-200
+                                                                        bg-red-50 px-4 py-3"
+                                                                >
+
+                                                                    {{-- WARNING ICON --}}
+                                                                    <svg
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                        class="mt-0.5 h-5 w-5 shrink-0 text-red-600"
+                                                                        fill="none"
+                                                                        viewBox="0 0 24 24"
+                                                                        stroke="currentColor"
+                                                                        stroke-width="2"
+                                                                    >
+                                                                        <path
+                                                                            stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            d="M12 9v3.75M12 16.5h.01"
+                                                                        />
+
+                                                                        <path
+                                                                            stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            d="M10.29 3.86L1.82 18a2 2 0
+                                                                            001.71 3h16.94a2 2 0
+                                                                            001.71-3L13.71 3.86a2 2
+                                                                            0 00-3.42 0z"
+                                                                        />
+                                                                    </svg>
+
+
+                                                                    <div>
+
+                                                                        <p class="text-sm font-semibold text-red-800">
+                                                                            Option Not Allowed
+                                                                        </p>
+
+                                                                        <p
+                                                                            class="mt-1 text-xs leading-5 text-red-700"
+                                                                            x-text="validationMessage"
+                                                                        ></p>
+
+                                                                    </div>
+
+                                                                </div>
+
+
+                                                                {{-- =====================================================
+                                                                    VALID CHANGE MESSAGE
+                                                                ====================================================== --}}
+                                                                <div
+                                                                    x-cloak
+                                                                    x-show="hasChanged && !isInvalid"
+                                                                    x-transition
+
+                                                                    class="mt-3 flex items-start gap-3
+                                                                        rounded-lg border border-green-200
+                                                                        bg-green-50 px-4 py-3"
+                                                                >
+
+                                                                    {{-- CHECK ICON --}}
+                                                                    <svg
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                        class="mt-0.5 h-5 w-5 shrink-0 text-green-600"
+                                                                        fill="none"
+                                                                        viewBox="0 0 24 24"
+                                                                        stroke="currentColor"
+                                                                        stroke-width="2"
+                                                                    >
+                                                                        <path
+                                                                            stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            d="M5 13l4 4L19 7"
+                                                                        />
+                                                                    </svg>
+
+
+                                                                    <div>
+
+                                                                        <p class="text-sm font-semibold text-green-800">
+                                                                            Change Allowed
+                                                                        </p>
+
+                                                                        <p class="mt-1 text-xs leading-5 text-green-700">
+                                                                            This availment status can be updated.
+                                                                        </p>
+
+                                                                    </div>
+
+                                                                </div>
+
+
+                                                                {{-- =====================================================
+                                                                    LARAVEL VALIDATION ERROR
+                                                                ====================================================== --}}
+                                                                @error('mode_of_availment')
+
+                                                                    <p class="mt-2 text-sm text-red-600">
+                                                                        {{ $message }}
+                                                                    </p>
+
+                                                                @enderror
+
+
+                                                                {{-- =====================================================
+                                                                    SAVE BUTTON
+                                                                ====================================================== --}}
+                                                                <div class="mt-5 flex justify-end">
+
+                                                                    <button
+                                                                        type="submit"
+
+                                                                        :disabled="isInvalid"
+
+                                                                        :class="isInvalid
+                                                                            ? 'cursor-not-allowed bg-gray-300 text-gray-500'
+                                                                            : 'bg-green-700 text-white hover:bg-green-800'"
+
+                                                                        class="rounded-lg px-4 py-2
+                                                                            text-sm font-semibold
+                                                                            transition
+                                                                            focus:outline-none
+                                                                            focus:ring-2
+                                                                            focus:ring-green-300"
+                                                                    >
+                                                                        Save Changes
+                                                                    </button>
+
+                                                                </div>
+
+                                                            </div>
+
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </template>
                                     </td>
-
                                 </tr>
-
-
                             @empty
-
                                 <tr>
-
                                     <td
-                                        colspan="11"
+                                        colspan="{{ auth()->user()->role === 'super_admin' ? 10 : 7 }}"
                                         class="px-6 py-12 text-center"
                                     >
-
                                         <div class="text-sm font-medium text-gray-700">
                                             No medical allowance records found.
                                         </div>
 
-                                        @if($search !== '')
-
+                                        @if ($search !== '')
                                             <p class="mt-1 text-sm text-gray-500">
-
                                                 No records matched your search for
                                                 <span class="font-semibold">
-                                                    "{{ $search }}"
+                                                    “{{ $search }}”
                                                 </span>.
-
                                             </p>
-
                                         @endif
-
                                     </td>
-
                                 </tr>
-
                             @endforelse
-
                         </tbody>
-
                     </table>
-
                 </div>
+
+                {{-- Required for Alpine modal elements --}}
+                @once
+                    <style>
+                        [x-cloak] {
+                            display: none !important;
+                        }
+                    </style>
+                @endonce
 
 
                 {{-- PAGINATION --}}

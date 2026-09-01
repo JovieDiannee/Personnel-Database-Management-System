@@ -727,16 +727,25 @@
                                     <td class="whitespace-nowrap px-4 py-4 text-right">
 
                                         <a
-                                            href="#"
+                                            href="{{ route(
+                                                'data-management.employment-status.edit',
+                                                $record->id
+                                            ) }}"
                                             class="inline-flex items-center
-                                                rounded-md border
-                                                border-green-700
+                                                rounded-md
+                                                bg-green-700
                                                 px-3 py-2
                                                 text-sm font-semibold
-                                                text-green-700
-                                                hover:bg-green-50"
+                                                text-white
+                                                shadow-sm
+                                                transition
+                                                hover:bg-green-800
+                                                focus:outline-none
+                                                focus:ring-2
+                                                focus:ring-green-500
+                                                focus:ring-offset-2"
                                         >
-                                            View
+                                            Update
                                         </a>
 
                                     </td>

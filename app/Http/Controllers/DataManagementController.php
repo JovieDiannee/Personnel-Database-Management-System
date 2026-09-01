@@ -28,6 +28,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use App\Exports\EnrollmentTemplateExport;
 
+
 class DataManagementController extends Controller
 {
     public function index()
@@ -45,12 +46,35 @@ class DataManagementController extends Controller
 
     public function personnel()
     {
-        $personnel = \App\Models\BasicInformation::with(['user', 'issuedId'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
-        return view('data-management.personnel', compact('personnel'));
-    }
+        $user = auth()->user();
 
+        $query = \App\Models\BasicInformation::with([
+            'user',
+            'issuedId',
+        ])->orderByDesc('created_at');
+
+        if ($user->role === 'admin') {
+            $schoolId = $user->employmentStatus?->school_db_id;
+
+            if ($schoolId) {
+                $query->whereHas('user.employmentStatus', function ($query) use ($schoolId) {
+                    $query->where('school_db_id', $schoolId);
+                });
+            } else {
+                // Admins without an assigned school should see no personnel.
+                $query->whereRaw('1 = 0');
+            }
+        }
+
+        // super_admin receives no school filter and can see everything.
+        $personnel = $query->paginate(20);
+
+        return view(
+            'data-management.personnel',
+            compact('personnel')
+        );
+    }
+    
     public function importPersonnel(Request $request)
     {
         $request->validate([
@@ -1275,11 +1299,31 @@ class DataManagementController extends Controller
     public function updateUserAccess(Request $request, $person)
     {
         $validated = $request->validate([
-            'role' => 'required|in:user,admin,super_admin',
-            'status' => 'required|in:active,inactive',
+
+            'role' => [
+                'required',
+                'in:user,admin,super_admin',
+            ],
+
+            'status' => [
+                'required',
+                'in:active,inactive',
+            ],
+
+            'reset_password' => [
+                'nullable',
+                'boolean',
+            ],
+
         ]);
 
-        // A Super Admin account must always remain active.
+
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin Must Remain Active
+        |--------------------------------------------------------------------------
+        */
+
         if (
             $validated['role'] === 'super_admin' &&
             $validated['status'] === 'inactive'
@@ -1290,7 +1334,21 @@ class DataManagementController extends Controller
             );
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Find Personnel
+        |--------------------------------------------------------------------------
+        */
+
         $personnel = \App\Models\BasicInformation::findOrFail($person);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Find User Account
+        |--------------------------------------------------------------------------
+        */
 
         $user = $personnel->user;
 
@@ -1301,15 +1359,27 @@ class DataManagementController extends Controller
             );
         }
 
-        // Prevent a Super Admin from changing their own account.
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prevent Changing Own Account
+        |--------------------------------------------------------------------------
+        */
+
         if ($user->id === auth()->id()) {
             return back()->with(
                 'error',
-                'You cannot change your own role or account status.'
+                'You cannot change your own role, account status, or password from this screen.'
             );
         }
 
-        // Protect existing Super Admin accounts from being demoted or disabled.
+
+        /*
+        |--------------------------------------------------------------------------
+        | Protect Existing Super Admin Accounts
+        |--------------------------------------------------------------------------
+        */
+
         if ($user->role === 'super_admin') {
             return back()->with(
                 'error',
@@ -1317,10 +1387,54 @@ class DataManagementController extends Controller
             );
         }
 
-        $user->update([
-            'role' => $validated['role'],
-            'status' => $validated['status'],
-        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update Role and Status
+        |--------------------------------------------------------------------------
+        */
+
+        $user->role = $validated['role'];
+
+        $user->status = $validated['status'];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reset Password
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->boolean('reset_password')) {
+
+            $user->password = Hash::make('pdms@123');
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Save Changes
+        |--------------------------------------------------------------------------
+        */
+
+        $user->save();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Success Message
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->boolean('reset_password')) {
+
+            return back()->with(
+                'success',
+                'User access updated successfully. The password has been reset to the default password: pdms@123'
+            );
+        }
+
 
         return back()->with(
             'success',
@@ -1540,13 +1654,22 @@ class DataManagementController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | USER EMAIL
+            | USER NAME AND EMAIL
             |--------------------------------------------------------------------------
             */
 
             if ($person->user) {
+                $fullName = collect([
+                    $validated['first_name'],
+                    $validated['middle_name'] ?? null,
+                    $validated['last_name'],
+                    $validated['extension_name'] ?? null,
+                ])
+                    ->filter(fn ($value) => filled($value))
+                    ->implode(' ');
 
                 $person->user->update([
+                    'name' => $fullName,
                     'email' => $validated['email'],
                 ]);
             }
@@ -1610,22 +1733,91 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $search = trim(
-            $request->input('search', '')
-        );
+        $search = trim($request->input('search', ''));
 
 
         /*
         |--------------------------------------------------------------------------
-        | Employment Status Records
+        | Logged-in User
         |--------------------------------------------------------------------------
         */
 
-        $employmentStatuses = \App\Models\EmploymentStatus::with([
+        $user = auth()->user();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Base Query
+        |--------------------------------------------------------------------------
+        */
+
+        $query = \App\Models\EmploymentStatus::with([
             'user.basicInformation',
             'plantilla',
             'school',
-        ])
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Role-Based Data Access
+        |--------------------------------------------------------------------------
+        |
+        | Super Admin = View ALL employment status records
+        | Admin       = View ONLY records from the same school
+        |
+        */
+
+        if ($user->role === 'admin') {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Get Admin's Employment Status / School
+            |--------------------------------------------------------------------------
+            */
+
+            $adminEmployment = $user->employmentStatus;
+
+            $adminSchool = $adminEmployment?->school;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Admin Has No School Assignment
+            |--------------------------------------------------------------------------
+            |
+            | Do not allow an Admin without a school assignment
+            | to see records from other schools.
+            |
+            */
+
+            if (! $adminSchool) {
+
+                $query->whereRaw('1 = 0');
+
+            } else {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Same School Only
+                |--------------------------------------------------------------------------
+                |
+                | Compare using the school record's school_id.
+                |
+                */
+
+                $query->whereHas('school', function ($schoolQuery) use ($adminSchool) {
+
+                    $schoolQuery->where(
+                        'school_id',
+                        $adminSchool->school_id
+                    );
+
+                });
+
+            }
+        }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -1633,12 +1825,14 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        ->when($search !== '', function ($query) use ($search) {
+        if ($search !== '') {
 
             $query->where(function ($q) use ($search) {
 
                 /*
-                | Search by email
+                |--------------------------------------------------------------------------
+                | Search by Email
+                |--------------------------------------------------------------------------
                 */
 
                 $q->whereHas('user', function ($userQuery) use ($search) {
@@ -1653,63 +1847,92 @@ class DataManagementController extends Controller
 
 
                 /*
-                | Search by personnel name
+                |--------------------------------------------------------------------------
+                | Search by Personnel Name
+                |--------------------------------------------------------------------------
                 */
 
-                $q->orWhereHas('user.basicInformation', function ($basicQuery) use ($search) {
+                $q->orWhereHas(
+                    'user.basicInformation',
+                    function ($basicQuery) use ($search) {
 
-                    $basicQuery
-                        ->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('middle_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%");
+                        $basicQuery
+                            ->where(
+                                'first_name',
+                                'like',
+                                "%{$search}%"
+                            )
+                            ->orWhere(
+                                'middle_name',
+                                'like',
+                                "%{$search}%"
+                            )
+                            ->orWhere(
+                                'last_name',
+                                'like',
+                                "%{$search}%"
+                            );
 
-                });
+                    }
+                );
 
 
                 /*
-                | Search by plantilla item number
+                |--------------------------------------------------------------------------
+                | Search by Plantilla Item Number / Position
+                |--------------------------------------------------------------------------
                 */
 
-                $q->orWhereHas('plantilla', function ($plantillaQuery) use ($search) {
+                $q->orWhereHas(
+                    'plantilla',
+                    function ($plantillaQuery) use ($search) {
 
-                    $plantillaQuery
-                        ->where(
-                            'item_number',
-                            'like',
-                            "%{$search}%"
-                        )
-                        ->orWhere(
-                            'position_title',
-                            'like',
-                            "%{$search}%"
-                        );
+                        $plantillaQuery
+                            ->where(
+                                'item_number',
+                                'like',
+                                "%{$search}%"
+                            )
+                            ->orWhere(
+                                'position_title',
+                                'like',
+                                "%{$search}%"
+                            );
 
-                });
+                    }
+                );
 
 
                 /*
-                | Search by school
+                |--------------------------------------------------------------------------
+                | Search by School
+                |--------------------------------------------------------------------------
                 */
 
-                $q->orWhereHas('school', function ($schoolQuery) use ($search) {
+                $q->orWhereHas(
+                    'school',
+                    function ($schoolQuery) use ($search) {
 
-                    $schoolQuery
-                        ->where(
-                            'school_name',
-                            'like',
-                            "%{$search}%"
-                        )
-                        ->orWhere(
-                            'school_id',
-                            'like',
-                            "%{$search}%"
-                        );
+                        $schoolQuery
+                            ->where(
+                                'school_name',
+                                'like',
+                                "%{$search}%"
+                            )
+                            ->orWhere(
+                                'school_id',
+                                'like',
+                                "%{$search}%"
+                            );
 
-                });
+                    }
+                );
 
 
                 /*
-                | Search by employment status
+                |--------------------------------------------------------------------------
+                | Search by Employment Status
+                |--------------------------------------------------------------------------
                 */
 
                 $q->orWhere(
@@ -1719,8 +1942,7 @@ class DataManagementController extends Controller
                 );
 
             });
-
-        })
+        }
 
 
         /*
@@ -1729,7 +1951,7 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        ->latest('updated_at')
+        $query->latest('updated_at');
 
 
         /*
@@ -1738,16 +1960,9 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        ->paginate(10)
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Preserve Search
-        |--------------------------------------------------------------------------
-        */
-
-        ->withQueryString();
+        $employmentStatuses = $query
+            ->paginate(10)
+            ->withQueryString();
 
 
         /*
@@ -3470,6 +3685,272 @@ class DataManagementController extends Controller
                     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ]
         );
+    }
+
+    public function editEmploymentStatus($employmentStatus)
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Employment Status Record
+        |--------------------------------------------------------------------------
+        */
+
+        $record = \App\Models\EmploymentStatus::with([
+            'user.basicInformation',
+            'plantilla',
+            'school',
+        ])->findOrFail($employmentStatus);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Plantilla Items
+        |--------------------------------------------------------------------------
+        |
+        | Show:
+        | 1. Plantilla items that are NOT assigned to any employee.
+        | 2. The current employee's existing plantilla item.
+        |
+        */
+
+        $plantillaItems = \App\Models\PlantillaDb::where(function ($query) use ($record) {
+
+            /*
+            |--------------------------------------------------------------
+            | Unassigned Plantilla Items
+            |--------------------------------------------------------------
+            */
+
+            $query->whereNotIn(
+                'id',
+                \App\Models\EmploymentStatus::whereNotNull('plantilla_db_id')
+                    ->where(
+                        'id',
+                        '!=',
+                        $record->id
+                    )
+                    ->select('plantilla_db_id')
+            );
+
+        })
+        ->orderBy('item_number')
+        ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Schools
+        |--------------------------------------------------------------------------
+        */
+
+        $schools = \App\Models\SchoolDb::orderBy('school_name')
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Return View
+        |--------------------------------------------------------------------------
+        */
+
+        return view(
+            'data-management.employment-status-edit',
+            compact(
+                'record',
+                'plantillaItems',
+                'schools'
+            )
+        );
+    }
+
+    public function updateEmploymentStatus(Request $request,$employmentStatus) 
+    {
+        $record = \App\Models\EmploymentStatus::findOrFail(
+            $employmentStatus
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate
+        |--------------------------------------------------------------------------
+        */
+
+        $validated = $request->validate([
+
+            'item_number' => [
+                'nullable',
+                'string',
+            ],
+
+            'school_id' => [
+                'nullable',
+                'string',
+            ],
+
+            'date_of_original_appointment' => [
+                'nullable',
+                'date',
+            ],
+
+            'date_of_last_promotion' => [
+                'nullable',
+                'date',
+            ],
+
+            'employment_status' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'warm_body_status' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'nature_of_work' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'source_of_fund' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'monthly_salary' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+            'contract_duration' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Resolve Plantilla
+        |--------------------------------------------------------------------------
+        */
+
+        $plantillaDbId = null;
+
+        if (! empty($validated['item_number'])) {
+
+            $plantilla = \App\Models\PlantillaDb::where(
+                'item_number',
+                $validated['item_number']
+            )->first();
+
+            if (! $plantilla) {
+
+                return back()
+                    ->withInput()
+                    ->with(
+                        'error',
+                        'The selected plantilla item number was not found.'
+                    );
+            }
+
+            $plantillaDbId = $plantilla->id;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Resolve School
+        |--------------------------------------------------------------------------
+        */
+
+        $schoolDbId = null;
+
+        if (! empty($validated['school_id'])) {
+
+            $school = \App\Models\SchoolDb::where(
+                'school_id',
+                $validated['school_id']
+            )->first();
+
+            if (! $school) {
+
+                return back()
+                    ->withInput()
+                    ->with(
+                        'error',
+                        'The selected school was not found.'
+                    );
+            }
+
+            $schoolDbId = $school->id;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update
+        |--------------------------------------------------------------------------
+        */
+
+        $record->update([
+
+            'plantilla_db_id' =>
+                $plantillaDbId,
+
+            'school_db_id' =>
+                $schoolDbId,
+
+            'date_of_original_appointment' =>
+                $validated['date_of_original_appointment'] ?? null,
+
+            'date_of_last_promotion' =>
+                $validated['date_of_last_promotion'] ?? null,
+
+            'employment_status' =>
+                $validated['employment_status'] ?? null,
+
+            'warm_body_status' =>
+                $validated['warm_body_status'] ?? null,
+
+            'nature_of_work' =>
+                $validated['nature_of_work'] ?? null,
+
+            'source_of_fund' =>
+                $validated['source_of_fund'] ?? null,
+
+            'monthly_salary' =>
+                $validated['monthly_salary'] ?? null,
+
+            'contract_duration' =>
+                $validated['contract_duration'] ?? null,
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect
+        |--------------------------------------------------------------------------
+        */
+
+        return redirect()
+            ->route(
+                'data-management.employment-status.edit',
+                $record->id
+            )
+            ->with(
+                'success',
+                'Employment status information updated successfully.'
+            );
     }
 
 
@@ -5439,16 +5920,48 @@ class DataManagementController extends Controller
     public function medicalAllowance(Request $request)
     {
         $search = trim($request->input('search', ''));
+        $user = $request->user();
 
-        $medicalAllowances = MedicalAllowance::with([
+        $query = MedicalAllowance::with([
             'user.basicInformation',
             'user.employmentStatus.plantilla',
             'user.employmentStatus.school',
-        ])
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Restrict Admin to Their Assigned School
+        |--------------------------------------------------------------------------
+        */
+
+        if ($user->role === 'admin') {
+            $schoolId = $user->employmentStatus?->school_db_id;
+
+            if ($schoolId) {
+                $query->whereHas(
+                    'user.employmentStatus',
+                    function ($employmentQuery) use ($schoolId) {
+                        $employmentQuery->where(
+                            'school_db_id',
+                            $schoolId
+                        );
+                    }
+                );
+            } else {
+                // Admin without an assigned school sees no records.
+                $query->whereRaw('1 = 0');
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin Receives No School Filter
+        |--------------------------------------------------------------------------
+        */
+
+        $medicalAllowances = $query
             ->when($search !== '', function ($query) use ($search) {
-
                 $query->where(function ($q) use ($search) {
-
                     /*
                     |--------------------------------------------------------------------------
                     | Search Personnel
@@ -5456,44 +5969,38 @@ class DataManagementController extends Controller
                     */
 
                     $q->whereHas('user', function ($userQuery) use ($search) {
-
                         $userQuery->where(
                             'email',
                             'like',
                             "%{$search}%"
                         );
-
                     });
-
 
                     $q->orWhereHas(
                         'user.basicInformation',
                         function ($basicQuery) use ($search) {
-
-                            $basicQuery->where(function ($nameQuery) use ($search) {
-
-                                $nameQuery
-                                    ->where(
-                                        'first_name',
-                                        'like',
-                                        "%{$search}%"
-                                    )
-                                    ->orWhere(
-                                        'middle_name',
-                                        'like',
-                                        "%{$search}%"
-                                    )
-                                    ->orWhere(
-                                        'last_name',
-                                        'like',
-                                        "%{$search}%"
-                                    );
-
-                            });
-
+                            $basicQuery->where(
+                                function ($nameQuery) use ($search) {
+                                    $nameQuery
+                                        ->where(
+                                            'first_name',
+                                            'like',
+                                            "%{$search}%"
+                                        )
+                                        ->orWhere(
+                                            'middle_name',
+                                            'like',
+                                            "%{$search}%"
+                                        )
+                                        ->orWhere(
+                                            'last_name',
+                                            'like',
+                                            "%{$search}%"
+                                        );
+                                }
+                            );
                         }
                     );
-
 
                     /*
                     |--------------------------------------------------------------------------
@@ -5513,7 +6020,6 @@ class DataManagementController extends Controller
                         "%{$search}%"
                     );
 
-
                     /*
                     |--------------------------------------------------------------------------
                     | Search Employment Status
@@ -5523,30 +6029,22 @@ class DataManagementController extends Controller
                     $q->orWhereHas(
                         'user.employmentStatus',
                         function ($employmentQuery) use ($search) {
-
                             $employmentQuery->where(
                                 'employment_status',
                                 'like',
                                 "%{$search}%"
                             );
-
                         }
                     );
-
                 });
-
             })
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-
         return view(
             'data-management.medical-allowance',
-            compact(
-                'medicalAllowances',
-                'search'
-            )
+            compact('medicalAllowances', 'search')
         );
     }
 
@@ -6193,11 +6691,11 @@ class DataManagementController extends Controller
                     SUM(
                         CASE
                             WHEN medical_allowance.mode_of_availment
-                                = 'Individual Availment (Medical Expenses)'
+                                = 'Not Eligible'
                             THEN 1
                             ELSE 0
                         END
-                    ) as individual_medical
+                    ) as not_eligible
                 "),
 
                 DB::raw("
@@ -6508,7 +7006,7 @@ class DataManagementController extends Controller
                 'Please select a valid mode of availment.'
             )
             ->setFormula1(
-                '"Group Availment (HMO),Individual Availment (HMO),Individual Availment (Medical Expenses)"'
+                '"Group Availment (HMO),Individual Availment (HMO)"'
             );
 
 
@@ -6641,6 +7139,88 @@ class DataManagementController extends Controller
         );
     }
 
+    public function updateAvailment(Request $request, $record)
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Validate
+        |--------------------------------------------------------------------------
+        */
+
+        $validated = $request->validate([
+            'mode_of_availment' => [
+                'required',
+                'in:Group Availment (HMO),Individual Availment (HMO),Not Eligible',
+            ],
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Find Record
+        |--------------------------------------------------------------------------
+        */
+
+        $medicalAllowance = \App\Models\MedicalAllowance::findOrFail($record);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prevent Group → Individual
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $medicalAllowance->mode_of_availment === 'Group Availment (HMO)' &&
+            $validated['mode_of_availment'] === 'Individual Availment (HMO)'
+        ) {
+            return back()->with(
+                'error',
+                'Update not allowed. Group Availment (HMO) cannot be changed to Individual Availment (HMO).'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check If There Is No Change
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $medicalAllowance->mode_of_availment ===
+            $validated['mode_of_availment']
+        ) {
+            return back()->with(
+                'error',
+                'No changes were made. The selected mode of availment is already the current mode.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update
+        |--------------------------------------------------------------------------
+        */
+
+        $medicalAllowance->update([
+            'mode_of_availment' =>
+                $validated['mode_of_availment'],
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Success
+        |--------------------------------------------------------------------------
+        */
+
+        return back()->with(
+            'success',
+            'Mode of availment updated successfully from Individual Availment (HMO) to Group Availment (HMO).'
+        );
+    }
 
     /*   
     |   END  OF MEDICAL ALLOWANCE RECORDS FUNCTIONS

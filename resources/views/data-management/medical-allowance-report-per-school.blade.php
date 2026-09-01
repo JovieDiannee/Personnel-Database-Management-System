@@ -487,9 +487,7 @@
                                     <th class="px-5 py-3 text-center text-xs
                                             font-semibold uppercase
                                             tracking-wider text-gray-600">
-                                        Individual Availment
-                                        <br>
-                                        (Medical Expenses)
+                                        Not Eligible
                                     </th>
 
                                     <th class="px-5 py-3 text-center text-xs
@@ -543,7 +541,7 @@
 
                                         <td class="px-5 py-4 text-center
                                                 text-sm font-semibold text-purple-700">
-                                            {{ $report->individual_medical }}
+                                            {{ $report->not_eligible }}
                                         </td>
 
                                         <td class="px-5 py-4 text-center

@@ -697,7 +697,7 @@
                                     {{-- Action --}}
 
                                     @if (auth()->user()->role === 'super_admin')
-                                        <td class="whitespace-nowrap px-6 py-4 text-right">
+                                        <td class="whitespace-nowrap px-6 py-4 text-center">
 
                                             @php
                                                 $personName = trim(collect([
@@ -723,7 +723,7 @@
                                     @endif
                                     
                                     {{-- Action --}}
-                                    <td class="whitespace-nowrap px-6 py-4 text-right">
+                                    <td class="whitespace-nowrap px-6 py-4 text-center">
 
                                         <a
                                             href="{{ route('data-management.personnel.edit', $person->id) }}"
@@ -908,6 +908,51 @@
             </div>
 
 
+            {{-- RESET PASSWORD --}}
+            <div class="mt-5">
+
+                <label class="mb-2 block text-sm font-medium text-gray-700">
+                    Password Management
+                </label>
+
+                <div
+                    class="rounded-xl border border-red-200
+                        bg-red-50 p-4"
+                >
+
+                    <label class="flex cursor-pointer items-start gap-3">
+
+                        <input
+                            type="checkbox"
+                            id="reset_password"
+                            name="reset_password"
+                            value="1"
+                            class="mt-1 h-4 w-4 rounded
+                                border-gray-300
+                                text-red-600
+                                focus:ring-red-500"
+                        >
+
+                        <div>
+
+                            <p class="text-sm font-semibold text-red-800">
+                                Reset User Password
+                            </p>
+
+                            <p class="mt-1 text-xs leading-5 text-red-700">
+                                Reset this user's password to the default password:
+                                <strong>pdms@123</strong>
+                            </p>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
             {{-- WARNING --}}
             <div class="mt-5 rounded-lg border border-yellow-200
                         bg-yellow-50 p-4">
@@ -917,6 +962,10 @@
                     <strong>Note:</strong>
                     Changing the user's role will change the areas
                     of the system they can access.
+
+                    If password reset is selected, the user's current
+                    password will immediately be replaced with
+                    <strong>pdms@123</strong>.
 
                 </p>
 

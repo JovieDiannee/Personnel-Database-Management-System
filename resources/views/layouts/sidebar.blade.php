@@ -366,7 +366,7 @@
                     Personnel Information
                 </a>
 
-
+               
                 {{-- EMPLOYMENT STATUS --}}
                 <a
                     href="{{ route('data-management.employment-status') }}"
@@ -379,6 +379,21 @@
                            }}"
                 >
                     Employment Status
+                </a>
+                
+
+                 {{-- MEDICAL ALLOWANCE --}}
+                <a
+                    href="{{ route('data-management.medical-allowance') }}"
+                    class="block rounded-lg px-3 py-2.5
+                           text-sm transition
+
+                           {{ request()->routeIs('data-management.medical-allowance*')
+                                ? 'bg-green-50 font-semibold text-green-800'
+                                : 'text-gray-500 hover:bg-green-50 hover:text-green-700'
+                           }}"
+                >
+                    Medical Allowance
                 </a>
 
 
@@ -426,19 +441,7 @@
                     Enrollment Records
                 </a>
 
-                {{-- MEDICAL ALLOWANCE --}}
-                <a
-                    href="{{ route('data-management.medical-allowance') }}"
-                    class="block rounded-lg px-3 py-2.5
-                           text-sm transition
-
-                           {{ request()->routeIs('data-management.medical-allowance*')
-                                ? 'bg-green-50 font-semibold text-green-800'
-                                : 'text-gray-500 hover:bg-green-50 hover:text-green-700'
-                           }}"
-                >
-                    Medical Allowance
-                </a>
+            
 
             </div>
 

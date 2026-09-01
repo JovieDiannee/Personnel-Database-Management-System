@@ -50,6 +50,8 @@
 
         </div>
 
+        @if(auth()->user()->role === 'super_admin' || auth()->user()->role === 'admin')
+
             {{-- =====================================================
                 PERSONNEL AND SCHOOL STATISTICS
             ====================================================== --}}
@@ -1133,7 +1135,7 @@
                             <div class="min-w-0 flex-1">
 
                                 <p class="text-sm font-medium text-gray-500">
-                                    Individual Medical Expenses
+                                    Number of Disbursement
                                 </p>
 
                                 <p class="mt-2 text-3xl font-bold text-red-600">
@@ -1141,7 +1143,7 @@
                                 </p>
 
                                 <p class="mt-1 text-xs text-gray-400">
-                                    Requested Reimbursement of Medical Expenses
+                                    Requested Reimbursement of Medical Allowance
                                 </p>
 
                             </div>
@@ -1177,8 +1179,10 @@
                 </div>
 
             </div>
-            
 
+        @endif
+
+        @if(auth()->user()->role === 'super_admin')
             {{-- =====================================================
                 REQUEST STATUS SUMMARY
             ====================================================== --}}
@@ -1374,8 +1378,7 @@
 
             </div>
             <br>
-        
-        @if(auth()->user()->role === 'super_admin')
+    
             {{-- =====================================================
                 QUICK ACTIONS
             ====================================================== --}}
@@ -1455,6 +1458,339 @@
                 </div>
 
             </div>
+        @endif
+
+        @if(auth()->user()->role === 'user')
+            {{-- =====================================================
+                403 CONTENT
+            ====================================================== --}}
+            <div
+                class="overflow-hidden rounded-2xl bg-white
+                        shadow-sm ring-1 ring-gray-100"
+                >
+
+                {{-- Section Header --}}
+                <div
+                    class="border-b border-green-100
+                            bg-green-50 px-6 py-4"
+                >
+
+                    <div class="flex items-center gap-3">
+
+                        <div
+                            class="flex h-10 w-10 items-center justify-center
+                                    rounded-lg bg-green-700 text-white"
+                        >
+
+                            {{-- Lock Icon --}}
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75"
+                                />
+
+                                <rect
+                                    width="15"
+                                    height="10"
+                                    x="4.5"
+                                    y="10.5"
+                                    rx="2.25"
+                                />
+                            </svg>
+
+                        </div>
+
+                        <div>
+
+                            <h2 class="font-bold text-gray-800">
+                                Permission Required
+                            </h2>
+
+                            <p class="text-sm text-gray-500">
+                                This resource is restricted based on your account role.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {{-- Main Content --}}
+                <div class="px-6 py-10 sm:px-10 sm:py-14">
+
+                    <div class="mx-auto max-w-3xl">
+
+                        <div class="grid gap-8 md:grid-cols-2 md:items-center">
+
+                            {{-- =================================================
+                                LEFT - 403 DISPLAY
+                            ================================================== --}}
+                            <div class="text-center md:text-left">
+
+                                <div
+                                    class="text-7xl font-black tracking-tight
+                                            text-green-900 sm:text-8xl"
+                                >
+                                    403
+                                </div>
+
+                                <div
+                                    class="mt-3 h-1 w-20 rounded-full
+                                            bg-green-600
+                                            mx-auto md:mx-0"
+                                ></div>
+
+                                <h3
+                                    class="mt-5 text-xl font-bold text-gray-800"
+                                >
+                                    Unauthorized Action
+                                </h3>
+
+                                <p
+                                    class="mt-3 text-sm leading-6 text-gray-500"
+                                >
+                                    You are currently signed in, but your account
+                                    does not have permission to perform this action
+                                    or access this section of the Personnel Database
+                                    Management System.
+                                </p>
+
+                            </div>
+
+
+                            {{-- =================================================
+                                RIGHT - ACCESS INFORMATION
+                            ================================================== --}}
+                            <div>
+
+                                {{-- Current Account --}}
+                                <div
+                                    class="rounded-xl border border-green-100
+                                            bg-green-50 p-5"
+                                >
+
+                                    <div class="flex items-start gap-4">
+
+                                        <div
+                                            class="flex h-11 w-11 shrink-0
+                                                    items-center justify-center
+                                                    rounded-lg bg-green-700
+                                                    text-white"
+                                        >
+
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="h-6 w-6"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                                stroke-width="1.7"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
+                                                />
+
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    d="M4.5 20.25a8.25 8.25 0 0115 0"
+                                                />
+                                            </svg>
+
+                                        </div>
+
+
+                                        <div class="min-w-0">
+
+                                            <p
+                                                class="text-xs font-semibold
+                                                        uppercase tracking-wider
+                                                        text-green-700"
+                                            >
+                                                Current Account
+                                            </p>
+
+                                            <p
+                                                class="mt-1 truncate
+                                                        font-bold text-gray-800"
+                                            >
+                                                {{ Auth::user()->name }}
+                                            </p>
+
+                                            <p class="text-sm text-gray-500">
+                                                {{ Auth::user()->email }}
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                {{-- Role --}}
+                                <div
+                                    class="mt-4 flex items-center justify-between
+                                            rounded-xl border border-gray-100
+                                            bg-white px-5 py-4
+                                            shadow-sm"
+                                >
+
+                                    <div>
+
+                                        <p
+                                            class="text-xs font-semibold
+                                                    uppercase tracking-wider
+                                                    text-gray-400"
+                                        >
+                                            Your Role
+                                        </p>
+
+                                        <p class="mt-1 font-bold text-gray-800">
+
+                                            {{ ucwords(str_replace('_', ' ', Auth::user()->role)) }}
+
+                                        </p>
+
+                                    </div>
+
+
+                                    <div
+                                        class="flex h-10 w-10 items-center
+                                                justify-center rounded-lg
+                                                bg-green-100 text-green-700"
+                                    >
+
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class="h-5 w-5"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            stroke-width="1.8"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M9 12.75L11.25 15 15 9.75"
+                                            />
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M12 3l7.5 3v5.25c0 4.75-3.2 8.65-7.5 9.75-4.3-1.1-7.5-5-7.5-9.75V6L12 3z"
+                                            />
+                                        </svg>
+
+                                    </div>
+
+                                </div>
+
+
+                                {{-- Information --}}
+                                <div
+                                    class="mt-4 flex gap-3 rounded-xl
+                                            border border-green-100
+                                            bg-green-50/70 p-4"
+                                >
+
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="mt-0.5 h-5 w-5 shrink-0 text-green-700"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                    >
+                                        <circle
+                                            cx="12"
+                                            cy="12"
+                                            r="9"
+                                        />
+
+                                        <path
+                                            stroke-linecap="round"
+                                            d="M12 11v5"
+                                        />
+
+                                        <path
+                                            stroke-linecap="round"
+                                            d="M12 8.25h.01"
+                                        />
+                                    </svg>
+
+
+                                    <p
+                                        class="text-sm leading-5 text-gray-600"
+                                    >
+                                        If you believe you should have access to
+                                        this resource, please contact the system
+                                        administrator or the Personnel Unit.
+                                    </p>
+
+                                </div>
+
+
+                                {{-- Back Button --}}
+                                <div class="mt-6">
+
+                                    <a
+                                        href="{{ route('profile.edit') }}"
+                                        class="inline-flex w-full items-center
+                                                justify-center gap-2 rounded-lg
+                                                bg-green-700 px-5 py-3
+                                                text-sm font-semibold text-white
+                                                shadow-sm transition
+                                                hover:bg-green-800
+                                                focus:outline-none
+                                                focus:ring-2
+                                                focus:ring-green-500
+                                                focus:ring-offset-2"
+                                    >
+
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class="h-5 w-5"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            stroke-width="1.8"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+                                            />
+                                        </svg>
+
+                                        Go to Profile
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         @endif
 
     </div>

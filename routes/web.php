@@ -34,12 +34,19 @@ Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
     Route::get('/data-management/personnel/{person}/edit',[DataManagementController::class, 'editPersonnel'])->name('data-management.personnel.edit');
     Route::put('/data-management/personnel/{person}',[DataManagementController::class, 'updatePersonnel'])->name('data-management.personnel.update');
 
+
     // Data Management -> Employment Status
     Route::get('/data-management/employment-status',[DataManagementController::class, 'employmentStatus'])->name('data-management.employment-status');
     Route::post('/data-management/employment-status/import',[DataManagementController::class, 'importEmploymentStatus'])->name('data-management.employment-status.import');
     Route::get('/data-management/employment-status/import/preview',[DataManagementController::class, 'employmentStatusImportPreview'])->name('data-management.employment-status.import.preview');
     Route::post('/data-management/employment-status/import/confirm',[DataManagementController::class, 'confirmEmploymentStatusImport'])->name('data-management.employment-status.import.confirm');
     Route::get('/data-management/employment-status/download-template',[DataManagementController::class, 'downloadEmploymentStatusTemplate'])->name('data-management.employment-status.download-template');
+    Route::get('/data-management/employment-status/{employmentStatus}/edit',[DataManagementController::class, 'editEmploymentStatus'])->name('data-management.employment-status.edit');
+    Route::put('/data-management/employment-status/{employmentStatus}',[DataManagementController::class, 'updateEmploymentStatus'])->name('data-management.employment-status.update');
+
+});
+
+Route::middleware(['auth', 'role:super_admin'])->group(function () {
 
     // Data Management -> Plantilla Position Records
     Route::get('/data-management/plantilla',[DataManagementController::class, 'plantilla'])->name('data-management.plantilla');
@@ -55,6 +62,9 @@ Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
     Route::post('/data-management/schools/import/confirm',[DataManagementController::class, 'confirmSchoolImport'])->name('data-management.schools.import.confirm');
     Route::get('/data-management/school-database/download-template',[DataManagementController::class, 'downloadSchoolDatabaseTemplate'])->name('data-management.school-database.download-template');
 
+});
+
+Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
     // Data Management -> Medical Allowance Records
     Route::get('/data-management/medical-allowance',[DataManagementController::class, 'medicalAllowance'])->name('data-management.medical-allowance');
     Route::post('/data-management/medical-allowance/import',[DataManagementController::class, 'importMedicalAllowance'])->name('data-management.medical-allowance.import');
@@ -62,8 +72,11 @@ Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
     Route::post('/data-management/medical-allowance/import/confirm',[DataManagementController::class, 'confirmMedicalAllowanceImport'])->name('data-management.medical-allowance.import.confirm');
     Route::get('/data-management/medical-allowance/report',[DataManagementController::class, 'medicalAllowanceReport'])->name('data-management.medical-allowance.report');
     Route::get('/data-management/medical-allowance/template',[DataManagementController::class, 'downloadMedicalAllowanceTemplate'])->name('data-management.medical-allowance.template');
+    Route::patch('/data-management/medical-allowance/{medicalAllowance}/availment',[DataManagementController::class, 'updateAvailment'])->name('medical-allowance.update-availment');
 
+});
 
+Route::middleware(['auth', 'role:super_admin'])->group(function () {
     // Data Management -> Enrollment Records
     Route::get('/data-management/enrollment',[DataManagementController::class, 'enrollment'])->name('data-management.enrollment');
     Route::post('/data-management/enrollment/import',[DataManagementController::class, 'importEnrollment'])->name('data-management.enrollment.import');
@@ -74,7 +87,7 @@ Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
 });
 
 // ============================================================
-// SUPER ADMIN ONLY - Change User Role
+// SUPER ADMIN ONLY - Change User Role, Status and Reset Password
 // ============================================================
 
 Route::middleware(['auth', 'role:super_admin'])->group(function () {
