@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('item_from_school_level', 100)->nullable();
 
             $table->string('position_title', 150);
-            $table->unsignedTinyInteger('salary_grade')->nullable();
+            $table->string('salary_grade', 10)->nullable();
 
             $table->string('area_code', 50)->nullable();
             $table->string('area_type', 100)->nullable();
