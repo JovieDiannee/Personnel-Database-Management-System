@@ -4376,17 +4376,15 @@ class DataManagementController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $salaryGrade = $row['salary_grade'] ?? null;
+            $salaryGrade = trim((string) ($row['salary_grade'] ?? ''));
 
             if (
-                $salaryGrade !== null &&
                 $salaryGrade !== '' &&
-                !is_numeric($salaryGrade)
+                !preg_match('/^[A-Za-z0-9\s\(\)\-\/]+$/', $salaryGrade)
             ) {
-
                 $errors[] = [
                     'row' => $excelRow,
-                    'message' => 'Salary grade must be numeric.'
+                    'message' => 'Salary Grade contains invalid characters.'
                 ];
             }
 
@@ -6008,7 +6006,7 @@ class DataManagementController extends Controller
                 'Please select a valid school area.'
             )
             ->setFormula1(
-                '"Urban,Rural"'
+                '"I,II-A,II-B,III,IV,V-A,V-B"'
             );
 
 
