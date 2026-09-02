@@ -984,7 +984,7 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $sheet->mergeCells('A1:AG1');
+        $sheet->mergeCells('A1:AF1');
 
         $sheet->setCellValue(
             'A1',
@@ -1024,7 +1024,7 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $sheet->mergeCells('A2:AG2');
+        $sheet->mergeCells('A2:AF2');
 
         $sheet->setCellValue(
             'A2',
@@ -1171,7 +1171,10 @@ class DataManagementController extends Controller
             'O5'  => 'A+',
             'P5'  => '09171234567',
             'Q5'  => '',
-            'R5'  => 'Information Technology',
+
+            // Must match one of the specialization dropdown values
+            'R5'  => 'Information and Communication Technology (ICT)',
+
             'S5'  => 'Permanent',
             'T5'  => 'P. Burgos Street',
             'U5'  => 'Talisay',
@@ -1336,6 +1339,180 @@ class DataManagementController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | SPECIALIZATION LIST
+        |--------------------------------------------------------------------------
+        |
+        | The specialization list is too long to safely use as an inline
+        | Excel validation list. Store it in a hidden worksheet instead.
+        |
+        */
+
+        $specializations = [
+
+            'Early Childhood Education',
+            'English',
+            'Filipino',
+            'General Education',
+            'Information and Communication Technology (ICT)',
+            'Mathematics',
+            'Music, Arts, PE, and Health (MAPEH)',
+            'Science - Biology',
+            'Science - Chemistry',
+            'Science - General Science',
+            'Science - Physical Science',
+            'Science - Physics',
+            'Social Studies / Social Sciences',
+            'Special Education (SPED)',
+            'Technology and Livelihood Education (TLE)',
+            'TVL - Agricultural Crops Production',
+            'TVL - Agroentrepreneurship',
+            'TVL - Animal Production',
+            'TVL - Bartending',
+            'TVL - Beauty Care Services',
+            'TVL - Bookkeeping',
+            'TVL - Bread and Pastry Production',
+            'TVL - Caregiving',
+            'TVL - Carpentry',
+            'TVL - Computer Systems Servicing',
+            'TVL - Contact Center Services',
+            'TVL - Cookery',
+            'TVL - Creative Web Design',
+            'TVL - Dressmaking',
+            'TVL - Driving',
+            'TVL - Electrical Installation and Maintenance',
+            'TVL - Electronic Products Assembly and Servicing',
+            'TVL - Events Management Services',
+            'TVL - Food and Beverage Services',
+            'TVL - Food Processing',
+            'TVL - Front Office Services',
+            'TVL - Hairdressing',
+            'TVL - Household Services',
+            'TVL - Housekeeping',
+            'TVL - Landscape Installation and Maintenance',
+            'TVL - Masonry',
+            'TVL - Organic Agriculture Production',
+            'TVL - Plumbing',
+            'TVL - RAC Servicing (DomRAC)',
+            'TVL - Rice Machinery Operations',
+            'TVL - Security Services',
+            'TVL - Shielded Metal Arc Welding',
+            'TVL - Technical Drafting',
+            'TVL - Technology and Livelihood Education (TLE)',
+            'TVL - Tour Guiding Services',
+            'TVL - Wellness Massage',
+            'Values Education',
+            'Guidance and Counseling',
+            'Accountancy',
+            'Architecture',
+            'Statistics',
+            'Civil Engineering',
+            'Computer Engineering',
+            'Electrical Engineering',
+            'Electronics Engineering',
+            'Mechanical Engineering',
+            'Agricultural Engineering',
+            'Human Resource Management',
+            'Legal Management',
+            'Management Accounting',
+            'Marketing Management',
+            'Nursing',
+            'Office Administration',
+            'Public Administration',
+            'Business Administration',
+            'Psychology',
+            'Criminology',
+            'Commerce',
+            'Other',
+            'Not Applicable',
+
+        ];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREATE DROPDOWN LIST WORKSHEET
+        |--------------------------------------------------------------------------
+        */
+
+        $dropdownSheet = $spreadsheet->createSheet();
+
+        $dropdownSheet->setTitle('Dropdown Lists');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADD SPECIALIZATIONS TO HIDDEN SHEET
+        |--------------------------------------------------------------------------
+        */
+
+        foreach ($specializations as $index => $specialization) {
+
+            $dropdownSheet->setCellValue(
+                'A' . ($index + 1),
+                $specialization
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SPECIALIZATION DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        $specializationValidation = new DataValidation();
+
+        $specializationValidation
+            ->setType(DataValidation::TYPE_LIST)
+            ->setErrorStyle(DataValidation::STYLE_STOP)
+            ->setAllowBlank(true)
+            ->setShowInputMessage(true)
+            ->setShowErrorMessage(true)
+            ->setShowDropDown(true)
+            ->setErrorTitle('Invalid Specialization')
+            ->setError(
+                'Please select a valid specialization from the list.'
+            )
+            ->setPromptTitle(
+                'Specialization'
+            )
+            ->setPrompt(
+                'Select the personnel specialization.'
+            )
+            ->setFormula1(
+                "'Dropdown Lists'!\$A\$1:\$A\$" . count($specializations)
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HIDE DROPDOWN LIST WORKSHEET
+        |--------------------------------------------------------------------------
+        */
+
+        $dropdownSheet->setSheetState(
+            \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet::SHEETSTATE_HIDDEN
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN TO MAIN WORKSHEET
+        |--------------------------------------------------------------------------
+        |
+        | createSheet() makes the new worksheet available in the workbook.
+        | Explicitly set the personnel sheet as the active sheet.
+        |
+        */
+
+        $spreadsheet->setActiveSheetIndexByName(
+            'Personnel Basic Information'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
         | APPLY DROPDOWNS
         |--------------------------------------------------------------------------
         |
@@ -1371,6 +1548,13 @@ class DataManagementController extends Controller
                 ->getCell("O{$row}")
                 ->setDataValidation(
                     clone $bloodTypeValidation
+                );
+
+            // Specialization
+            $sheet
+                ->getCell("R{$row}")
+                ->setDataValidation(
+                    clone $specializationValidation
                 );
 
             // Address Type
@@ -1427,7 +1611,10 @@ class DataManagementController extends Controller
             'O'  => 15,
             'P'  => 20,
             'Q'  => 20,
-            'R'  => 28,
+
+            // Wider because specialization names are long
+            'R'  => 48,
+
             'S'  => 20,
             'T'  => 25,
             'U'  => 25,
@@ -3698,7 +3885,7 @@ class DataManagementController extends Controller
                 'Please select a valid warm body status.'
             )
             ->setFormula1(
-                '"OriginalBorrowed,Detailed,TIC,ALS,SNED,Vacant (Retired),Vacant (Resigned),Vacant (Others)"'
+                '"Original,Borrowed,Detailed,TIC,ALS,SNED,Vacant (Retired),Vacant (Resigned),Vacant (Others)"'
             );
 
 

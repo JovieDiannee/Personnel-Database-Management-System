@@ -1,3 +1,10 @@
+@push('styles')
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css"
+    >
+@endpush
+
 <x-app-layout>
 
     <div class="mx-auto max-w-7xl px-6 py-8">
@@ -272,8 +279,8 @@
             ================================================== --}}
             <div class="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
 
+                {{-- SECTION HEADER --}}
                 <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
-
                     <h3 class="font-bold text-gray-900">
                         Employment Information
                     </h3>
@@ -281,101 +288,105 @@
                     <p class="mt-1 text-xs text-gray-500">
                         Current employment, assignment, plantilla and salary details.
                     </p>
-
                 </div>
 
-
-                <div class="grid gap-5 p-6 md:grid-cols-2 lg:grid-cols-4">
-
+                {{-- FORM GRID --}}
+                <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2 lg:grid-cols-4">
 
                     {{-- =================================================
-                        PLANTILLA ITEM NUMBER
+                        PLANTILLA ITEM NUMBER — FULL WIDTH
                     ================================================== --}}
-                    <div class="md:col-span-2 lg:col-span-6">
-
-                        <label class="mb-1 block text-sm font-medium text-gray-700">
+                    <div class="md:col-span-2 lg:col-span-4">
+                        <label
+                            for="item_number"
+                            class="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             Plantilla Item Number
                         </label>
 
                         <select
+                            id="item_number"
                             name="item_number"
-                            class="w-full rounded-lg border-gray-300
-                                focus:border-green-600
-                                focus:ring-green-600"
+                            class="searchable-dropdown"
+                            data-placeholder="Search by item number or position title..."
                         >
-
-
-                            @foreach($plantillaItems as $item)
-
+                            
+                            @foreach ($plantillaItems as $item)
                                 <option
                                     value="{{ $item->item_number }}"
                                     @selected(
-                                        old(
+                                        (string) old(
                                             'item_number',
                                             $record->plantilla?->item_number
-                                        ) === $item->item_number
+                                        ) === (string) $item->item_number
                                     )
                                 >
-                                    {{ $item->item_number }}
-                                    - {{ $item->position_title }}
+                                    {{ $item->item_number }} - {{ $item->position_title }}
                                 </option>
-
                             @endforeach
-
                         </select>
 
+                        @error('item_number')
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
-
                     {{-- =================================================
-                        SCHOOL
+                        SCHOOL — FULL WIDTH
                     ================================================== --}}
-                    <div class="md:col-span-2 lg:col-span-6">
-
-                        <label class="mb-1 block text-sm font-medium text-gray-700">
+                    <div class="md:col-span-2 lg:col-span-4">
+                        <label
+                            for="school_id"
+                            class="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             School
                         </label>
 
                         <select
+                            id="school_id"
                             name="school_id"
-                            class="w-full rounded-lg border-gray-300
-                                focus:border-green-600
-                                focus:ring-green-600"
+                            class="searchable-dropdown"
+                            data-placeholder="Search by school ID or school name..."
                         >
+                            <option value="">Select a school</option>
 
-
-                            @foreach($schools as $school)
-
+                            @foreach ($schools as $school)
                                 <option
                                     value="{{ $school->school_id }}"
                                     @selected(
-                                        old(
+                                        (string) old(
                                             'school_id',
                                             $record->school?->school_id
-                                        ) === $school->school_id
+                                        ) === (string) $school->school_id
                                     )
                                 >
-                                    {{ $school->school_id }}
-                                    - {{ $school->school_name }}
+                                    {{ $school->school_id }} - {{ $school->school_name }}
                                 </option>
-
                             @endforeach
-
                         </select>
 
+                        @error('school_id')
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
-
                     {{-- =================================================
-                        DATE OF ORIGINAL APPOINTMENT
+                        DATE OF ORIGINAL APPOINTMENT — 25%
                     ================================================== --}}
-                    <div class="lg:col-span-3">
-
-                        <label class="mb-1 block text-sm font-medium text-gray-700">
+                    <div class="lg:col-span-1">
+                        <label
+                            for="date_of_original_appointment"
+                            class="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             Date of Original Appointment
                         </label>
 
                         <input
+                            id="date_of_original_appointment"
                             type="date"
                             name="date_of_original_appointment"
                             value="{{ old(
@@ -387,23 +398,29 @@
                                     : ''
                             ) }}"
                             class="w-full rounded-lg border-gray-300
-                                focus:border-green-600
-                                focus:ring-green-600"
+                                focus:border-green-600 focus:ring-green-600"
                         >
 
+                        @error('date_of_original_appointment')
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
-
                     {{-- =================================================
-                        DATE OF LAST PROMOTION
+                        DATE OF LAST PROMOTION — 25%
                     ================================================== --}}
-                    <div class="lg:col-span-3">
-
-                        <label class="mb-1 block text-sm font-medium text-gray-700">
+                    <div class="lg:col-span-1">
+                        <label
+                            for="date_of_last_promotion"
+                            class="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             Date of Last Promotion
                         </label>
 
                         <input
+                            id="date_of_last_promotion"
                             type="date"
                             name="date_of_last_promotion"
                             value="{{ old(
@@ -415,19 +432,22 @@
                                     : ''
                             ) }}"
                             class="w-full rounded-lg border-gray-300
-                                focus:border-green-600
-                                focus:ring-green-600"
+                                focus:border-green-600 focus:ring-green-600"
                         >
 
+                        @error('date_of_last_promotion')
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
-
                     {{-- =================================================
-                        EMPLOYMENT STATUS
+                        EMPLOYMENT STATUS — 25%
                     ================================================== --}}
-                    <div>
-
+                    <div class="lg:col-span-1">
                         <label
+                            for="employment_status"
                             class="mb-1 block text-sm font-medium text-gray-700"
                         >
                             Employment Status
@@ -447,14 +467,12 @@
                         @endphp
 
                         <select
+                            id="employment_status"
                             name="employment_status"
                             class="w-full rounded-lg border-gray-300
-                                focus:border-green-600
-                                focus:ring-green-600"
+                                focus:border-green-600 focus:ring-green-600"
                         >
-
-                            @foreach($employmentStatuses as $status)
-
+                            @foreach ($employmentStatuses as $status)
                                 <option
                                     value="{{ $status }}"
                                     @selected(
@@ -466,32 +484,34 @@
                                 >
                                     {{ $status }}
                                 </option>
-
                             @endforeach
-
                         </select>
 
+                        @error('employment_status')
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
-
                     {{-- =================================================
-                        WARM BODY STATUS
+                        WARM BODY STATUS — 25%
                     ================================================== --}}
-                    {{-- WARM BODY STATUS --}}
-                    <div>
-
-                        <label class="mb-1 block text-sm font-medium text-gray-700">
+                    <div class="lg:col-span-1">
+                        <label
+                            for="warm_body_status"
+                            class="mb-1 block text-sm font-medium text-gray-700"
+                        >
                             Warm Body Status
                         </label>
 
                         <select
+                            id="warm_body_status"
                             name="warm_body_status"
                             class="w-full rounded-lg border-gray-300
-                                focus:border-green-600
-                                focus:ring-green-600"
+                                focus:border-green-600 focus:ring-green-600"
                         >
-
-                            @foreach([
+                            @foreach ([
                                 'Original',
                                 'Borrowed',
                                 'Detailed',
@@ -502,7 +522,6 @@
                                 'Vacant (Resigned)',
                                 'Vacant (Others)',
                             ] as $status)
-
                                 <option
                                     value="{{ $status }}"
                                     @selected(
@@ -514,19 +533,20 @@
                                 >
                                     {{ $status }}
                                 </option>
-
                             @endforeach
-
                         </select>
 
+                        @error('warm_body_status')
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
-
                     {{-- =================================================
-                        NATURE OF WORK
+                        NATURE OF WORK — 25%
                     ================================================== --}}
-                    <div>
-
+                    <div class="lg:col-span-1">
                         <label
                             for="nature_of_work"
                             class="mb-1 block text-sm font-medium text-gray-700"
@@ -538,12 +558,9 @@
                             id="nature_of_work"
                             name="nature_of_work"
                             class="w-full rounded-lg border-gray-300
-                                focus:border-green-600
-                                focus:ring-green-600"
+                                focus:border-green-600 focus:ring-green-600"
                         >
-                           
-
-                            @foreach([
+                            @foreach ([
                                 'District Supervisor',
                                 'Teaching Services',
                                 'School Administration',
@@ -561,28 +578,31 @@
                                 'Executive or Management Services',
                                 'Others',
                             ] as $nature)
-
                                 <option
                                     value="{{ $nature }}"
                                     @selected(
-                                        old('nature_of_work', $record->nature_of_work) === $nature
+                                        old(
+                                            'nature_of_work',
+                                            $record->nature_of_work
+                                        ) === $nature
                                     )
                                 >
                                     {{ $nature }}
                                 </option>
-
                             @endforeach
-
                         </select>
 
+                        @error('nature_of_work')
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
-
                     {{-- =================================================
-                        SOURCE OF FUND
+                        SOURCE OF FUND — 25%
                     ================================================== --}}
-                    <div>
-
+                    <div class="lg:col-span-1">
                         <label
                             for="source_of_fund"
                             class="mb-1 block text-sm font-medium text-gray-700"
@@ -594,19 +614,15 @@
                             id="source_of_fund"
                             name="source_of_fund"
                             class="w-full rounded-lg border-gray-300
-                                focus:border-green-600
-                                focus:ring-green-600"
+                                focus:border-green-600 focus:ring-green-600"
                         >
-                           
-
-                            @foreach([
+                            @foreach ([
                                 'Plantilla',
                                 'MOOE/GMS',
                                 'LGU Funds',
                                 'LGU SEFs',
                                 'Program Support Funds',
                             ] as $fund)
-
                                 <option
                                     value="{{ $fund }}"
                                     @selected(
@@ -618,26 +634,29 @@
                                 >
                                     {{ $fund }}
                                 </option>
-
                             @endforeach
-
                         </select>
 
+                        @error('source_of_fund')
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
-
                     {{-- =================================================
-                        MONTHLY SALARY
+                        MONTHLY SALARY — 25%
                     ================================================== --}}
-                    <div>
-
+                    <div class="lg:col-span-1">
                         <label
+                            for="monthly_salary"
                             class="mb-1 block text-sm font-medium text-gray-700"
                         >
                             Monthly Salary
                         </label>
 
                         <input
+                            id="monthly_salary"
                             type="number"
                             step="0.01"
                             min="0"
@@ -647,41 +666,48 @@
                                 $record->monthly_salary
                             ) }}"
                             class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                                focus:border-green-600 focus:ring-green-600"
                         >
 
+                        @error('monthly_salary')
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
-
                     {{-- =================================================
-                        CONTRACT DURATION
+                        CONTRACT DURATION — 25%
                     ================================================== --}}
-                    <div class="lg:col-span-3">
-
+                    <div class="lg:col-span-1">
                         <label
+                            for="contract_duration"
                             class="mb-1 block text-sm font-medium text-gray-700"
                         >
                             Contract Duration
                         </label>
 
                         <input
+                            id="contract_duration"
                             type="text"
                             name="contract_duration"
                             value="{{ old(
                                 'contract_duration',
                                 $record->contract_duration
                             ) }}"
-                            placeholder="Example: January 2026 - December 2026"
+                            placeholder="Example: Jan 2026 - Dec 2026"
                             class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                                focus:border-green-600 focus:ring-green-600"
                         >
 
+                        @error('contract_duration')
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
                 </div>
-
             </div>
 
 
@@ -803,3 +829,25 @@
     </div>
 
 </x-app-layout>
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            new TomSelect('#item_number', {
+                create: false,
+                allowEmptyOption: true,
+                maxOptions: null,
+                placeholder: 'Search plantilla item...',
+            });
+
+            new TomSelect('#school_id', {
+                create: false,
+                allowEmptyOption: true,
+                maxOptions: null,
+                placeholder: 'Search school...',
+            });
+        });
+    </script>
+@endpush

@@ -402,8 +402,6 @@
                                    focus:ring-green-600"
                         >
 
-                            <option value="">Select</option>
-
                             <option
                                 value="Male"
                                 @selected(old('sex', $person->sex) === 'Male')
@@ -482,7 +480,8 @@
                                 'Single',
                                 'Married',
                                 'Widowed',
-                                'Separated'
+                                'Separated',
+                                'Annulled'
                             ] as $status)
 
                                 <option
@@ -544,23 +543,71 @@
 
                     {{-- MODE OF CITIZENSHIP --}}
                     <div>
-
-                        <label class="mb-1 block text-sm font-medium text-gray-700">
+                        <label for="mode_of_citizenship" class="mb-1 block text-sm font-medium text-gray-700">
                             Mode of Citizenship
                         </label>
 
-                        <input
-                            type="text"
+                        <select
+                            id="mode_of_citizenship"
                             name="mode_of_citizenship"
-                            value="{{ old(
-                                'mode_of_citizenship',
-                                $person->mode_of_citizenship
-                            ) }}"
                             class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                                focus:border-green-600 focus:ring-green-600"
                         >
 
+                            @foreach ([
+                                'By Birth',
+                                'By Naturalization',
+                            ] as $mode)
+                                <option
+                                    value="{{ $mode }}"
+                                    @selected(old('mode_of_citizenship', $person->mode_of_citizenship) === $mode)
+                                >
+                                    {{ $mode }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        @error('mode_of_citizenship')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- BLOOD TYPE --}}
+                    <div>
+                        <label for="blood_type" class="mb-1 block text-sm font-medium text-gray-700">
+                            Blood Type
+                        </label>
+
+                        <select
+                            id="blood_type"
+                            name="blood_type"
+                            class="w-full rounded-lg border-gray-300
+                                focus:border-green-600 focus:ring-green-600"
+                        >
+                            
+                            @foreach ([
+                                'A+',
+                                'A-',
+                                'B+',
+                                'B-',
+                                'AB+',
+                                'AB-',
+                                'O+',
+                                'O-',
+                                'Unknown',
+                            ] as $bloodType)
+                                <option
+                                    value="{{ $bloodType }}"
+                                    @selected(old('blood_type', $person->blood_type) === $bloodType)
+                                >
+                                    {{ $bloodType }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        @error('blood_type')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
 
@@ -601,47 +648,111 @@
                                    focus:ring-green-600"
                         >
 
-                    </div>
-
-
-                    {{-- BLOOD TYPE --}}
-                    <div>
-
-                        <label class="mb-1 block text-sm font-medium text-gray-700">
-                            Blood Type
-                        </label>
-
-                        <input
-                            type="text"
-                            name="blood_type"
-                            value="{{ old('blood_type', $person->blood_type) }}"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
-                        >
-
-                    </div>
+                    </div>                    
 
 
                     {{-- SPECIALIZATION --}}
                     <div>
-
-                        <label class="mb-1 block text-sm font-medium text-gray-700">
+                        <label for="specialization" class="mb-1 block text-sm font-medium text-gray-700">
                             Specialization
                         </label>
 
-                        <input
-                            type="text"
+                        <select
+                            id="specialization"
                             name="specialization"
-                            value="{{ old(
-                                'specialization',
-                                $person->specialization
-                            ) }}"
                             class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                                focus:border-green-600 focus:ring-green-600"
                         >
 
+                            @foreach ([
+                                'Early Childhood Education',
+                                'English',
+                                'Filipino',
+                                'General Education',
+                                'Information and Communication Technology (ICT)',
+                                'Mathematics',
+                                'Music, Arts, PE, and Health (MAPEH)',
+                                'Science - Biology',
+                                'Science - Chemistry',
+                                'Science - General Science',
+                                'Science - Physical Science',
+                                'Science - Physics',
+                                'Social Studies / Social Sciences',
+                                'Special Education (SPED)',
+                                'Technology and Livelihood Education (TLE)',
+                                'TVL - Agricultural Crops Production',
+                                'TVL - Agroentrepreneurship',
+                                'TVL - Animal Production',
+                                'TVL - Bartending',
+                                'TVL - Beauty Care Services',
+                                'TVL - Bookkeeping',
+                                'TVL - Bread and Pastry Production',
+                                'TVL - Caregiving',
+                                'TVL - Carpentry',
+                                'TVL - Computer Systems Servicing',
+                                'TVL - Contact Center Services',
+                                'TVL - Cookery',
+                                'TVL - Creative Web Design',
+                                'TVL - Dressmaking',
+                                'TVL - Driving',
+                                'TVL - Electrical Installation and Maintenance',
+                                'TVL - Electronic Products Assembly and Servicing',
+                                'TVL - Events Management Services',
+                                'TVL - Food and Beverage Services',
+                                'TVL - Food Processing',
+                                'TVL - Front Office Services',
+                                'TVL - Hairdressing',
+                                'TVL - Household Services',
+                                'TVL - Housekeeping',
+                                'TVL - Landscape Installation and Maintenance',
+                                'TVL - Masonry',
+                                'TVL - Organic Agriculture Production',
+                                'TVL - Plumbing',
+                                'TVL - RAC Servicing (DomRAC)',
+                                'TVL - Rice Machinery Operations',
+                                'TVL - Security Services',
+                                'TVL - Shielded Metal Arc Welding',
+                                'TVL - Technical Drafting',
+                                'TVL - Technology and Livelihood Education (TLE)',
+                                'TVL - Tour Guiding Services',
+                                'TVL - Wellness Massage',
+                                'Values Education',
+                                'Guidance and Counseling',
+                                'Accountancy',
+                                'Architecture',
+                                'Statistics',
+                                'Civil Engineering',
+                                'Computer Engineering',
+                                'Electrical Engineering',
+                                'Electronics Engineering',
+                                'Mechanical Engineering',
+                                'Agricultural Engineering',
+                                'Human Resource Management',
+                                'Legal Management',
+                                'Management Accounting',
+                                'Marketing Management',
+                                'Nursing',
+                                'Office Administration',
+                                'Public Administration',
+                                'Business Administration',
+                                'Psychology',
+                                'Criminology',
+                                'Commerce',
+                                'Other',
+                                'Not Applicable',
+                            ] as $specialization)
+                                <option
+                                    value="{{ $specialization }}"
+                                    @selected(old('specialization', $person->specialization) === $specialization)
+                                >
+                                    {{ $specialization }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        @error('specialization')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
 

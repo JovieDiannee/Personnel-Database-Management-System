@@ -14,7 +14,10 @@
                             >
 
                             <h3 class="mb-3 text-center text-sm font-bold uppercase tracking-[0.12em] text-green-700 sm:text-xl">
-                                SCHOOLS DIVISION OF LEYTE - PERSONNEL UNIT
+                                DEPARTMENT OF EDUCATION - SCHOOLS DIVISION OF LEYTE
+                            </h3>
+                            <h3 class="mb-3 text-center text-sm font-bold uppercase tracking-[0.12em] text-green-700 sm:text-xl">
+                                PERSONNEL UNIT
                             </h3>
 
                             <h1 class="text-3xl font-bold leading-tight text-gray-900 sm:text-4xl">

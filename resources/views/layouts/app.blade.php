@@ -28,6 +28,8 @@
         'resources/js/app.js'
     ])
 
+    @stack('styles')
+
 </head>
 
 
@@ -115,6 +117,8 @@
         </div>
 
     </div>
+
+    @stack('scripts')
 
 </body>
 

@@ -1,3 +1,128 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "tom-select/dist/css/tom-select.css";
+
+/* =====================================================
+   TOM SELECT — MATCH TAILWIND INPUT DESIGN
+===================================================== */
+
+.ts-wrapper {
+    width: 100%;
+}
+
+.ts-wrapper.single .ts-control {
+    min-height: 50px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+
+    padding: 0.625rem 2.75rem 0.625rem 1rem;
+
+    color: #111827;
+    background-color: #ffffff;
+
+    border: 1px solid #d1d5db !important;
+    border-radius: 0.5rem !important;
+
+    font-size: 1rem;
+    line-height: 1.5rem;
+
+    box-shadow: none !important;
+    cursor: pointer;
+}
+
+/* Search input inside the dropdown */
+.ts-wrapper.single .ts-control input {
+    min-width: 1px;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    color: #111827;
+    background: transparent;
+
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+
+/* Green focus border and ring */
+.ts-wrapper.focus .ts-control {
+    border-color: #16a34a !important;
+    box-shadow: 0 0 0 1px #16a34a !important;
+}
+
+/* Dropdown arrow */
+.ts-wrapper.single .ts-control::after {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+
+    width: 0.55rem;
+    height: 0.55rem;
+
+    content: "";
+    border-right: 2px solid #6b7280;
+    border-bottom: 2px solid #6b7280;
+
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+}
+
+/* Opened arrow */
+.ts-wrapper.single.dropdown-active .ts-control::after {
+    transform: translateY(-30%) rotate(225deg);
+}
+
+/* Dropdown menu */
+.ts-dropdown {
+    margin-top: 0.25rem;
+
+    color: #111827;
+    background-color: #ffffff;
+
+    border: 1px solid #d1d5db !important;
+    border-radius: 0.5rem !important;
+
+    box-shadow:
+        0 10px 15px -3px rgb(0 0 0 / 0.1),
+        0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+    overflow: hidden;
+    z-index: 9999;
+}
+
+/* Individual options */
+.ts-dropdown .option {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+/* Hovered or keyboard-selected option */
+.ts-dropdown .option.active {
+    color: #166534;
+    background-color: #dcfce7;
+}
+
+/* Currently selected option */
+.ts-dropdown .option.selected {
+    color: #ffffff;
+    background-color: #16a34a;
+}
+
+/* Placeholder */
+.ts-wrapper .ts-control .item[data-value=""] {
+    color: #6b7280;
+}
+
+/* Disabled dropdown */
+.ts-wrapper.disabled .ts-control {
+    color: #6b7280;
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+    opacity: 1;
+}
