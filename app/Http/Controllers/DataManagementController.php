@@ -44,39 +44,254 @@ class DataManagementController extends Controller
     |   START OF PERSONNEL INFORMATION FUNCTIONS
     */
 
-    public function personnel()
+    public function personnel(Request $request)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Search
+        |--------------------------------------------------------------------------
+        */
+
+        $search = trim($request->input('search', ''));
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Logged-in User
+        |--------------------------------------------------------------------------
+        */
+
         $user = auth()->user();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Base Personnel Query
+        |--------------------------------------------------------------------------
+        */
 
         $query = \App\Models\BasicInformation::with([
             'user',
             'issuedId',
-        ])->orderByDesc('created_at');
+            'user.employmentStatus.school',
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Role-Based Access
+        |--------------------------------------------------------------------------
+        |
+        | Super Admin = View all personnel
+        | Admin       = View personnel from the same school only
+        |
+        */
 
         if ($user->role === 'admin') {
-            $schoolId = $user->employmentStatus?->school_db_id;
 
-            if ($schoolId) {
-                $query->whereHas('user.employmentStatus', function ($query) use ($schoolId) {
-                    $query->where('school_db_id', $schoolId);
-                });
+            $adminSchoolId = $user->employmentStatus?->school_db_id;
+
+            if ($adminSchoolId) {
+
+                $query->whereHas(
+                    'user.employmentStatus',
+                    function ($employmentQuery) use ($adminSchoolId) {
+
+                        $employmentQuery->where(
+                            'school_db_id',
+                            $adminSchoolId
+                        );
+
+                    }
+                );
+
             } else {
-                // Admins without an assigned school should see no personnel.
+
+                /*
+                | Admin without a school assignment
+                | should not see personnel from other schools.
+                */
+
                 $query->whereRaw('1 = 0');
             }
         }
 
-        // super_admin receives no school filter and can see everything.
-        $personnel = $query->paginate(20);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search Personnel
+        |--------------------------------------------------------------------------
+        */
+
+        if ($search !== '') {
+
+            $query->where(function ($q) use ($search) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Employee Number
+                |--------------------------------------------------------------------------
+                */
+
+                $q->whereHas(
+                    'issuedId',
+                    function ($issuedIdQuery) use ($search) {
+
+                        $issuedIdQuery->where(
+                            'employee_id',
+                            'like',
+                            "%{$search}%"
+                        );
+
+                    }
+                )
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Name
+                |--------------------------------------------------------------------------
+                */
+
+                ->orWhere(
+                    'first_name',
+                    'like',
+                    "%{$search}%"
+                )
+
+                ->orWhere(
+                    'middle_name',
+                    'like',
+                    "%{$search}%"
+                )
+
+                ->orWhere(
+                    'last_name',
+                    'like',
+                    "%{$search}%"
+                )
+
+                ->orWhere(
+                    'extension_name',
+                    'like',
+                    "%{$search}%"
+                )
+
+                ->orWhereRaw(
+                    "CONCAT_WS(
+                        ' ',
+                        last_name,
+                        first_name,
+                        middle_name,
+                        extension_name
+                    ) LIKE ?",
+                    ["%{$search}%"]
+                )
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Mobile Number
+                |--------------------------------------------------------------------------
+                */
+
+                ->orWhere(
+                    'mobile_number',
+                    'like',
+                    "%{$search}%"
+                )
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | User Role
+                |--------------------------------------------------------------------------
+                */
+
+                ->orWhereHas(
+                    'user',
+                    function ($userQuery) use ($search) {
+
+                        $userQuery->where(
+                            'role',
+                            'like',
+                            "%{$search}%"
+                        );
+
+                    }
+                )
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | User Status
+                |--------------------------------------------------------------------------
+                */
+
+                ->orWhereHas(
+                    'user',
+                    function ($userQuery) use ($search) {
+
+                        $userQuery->where(
+                            'status',
+                            'like',
+                            "%{$search}%"
+                        );
+
+                    }
+                )
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Date Created
+                |--------------------------------------------------------------------------
+                */
+
+                ->orWhere(
+                    'created_at',
+                    'like',
+                    "%{$search}%"
+                );
+
+            });
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sort and Paginate
+        |--------------------------------------------------------------------------
+        */
+
+        $personnel = $query
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->paginate(20)
+            ->withQueryString();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Return View
+        |--------------------------------------------------------------------------
+        */
 
         return view(
             'data-management.personnel',
-            compact('personnel')
+            compact(
+                'personnel',
+                'search'
+            )
         );
     }
     
     public function importPersonnel(Request $request)
     {
+        if (auth()->user()->role !== 'super_admin') {
+            abort(403, 'Only the Super Admin can import personnel records.');
+        }
+
         $request->validate([
             'file' => [
                 'required',
@@ -283,6 +498,7 @@ class DataManagementController extends Controller
 
     public function personnelImportPreview()
     {
+
         $rows = session('personnel_import_records', []);
 
         $errors = session('personnel_import_errors', []);
@@ -1785,10 +2001,6 @@ class DataManagementController extends Controller
             |--------------------------------------------------------------------------
             | Admin Has No School Assignment
             |--------------------------------------------------------------------------
-            |
-            | Do not allow an Admin without a school assignment
-            | to see records from other schools.
-            |
             */
 
             if (! $adminSchool) {
@@ -1801,19 +2013,19 @@ class DataManagementController extends Controller
                 |--------------------------------------------------------------------------
                 | Same School Only
                 |--------------------------------------------------------------------------
-                |
-                | Compare using the school record's school_id.
-                |
                 */
 
-                $query->whereHas('school', function ($schoolQuery) use ($adminSchool) {
+                $query->whereHas(
+                    'school',
+                    function ($schoolQuery) use ($adminSchool) {
 
-                    $schoolQuery->where(
-                        'school_id',
-                        $adminSchool->school_id
-                    );
+                        $schoolQuery->where(
+                            'school_id',
+                            $adminSchool->school_id
+                        );
 
-                });
+                    }
+                );
 
             }
         }
@@ -1821,7 +2033,7 @@ class DataManagementController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Search Personnel
+        | Search Employment Records
         |--------------------------------------------------------------------------
         */
 
@@ -1831,28 +2043,11 @@ class DataManagementController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | Search by Email
-                |--------------------------------------------------------------------------
-                */
-
-                $q->whereHas('user', function ($userQuery) use ($search) {
-
-                    $userQuery->where(
-                        'email',
-                        'like',
-                        "%{$search}%"
-                    );
-
-                });
-
-
-                /*
-                |--------------------------------------------------------------------------
                 | Search by Personnel Name
                 |--------------------------------------------------------------------------
                 */
 
-                $q->orWhereHas(
+                $q->whereHas(
                     'user.basicInformation',
                     function ($basicQuery) use ($search) {
 
@@ -1871,30 +2066,9 @@ class DataManagementController extends Controller
                                 'last_name',
                                 'like',
                                 "%{$search}%"
-                            );
-
-                    }
-                );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Search by Plantilla Item Number / Position
-                |--------------------------------------------------------------------------
-                */
-
-                $q->orWhereHas(
-                    'plantilla',
-                    function ($plantillaQuery) use ($search) {
-
-                        $plantillaQuery
-                            ->where(
-                                'item_number',
-                                'like',
-                                "%{$search}%"
                             )
                             ->orWhere(
-                                'position_title',
+                                'extension_name',
                                 'like',
                                 "%{$search}%"
                             );
@@ -1905,7 +2079,7 @@ class DataManagementController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | Search by School
+                | Search by School Name / School ID
                 |--------------------------------------------------------------------------
                 */
 
@@ -1931,12 +2105,61 @@ class DataManagementController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
+                | Search by Plantilla Information
+                |--------------------------------------------------------------------------
+                |
+                | Item From School Level
+                | Plantilla Item Number
+                | Position Title
+                |
+                */
+
+                $q->orWhereHas(
+                    'plantilla',
+                    function ($plantillaQuery) use ($search) {
+
+                        $plantillaQuery
+                            ->where(
+                                'item_from_school_level',
+                                'like',
+                                "%{$search}%"
+                            )
+                            ->orWhere(
+                                'item_number',
+                                'like',
+                                "%{$search}%"
+                            )
+                            ->orWhere(
+                                'position_title',
+                                'like',
+                                "%{$search}%"
+                            );
+
+                    }
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
                 | Search by Employment Status
                 |--------------------------------------------------------------------------
                 */
 
                 $q->orWhere(
                     'employment_status',
+                    'like',
+                    "%{$search}%"
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Search by Date of Original Appointment
+                |--------------------------------------------------------------------------
+                */
+
+                $q->orWhere(
+                    'date_of_original_appointment',
                     'like',
                     "%{$search}%"
                 );
@@ -3451,7 +3674,7 @@ class DataManagementController extends Controller
                 'Please select a valid employment status.'
             )
             ->setFormula1(
-                '"Permanent,Temporary,Contractual,Job Order,Casual"'
+                '"Permanent,Provisional,Temporary,Contractual,Casual,Contract of Service,Job Order,LGU Deployed"'
             );
 
 
@@ -3475,7 +3698,7 @@ class DataManagementController extends Controller
                 'Please select a valid warm body status.'
             )
             ->setFormula1(
-                '"Original,Detailed,Borrowed"'
+                '"OriginalBorrowed,Detailed,TIC,ALS,SNED,Vacant (Retired),Vacant (Resigned),Vacant (Others)"'
             );
 
 
@@ -3499,7 +3722,7 @@ class DataManagementController extends Controller
                 'Please select a valid nature of work.'
             )
             ->setFormula1(
-                '"School Administration,Teaching Services"'
+                '"District Supervisor,Teaching Services,School Administration,Administrative Support,Clerical Services,Driving Services,Engineering Services,Health and Allied Services,IT Services,Janitorial Services,Legal Services,Security Services,Technical Services,Labor Services,Executive or Management Services,Others"'
             );
 
 
@@ -3523,7 +3746,7 @@ class DataManagementController extends Controller
                 'Please select a valid source of fund.'
             )
             ->setFormula1(
-                '"Plantilla, MOOE Fund, LGU Fund"'
+                '"Plantilla,MOOE/GMS,LGU Funds,LGU SEFs,Program Support Funds"'
             );
 
 
@@ -4792,7 +5015,7 @@ class DataManagementController extends Controller
                 'Please select a valid area type.'
             )
             ->setFormula1(
-                '"Urban,Rural"'
+                '"I,II-A,II-B,III,IV,V-A,V-B"'
             );
 
 
@@ -7030,7 +7253,7 @@ class DataManagementController extends Controller
                 'Please select Paid or Pending.'
             )
             ->setFormula1(
-                '"Paid,Pending"'
+                '"Disbursed,Pending"'
             );
 
 

@@ -274,209 +274,265 @@
             @endif
 
 
-            {{-- UPLOAD FILE SECTION --}}
+            {{-- =====================================================
+                SUPER ADMIN - IMPORT PERSONNEL
+            ====================================================== --}}
+            @if(auth()->user()->role === 'super_admin')
 
-            <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+                {{-- UPLOAD FILE SECTION --}}
+                <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
 
-                <div class="mb-6">
-                    <h2 class="text-lg font-bold text-gray-900">
-                        Import Personnel Information
-                    </h2>
+                    <div class="mb-6">
+                        <h2 class="text-lg font-bold text-gray-900">
+                            Import Personnel Information
+                        </h2>
 
-                    <p class="mt-1 text-sm text-gray-500">
-                        Upload an Excel file containing official personnel information
-                        for validation and preview.
-                    </p>
-                </div>
-
-
-                <form
-                    action="{{ route('data-management.personnel.import') }}"
-                    method="POST"
-                    enctype="multipart/form-data"
-                >
-
-                    @csrf
-
-                                        <div class="flex flex-col gap-3 md:flex-row md:items-center">
-
-                        {{-- EXCEL FILE LABEL --}}
-                        <label
-                            for="file"
-                            class="shrink-0 text-sm font-semibold text-gray-700"
-                        >
-                            EXCEL FILE
-                        </label>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Upload an Excel file containing official personnel information
+                            for validation and preview.
+                        </p>
+                    </div>
 
 
-                        {{-- CUSTOM FILE INPUT --}}
-                        <div class="relative flex h-10 flex-1">
+                    <form
+                        action="{{ route('data-management.personnel.import') }}"
+                        method="POST"
+                        enctype="multipart/form-data"
+                    >
 
-                            {{-- REAL FILE INPUT --}}
-                            <input
-                                type="file"
-                                id="file"
-                                name="file"
-                                accept=".xlsx,.xls"
-                                required
-                                class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-                                onchange="document.getElementById('file-name').textContent =
-                                    this.files.length ? this.files[0].name : 'No file selected'"
+                        @csrf
+
+                        <div class="flex flex-col gap-3 md:flex-row md:items-center">
+
+                            {{-- EXCEL FILE LABEL --}}
+                            <label
+                                for="file"
+                                class="shrink-0 text-sm font-semibold text-gray-700"
                             >
+                                EXCEL FILE
+                            </label>
 
 
-                            {{-- CUSTOM FILE DISPLAY --}}
-                            <div
-                                class="flex h-full w-full items-center overflow-hidden
-                                    rounded-lg border border-gray-300
-                                    bg-white shadow-sm"
-                            >
+                            {{-- CUSTOM FILE INPUT --}}
+                            <div class="relative flex h-10 flex-1">
 
-                                {{-- BROWSE BUTTON --}}
-                                <span
-                                    class="flex h-full shrink-0 items-center
-                                        border-r border-green-200
-                                        bg-green-50
-                                        px-4
-                                        text-sm font-semibold
-                                        text-green-700"
+                                <input
+                                    type="file"
+                                    id="file"
+                                    name="file"
+                                    accept=".xlsx,.xls"
+                                    required
+                                    class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                                    onchange="
+                                        document.getElementById('file-name').textContent =
+                                        this.files.length
+                                            ? this.files[0].name
+                                            : 'No file selected'
+                                    "
                                 >
-                                    Browse...
-                                </span>
 
 
-                                {{-- FILE NAME --}}
-                                <span
-                                    id="file-name"
-                                    class="truncate px-4 text-sm text-gray-500"
+                                <div
+                                    class="flex h-full w-full items-center overflow-hidden
+                                        rounded-lg border border-gray-300
+                                        bg-white shadow-sm"
                                 >
-                                    No file selected
-                                </span>
+
+                                    <span
+                                        class="flex h-full shrink-0 items-center
+                                            border-r border-green-200
+                                            bg-green-50 px-4
+                                            text-sm font-semibold text-green-700"
+                                    >
+                                        Browse...
+                                    </span>
+
+                                    <span
+                                        id="file-name"
+                                        class="truncate px-4 text-sm text-gray-500"
+                                    >
+                                        No file selected
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- ACTION BUTTONS --}}
+                            <div class="flex shrink-0 items-center gap-2">
+
+                                <button
+                                    type="submit"
+                                    class="flex h-10 items-center justify-center gap-2
+                                        rounded-lg bg-green-700 px-5
+                                        text-sm font-semibold text-white
+                                        shadow-sm transition
+                                        hover:bg-green-800
+                                        focus:outline-none
+                                        focus:ring-2 focus:ring-green-500
+                                        focus:ring-offset-2"
+                                >
+
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+                                        />
+
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M12 3v10m0-10L8 7m4-4l4 4"
+                                        />
+                                    </svg>
+
+                                    Upload & Preview
+
+                                </button>
+
+
+                                <a
+                                    href="{{ route('data-management.personnel-basic-information.download-template') }}"
+                                    class="flex h-10 items-center justify-center gap-2
+                                        rounded-lg border border-green-700
+                                        bg-white px-4
+                                        text-sm font-semibold text-green-700
+                                        shadow-sm transition
+                                        hover:bg-green-50
+                                        focus:outline-none
+                                        focus:ring-2 focus:ring-green-500
+                                        focus:ring-offset-2"
+                                >
+
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M12 3v12m0 0l-4-4m4 4l4-4"
+                                        />
+
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M5 21h14"
+                                        />
+                                    </svg>
+
+                                    Download Template
+
+                                </a>
 
                             </div>
 
                         </div>
 
 
-                        {{-- ACTION BUTTONS --}}
-                        <div class="flex shrink-0 items-center gap-2">
+                        {{-- HELP TEXT --}}
+                        <p class="mt-1.5 text-xs text-gray-500">
+                            Accepted formats:
+                            <span class="font-medium">.xlsx</span>
+                            and
+                            <span class="font-medium">.xls</span>.
+                            Maximum file size:
+                            <span class="font-medium">10 MB</span>.
+                        </p>
 
-                            {{-- UPLOAD BUTTON --}}
-                            <button
-                                type="submit"
-                                class="flex h-10 items-center justify-center gap-2
-                                    rounded-lg
-                                    bg-green-700
-                                    px-5
-                                    text-sm
-                                    font-semibold
-                                    text-white
-                                    shadow-sm
-                                    transition
-                                    duration-200
-                                    hover:bg-green-800
-                                    focus:outline-none
-                                    focus:ring-2
-                                    focus:ring-green-500
-                                    focus:ring-offset-2"
-                                >
+                    </form>
 
-                                {{-- UPLOAD ICON --}}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
-                                    />
+                </div>
 
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M12 3v10m0-10L8 7m4-4l4 4"
-                                    />
 
-                                </svg>
+            {{-- =====================================================
+                ADMIN - MANUAL PERSONNEL ENTRY
+            ====================================================== --}}
+            @elseif(auth()->user()->role === 'admin')
+            
+                <div
+                    class="rounded-2xl border border-green-200
+                        bg-white p-6 shadow-sm"
+                    >
 
-                                Upload & Preview
+                    <div
+                        class="flex flex-col gap-5
+                            md:flex-row md:items-center
+                            md:justify-between"
+                    >
 
-                            </button>
+                        <div class="flex items-start gap-4">
 
-                            {{-- DOWNLOAD TEMPLATE --}}
-                            <a
-                                href="{{ route('data-management.personnel-basic-information.download-template') }}"
-                                class="flex h-10 items-center justify-center gap-2
-                                    rounded-lg
-                                    border border-green-700
-                                    bg-white
-                                    px-4
-                                    text-sm
-                                    font-semibold
-                                    text-green-700
-                                    shadow-sm
-                                    transition
-                                    duration-200
-                                    hover:bg-green-50
-                                    focus:outline-none
-                                    focus:ring-2
-                                    focus:ring-green-500
-                                    focus:ring-offset-2"
-                                >
+                            <div>
 
-                                {{-- DOWNLOAD ICON --}}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M12 3v12m0 0l-4-4m4 4l4-4"
-                                    />
+                                <h2 class="text-lg font-bold text-gray-900">
+                                    Add Personnel Information
+                                </h2>
 
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M5 21h14"
-                                    />
-                                </svg>
+                                <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
+                                    Excel import is available only to the Super Admin.
+                                    To add a personnel record, complete the personnel information form.
+                                </p>
 
-                                Download Template
-
-                            </a>
+                            </div>
 
                         </div>
 
+
+                        <a
+                            href="https://forms.gle/zrz8AGM3bdvAWoJ67"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex h-10 shrink-0
+                                items-center justify-center gap-2
+                                rounded-lg bg-green-700
+                                px-5 text-sm font-semibold
+                                text-white shadow-sm
+                                transition hover:bg-green-800
+                                focus:outline-none
+                                focus:ring-2 focus:ring-green-500
+                                focus:ring-offset-2"
+                        >
+
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M12 4.5v15m7.5-7.5h-15"
+                                />
+                            </svg>
+
+                            Add Personnel
+
+                        </a>
+
                     </div>
 
-                    {{-- HELP TEXT --}}
-                    <p class="mt-1.5 text-xs text-gray-500">
+                </div>
 
-                        Accepted formats:
-                        <span class="font-medium">.xlsx</span>
-                        and
-                        <span class="font-medium">.xls</span>.
-                        Maximum file size:
-                        <span class="font-medium">10 MB</span>.
-
-                    </p>
-
-                </form>
-
-            </div>
-
-            <br>
+            @endif
             
+            <br>
 
 
             {{-- RECORDS SECTION --}}
@@ -500,29 +556,81 @@
                 {{-- SEARCH --}}
                 <div class="border-b border-gray-200 p-6">
 
-                    <div class="max-w-md">
+                    <form
+                        action="{{ route('data-management.personnel') }}"
+                        method="GET"
+                    >
 
-                        <label
-                            for="search"
-                            class="mb-2 block text-sm font-medium text-gray-700"
-                        >
-                            Search Personnel
-                        </label>
+                        <div class="flex flex-col gap-3 md:flex-row">
 
-                        <input
-                            type="text"
-                            id="search"
-                            name="search"
-                            placeholder="Search by name or employee number..."
-                            class="w-full rounded-md border-gray-300
-                                text-sm shadow-sm
-                                focus:border-green-600
-                                focus:ring-green-600"
-                        >
+                            <div class="flex-1">
 
-                    </div>
+                                <label
+                                    for="search"
+                                    class="mb-2 block text-sm font-medium text-gray-700"
+                                >
+                                    Search Personnel
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="search"
+                                    name="search"
+                                    value="{{ $search }}"
+                                    placeholder="Search by name, employee number, email, or school..."
+                                    class="w-full rounded-md border-gray-300
+                                        text-sm shadow-sm
+                                        focus:border-green-600
+                                        focus:ring-green-600"
+                                >
+
+                            </div>
+
+
+                            <div class="flex items-end gap-2">
+
+                                {{-- SEARCH BUTTON --}}
+                                <button
+                                    type="submit"
+                                    class="rounded-md bg-green-700
+                                        px-5 py-2.5
+                                        text-sm font-semibold text-white
+                                        transition
+                                        hover:bg-green-800
+                                        focus:outline-none
+                                        focus:ring-2
+                                        focus:ring-green-500
+                                        focus:ring-offset-2"
+                                >
+                                    Search
+                                </button>
+
+
+                                {{-- CLEAR BUTTON --}}
+                                @if($search !== '')
+
+                                    <a
+                                        href="{{ route('data-management.personnel') }}"
+                                        class="rounded-md border border-gray-300
+                                            bg-white px-5 py-2.5
+                                            text-sm font-semibold text-gray-700
+                                            transition
+                                            hover:bg-gray-50"
+                                    >
+                                        Clear
+                                    </a>
+
+                                @endif
+
+                            </div>
+
+                        </div>
+
+                    </form>
 
                 </div>
+
+                
 
 
                 {{-- TABLE --}}

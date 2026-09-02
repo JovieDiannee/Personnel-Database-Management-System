@@ -300,211 +300,286 @@
             @endif
 
 
-            {{-- ========================================================= --}}
-            {{-- IMPORT SECTION --}}
-            {{-- ========================================================= --}}
+            {{-- =====================================================
+                SUPER ADMIN - IMPORT PERSONNEL
+            ====================================================== --}}
+            @if(auth()->user()->role === 'super_admin')
 
-            <div id="import" class="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div id="import" class="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
 
-                <div class="mb-5">
+                    <div class="mb-5">
 
-                    <h2 class="text-lg font-semibold text-gray-800">
-                        Import Medical Allowance Records
-                    </h2>
+                        <h2 class="text-lg font-semibold text-gray-800">
+                            Import Medical Allowance Records
+                        </h2>
 
-                    <p class="mt-1 text-sm text-gray-500">
-                        Upload an Excel file containing personnel medical
-                        allowance records.
-                    </p>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Upload an Excel file containing personnel medical
+                            allowance records.
+                        </p>
+
+                    </div>
+
+
+                    <form
+                        action="{{ route('data-management.medical-allowance.import') }}"
+                        method="POST"
+                        enctype="multipart/form-data"
+                        >
+
+                        @csrf
+
+                        <div class="flex flex-col gap-3 md:flex-row md:items-center">
+
+                            {{-- EXCEL FILE LABEL --}}
+                            <label
+                                for="file"
+                                class="shrink-0 text-sm font-semibold text-gray-700"
+                            >
+                                EXCEL FILE
+                            </label>
+
+
+                            {{-- CUSTOM FILE INPUT --}}
+                            <div class="relative flex h-10 flex-1">
+
+                                {{-- REAL FILE INPUT --}}
+                                <input
+                                    type="file"
+                                    id="file"
+                                    name="file"
+                                    accept=".xlsx,.xls"
+                                    required
+                                    class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                                    onchange="document.getElementById('file-name').textContent =
+                                        this.files.length ? this.files[0].name : 'No file selected'"
+                                >
+
+
+                                {{-- CUSTOM FILE DISPLAY --}}
+                                <div
+                                    class="flex h-full w-full items-center overflow-hidden
+                                        rounded-lg border border-gray-300
+                                        bg-white shadow-sm"
+                                >
+
+                                    {{-- BROWSE BUTTON --}}
+                                    <span
+                                        class="flex h-full shrink-0 items-center
+                                            border-r border-green-200
+                                            bg-green-50
+                                            px-4
+                                            text-sm font-semibold
+                                            text-green-700"
+                                    >
+                                        Browse...
+                                    </span>
+
+
+                                    {{-- FILE NAME --}}
+                                    <span
+                                        id="file-name"
+                                        class="truncate px-4 text-sm text-gray-500"
+                                    >
+                                        No file selected
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- ACTION BUTTONS --}}
+                            <div class="flex shrink-0 items-center gap-2">
+
+                                {{-- UPLOAD BUTTON --}}
+                                <button
+                                    type="submit"
+                                    class="flex h-10 items-center justify-center gap-2
+                                        rounded-lg
+                                        bg-green-700
+                                        px-5
+                                        text-sm
+                                        font-semibold
+                                        text-white
+                                        shadow-sm
+                                        transition
+                                        duration-200
+                                        hover:bg-green-800
+                                        focus:outline-none
+                                        focus:ring-2
+                                        focus:ring-green-500
+                                        focus:ring-offset-2"
+                                    >
+
+                                    {{-- UPLOAD ICON --}}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+                                        />
+
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M12 3v10m0-10L8 7m4-4l4 4"
+                                        />
+
+                                    </svg>
+
+                                    Upload & Preview
+
+                                </button>
+
+                                {{-- DOWNLOAD TEMPLATE --}}
+                                <a
+                                    href="{{ route('data-management.medical-allowance.template') }}"
+                                    class="flex h-10 items-center justify-center gap-2
+                                        rounded-lg
+                                        border border-green-700
+                                        bg-white
+                                        px-4
+                                        text-sm
+                                        font-semibold
+                                        text-green-700
+                                        shadow-sm
+                                        transition
+                                        duration-200
+                                        hover:bg-green-50
+                                        focus:outline-none
+                                        focus:ring-2
+                                        focus:ring-green-500
+                                        focus:ring-offset-2"
+                                    >
+
+                                    {{-- DOWNLOAD ICON --}}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M12 3v12m0 0l-4-4m4 4l4-4"
+                                        />
+
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M5 21h14"
+                                        />
+                                    </svg>
+
+                                    Download Template
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                        {{-- HELP TEXT --}}
+                        <p class="mt-1.5 text-xs text-gray-500">
+
+                            Accepted formats:
+                            <span class="font-medium">.xlsx</span>
+                            and
+                            <span class="font-medium">.xls</span>.
+                            Maximum file size:
+                            <span class="font-medium">10 MB</span>.
+
+                        </p>
+
+                    </form>
 
                 </div>
 
-
-                <form
-                    action="{{ route('data-management.medical-allowance.import') }}"
-                    method="POST"
-                    enctype="multipart/form-data"
+            {{-- =====================================================
+                ADMIN - MANUAL PERSONNEL ENTRY
+            ====================================================== --}}
+            @elseif(auth()->user()->role === 'admin')
+            
+                <div
+                    class="rounded-2xl border border-green-200
+                        bg-white p-6 shadow-sm"
                     >
 
-                    @csrf
+                    <div
+                        class="flex flex-col gap-5
+                            md:flex-row md:items-center
+                            md:justify-between"
+                    >
 
-                    <div class="flex flex-col gap-3 md:flex-row md:items-center">
+                        <div class="flex items-start gap-4">
 
-                        {{-- EXCEL FILE LABEL --}}
-                        <label
-                            for="file"
-                            class="shrink-0 text-sm font-semibold text-gray-700"
-                        >
-                            EXCEL FILE
-                        </label>
+                            <div>
 
+                                <h2 class="text-lg font-bold text-gray-900">
+                                    Add Personnel Information
+                                </h2>
 
-                        {{-- CUSTOM FILE INPUT --}}
-                        <div class="relative flex h-10 flex-1">
-
-                            {{-- REAL FILE INPUT --}}
-                            <input
-                                type="file"
-                                id="file"
-                                name="file"
-                                accept=".xlsx,.xls"
-                                required
-                                class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-                                onchange="document.getElementById('file-name').textContent =
-                                    this.files.length ? this.files[0].name : 'No file selected'"
-                            >
-
-
-                            {{-- CUSTOM FILE DISPLAY --}}
-                            <div
-                                class="flex h-full w-full items-center overflow-hidden
-                                    rounded-lg border border-gray-300
-                                    bg-white shadow-sm"
-                            >
-
-                                {{-- BROWSE BUTTON --}}
-                                <span
-                                    class="flex h-full shrink-0 items-center
-                                        border-r border-green-200
-                                        bg-green-50
-                                        px-4
-                                        text-sm font-semibold
-                                        text-green-700"
-                                >
-                                    Browse...
-                                </span>
-
-
-                                {{-- FILE NAME --}}
-                                <span
-                                    id="file-name"
-                                    class="truncate px-4 text-sm text-gray-500"
-                                >
-                                    No file selected
-                                </span>
+                                <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
+                                    Excel import is available only to the Super Admin.
+                                    To add a personnel record, complete the personnel information form.
+                                </p>
 
                             </div>
 
                         </div>
 
 
-                        {{-- ACTION BUTTONS --}}
-                        <div class="flex shrink-0 items-center gap-2">
+                        <a
+                            href="https://forms.gle/zrz8AGM3bdvAWoJ67"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex h-10 shrink-0
+                                items-center justify-center gap-2
+                                rounded-lg bg-green-700
+                                px-5 text-sm font-semibold
+                                text-white shadow-sm
+                                transition hover:bg-green-800
+                                focus:outline-none
+                                focus:ring-2 focus:ring-green-500
+                                focus:ring-offset-2"
+                        >
 
-                            {{-- UPLOAD BUTTON --}}
-                            <button
-                                type="submit"
-                                class="flex h-10 items-center justify-center gap-2
-                                    rounded-lg
-                                    bg-green-700
-                                    px-5
-                                    text-sm
-                                    font-semibold
-                                    text-white
-                                    shadow-sm
-                                    transition
-                                    duration-200
-                                    hover:bg-green-800
-                                    focus:outline-none
-                                    focus:ring-2
-                                    focus:ring-green-500
-                                    focus:ring-offset-2"
-                                >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M12 4.5v15m7.5-7.5h-15"
+                                />
+                            </svg>
 
-                                {{-- UPLOAD ICON --}}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
-                                    />
+                            Add Personnel
 
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M12 3v10m0-10L8 7m4-4l4 4"
-                                    />
-
-                                </svg>
-
-                                Upload & Preview
-
-                            </button>
-
-                            {{-- DOWNLOAD TEMPLATE --}}
-                            <a
-                                href="{{ route('data-management.medical-allowance.template') }}"
-                                class="flex h-10 items-center justify-center gap-2
-                                    rounded-lg
-                                    border border-green-700
-                                    bg-white
-                                    px-4
-                                    text-sm
-                                    font-semibold
-                                    text-green-700
-                                    shadow-sm
-                                    transition
-                                    duration-200
-                                    hover:bg-green-50
-                                    focus:outline-none
-                                    focus:ring-2
-                                    focus:ring-green-500
-                                    focus:ring-offset-2"
-                                >
-
-                                {{-- DOWNLOAD ICON --}}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M12 3v12m0 0l-4-4m4 4l4-4"
-                                    />
-
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M5 21h14"
-                                    />
-                                </svg>
-
-                                Download Template
-
-                            </a>
-
-                        </div>
+                        </a>
 
                     </div>
 
-                    {{-- HELP TEXT --}}
-                    <p class="mt-1.5 text-xs text-gray-500">
+                </div>
+                <br>
 
-                        Accepted formats:
-                        <span class="font-medium">.xlsx</span>
-                        and
-                        <span class="font-medium">.xls</span>.
-                        Maximum file size:
-                        <span class="font-medium">10 MB</span>.
-
-                    </p>
-
-                </form>
-
-            </div>
-
+            @endif
 
             {{-- ========================================================= --}}
             {{-- MEDICAL ALLOWANCE RECORDS --}}

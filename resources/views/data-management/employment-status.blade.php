@@ -193,203 +193,280 @@
             @endif
 
 
-            {{-- IMPORT SECTION --}}
-           <div class="rounded-xl border bg-white p-6 shadow-sm">
+            {{-- =====================================================
+                SUPER ADMIN - IMPORT PERSONNEL
+            ====================================================== --}}
+            @if(auth()->user()->role === 'super_admin')
+                <div class="rounded-xl border bg-white p-6 shadow-sm">
 
-                <h2 class="text-lg font-bold text-gray-800">
-                    Import Employment Status
-                </h2>
+                    <h2 class="text-lg font-bold text-gray-800">
+                        Import Employment Status
+                    </h2>
 
-                <p class="mt-1 text-sm text-gray-500">
-                    Upload the official Employment Status Excel file.
-                </p>
-
-
-                <form
-                    action="{{ route('data-management.employment-status.import') }}"
-                    method="POST"
-                    enctype="multipart/form-data"
-                    class="mt-6"
-                >
-
-                    @csrf
-                    
-                                        <div class="flex flex-col gap-3 md:flex-row md:items-center">
-
-                        {{-- EXCEL FILE LABEL --}}
-                        <label
-                            for="file"
-                            class="shrink-0 text-sm font-semibold text-gray-700"
-                        >
-                            EXCEL FILE
-                        </label>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Upload the official Employment Status Excel file.
+                    </p>
 
 
-                        {{-- CUSTOM FILE INPUT --}}
-                        <div class="relative flex h-10 flex-1">
+                    <form
+                        action="{{ route('data-management.employment-status.import') }}"
+                        method="POST"
+                        enctype="multipart/form-data"
+                        class="mt-6"
+                    >
 
-                            {{-- REAL FILE INPUT --}}
-                            <input
-                                type="file"
-                                id="file"
-                                name="file"
-                                accept=".xlsx,.xls"
-                                required
-                                class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-                                onchange="document.getElementById('file-name').textContent =
-                                    this.files.length ? this.files[0].name : 'No file selected'"
+                        @csrf
+                        
+                                            <div class="flex flex-col gap-3 md:flex-row md:items-center">
+
+                            {{-- EXCEL FILE LABEL --}}
+                            <label
+                                for="file"
+                                class="shrink-0 text-sm font-semibold text-gray-700"
                             >
+                                EXCEL FILE
+                            </label>
 
 
-                            {{-- CUSTOM FILE DISPLAY --}}
-                            <div
-                                class="flex h-full w-full items-center overflow-hidden
-                                    rounded-lg border border-gray-300
-                                    bg-white shadow-sm"
-                            >
+                            {{-- CUSTOM FILE INPUT --}}
+                            <div class="relative flex h-10 flex-1">
 
-                                {{-- BROWSE BUTTON --}}
-                                <span
-                                    class="flex h-full shrink-0 items-center
-                                        border-r border-green-200
-                                        bg-green-50
+                                {{-- REAL FILE INPUT --}}
+                                <input
+                                    type="file"
+                                    id="file"
+                                    name="file"
+                                    accept=".xlsx,.xls"
+                                    required
+                                    class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                                    onchange="document.getElementById('file-name').textContent =
+                                        this.files.length ? this.files[0].name : 'No file selected'"
+                                >
+
+
+                                {{-- CUSTOM FILE DISPLAY --}}
+                                <div
+                                    class="flex h-full w-full items-center overflow-hidden
+                                        rounded-lg border border-gray-300
+                                        bg-white shadow-sm"
+                                >
+
+                                    {{-- BROWSE BUTTON --}}
+                                    <span
+                                        class="flex h-full shrink-0 items-center
+                                            border-r border-green-200
+                                            bg-green-50
+                                            px-4
+                                            text-sm font-semibold
+                                            text-green-700"
+                                    >
+                                        Browse...
+                                    </span>
+
+
+                                    {{-- FILE NAME --}}
+                                    <span
+                                        id="file-name"
+                                        class="truncate px-4 text-sm text-gray-500"
+                                    >
+                                        No file selected
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- ACTION BUTTONS --}}
+                            <div class="flex shrink-0 items-center gap-2">
+
+                                {{-- UPLOAD BUTTON --}}
+                                <button
+                                    type="submit"
+                                    class="flex h-10 items-center justify-center gap-2
+                                        rounded-lg
+                                        bg-green-700
+                                        px-5
+                                        text-sm
+                                        font-semibold
+                                        text-white
+                                        shadow-sm
+                                        transition
+                                        duration-200
+                                        hover:bg-green-800
+                                        focus:outline-none
+                                        focus:ring-2
+                                        focus:ring-green-500
+                                        focus:ring-offset-2"
+                                    >
+
+                                    {{-- UPLOAD ICON --}}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+                                        />
+
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M12 3v10m0-10L8 7m4-4l4 4"
+                                        />
+
+                                    </svg>
+
+                                    Upload & Preview
+
+                                </button>
+
+                                {{-- DOWNLOAD TEMPLATE --}}
+                                <a
+                                    href="{{ route('data-management.employment-status.download-template') }}"
+                                    class="flex h-10 items-center justify-center gap-2
+                                        rounded-lg
+                                        border border-green-700
+                                        bg-white
                                         px-4
-                                        text-sm font-semibold
-                                        text-green-700"
-                                >
-                                    Browse...
-                                </span>
+                                        text-sm
+                                        font-semibold
+                                        text-green-700
+                                        shadow-sm
+                                        transition
+                                        duration-200
+                                        hover:bg-green-50
+                                        focus:outline-none
+                                        focus:ring-2
+                                        focus:ring-green-500
+                                        focus:ring-offset-2"
+                                    >
 
+                                    {{-- DOWNLOAD ICON --}}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M12 3v12m0 0l-4-4m4 4l4-4"
+                                        />
 
-                                {{-- FILE NAME --}}
-                                <span
-                                    id="file-name"
-                                    class="truncate px-4 text-sm text-gray-500"
-                                >
-                                    No file selected
-                                </span>
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M5 21h14"
+                                        />
+                                    </svg>
+
+                                    Download Template
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                        {{-- HELP TEXT --}}
+                        <p class="mt-1.5 text-xs text-gray-500">
+
+                            Accepted formats:
+                            <span class="font-medium">.xlsx</span>
+                            and
+                            <span class="font-medium">.xls</span>.
+                            Maximum file size:
+                            <span class="font-medium">10 MB</span>.
+
+                        </p>
+
+                    </form>
+
+                </div>
+            {{-- =====================================================
+                ADMIN - MANUAL PERSONNEL ENTRY
+            ====================================================== --}}
+            @elseif(auth()->user()->role === 'admin')
+            
+                <div
+                    class="rounded-2xl border border-green-200
+                        bg-white p-6 shadow-sm"
+                    >
+
+                    <div
+                        class="flex flex-col gap-5
+                            md:flex-row md:items-center
+                            md:justify-between"
+                    >
+
+                        <div class="flex items-start gap-4">
+
+                            <div>
+
+                                <h2 class="text-lg font-bold text-gray-900">
+                                    Add Personnel Information
+                                </h2>
+
+                                <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
+                                    Excel import is available only to the Super Admin.
+                                    To add a personnel record, complete the personnel information form.
+                                </p>
 
                             </div>
 
                         </div>
 
 
-                        {{-- ACTION BUTTONS --}}
-                        <div class="flex shrink-0 items-center gap-2">
+                        <a
+                            href="https://forms.gle/zrz8AGM3bdvAWoJ67"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex h-10 shrink-0
+                                items-center justify-center gap-2
+                                rounded-lg bg-green-700
+                                px-5 text-sm font-semibold
+                                text-white shadow-sm
+                                transition hover:bg-green-800
+                                focus:outline-none
+                                focus:ring-2 focus:ring-green-500
+                                focus:ring-offset-2"
+                        >
 
-                            {{-- UPLOAD BUTTON --}}
-                            <button
-                                type="submit"
-                                class="flex h-10 items-center justify-center gap-2
-                                    rounded-lg
-                                    bg-green-700
-                                    px-5
-                                    text-sm
-                                    font-semibold
-                                    text-white
-                                    shadow-sm
-                                    transition
-                                    duration-200
-                                    hover:bg-green-800
-                                    focus:outline-none
-                                    focus:ring-2
-                                    focus:ring-green-500
-                                    focus:ring-offset-2"
-                                >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M12 4.5v15m7.5-7.5h-15"
+                                />
+                            </svg>
 
-                                {{-- UPLOAD ICON --}}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
-                                    />
+                            Add Personnel
 
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M12 3v10m0-10L8 7m4-4l4 4"
-                                    />
-
-                                </svg>
-
-                                Upload & Preview
-
-                            </button>
-
-                            {{-- DOWNLOAD TEMPLATE --}}
-                            <a
-                                href="{{ route('data-management.employment-status.download-template') }}"
-                                class="flex h-10 items-center justify-center gap-2
-                                    rounded-lg
-                                    border border-green-700
-                                    bg-white
-                                    px-4
-                                    text-sm
-                                    font-semibold
-                                    text-green-700
-                                    shadow-sm
-                                    transition
-                                    duration-200
-                                    hover:bg-green-50
-                                    focus:outline-none
-                                    focus:ring-2
-                                    focus:ring-green-500
-                                    focus:ring-offset-2"
-                                >
-
-                                {{-- DOWNLOAD ICON --}}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M12 3v12m0 0l-4-4m4 4l4-4"
-                                    />
-
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M5 21h14"
-                                    />
-                                </svg>
-
-                                Download Template
-
-                            </a>
-
-                        </div>
+                        </a>
 
                     </div>
 
-                    {{-- HELP TEXT --}}
-                    <p class="mt-1.5 text-xs text-gray-500">
+                </div>
 
-                        Accepted formats:
-                        <span class="font-medium">.xlsx</span>
-                        and
-                        <span class="font-medium">.xls</span>.
-                        Maximum file size:
-                        <span class="font-medium">10 MB</span>.
+            @endif
 
-                    </p>
-
-                </form>
-
-            </div>
             <br>
 
             {{-- RECORDS TABLE --}}
@@ -422,58 +499,68 @@
                     <form
                         action="{{ route('data-management.employment-status') }}"
                         method="GET"
-                        class="flex flex-col gap-3 sm:flex-row sm:items-end"
                     >
 
-                        <div class="w-full max-w-md">
+                        <div class="flex flex-col gap-3 md:flex-row">
 
-                            <label
-                                for="search"
-                                class="mb-2 block text-sm font-medium text-gray-700"
-                            >
-                                Search Employment Records
-                            </label>
+                            {{-- SEARCH INPUT --}}
+                            <div class="flex-1">
 
-                            <input
-                                type="text"
-                                id="search"
-                                name="search"
-                                value="{{ $search }}"
-                                placeholder="Search name, email, school, item no., position..."
-                                class="w-full rounded-md border-gray-300
-                                    text-sm shadow-sm
-                                    focus:border-green-600
-                                    focus:ring-green-600"
-                            >
-
-                        </div>
-
-
-                        <div class="flex gap-2">
-
-                            <button
-                                type="submit"
-                                class="rounded-md bg-green-700 px-4 py-2
-                                    text-sm font-semibold text-white
-                                    hover:bg-green-800"
-                            >
-                                Search
-                            </button>
-
-
-                            @if($search !== '')
-
-                                <a
-                                    href="{{ route('data-management.employment-status') }}"
-                                    class="rounded-md border border-gray-300
-                                        bg-white px-4 py-2
-                                        text-sm font-semibold text-gray-700
-                                        hover:bg-gray-50"
+                                <label
+                                    for="search"
+                                    class="mb-2 block text-sm font-medium text-gray-700"
                                 >
-                                    Clear
-                                </a>
+                                    Search Employment Records
+                                </label>
 
-                            @endif
+                                <input
+                                    type="text"
+                                    id="search"
+                                    name="search"
+                                    value="{{ $search }}"
+                                    placeholder="Search name, school, item no., position, status..."
+                                    class="w-full rounded-md border-gray-300
+                                        text-sm shadow-sm
+                                        focus:border-green-600
+                                        focus:ring-green-600"
+                                >
+
+                            </div>
+
+
+                            {{-- BUTTONS --}}
+                            <div class="flex items-end gap-2">
+
+                                {{-- SEARCH --}}
+                                <button
+                                    type="submit"
+                                    class="rounded-md bg-green-700
+                                        px-5 py-2.5
+                                        text-sm font-semibold text-white
+                                        transition
+                                        hover:bg-green-800"
+                                >
+                                    Search
+                                </button>
+
+
+                                {{-- CLEAR --}}
+                                @if($search !== '')
+
+                                    <a
+                                        href="{{ route('data-management.employment-status') }}"
+                                        class="rounded-md border border-gray-300
+                                            bg-white px-5 py-2.5
+                                            text-sm font-semibold text-gray-700
+                                            transition
+                                            hover:bg-gray-50"
+                                    >
+                                        Clear
+                                    </a>
+
+                                @endif
+
+                            </div>
 
                         </div>
 

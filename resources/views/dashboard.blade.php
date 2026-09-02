@@ -82,7 +82,7 @@
                                 </p>
 
                                 <p class="mt-3 text-4xl font-bold text-green-800">
-                                    {{ $plantillaEmployees ?? '21,183' }}
+                                    {{ number_format($plantillaEmployees) }}
                                 </p>
 
                             </div>
@@ -134,7 +134,7 @@
                                 </p>
 
                                 <p class="mt-3 text-4xl font-bold text-green-800">
-                                    {{ $otherFundsEmployees ?? 430 }}
+                                    {{ number_format($otherFundsEmployees) }}
                                 </p>
 
                             </div>
@@ -186,7 +186,7 @@
                                 </p>
 
                                 <p class="mt-3 text-4xl font-bold text-green-800">
-                                    {{ $numberOfSchools ?? '1,378' }}
+                                    {{ number_format($numberOfSchools) }}
                                 </p>
 
                             </div>
@@ -238,7 +238,7 @@
                                 </p>
 
                                 <p class="mt-3 text-4xl font-bold text-green-800">
-                                    {{ $hrTransactions ?? '4,582' }}
+                                    {{ number_format($hrTransactions) }}
                                 </p>
 
                             </div>
@@ -276,6 +276,195 @@
                         </div>
 
                     </div>
+
+                </div>
+
+            </div>
+
+            {{-- =====================================================
+                MEDICAL ALLOWANCE REPORT
+            ====================================================== --}}
+
+            <div>
+                {{-- SECTION TITLE --}}
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-6 py-4 text-white shadow-lg">
+
+                    <div class="text-center">
+
+                        {{-- LINE 1 --}}
+                        <h3 class="text-xl font-bold uppercase tracking-wide text-white">
+                            Medical Allowance Report School Year 2026–2027
+                        </h3>
+
+                        {{-- LINE 2 --}}
+                        <p class="mt-1 text-sm text-green-100">
+                            Summary of personnel medical allowance availments
+                        </p>
+
+                    </div>
+
+                </div>
+                <br>
+                
+
+                {{-- 3 CARDS IN ONE ROW --}}
+                <div class="flex w-full flex-nowrap gap-6">
+
+
+                    {{-- =================================================
+                        GROUP AVAILMENT
+                    ================================================== --}}
+                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+
+                        <div class="flex items-start justify-between gap-4">
+
+                            <div class="min-w-0 flex-1">
+
+                                <p class="text-sm font-medium text-gray-500">
+                                    Group Availment (HMO)
+                                </p>
+
+                                <p class="mt-2 text-3xl font-bold text-green-700">
+                                    {{ number_format($groupAvailment) }}
+                                </p>
+
+                                <p class="mt-1 text-xs text-gray-400">
+                                    Personnel enrolled in the group medical program
+                                </p>
+
+                            </div>
+
+
+                            {{-- ICON --}}
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M3 21h18M5 21V7a2 2 0 012-2h2v4h6V5h2a2 2 0 012 2v14M9 21v-4h6v4"
+                                    />
+
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    {{-- =================================================
+                        INDIVIDUAL AVAILMENT HMO
+                    ================================================== --}}
+                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+
+                        <div class="flex items-start justify-between gap-4">
+
+                            <div class="min-w-0 flex-1">
+
+                                <p class="text-sm font-medium text-gray-500">
+                                    Individual Availment (HMO)
+                                </p>
+
+                                <p class="mt-2 text-3xl font-bold text-blue-600">
+                                    {{ number_format($individualAvailment) }}
+                                </p>
+
+                                <p class="mt-1 text-xs text-gray-400">
+                                    Personnel utilizing HMO medical benefits
+                                </p>
+
+                            </div>
+
+
+                            {{-- ICON --}}
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M20 8h-3V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2v-8a2 2 0 00-2-2zM9 6h6v2H9V6zm3 5v2m-2-1h4"
+                                    />
+
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    {{-- =================================================
+                        INDIVIDUAL MEDICAL EXPENSES
+                    ================================================== --}}
+                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+
+                        <div class="flex items-start justify-between gap-4">
+
+                            <div class="min-w-0 flex-1">
+
+                                <p class="text-sm font-medium text-gray-500">
+                                    Medical Allowance Received
+                                </p>
+
+                                <p class="mt-2 text-3xl font-bold text-red-600">
+                                    {{ number_format($numberOfDisbursement) }}
+                                </p>
+
+                                <p class="mt-1 text-xs text-gray-400">
+                                    Personnel who have already received their medical allowance
+                                </p>
+
+                            </div>
+
+
+                            {{-- ICON --}}
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                >
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M20 8h-3V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2v-8a2 2 0 00-2-2zM9 6h6v2H9V6zm3 5v2m-2-1h4"
+                                    />
+
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
 
                 </div>
 
@@ -325,7 +514,7 @@
                                 </p>
 
                                 <p class="mt-2 text-3xl font-bold text-green-700">
-                                    9
+                                    ---
                                 </p>
 
                                 <p class="mt-1 text-xs text-gray-400">
@@ -390,7 +579,7 @@
                                 </p>
 
                                 <p class="mt-2 text-3xl font-bold text-amber-600">
-                                    2
+                                    ---
                                 </p>
 
                                 <p class="mt-1 text-xs text-gray-400">
@@ -449,7 +638,7 @@
                                 </p>
 
                                 <p class="mt-2 text-3xl font-bold text-red-600">
-                                    0
+                                    ---
                                 </p>
 
                                 <p class="mt-1 text-xs text-gray-400">
@@ -580,7 +769,7 @@
                                         </span>
 
                                         <span class="font-bold text-green-700">
-                                            0
+                                            ---
                                         </span>
 
                                     </div>
@@ -678,7 +867,7 @@
                                         </span>
 
                                         <span class="font-bold text-green-800">
-                                            0
+                                            ---
                                         </span>
 
                                     </div>
@@ -770,7 +959,7 @@
                                     </span>
 
                                     <span class="text-sm font-bold text-green-700">
-                                        1,245
+                                        ---
                                     </span>
 
                                 </div>
@@ -784,7 +973,7 @@
                                     </span>
 
                                     <span class="text-sm font-bold text-green-700">
-                                        1,586
+                                        ---
                                     </span>
 
                                 </div>
@@ -798,7 +987,7 @@
                                     </span>
 
                                     <span class="text-sm font-bold text-green-700">
-                                        1,372
+                                        ---
                                     </span>
 
                                 </div>
@@ -812,7 +1001,7 @@
                                     </span>
 
                                     <span class="text-sm font-bold text-green-700">
-                                        2,418
+                                        ---
                                     </span>
 
                                 </div>
@@ -826,7 +1015,7 @@
                                     </span>
 
                                     <span class="text-sm font-bold text-green-700">
-                                        1,634
+                                        ---
                                     </span>
 
                                 </div>
@@ -840,7 +1029,7 @@
                                     </span>
 
                                     <span class="text-sm font-bold text-green-700">
-                                        1,285
+                                        ---
                                     </span>
 
                                 </div>
@@ -854,7 +1043,7 @@
                                     </span>
 
                                     <span class="text-sm font-bold text-green-700">
-                                        864
+                                        ---
                                     </span>
 
                                 </div>
@@ -868,7 +1057,7 @@
                                     </span>
 
                                     <span class="text-sm font-bold text-green-700">
-                                        742
+                                        ---
                                     </span>
 
                                 </div>
@@ -918,7 +1107,7 @@
                                     </span>
 
                                     <span class="text-xs font-semibold text-gray-700">
-                                        English
+                                        Specialization #1
                                     </span>
 
                                 </div>
@@ -932,7 +1121,7 @@
                                     </span>
 
                                     <span class="text-xs font-semibold text-gray-700">
-                                        Math
+                                        Specialization #2
                                     </span>
 
                                 </div>
@@ -946,7 +1135,7 @@
                                     </span>
 
                                     <span class="text-xs font-semibold text-gray-700">
-                                        Science
+                                        Specialization #3
                                     </span>
 
                                 </div>
@@ -960,7 +1149,7 @@
                                     </span>
 
                                     <span class="text-xs font-semibold text-gray-700">
-                                        Filipino
+                                        Specialization #4
                                     </span>
 
                                 </div>
@@ -974,7 +1163,7 @@
                                     </span>
 
                                     <span class="text-xs font-semibold text-gray-700">
-                                        MAPEH
+                                        Specialization #5
                                     </span>
 
                                 </div>
@@ -985,196 +1174,6 @@
                         </div>
 
                     </div>
-
-                </div>
-
-            </div>
-
-
-            {{-- =====================================================
-                MEDICAL ALLOWANCE REPORT
-            ====================================================== --}}
-
-            <div>
-                {{-- SECTION TITLE --}}
-                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-6 py-4 text-white shadow-lg">
-
-                    <div class="text-center">
-
-                        {{-- LINE 1 --}}
-                        <h3 class="text-xl font-bold uppercase tracking-wide text-white">
-                            Medical Allowance Report School Year 2026–2027
-                        </h3>
-
-                        {{-- LINE 2 --}}
-                        <p class="mt-1 text-sm text-green-100">
-                            Summary of personnel medical allowance availments
-                        </p>
-
-                    </div>
-
-                </div>
-                <br>
-                
-
-                {{-- 3 CARDS IN ONE ROW --}}
-                <div class="flex w-full flex-nowrap gap-6">
-
-
-                    {{-- =================================================
-                        GROUP AVAILMENT
-                    ================================================== --}}
-                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-
-                        <div class="flex items-start justify-between gap-4">
-
-                            <div class="min-w-0 flex-1">
-
-                                <p class="text-sm font-medium text-gray-500">
-                                    Group Availment (HMO)
-                                </p>
-
-                                <p class="mt-2 text-3xl font-bold text-green-700">
-                                    51
-                                </p>
-
-                                <p class="mt-1 text-xs text-gray-400">
-                                    Personnel enrolled in the group medical program
-                                </p>
-
-                            </div>
-
-
-                            {{-- ICON --}}
-                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">
-
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-6 w-6"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                >
-
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M3 21h18M5 21V7a2 2 0 012-2h2v4h6V5h2a2 2 0 012 2v14M9 21v-4h6v4"
-                                    />
-
-                                </svg>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-
-                    {{-- =================================================
-                        INDIVIDUAL AVAILMENT HMO
-                    ================================================== --}}
-                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-
-                        <div class="flex items-start justify-between gap-4">
-
-                            <div class="min-w-0 flex-1">
-
-                                <p class="text-sm font-medium text-gray-500">
-                                    Individual Availment (HMO)
-                                </p>
-
-                                <p class="mt-2 text-3xl font-bold text-blue-600">
-                                    24
-                                </p>
-
-                                <p class="mt-1 text-xs text-gray-400">
-                                    Personnel utilizing HMO medical benefits
-                                </p>
-
-                            </div>
-
-
-                            {{-- ICON --}}
-                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
-
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-6 w-6"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                >
-
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M20 8h-3V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2v-8a2 2 0 00-2-2zM9 6h6v2H9V6zm3 5v2m-2-1h4"
-                                    />
-
-                                </svg>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-
-                    {{-- =================================================
-                        INDIVIDUAL MEDICAL EXPENSES
-                    ================================================== --}}
-                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-
-                        <div class="flex items-start justify-between gap-4">
-
-                            <div class="min-w-0 flex-1">
-
-                                <p class="text-sm font-medium text-gray-500">
-                                    Number of Disbursement
-                                </p>
-
-                                <p class="mt-2 text-3xl font-bold text-red-600">
-                                    44
-                                </p>
-
-                                <p class="mt-1 text-xs text-gray-400">
-                                    Requested Reimbursement of Medical Allowance
-                                </p>
-
-                            </div>
-
-
-                            {{-- ICON --}}
-                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
-
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-6 w-6"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                >
-
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M20 8h-3V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2v-8a2 2 0 00-2-2zM9 6h6v2H9V6zm3 5v2m-2-1h4"
-                                    />
-
-                                </svg>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
 
                 </div>
 
@@ -1205,7 +1204,7 @@
                             </p>
 
                             <p class="mt-2 text-3xl font-bold text-amber-600">
-                                12
+                                ---
                             </p>
 
                             <p class="mt-1 text-xs text-gray-400">
@@ -1251,7 +1250,7 @@
                             </p>
 
                             <p class="mt-2 text-3xl font-bold text-green-700">
-                                48
+                                ---
                             </p>
 
                             <p class="mt-1 text-xs text-gray-400">
@@ -1297,7 +1296,7 @@
                             </p>
 
                             <p class="mt-2 text-3xl font-bold text-blue-600">
-                                27
+                                ---
                             </p>
 
                             <p class="mt-1 text-xs text-gray-400">
@@ -1343,7 +1342,7 @@
                             </p>
 
                             <p class="mt-2 text-3xl font-bold text-red-600">
-                                8
+                                ---
                             </p>
 
                             <p class="mt-1 text-xs text-gray-400">
