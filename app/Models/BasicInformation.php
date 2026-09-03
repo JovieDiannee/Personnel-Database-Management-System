@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class BasicInformation extends Model
+class BasicInformation extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+    
     protected $table = 'basic_information';
 
     protected $fillable = [
