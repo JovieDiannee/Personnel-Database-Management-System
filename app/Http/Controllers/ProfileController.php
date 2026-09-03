@@ -6,6 +6,7 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
@@ -71,7 +72,7 @@ class ProfileController extends Controller
     ]);
 
     $user = Auth::user();
-
+        Log::info('ProfileController updateProfilePicture method called(updateProfilePicture)');
         // Delete old profile picture
         if ($user->profile_picture) {
             Storage::disk('public')->delete($user->profile_picture);
