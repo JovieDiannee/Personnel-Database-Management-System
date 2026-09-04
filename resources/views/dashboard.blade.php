@@ -310,16 +310,19 @@
                 {{-- 3 CARDS IN ONE ROW --}}
                 <div class="flex w-full flex-nowrap gap-6">
 
-
                     {{-- =================================================
                         GROUP AVAILMENT
                     ================================================== --}}
-                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-
+                    <a
+                        href="{{ route('data-management.medical-allowance') }}"
+                        class="group block min-w-0 flex-1 cursor-pointer rounded-2xl bg-white p-5 shadow-sm
+                            ring-1 ring-gray-100 transition duration-300
+                            hover:-translate-y-1 hover:shadow-lg hover:ring-green-200
+                            focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                        aria-label="View medical allowance records"
+                    >
                         <div class="flex items-start justify-between gap-4">
-
                             <div class="min-w-0 flex-1">
-
                                 <p class="text-sm font-medium text-gray-500">
                                     Group Availment (HMO)
                                 </p>
@@ -331,13 +334,13 @@
                                 <p class="mt-1 text-xs text-gray-400">
                                     Personnel enrolled in the group medical program
                                 </p>
-
                             </div>
 
-
                             {{-- ICON --}}
-                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">
-
+                            <div
+                                class="flex h-12 w-12 shrink-0 items-center justify-center
+                                    rounded-xl bg-green-100 text-green-700"
+                            >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     class="h-6 w-6"
@@ -345,33 +348,31 @@
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
                                     stroke-width="1.8"
+                                    aria-hidden="true"
                                 >
-
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
                                         d="M3 21h18M5 21V7a2 2 0 012-2h2v4h6V5h2a2 2 0 012 2v14M9 21v-4h6v4"
                                     />
-
                                 </svg>
-
                             </div>
-
                         </div>
-
-                    </div>
-
-
+                    </a>
 
                     {{-- =================================================
                         INDIVIDUAL AVAILMENT HMO
                     ================================================== --}}
-                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-
+                    <a
+                        href="{{ route('data-management.medical-allowance') }}"
+                        class="group block min-w-0 flex-1 cursor-pointer rounded-2xl bg-white p-5 shadow-sm
+                            ring-1 ring-gray-100 transition duration-300
+                            hover:-translate-y-1 hover:shadow-lg hover:ring-blue-200
+                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        aria-label="View medical allowance records"
+                    >
                         <div class="flex items-start justify-between gap-4">
-
                             <div class="min-w-0 flex-1">
-
                                 <p class="text-sm font-medium text-gray-500">
                                     Individual Availment (HMO)
                                 </p>
@@ -383,13 +384,13 @@
                                 <p class="mt-1 text-xs text-gray-400">
                                     Personnel utilizing HMO medical benefits
                                 </p>
-
                             </div>
 
-
                             {{-- ICON --}}
-                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
-
+                            <div
+                                class="flex h-12 w-12 shrink-0 items-center justify-center
+                                    rounded-xl bg-blue-100 text-blue-600"
+                            >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     class="h-6 w-6"
@@ -397,34 +398,37 @@
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
                                     stroke-width="1.8"
+                                    aria-hidden="true"
                                 >
-
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
                                         d="M20 8h-3V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2v-8a2 2 0 00-2-2zM9 6h6v2H9V6zm3 5v2m-2-1h4"
                                     />
-
                                 </svg>
-
                             </div>
-
                         </div>
-
-                    </div>
-
-
+                    </a>
 
                     {{-- =================================================
-                        INDIVIDUAL MEDICAL EXPENSES
+                        MEDICAL ALLOWANCE RECEIVED - CLICKABLE CARD
                     ================================================== --}}
-                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-
+                    <a
+                        href="{{ route('data-management.medical-allowance') }}"
+                        class="group block min-w-0 flex-1 cursor-pointer rounded-2xl
+                            bg-white p-5 shadow-sm ring-1 ring-gray-100
+                            transition duration-300
+                            hover:-translate-y-1 hover:shadow-lg hover:ring-red-200
+                            focus:outline-none focus:ring-2 focus:ring-red-500
+                            focus:ring-offset-2"
+                        aria-label="View medical allowance records"
+                    >
                         <div class="flex items-start justify-between gap-4">
-
                             <div class="min-w-0 flex-1">
-
-                                <p class="text-sm font-medium text-gray-500">
+                                <p
+                                    class="text-sm font-medium text-gray-500
+                                        transition group-hover:text-red-600"
+                                >
                                     Medical Allowance Received
                                 </p>
 
@@ -435,13 +439,14 @@
                                 <p class="mt-1 text-xs text-gray-400">
                                     Personnel who have already received their medical allowance
                                 </p>
-
                             </div>
 
-
                             {{-- ICON --}}
-                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
-
+                            <div
+                                class="flex h-12 w-12 shrink-0 items-center justify-center
+                                    rounded-xl bg-red-100 text-red-600 transition
+                                    group-hover:bg-red-600 group-hover:text-white"
+                            >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     class="h-6 w-6"
@@ -449,26 +454,22 @@
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
                                     stroke-width="1.8"
+                                    aria-hidden="true"
                                 >
-
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
                                         d="M20 8h-3V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2v-8a2 2 0 00-2-2zM9 6h6v2H9V6zm3 5v2m-2-1h4"
                                     />
-
                                 </svg>
-
                             </div>
-
                         </div>
+                    </a>
 
                     </div>
 
 
                 </div>
-
-            </div>
 
             {{-- =====================================================
                 TEACHER REQUIREMENT ANALYSIS SCHOOL YEAR 2026-2027 

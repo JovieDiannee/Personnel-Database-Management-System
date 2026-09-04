@@ -13,12 +13,24 @@
                                 class="mx-auto mb-5 h-32 w-32 object-contain sm:h-40 sm:w-40"
                             >
 
-                            <h3 class="mb-3 text-center text-sm font-bold uppercase tracking-[0.12em] text-green-700 sm:text-xl">
-                                DEPARTMENT OF EDUCATION - SCHOOLS DIVISION OF LEYTE
-                            </h3>
-                            <h3 class="mb-3 text-center text-sm font-bold uppercase tracking-[0.12em] text-green-700 sm:text-xl">
-                                PERSONNEL UNIT
-                            </h3>
+                            <div class="mb-10 text-center">
+                                {{-- OFFICE IDENTITY --}}
+                                <div class="mb-5">
+
+                                    <h3 class="mt-2 text-xl font-bold text-green-800 sm:text-2xl">
+                                        Department of Education - Schools Division of Leyte
+                                    </h3>
+
+                                    <div class="mx-auto mt-3 h-1 w-12 rounded-full bg-green-600"></div>
+
+                                    <span
+                                        class="mt-4 inline-flex rounded-full bg-green-50 px-4 py-1.5
+                                            text-s font-bold uppercase tracking-[0.20em] text-green-700
+                                            ring-1 ring-inset ring-green-200"
+                                    >
+                                        Personnel Unit
+                                    </span>
+                                </div>
 
                             <h1 class="text-3xl font-bold leading-tight text-gray-900 sm:text-4xl">
                                 Personnel Database
@@ -45,7 +57,7 @@
                                 <x-input-label
                                     for="email"
                                     :value="__('Email Address')"
-                                    class="font-medium text-gray-700"
+                                    class="font-medium text-gray-700 text-left"
                                 />
 
                                 <x-text-input
