@@ -801,11 +801,6 @@
                                     </th>
                                 @endif
 
-                                {{-- ITEM NUMBER --}}
-                                <th class="min-w-[180px] px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
-                                    Plantilla Item No.
-                                </th>
 
                                 {{-- POSITION --}}
                                 <th class="min-w-[200px] px-4 py-3 text-left text-xs font-semibold
@@ -891,11 +886,6 @@
                                             {{ $plantilla?->item_from_school_level ?? '—' }}
                                         </td>
                                     @endif
-
-                                    {{-- PLANTILLA ITEM NO. --}}
-                                    <td class="min-w-[180px] px-4 py-4 text-sm text-gray-700">
-                                        {{ $plantilla?->item_number ?? '—' }}
-                                    </td>
 
                                     {{-- POSITION TITLE --}}
                                     <td class="min-w-[200px] px-4 py-4 text-sm font-medium text-gray-900">
@@ -1057,7 +1047,6 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <br>
 
                                                             {{-- =====================================================
                                                                 MODE OF AVAILMENT

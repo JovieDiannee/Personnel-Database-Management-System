@@ -350,7 +350,6 @@
                             class="searchable-dropdown"
                             data-placeholder="Search by school ID or school name..."
                         >
-                            <option value="">Select a school</option>
 
                             @foreach ($schools as $school)
                                 <option
