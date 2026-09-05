@@ -781,14 +781,13 @@
                                         @if($record->warm_body_status)
 
                                             <span
-                                                class="inline-flex rounded-full
-                                                    bg-blue-100 px-3 py-1
-                                                    text-xs font-semibold
-                                                    text-blue-800"
+                                                class="inline-flex rounded-full px-3 py-1 text-xs font-semibold
+                                                    {{ $record->warm_body_status === 'Detailed'
+                                                        ? 'bg-red-100 text-red-700'
+                                                        : 'bg-blue-100 text-blue-800'
+                                                    }}"
                                             >
-
                                                 {{ $record->warm_body_status }}
-
                                             </span>
 
                                         @else

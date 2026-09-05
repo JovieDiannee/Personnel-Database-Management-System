@@ -2852,7 +2852,6 @@ class DataManagementController extends Controller
         */
 
         if (!$records || count($records) === 0) {
-
             return redirect()
                 ->route('data-management.employment-status')
                 ->with(
@@ -2875,24 +2874,19 @@ class DataManagementController extends Controller
         $errors = [];
 
 
-
         /*
         |--------------------------------------------------------------------------
         | STEP 1
         | CHECK DUPLICATE EMAIL / PLANTILLA IN EXCEL
         |--------------------------------------------------------------------------
         |
-        | Rules:
+        | Blank Plantilla is allowed.
+        | Duplicate checking is only performed when Plantilla has a value.
         |
-        | ONE EMAIL     = ONE PLANTILLA
-        | ONE PLANTILLA = ONE EMAIL
-        |
-        |--------------------------------------------------------------------------
         */
 
         $emailPlantillas = [];
         $plantillaEmails = [];
-
         $duplicateErrors = [];
 
 
@@ -2909,37 +2903,36 @@ class DataManagementController extends Controller
             );
 
 
-            $plantillaDbId =
-                trim(
-                    (string) (
-                        $record['plantilla_db_id'] ?? ''
-                    )
-                );
-
-
             /*
             |--------------------------------------------------------------------------
-            | Ignore empty values here
+            | PLANTILLA
             |--------------------------------------------------------------------------
-            |
-            | These will be validated again during actual import.
-            |
             */
 
-            // if ($email === '' || $plantillaDbId === '') {
-            //     continue;
-            // }
+            $plantillaValue = trim(
+                (string) ($record['plantilla_db_id'] ?? '')
+            );
 
-            if ($email === '') {
-                 continue;
-             }
-
+            $plantillaDbId =
+                $plantillaValue !== ''
+                    ? $plantillaValue
+                    : null;
 
 
             /*
             |--------------------------------------------------------------------------
-            | CHECK 1:
-            | SAME EMAIL WITH DIFFERENT PLANTILLA
+            | IGNORE EMPTY EMAIL OR EMPTY PLANTILLA FOR DUPLICATE CHECKING
+            |--------------------------------------------------------------------------
+            */
+
+            if ($email === '' || $plantillaDbId === null) {
+                continue;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CHECK SAME EMAIL WITH DIFFERENT PLANTILLA
             |--------------------------------------------------------------------------
             */
 
@@ -2975,11 +2968,9 @@ class DataManagementController extends Controller
             }
 
 
-
             /*
             |--------------------------------------------------------------------------
-            | CHECK 2:
-            | SAME PLANTILLA WITH DIFFERENT EMAIL
+            | CHECK SAME PLANTILLA WITH DIFFERENT EMAIL
             |--------------------------------------------------------------------------
             */
 
@@ -3014,7 +3005,6 @@ class DataManagementController extends Controller
             }
 
 
-
             /*
             |--------------------------------------------------------------------------
             | STORE FOR NEXT COMPARISON
@@ -3023,37 +3013,27 @@ class DataManagementController extends Controller
 
             $emailPlantillas[$email] = [
 
-                'plantilla' =>
-                    $plantillaDbId,
+                'plantilla' => $plantillaDbId,
 
-                'row' =>
-                    $excelRow,
+                'row' => $excelRow,
 
             ];
 
 
             $plantillaEmails[$plantillaDbId] = [
 
-                'email' =>
-                    $email,
+                'email' => $email,
 
-                'row' =>
-                    $excelRow,
+                'row' => $excelRow,
 
             ];
         }
-
 
 
         /*
         |--------------------------------------------------------------------------
         | STEP 2
         | CHECK DUPLICATE PLANTILLA ALREADY IN DATABASE
-        |--------------------------------------------------------------------------
-        |
-        | This checks whether the Plantilla is already assigned
-        | to another employee in employment_status.
-        |
         |--------------------------------------------------------------------------
         */
 
@@ -3070,18 +3050,25 @@ class DataManagementController extends Controller
             );
 
 
+            $plantillaValue = trim(
+                (string) ($record['plantilla_db_id'] ?? '')
+            );
+
             $plantillaDbId =
-                trim(
-                    (string) (
-                        $record['plantilla_db_id'] ?? ''
-                    )
-                );
+                $plantillaValue !== ''
+                    ? $plantillaValue
+                    : null;
 
 
-            if ($email === '' || $plantillaDbId === '') {
+            /*
+            |--------------------------------------------------------------------------
+            | BLANK PLANTILLA IS ALLOWED
+            |--------------------------------------------------------------------------
+            */
+
+            if ($email === '' || $plantillaDbId === null) {
                 continue;
             }
-
 
 
             /*
@@ -3095,25 +3082,14 @@ class DataManagementController extends Controller
                 ->first();
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | USER DOES NOT EXIST
-            |--------------------------------------------------------------------------
-            |
-            | This will also be handled during the actual import,
-            | so don't duplicate the error here.
-            |
-            */
-
             if (!$user) {
                 continue;
             }
 
 
-
             /*
             |--------------------------------------------------------------------------
-            | FIND OTHER EMPLOYEE USING SAME PLANTILLA
+            | FIND ANOTHER EMPLOYEE USING SAME PLANTILLA
             |--------------------------------------------------------------------------
             */
 
@@ -3143,30 +3119,26 @@ class DataManagementController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | DUPLICATE FOUND IN DATABASE
+            | DUPLICATE FOUND
             |--------------------------------------------------------------------------
             */
 
             if ($existingPlantilla) {
 
-                $existingEmail =
-                    strtolower(
-                        trim(
-                            (string) $existingPlantilla->email
-                        )
-                    );
+                $existingEmail = strtolower(
+                    trim(
+                        (string) $existingPlantilla->email
+                    )
+                );
 
 
                 $duplicateErrors[] = [
 
-                    'row' =>
-                        $excelRow,
+                    'row' => $excelRow,
 
-                    'email' =>
-                        $email,
+                    'email' => $email,
 
-                    'plantilla' =>
-                        $plantillaDbId,
+                    'plantilla' => $plantillaDbId,
 
                     'message' =>
                         "Duplicate Plantilla {$plantillaDbId}. "
@@ -3179,7 +3151,6 @@ class DataManagementController extends Controller
         }
 
 
-
         /*
         |--------------------------------------------------------------------------
         | STEP 3
@@ -3187,9 +3158,7 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $duplicateErrors = collect(
-            $duplicateErrors
-        )
+        $duplicateErrors = collect($duplicateErrors)
             ->unique(function ($error) {
 
                 return
@@ -3201,7 +3170,6 @@ class DataManagementController extends Controller
             })
             ->values()
             ->toArray();
-
 
 
         /*
@@ -3225,14 +3193,11 @@ class DataManagementController extends Controller
 
                         'updated' => 0,
 
-                        'skipped' =>
-                            count($records),
+                        'skipped' => count($records),
 
-                        'errors' =>
-                            $duplicateErrors,
+                        'errors' => $duplicateErrors,
 
-                        'duplicate_plantilla' =>
-                            true,
+                        'duplicate_plantilla' => true,
 
                     ]
                 )
@@ -3241,7 +3206,6 @@ class DataManagementController extends Controller
                     'Import stopped. Duplicate Plantilla assignment(s) were found. No records were imported or updated.'
                 );
         }
-
 
 
         /*
@@ -3269,16 +3233,15 @@ class DataManagementController extends Controller
                         $record['excel_row'] ?? ($index + 2);
 
 
-
                     /*
                     |--------------------------------------------------------------------------
                     | EMAIL
                     |--------------------------------------------------------------------------
                     */
 
-                    $email = trim(
-                        (string) (
-                            $record['email'] ?? ''
+                    $email = strtolower(
+                        trim(
+                            (string) ($record['email'] ?? '')
                         )
                     );
 
@@ -3289,8 +3252,7 @@ class DataManagementController extends Controller
 
                         $errors[] = [
 
-                            'row' =>
-                                $excelRow,
+                            'row' => $excelRow,
 
                             'message' =>
                                 'Email address is missing.'
@@ -3301,38 +3263,42 @@ class DataManagementController extends Controller
                     }
 
 
-
                     /*
                     |--------------------------------------------------------------------------
                     | PLANTILLA
                     |--------------------------------------------------------------------------
+                    |
+                    | Blank = NULL
+                    |
                     */
 
+                    $plantillaValue = trim(
+                        (string) ($record['plantilla_db_id'] ?? '')
+                    );
+
                     $plantillaDbId =
-                        trim(
-                            (string) (
-                                $record['plantilla_db_id'] ?? ''
-                            )
-                        );
+                        $plantillaValue !== ''
+                            ? $plantillaValue
+                            : null;
 
 
-                    if ($plantillaDbId === '') {
+                    /*
+                    |--------------------------------------------------------------------------
+                    | SCHOOL
+                    |--------------------------------------------------------------------------
+                    |
+                    | Blank = NULL
+                    |
+                    */
 
-                        $skipped++;
+                    $schoolValue = trim(
+                        (string) ($record['school_db_id'] ?? '')
+                    );
 
-                        $errors[] = [
-
-                            'row' =>
-                                $excelRow,
-
-                            'message' =>
-                                'Plantilla Item is missing.'
-
-                        ];
-
-                        continue;
-                    }
-
+                    $schoolDbId =
+                        $schoolValue !== ''
+                            ? $schoolValue
+                            : null;
 
 
                     /*
@@ -3355,8 +3321,7 @@ class DataManagementController extends Controller
 
                         $errors[] = [
 
-                            'row' =>
-                                $excelRow,
+                            'row' => $excelRow,
 
                             'message' =>
                                 "Email {$email} does not exist in the users table."
@@ -3365,7 +3330,6 @@ class DataManagementController extends Controller
 
                         continue;
                     }
-
 
 
                     /*
@@ -3383,6 +3347,123 @@ class DataManagementController extends Controller
                             ->first();
 
 
+                    /*
+                    |--------------------------------------------------------------------------
+                    | CLEAN OPTIONAL TEXT VALUES
+                    |--------------------------------------------------------------------------
+                    |
+                    | Blank or "-" = NULL
+                    |
+                    */
+
+                    $employmentStatus = trim(
+                        (string) ($record['employment_status'] ?? '')
+                    );
+
+                    $employmentStatus =
+                        ($employmentStatus === '' || $employmentStatus === '-')
+                            ? null
+                            : $employmentStatus;
+
+
+                    $warmBodyStatus = trim(
+                        (string) ($record['warm_body_status'] ?? '')
+                    );
+
+                    $warmBodyStatus =
+                        ($warmBodyStatus === '' || $warmBodyStatus === '-')
+                            ? null
+                            : $warmBodyStatus;
+
+
+                    $natureOfWork = trim(
+                        (string) ($record['nature_of_work'] ?? '')
+                    );
+
+                    $natureOfWork =
+                        ($natureOfWork === '' || $natureOfWork === '-')
+                            ? null
+                            : $natureOfWork;
+
+
+                    $sourceOfFund = trim(
+                        (string) ($record['source_of_fund'] ?? '')
+                    );
+
+                    $sourceOfFund =
+                        ($sourceOfFund === '' || $sourceOfFund === '-')
+                            ? null
+                            : $sourceOfFund;
+
+
+                    $contractDuration = trim(
+                        (string) ($record['contract_duration'] ?? '')
+                    );
+
+                    $contractDuration =
+                        ($contractDuration === '' || $contractDuration === '-')
+                            ? null
+                            : $contractDuration;
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | MONTHLY SALARY
+                    |--------------------------------------------------------------------------
+                    |
+                    | Blank or "-" = NULL
+                    |
+                    */
+
+                    $monthlySalary = trim(
+                        (string) ($record['monthly_salary'] ?? '')
+                    );
+
+                    $monthlySalary =
+                        ($monthlySalary === '' || $monthlySalary === '-')
+                            ? null
+                            : $monthlySalary;
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | ORIGINAL APPOINTMENT DATE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $originalAppointment = trim(
+                        (string) (
+                            $record['date_of_original_appointment']
+                            ?? ''
+                        )
+                    );
+
+                    $originalAppointment =
+                        ($originalAppointment === '' ||
+                        $originalAppointment === '-')
+                            ? null
+                            : $originalAppointment;
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | LAST PROMOTION DATE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $lastPromotion = trim(
+                        (string) (
+                            $record['date_of_last_promotion']
+                            ?? ''
+                        )
+                    );
+
+                    $lastPromotion =
+                        ($lastPromotion === '' ||
+                        $lastPromotion === '-')
+                            ? null
+                            : $lastPromotion;
+
 
                     /*
                     |--------------------------------------------------------------------------
@@ -3396,47 +3477,31 @@ class DataManagementController extends Controller
                             $plantillaDbId,
 
                         'school_db_id' =>
-                            $record['school_db_id'] ?? null,
+                            $schoolDbId,
 
                         'date_of_original_appointment' =>
-                            $record[
-                                'date_of_original_appointment'
-                            ] ?? null,
+                            $originalAppointment,
 
                         'date_of_last_promotion' =>
-                            $record[
-                                'date_of_last_promotion'
-                            ] ?? null,
+                            $lastPromotion,
 
                         'employment_status' =>
-                            $record[
-                                'employment_status'
-                            ] ?? null,
+                            $employmentStatus,
 
                         'warm_body_status' =>
-                            $record[
-                                'warm_body_status'
-                            ] ?? null,
+                            $warmBodyStatus,
 
                         'nature_of_work' =>
-                            $record[
-                                'nature_of_work'
-                            ] ?? null,
+                            $natureOfWork,
 
                         'source_of_fund' =>
-                            $record[
-                                'source_of_fund'
-                            ] ?? null,
+                            $sourceOfFund,
 
                         'monthly_salary' =>
-                            ($record['monthly_salary'] ?? '') !== ''
-                                ? $record['monthly_salary']
-                                : null,
+                            $monthlySalary,
 
                         'contract_duration' =>
-                            $record[
-                                'contract_duration'
-                            ] ?? null,
+                            $contractDuration,
 
                         'updated_at' =>
                             now(),
@@ -3444,10 +3509,9 @@ class DataManagementController extends Controller
                     ];
 
 
-
                     /*
                     |--------------------------------------------------------------------------
-                    | UPDATE
+                    | UPDATE EXISTING RECORD
                     |--------------------------------------------------------------------------
                     */
 
@@ -3463,14 +3527,12 @@ class DataManagementController extends Controller
                             );
 
                         $updated++;
-
                     }
-
 
 
                     /*
                     |--------------------------------------------------------------------------
-                    | CREATE
+                    | CREATE NEW RECORD
                     |--------------------------------------------------------------------------
                     */
 
@@ -3492,7 +3554,6 @@ class DataManagementController extends Controller
                     }
 
 
-
                 } catch (\Throwable $e) {
 
                     $skipped++;
@@ -3511,7 +3572,6 @@ class DataManagementController extends Controller
             }
 
 
-
             /*
             |--------------------------------------------------------------------------
             | COMMIT
@@ -3519,7 +3579,6 @@ class DataManagementController extends Controller
             */
 
             DB::commit();
-
 
 
             /*
@@ -3532,7 +3591,6 @@ class DataManagementController extends Controller
                 'employment_status_import_records',
                 'employment_status_import_errors',
             ]);
-
 
 
             /*
