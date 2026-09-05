@@ -872,14 +872,44 @@
                 {{-- PAGINATION --}}
                 <div class="border-t border-gray-200 px-6 py-4">
 
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
                         <div class="text-sm text-gray-500">
-                            Showing
-                            <span class="font-semibold text-gray-700">
-                                {{ $personnel->count() }}
-                            </span>
-                            records
+
+                            @if($personnel->total() > 0)
+
+                                Showing
+                                <span class="font-semibold text-gray-700">
+                                    {{ $personnel->firstItem() }}
+                                </span>
+
+                                to
+
+                                <span class="font-semibold text-gray-700">
+                                    {{ $personnel->lastItem() }}
+                                </span>
+
+                                of
+
+                                <span class="font-semibold text-gray-700">
+                                    {{ $personnel->total() }}
+                                </span>
+
+                                records
+
+                            @else
+
+                                Showing 0 records
+
+                            @endif
+
+                        </div>
+
+
+                        <div>
+
+                            {{ $personnel->links() }}
+
                         </div>
 
                     </div>

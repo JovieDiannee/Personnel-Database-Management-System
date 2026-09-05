@@ -267,7 +267,7 @@ class DataManagementController extends Controller
         $personnel = $query
             ->orderBy('last_name')
             ->orderBy('first_name')
-            ->paginate(20)
+            ->paginate(10)
             ->withQueryString();
 
 
