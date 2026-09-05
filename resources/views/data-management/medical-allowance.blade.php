@@ -1343,40 +1343,52 @@
 
 
                 {{-- PAGINATION --}}
-                @if($medicalAllowances->hasPages())
-
-                    <div class="border-t border-gray-200 px-6 py-4">
-
-                        {{ $medicalAllowances->links() }}
-
-                    </div>
-
-                @endif
-
-
-                {{-- RECORD COUNT --}}
                 <div class="border-t border-gray-200 px-6 py-4">
 
-                    <p class="text-sm text-gray-500">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-                        Showing
-                        <span class="font-medium text-gray-700">
-                            {{ $medicalAllowances->firstItem() ?? 0 }}
-                        </span>
+                        {{-- RECORD COUNT --}}
+                        <div class="text-sm text-gray-500">
 
-                        to
-                        <span class="font-medium text-gray-700">
-                            {{ $medicalAllowances->lastItem() ?? 0 }}
-                        </span>
+                            @if($medicalAllowances->total() > 0)
 
-                        of
-                        <span class="font-medium text-gray-700">
-                            {{ $medicalAllowances->total() }}
-                        </span>
+                                Showing
 
-                        medical allowance records.
+                                <span class="font-semibold text-gray-700">
+                                    {{ $medicalAllowances->firstItem() }}
+                                </span>
 
-                    </p>
+                                to
+
+                                <span class="font-semibold text-gray-700">
+                                    {{ $medicalAllowances->lastItem() }}
+                                </span>
+
+                                of
+
+                                <span class="font-semibold text-gray-700">
+                                    {{ $medicalAllowances->total() }}
+                                </span>
+
+                                records
+
+                            @else
+
+                                Showing 0 records
+
+                            @endif
+
+                        </div>
+
+
+                        {{-- PAGINATION LINKS --}}
+                        <div>
+
+                            {{ $medicalAllowances->links() }}
+
+                        </div>
+
+                    </div>
 
                 </div>
 
