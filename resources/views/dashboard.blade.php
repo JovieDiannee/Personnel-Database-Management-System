@@ -286,17 +286,18 @@
             ====================================================== --}}
 
             <div>
+
                 {{-- SECTION TITLE --}}
-                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-6 py-4 text-white shadow-lg">
+                <div class="relative overflow-hidden rounded-2xl
+                            bg-gradient-to-br from-green-950 via-green-900 to-green-800
+                            px-6 py-4 text-white shadow-lg">
 
                     <div class="text-center">
 
-                        {{-- LINE 1 --}}
                         <h3 class="text-xl font-bold uppercase tracking-wide text-white">
                             Medical Allowance Report School Year 2026–2027
                         </h3>
 
-                        {{-- LINE 2 --}}
                         <p class="mt-1 text-sm text-green-100">
                             Summary of personnel medical allowance availments
                         </p>
@@ -304,6 +305,52 @@
                     </div>
 
                 </div>
+
+
+                {{-- DEADLINE NOTICE --}}
+                <div class="mt-3 flex items-center justify-center rounded-xl
+                            border border-red-200 bg-red-50 px-5 py-3
+                            shadow-sm">
+
+                    <div class="flex items-center gap-3">
+
+                        {{-- CLOCK ICON --}}
+                        <div class="flex h-8 w-8 shrink-0 items-center justify-center
+                                    rounded-full bg-red-100 text-red-600">
+
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                            </svg>
+
+                        </div>
+
+                        <div class="text-sm text-red-700">
+
+                            <span class="font-medium">
+                                Deadline for Updating:
+                            </span>
+
+                            <span class="ml-1 font-bold">
+                                September 9, 2026 • 5:00 P.M.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
                 <br>
                 
 
@@ -466,10 +513,10 @@
                         </div>
                     </a>
 
-                    </div>
-
-
                 </div>
+
+
+            </div>
 
             {{-- =====================================================
                 TEACHER REQUIREMENT ANALYSIS SCHOOL YEAR 2026-2027 

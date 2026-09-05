@@ -1846,21 +1846,54 @@ class DataManagementController extends Controller
 
     public function editPersonnel($id)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | LOGGED-IN USER ACCESS CHECK
+        |--------------------------------------------------------------------------
+        */
+
+        $loggedInUser = auth()->user();
+
+        $loggedInEmployeeId = $loggedInUser
+            ?->basicInformation
+            ?->issuedId
+            ?->employee_id;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESTRICT EMPLOYEE NO. 1000001
+        |--------------------------------------------------------------------------
+        */
+
+        if ((string) $loggedInEmployeeId === '1000001') {
+            abort(403, 'You are not authorized to access this page.');
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PERSONNEL RECORD
+        |--------------------------------------------------------------------------
+        */
+
         $person = \App\Models\BasicInformation::with([
             'user',
             'issuedId',
             'employmentStatus',
         ])->findOrFail($id);
 
+
         /*
         |--------------------------------------------------------------------------
-        | Address
+        | ADDRESS
         |--------------------------------------------------------------------------
         */
 
         $addresses = DB::table('address')
             ->where('basic_information_id', $person->id)
             ->get();
+
 
         return view(
             'data-management.personnel-edit',

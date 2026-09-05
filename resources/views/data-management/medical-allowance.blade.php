@@ -183,6 +183,50 @@
 
             </div>
 
+            {{-- DEADLINE NOTICE --}}
+            <div class="mt-3 flex items-center justify-center rounded-xl
+                        border border-red-200 bg-red-50 px-5 py-3
+                        shadow-sm">
+
+                <div class="flex items-center gap-3">
+
+                    {{-- CLOCK ICON --}}
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center
+                                rounded-full bg-red-100 text-red-600">
+
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+
+                    </div>
+
+                    <div class="text-sm text-red-700">
+
+                        <span class="font-medium">
+                            Deadline for Updating:
+                        </span>
+
+                        <span class="ml-1 font-bold">
+                            September 9, 2026 • 5:00 P.M.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
             
             {{-- GENERAL ERROR --}}
             @if(session('error'))
