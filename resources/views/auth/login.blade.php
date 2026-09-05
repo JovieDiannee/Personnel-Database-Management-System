@@ -17,11 +17,10 @@
                                 {{-- OFFICE IDENTITY --}}
                                 <div class="mb-5">
 
-                                    <h3 class="mt-2 text-xl font-bold text-green-800 sm:text-2xl">
+                                    <h3 class="mt-2 text-base font-bold text-green-800 sm:text-lg">
                                         Department of Education - Schools Division of Leyte
                                     </h3>
 
-                                    <div class="mx-auto mt-3 h-1 w-12 rounded-full bg-green-600"></div>
 
                                     <span
                                         class="mt-4 inline-flex rounded-full bg-green-50 px-4 py-1.5

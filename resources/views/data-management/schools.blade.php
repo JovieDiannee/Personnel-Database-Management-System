@@ -398,7 +398,82 @@
                     </div>
 
                 </div>
+                
+                {{-- SEARCH --}}
+                <div
+                    id="school-database-table"
+                    class="border-b border-gray-200 p-6"
+                >
 
+                    <form
+                        action="{{ route('data-management.schools') }}"
+                        method="GET"
+                    >
+
+                        <div class="flex flex-col gap-3 md:flex-row">
+
+                            {{-- SEARCH INPUT --}}
+                            <div class="flex-1">
+
+                                <label
+                                    for="search"
+                                    class="mb-2 block text-sm font-medium text-gray-700"
+                                >
+                                    Search School
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="search"
+                                    name="search"
+                                    value="{{ $search }}"
+                                    placeholder="Search by school ID, name, district, municipality, or area..."
+                                    class="w-full rounded-md border-gray-300
+                                        text-sm shadow-sm
+                                        focus:border-green-600
+                                        focus:ring-green-600"
+                                >
+
+                            </div>
+
+
+                            {{-- BUTTONS --}}
+                            <div class="flex items-end gap-2">
+
+                                {{-- SEARCH --}}
+                                <button
+                                    type="submit"
+                                    class="rounded-md bg-green-700
+                                        px-5 py-2.5
+                                        text-sm font-semibold text-white
+                                        hover:bg-green-800"
+                                >
+                                    Search
+                                </button>
+
+
+                                {{-- CLEAR --}}
+                                @if($search !== '')
+
+                                    <a
+                                        href="{{ route('data-management.schools') }}"
+                                        class="rounded-md border border-gray-300
+                                            bg-white px-5 py-2.5
+                                            text-sm font-semibold text-gray-700
+                                            hover:bg-gray-50"
+                                    >
+                                        Clear
+                                    </a>
+
+                                @endif
+
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
 
                 {{-- TABLE --}}
                 <div class="overflow-x-auto">

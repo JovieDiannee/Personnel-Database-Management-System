@@ -338,7 +338,7 @@
                         <div class="text-sm text-red-700">
 
                             <span class="font-medium">
-                                Deadline for Updating:
+                                Deadline for Updating and Adding Personnel: 
                             </span>
 
                             <span class="ml-1 font-bold">

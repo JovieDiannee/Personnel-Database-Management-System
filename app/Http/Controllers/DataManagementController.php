@@ -5541,13 +5541,86 @@ class DataManagementController extends Controller
     */
 
 
-    public function schools()
+    public function schools(Request $request)
     {
-        $schools = DB::table('school_db')
-        ->orderBy('school_name')
-        ->paginate(10);
+        /*
+        |--------------------------------------------------------------------------
+        | Search
+        |--------------------------------------------------------------------------
+        */
 
-        return view('data-management.schools', compact('schools'));
+        $search = trim($request->input('search', ''));
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Base Query
+        |--------------------------------------------------------------------------
+        */
+
+        $query = DB::table('school_db');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search School Records
+        |--------------------------------------------------------------------------
+        */
+
+        if ($search !== '') {
+
+            $query->where(function ($q) use ($search) {
+
+                $q->where('school_id', 'like', "%{$search}%")
+
+                ->orWhere('school_name', 'like', "%{$search}%")
+
+                ->orWhere('school_district', 'like', "%{$search}%")
+
+                ->orWhere('school_municipality', 'like', "%{$search}%")
+
+                ->orWhere('school_area', 'like', "%{$search}%")
+
+                ->orWhere('legislative_district', 'like', "%{$search}%")
+
+                ->orWhere('school_sector', 'like', "%{$search}%")
+
+                ->orWhere(
+                    'school_curricular_offering',
+                    'like',
+                    "%{$search}%"
+                );
+
+            });
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sort and Paginate
+        |--------------------------------------------------------------------------
+        */
+
+        $schools = $query
+            ->orderBy('school_name')
+            ->paginate(10)
+            ->withQueryString();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Return View
+        |--------------------------------------------------------------------------
+        */
+
+        return view(
+            'data-management.schools',
+            compact(
+                'schools',
+                'search'
+            )
+        );
     }
 
     public function importSchools(Request $request)
