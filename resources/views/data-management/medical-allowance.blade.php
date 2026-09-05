@@ -701,7 +701,9 @@
 
 
                 {{-- SEARCH --}}
-                <div class="border-b border-gray-200 p-6">
+                <div 
+                    id="medical-allowance-table"
+                    class="border-b border-gray-200 p-6">
 
                     <form
                         action="{{ route('data-management.medical-allowance') }}"
@@ -772,7 +774,6 @@
 
                 {{-- TABLE --}}
                 <div
-                    id="medical-allowance-table"
                     class="overflow-x-auto scroll-mt-24"
                 >
 
@@ -794,307 +795,307 @@
 
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-green-50">
-    <tr>
-
-        {{-- NAME AND EMAIL --}}
-        <th class="min-w-[220px] px-4 py-3 text-left text-xs font-semibold
-                   uppercase tracking-wider text-gray-600">
-
-            <a
-                href="{{ $sortUrl('name') }}"
-                class="flex items-center justify-between gap-3 hover:text-green-700"
-            >
-                <span>Name and Email</span>
-
-                {{-- SORT ICON --}}
-                <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                    {{-- ASCENDING --}}
-                    <span class="text-[11px] font-black
-                        {{ $sort === 'name' && $direction === 'asc'
-                            ? 'text-green-700'
-                            : 'text-gray-300'
-                        }}">
-                        ▲
-                    </span>
-
-                    {{-- DESCENDING --}}
-                    <span class="text-[11px] font-black
-                        {{ $sort === 'name' && $direction === 'desc'
-                            ? 'text-green-700'
-                            : 'text-gray-300'
-                        }}">
-                        ▼
-                    </span>
-
-                </span>
-            </a>
-
-        </th>
-
-
-        @if (auth()->user()->role === 'super_admin')
-
-            {{-- SCHOOL NAME --}}
-            <th class="min-w-[220px] px-4 py-3 text-left text-xs font-semibold
-                       uppercase tracking-wider text-gray-600">
-
-                <a
-                    href="{{ $sortUrl('school') }}"
-                    class="flex items-center justify-between gap-3 hover:text-green-700"
-                >
-                    <span>School Name</span>
-
-                    <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                        <span class="text-[11px] font-black
-                            {{ $sort === 'school' && $direction === 'asc'
-                                ? 'text-green-700'
-                                : 'text-gray-300'
-                            }}">
-                            ▲
-                        </span>
-
-                        <span class="text-[11px] font-black
-                            {{ $sort === 'school' && $direction === 'desc'
-                                ? 'text-green-700'
-                                : 'text-gray-300'
-                            }}">
-                            ▼
-                        </span>
-
-                    </span>
-                </a>
-
-            </th>
-
-
-            {{-- DISTRICT --}}
-            <th class="min-w-[140px] px-4 py-3 text-left text-xs font-semibold
-                       uppercase tracking-wider text-gray-600">
-
-                <a
-                    href="{{ $sortUrl('district') }}"
-                    class="flex items-center justify-between gap-3 hover:text-green-700"
-                >
-                    <span>District</span>
-
-                    <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                        <span class="text-[11px] font-black
-                            {{ $sort === 'district' && $direction === 'asc'
-                                ? 'text-green-700'
-                                : 'text-gray-300'
-                            }}">
-                            ▲
-                        </span>
-
-                        <span class="text-[11px] font-black
-                            {{ $sort === 'district' && $direction === 'desc'
-                                ? 'text-green-700'
-                                : 'text-gray-300'
-                            }}">
-                            ▼
-                        </span>
-
-                    </span>
-                </a>
-
-            </th>
-
-
-            {{-- ITEM FROM SCHOOL LEVEL --}}
-            <th class="min-w-[180px] px-4 py-3 text-left text-xs font-semibold
-                       uppercase tracking-wider text-gray-600">
-
-                <a
-                    href="{{ $sortUrl('school_level') }}"
-                    class="flex items-center justify-between gap-3 hover:text-green-700"
-                >
-                    <span>
-                        Item From<br>
-                        School Level
-                    </span>
-
-                    <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                        <span class="text-[11px] font-black
-                            {{ $sort === 'school_level' && $direction === 'asc'
-                                ? 'text-green-700'
-                                : 'text-gray-300'
-                            }}">
-                            ▲
-                        </span>
-
-                        <span class="text-[11px] font-black
-                            {{ $sort === 'school_level' && $direction === 'desc'
-                                ? 'text-green-700'
-                                : 'text-gray-300'
-                            }}">
-                            ▼
-                        </span>
-
-                    </span>
-                </a>
-
-            </th>
-
-        @endif
-
-
-        {{-- POSITION TITLE --}}
-        <th class="min-w-[200px] px-4 py-3 text-left text-xs font-semibold
-                   uppercase tracking-wider text-gray-600">
-
-            <a
-                href="{{ $sortUrl('position') }}"
-                class="flex items-center justify-between gap-3 hover:text-green-700"
-            >
-                <span>Position Title</span>
-
-                <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                    <span class="text-[11px] font-black
-                        {{ $sort === 'position' && $direction === 'asc'
-                            ? 'text-green-700'
-                            : 'text-gray-300'
-                        }}">
-                        ▲
-                    </span>
-
-                    <span class="text-[11px] font-black
-                        {{ $sort === 'position' && $direction === 'desc'
-                            ? 'text-green-700'
-                            : 'text-gray-300'
-                        }}">
-                        ▼
-                    </span>
-
-                </span>
-            </a>
-
-        </th>
-
-
-        {{-- EMPLOYMENT STATUS --}}
-        <th class="min-w-[170px] px-4 py-3 text-left text-xs font-semibold
-                   uppercase tracking-wider text-gray-600">
-
-            <a
-                href="{{ $sortUrl('employment_status') }}"
-                class="flex items-center justify-between gap-3 hover:text-green-700"
-            >
-                <span>
-                    Employment<br>
-                    Status
-                </span>
-
-                <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                    <span class="text-[11px] font-black
-                        {{ $sort === 'employment_status' && $direction === 'asc'
-                            ? 'text-green-700'
-                            : 'text-gray-300'
-                        }}">
-                        ▲
-                    </span>
-
-                    <span class="text-[11px] font-black
-                        {{ $sort === 'employment_status' && $direction === 'desc'
-                            ? 'text-green-700'
-                            : 'text-gray-300'
-                        }}">
-                        ▼
-                    </span>
-
-                </span>
-            </a>
-
-        </th>
-
-
-        {{-- MEDICAL ALLOWANCE MODE AVAILMENT --}}
-        <th class="min-w-[230px] px-4 py-3 text-left text-xs font-semibold
-                   uppercase tracking-wider text-gray-600">
-
-            <a
-                href="{{ $sortUrl('mode_of_availment') }}"
-                class="flex items-center justify-between gap-3 hover:text-green-700"
-            >
-                <span>
-                    Medical Allowance<br>
-                    Mode Availment
-                </span>
-
-                <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                    <span class="text-[11px] font-black
-                        {{ $sort === 'mode_of_availment' && $direction === 'asc'
-                            ? 'text-green-700'
-                            : 'text-gray-300'
-                        }}">
-                        ▲
-                    </span>
-
-                    <span class="text-[11px] font-black
-                        {{ $sort === 'mode_of_availment' && $direction === 'desc'
-                            ? 'text-green-700'
-                            : 'text-gray-300'
-                        }}">
-                        ▼
-                    </span>
-
-                </span>
-            </a>
-
-        </th>
-
-
-        {{-- DISBURSEMENT STATUS --}}
-        <th class="min-w-[190px] px-4 py-3 text-left text-xs font-semibold
-                   uppercase tracking-wider text-gray-600">
-
-            <a
-                href="{{ $sortUrl('disbursement_status') }}"
-                class="flex items-center justify-between gap-3 hover:text-green-700"
-            >
-                <span>
-                    Disbursement<br>
-                    Status
-                </span>
-
-                <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                    <span class="text-[11px] font-black
-                        {{ $sort === 'disbursement_status' && $direction === 'asc'
-                            ? 'text-green-700'
-                            : 'text-gray-300'
-                        }}">
-                        ▲
-                    </span>
-
-                    <span class="text-[11px] font-black
-                        {{ $sort === 'disbursement_status' && $direction === 'desc'
-                            ? 'text-green-700'
-                            : 'text-gray-300'
-                        }}">
-                        ▼
-                    </span>
-
-                </span>
-            </a>
-
-        </th>
-
-
-        {{-- ACTION --}}
-        <th class="min-w-[110px] px-4 py-3 text-center text-xs font-semibold
-                   uppercase tracking-wider text-gray-600">
-            Action
-        </th>
-
-    </tr>
-</thead>
+                        <tr>
+
+                            {{-- NAME AND EMAIL --}}
+                            <th class="min-w-[220px] px-4 py-3 text-left text-xs font-semibold
+                                    uppercase tracking-wider text-gray-600">
+
+                                <a
+                                    href="{{ $sortUrl('name') }}"
+                                    class="flex items-center justify-between gap-3 hover:text-green-700"
+                                >
+                                    <span>Name and Email</span>
+
+                                    {{-- SORT ICON --}}
+                                    <span class="flex shrink-0 flex-col items-center leading-[9px]">
+
+                                        {{-- ASCENDING --}}
+                                        <span class="text-[11px] font-black
+                                            {{ $sort === 'name' && $direction === 'asc'
+                                                ? 'text-green-700'
+                                                : 'text-gray-300'
+                                            }}">
+                                            ▲
+                                        </span>
+
+                                        {{-- DESCENDING --}}
+                                        <span class="text-[11px] font-black
+                                            {{ $sort === 'name' && $direction === 'desc'
+                                                ? 'text-green-700'
+                                                : 'text-gray-300'
+                                            }}">
+                                            ▼
+                                        </span>
+
+                                    </span>
+                                </a>
+
+                            </th>
+
+
+                            @if (auth()->user()->role === 'super_admin')
+
+                                {{-- SCHOOL NAME --}}
+                                <th class="min-w-[220px] px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+
+                                    <a
+                                        href="{{ $sortUrl('school') }}"
+                                        class="flex items-center justify-between gap-3 hover:text-green-700"
+                                    >
+                                        <span>School Name</span>
+
+                                        <span class="flex shrink-0 flex-col items-center leading-[9px]">
+
+                                            <span class="text-[11px] font-black
+                                                {{ $sort === 'school' && $direction === 'asc'
+                                                    ? 'text-green-700'
+                                                    : 'text-gray-300'
+                                                }}">
+                                                ▲
+                                            </span>
+
+                                            <span class="text-[11px] font-black
+                                                {{ $sort === 'school' && $direction === 'desc'
+                                                    ? 'text-green-700'
+                                                    : 'text-gray-300'
+                                                }}">
+                                                ▼
+                                            </span>
+
+                                        </span>
+                                    </a>
+
+                                </th>
+
+
+                                {{-- DISTRICT --}}
+                                <th class="min-w-[140px] px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+
+                                    <a
+                                        href="{{ $sortUrl('district') }}"
+                                        class="flex items-center justify-between gap-3 hover:text-green-700"
+                                    >
+                                        <span>District</span>
+
+                                        <span class="flex shrink-0 flex-col items-center leading-[9px]">
+
+                                            <span class="text-[11px] font-black
+                                                {{ $sort === 'district' && $direction === 'asc'
+                                                    ? 'text-green-700'
+                                                    : 'text-gray-300'
+                                                }}">
+                                                ▲
+                                            </span>
+
+                                            <span class="text-[11px] font-black
+                                                {{ $sort === 'district' && $direction === 'desc'
+                                                    ? 'text-green-700'
+                                                    : 'text-gray-300'
+                                                }}">
+                                                ▼
+                                            </span>
+
+                                        </span>
+                                    </a>
+
+                                </th>
+
+
+                                {{-- ITEM FROM SCHOOL LEVEL --}}
+                                <th class="min-w-[180px] px-4 py-3 text-left text-xs font-semibold
+                                        uppercase tracking-wider text-gray-600">
+
+                                    <a
+                                        href="{{ $sortUrl('school_level') }}"
+                                        class="flex items-center justify-between gap-3 hover:text-green-700"
+                                    >
+                                        <span>
+                                            Item From<br>
+                                            School Level
+                                        </span>
+
+                                        <span class="flex shrink-0 flex-col items-center leading-[9px]">
+
+                                            <span class="text-[11px] font-black
+                                                {{ $sort === 'school_level' && $direction === 'asc'
+                                                    ? 'text-green-700'
+                                                    : 'text-gray-300'
+                                                }}">
+                                                ▲
+                                            </span>
+
+                                            <span class="text-[11px] font-black
+                                                {{ $sort === 'school_level' && $direction === 'desc'
+                                                    ? 'text-green-700'
+                                                    : 'text-gray-300'
+                                                }}">
+                                                ▼
+                                            </span>
+
+                                        </span>
+                                    </a>
+
+                                </th>
+
+                            @endif
+
+
+                            {{-- POSITION TITLE --}}
+                            <th class="min-w-[200px] px-4 py-3 text-left text-xs font-semibold
+                                    uppercase tracking-wider text-gray-600">
+
+                                <a
+                                    href="{{ $sortUrl('position') }}"
+                                    class="flex items-center justify-between gap-3 hover:text-green-700"
+                                >
+                                    <span>Position Title</span>
+
+                                    <span class="flex shrink-0 flex-col items-center leading-[9px]">
+
+                                        <span class="text-[11px] font-black
+                                            {{ $sort === 'position' && $direction === 'asc'
+                                                ? 'text-green-700'
+                                                : 'text-gray-300'
+                                            }}">
+                                            ▲
+                                        </span>
+
+                                        <span class="text-[11px] font-black
+                                            {{ $sort === 'position' && $direction === 'desc'
+                                                ? 'text-green-700'
+                                                : 'text-gray-300'
+                                            }}">
+                                            ▼
+                                        </span>
+
+                                    </span>
+                                </a>
+
+                            </th>
+
+
+                            {{-- EMPLOYMENT STATUS --}}
+                            <th class="min-w-[170px] px-4 py-3 text-left text-xs font-semibold
+                                    uppercase tracking-wider text-gray-600">
+
+                                <a
+                                    href="{{ $sortUrl('employment_status') }}"
+                                    class="flex items-center justify-between gap-3 hover:text-green-700"
+                                >
+                                    <span>
+                                        Employment<br>
+                                        Status
+                                    </span>
+
+                                    <span class="flex shrink-0 flex-col items-center leading-[9px]">
+
+                                        <span class="text-[11px] font-black
+                                            {{ $sort === 'employment_status' && $direction === 'asc'
+                                                ? 'text-green-700'
+                                                : 'text-gray-300'
+                                            }}">
+                                            ▲
+                                        </span>
+
+                                        <span class="text-[11px] font-black
+                                            {{ $sort === 'employment_status' && $direction === 'desc'
+                                                ? 'text-green-700'
+                                                : 'text-gray-300'
+                                            }}">
+                                            ▼
+                                        </span>
+
+                                    </span>
+                                </a>
+
+                            </th>
+
+
+                            {{-- MEDICAL ALLOWANCE MODE AVAILMENT --}}
+                            <th class="min-w-[230px] px-4 py-3 text-left text-xs font-semibold
+                                    uppercase tracking-wider text-gray-600">
+
+                                <a
+                                    href="{{ $sortUrl('mode_of_availment') }}"
+                                    class="flex items-center justify-between gap-3 hover:text-green-700"
+                                >
+                                    <span>
+                                        Medical Allowance<br>
+                                        Mode Availment
+                                    </span>
+
+                                    <span class="flex shrink-0 flex-col items-center leading-[9px]">
+
+                                        <span class="text-[11px] font-black
+                                            {{ $sort === 'mode_of_availment' && $direction === 'asc'
+                                                ? 'text-green-700'
+                                                : 'text-gray-300'
+                                            }}">
+                                            ▲
+                                        </span>
+
+                                        <span class="text-[11px] font-black
+                                            {{ $sort === 'mode_of_availment' && $direction === 'desc'
+                                                ? 'text-green-700'
+                                                : 'text-gray-300'
+                                            }}">
+                                            ▼
+                                        </span>
+
+                                    </span>
+                                </a>
+
+                            </th>
+
+
+                            {{-- DISBURSEMENT STATUS --}}
+                            <th class="min-w-[190px] px-4 py-3 text-left text-xs font-semibold
+                                    uppercase tracking-wider text-gray-600">
+
+                                <a
+                                    href="{{ $sortUrl('disbursement_status') }}"
+                                    class="flex items-center justify-between gap-3 hover:text-green-700"
+                                >
+                                    <span>
+                                        Disbursement<br>
+                                        Status
+                                    </span>
+
+                                    <span class="flex shrink-0 flex-col items-center leading-[9px]">
+
+                                        <span class="text-[11px] font-black
+                                            {{ $sort === 'disbursement_status' && $direction === 'asc'
+                                                ? 'text-green-700'
+                                                : 'text-gray-300'
+                                            }}">
+                                            ▲
+                                        </span>
+
+                                        <span class="text-[11px] font-black
+                                            {{ $sort === 'disbursement_status' && $direction === 'desc'
+                                                ? 'text-green-700'
+                                                : 'text-gray-300'
+                                            }}">
+                                            ▼
+                                        </span>
+
+                                    </span>
+                                </a>
+
+                            </th>
+
+
+                            {{-- ACTION --}}
+                            <th class="min-w-[110px] px-4 py-3 text-center text-xs font-semibold
+                                    uppercase tracking-wider text-gray-600">
+                                Action
+                            </th>
+
+                        </tr>
+                    </thead>
 
                         <tbody class="divide-y divide-gray-200 bg-white">
                             @forelse ($medicalAllowances as $record)
