@@ -2926,9 +2926,13 @@ class DataManagementController extends Controller
             |
             */
 
-            if ($email === '' || $plantillaDbId === '') {
-                continue;
-            }
+            // if ($email === '' || $plantillaDbId === '') {
+            //     continue;
+            // }
+
+            if ($email === '') {
+                 continue;
+             }
 
 
 

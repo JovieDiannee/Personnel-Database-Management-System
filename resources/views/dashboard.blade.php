@@ -111,7 +111,7 @@
                         <div class="mt-4 border-t border-gray-100 pt-3">
 
                             <a
-                                href="{{ route('data-management.personnel') }}"
+                                href="{{ route('data-management.employment-status') }}"
                                 class="text-sm font-medium text-green-700 hover:text-green-900"
                             >
                                 View personnel →

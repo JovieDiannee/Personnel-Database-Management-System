@@ -796,7 +796,7 @@
                                     <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
 
                                         {{ $person->created_at
-                                            ? $person->created_at->format('d/m/Y')
+                                            ? str_replace('Sep.', 'Sept.', $person->created_at->format('M. j, Y'))
                                             : '—'
                                         }}
 
