@@ -4193,6 +4193,31 @@ class DataManagementController extends Controller
 
     public function editEmploymentStatus($employmentStatus)
     {
+        
+        /*
+        |--------------------------------------------------------------------------
+        | LOGGED-IN USER ACCESS CHECK
+        |--------------------------------------------------------------------------
+        */
+
+        $loggedInUser = auth()->user();
+
+        $loggedInEmployeeId = $loggedInUser
+            ?->basicInformation
+            ?->issuedId
+            ?->employee_id;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESTRICT EMPLOYEE NO. 1000001
+        |--------------------------------------------------------------------------
+        */
+
+        if ((string) $loggedInEmployeeId === '1000001') {
+            abort(403, 'You are not authorized to access this page.');
+        }
+
         /*
         |--------------------------------------------------------------------------
         | Employment Status Record
