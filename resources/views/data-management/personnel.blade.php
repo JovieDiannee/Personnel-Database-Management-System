@@ -651,7 +651,7 @@
                                 {{-- Name --}}
                                 <th class="px-6 py-3 text-left text-xs font-semibold
                                         uppercase tracking-wider text-gray-600">
-                                    Name
+                                    COMPLETE Name
                                 </th>
 
                                 {{-- Mobile Number --}}
@@ -712,16 +712,8 @@
 
                                         <div class="text-sm font-semibold text-gray-900">
 
-                                            {{ $person->last_name }},
-                                            {{ $person->first_name }}
+                                            {{ $person->first_name }} {{ $person->middle_name }} {{ $person->last_name }} {{ $person->extension_name }}
 
-                                            @if ($person->middle_name)
-                                                {{ strtoupper(substr($person->middle_name, 0, 1)) }}.
-                                            @endif
-
-                                            @if ($person->extension_name)
-                                                {{ $person->extension_name }}
-                                            @endif
 
                                         </div>
 

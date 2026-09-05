@@ -6391,129 +6391,354 @@ class DataManagementController extends Controller
         $search = trim($request->input('search', ''));
         $user = $request->user();
 
-        $query = MedicalAllowance::with([
-            'user.basicInformation',
-            'user.employmentStatus.plantilla',
-            'user.employmentStatus.school',
-        ]);
+        /*
+        |--------------------------------------------------------------------------
+        | SORTING
+        |--------------------------------------------------------------------------
+        */
+
+        $sort = $request->input('sort', 'created_at');
+        $direction = strtolower($request->input('direction', 'desc'));
+
+        if (!in_array($direction, ['asc', 'desc'])) {
+            $direction = 'asc';
+        }
+
+        $allowedSorts = [
+            'name',
+            'school',
+            'district',
+            'school_level',
+            'position',
+            'employment_status',
+            'mode_of_availment',
+            'disbursement_status',
+            'created_at',
+        ];
+
+        if (!in_array($sort, $allowedSorts)) {
+            $sort = 'created_at';
+        }
+
 
         /*
         |--------------------------------------------------------------------------
-        | Restrict Admin to Their Assigned School
+        | BASE QUERY
+        |--------------------------------------------------------------------------
+        */
+
+        $query = MedicalAllowance::query()
+            ->select('medical_allowance.*')
+
+            ->leftJoin(
+                'users',
+                'users.id',
+                '=',
+                'medical_allowance.users_id'
+            )
+
+            ->leftJoin(
+                'basic_information',
+                'basic_information.users_id',
+                '=',
+                'users.id'
+            )
+
+            ->leftJoin(
+                'employment_status',
+                'employment_status.users_id',
+                '=',
+                'users.id'
+            )
+
+            ->leftJoin(
+                'plantilla_db',
+                'plantilla_db.id',
+                '=',
+                'employment_status.plantilla_db_id'
+            )
+
+            ->leftJoin(
+                'school_db',
+                'school_db.id',
+                '=',
+                'employment_status.school_db_id'
+            )
+
+            ->with([
+                'user.basicInformation',
+                'user.employmentStatus.plantilla',
+                'user.employmentStatus.school',
+            ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESTRICT ADMIN TO THEIR ASSIGNED SCHOOL
         |--------------------------------------------------------------------------
         */
 
         if ($user->role === 'admin') {
+
             $schoolId = $user->employmentStatus?->school_db_id;
 
             if ($schoolId) {
-                $query->whereHas(
-                    'user.employmentStatus',
-                    function ($employmentQuery) use ($schoolId) {
-                        $employmentQuery->where(
-                            'school_db_id',
-                            $schoolId
-                        );
-                    }
+
+                $query->where(
+                    'employment_status.school_db_id',
+                    $schoolId
                 );
+
             } else {
-                // Admin without an assigned school sees no records.
+
                 $query->whereRaw('1 = 0');
             }
         }
 
+
         /*
         |--------------------------------------------------------------------------
-        | Super Admin Receives No School Filter
+        | SEARCH
+        |--------------------------------------------------------------------------
+        */
+
+        if ($search !== '') {
+
+            $query->where(function ($q) use ($search) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | EMAIL
+                |--------------------------------------------------------------------------
+                */
+
+                $q->where(
+                    'users.email',
+                    'like',
+                    "%{$search}%"
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | PERSONNEL NAME
+                |--------------------------------------------------------------------------
+                */
+
+                $q->orWhere(
+                    'basic_information.first_name',
+                    'like',
+                    "%{$search}%"
+                );
+
+                $q->orWhere(
+                    'basic_information.middle_name',
+                    'like',
+                    "%{$search}%"
+                );
+
+                $q->orWhere(
+                    'basic_information.last_name',
+                    'like',
+                    "%{$search}%"
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | MEDICAL ALLOWANCE
+                |--------------------------------------------------------------------------
+                */
+
+                $q->orWhere(
+                    'medical_allowance.mode_of_availment',
+                    'like',
+                    "%{$search}%"
+                );
+
+                $q->orWhere(
+                    'medical_allowance.disbursement_status',
+                    'like',
+                    "%{$search}%"
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | EMPLOYMENT STATUS
+                |--------------------------------------------------------------------------
+                */
+
+                $q->orWhere(
+                    'employment_status.employment_status',
+                    'like',
+                    "%{$search}%"
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | SCHOOL
+                |--------------------------------------------------------------------------
+                */
+
+                $q->orWhere(
+                    'school_db.school_name',
+                    'like',
+                    "%{$search}%"
+                );
+
+                $q->orWhere(
+                    'school_db.school_district',
+                    'like',
+                    "%{$search}%"
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | POSITION
+                |--------------------------------------------------------------------------
+                */
+
+                $q->orWhere(
+                    'plantilla_db.position_title',
+                    'like',
+                    "%{$search}%"
+                );
+            });
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | APPLY SORT
+        |--------------------------------------------------------------------------
+        */
+
+        switch ($sort) {
+
+            case 'name':
+
+                $query
+                    ->orderBy(
+                        'basic_information.last_name',
+                        $direction
+                    )
+                    ->orderBy(
+                        'basic_information.first_name',
+                        $direction
+                    );
+
+                break;
+
+
+            case 'school':
+
+                $query->orderBy(
+                    'school_db.school_name',
+                    $direction
+                );
+
+                break;
+
+
+            case 'district':
+
+                $query->orderBy(
+                    'school_db.school_district',
+                    $direction
+                );
+
+                break;
+
+
+            case 'school_level':
+
+                $query->orderBy(
+                    'plantilla_db.item_from_school_level',
+                    $direction
+                );
+
+                break;
+
+
+            case 'position':
+
+                $query->orderBy(
+                    'plantilla_db.position_title',
+                    $direction
+                );
+
+                break;
+
+
+            case 'employment_status':
+
+                $query->orderBy(
+                    'employment_status.employment_status',
+                    $direction
+                );
+
+                break;
+
+
+            case 'mode_of_availment':
+
+                $query->orderBy(
+                    'medical_allowance.mode_of_availment',
+                    $direction
+                );
+
+                break;
+
+
+            case 'disbursement_status':
+
+                $query->orderBy(
+                    'medical_allowance.disbursement_status',
+                    $direction
+                );
+
+                break;
+
+
+            default:
+
+                $query->orderBy(
+                    'medical_allowance.created_at',
+                    $direction
+                );
+
+                break;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PAGINATION
         |--------------------------------------------------------------------------
         */
 
         $medicalAllowances = $query
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Search Personnel
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $q->whereHas('user', function ($userQuery) use ($search) {
-                        $userQuery->where(
-                            'email',
-                            'like',
-                            "%{$search}%"
-                        );
-                    });
-
-                    $q->orWhereHas(
-                        'user.basicInformation',
-                        function ($basicQuery) use ($search) {
-                            $basicQuery->where(
-                                function ($nameQuery) use ($search) {
-                                    $nameQuery
-                                        ->where(
-                                            'first_name',
-                                            'like',
-                                            "%{$search}%"
-                                        )
-                                        ->orWhere(
-                                            'middle_name',
-                                            'like',
-                                            "%{$search}%"
-                                        )
-                                        ->orWhere(
-                                            'last_name',
-                                            'like',
-                                            "%{$search}%"
-                                        );
-                                }
-                            );
-                        }
-                    );
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Search Medical Allowance
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $q->orWhere(
-                        'mode_of_availment',
-                        'like',
-                        "%{$search}%"
-                    );
-
-                    $q->orWhere(
-                        'disbursement_status',
-                        'like',
-                        "%{$search}%"
-                    );
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Search Employment Status
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $q->orWhereHas(
-                        'user.employmentStatus',
-                        function ($employmentQuery) use ($search) {
-                            $employmentQuery->where(
-                                'employment_status',
-                                'like',
-                                "%{$search}%"
-                            );
-                        }
-                    );
-                });
-            })
-            ->latest()
             ->paginate(10)
             ->withQueryString();
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN VIEW
+        |--------------------------------------------------------------------------
+        */
+
         return view(
             'data-management.medical-allowance',
-            compact('medicalAllowances', 'search')
+            compact(
+                'medicalAllowances',
+                'search',
+                'sort',
+                'direction'
+            )
         );
     }
 
