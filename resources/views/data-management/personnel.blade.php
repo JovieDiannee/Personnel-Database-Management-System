@@ -831,19 +831,15 @@
                                     {{-- Action --}}
                                     <td class="whitespace-nowrap px-6 py-4 text-center">
 
-                                        @if((string) auth()->user()?->basicInformation?->issuedId?->employee_id !== '1000001')
-
-                                            <a
-                                                href="{{ route('data-management.personnel.edit', $person->id) }}"
-                                                class="inline-flex items-center rounded-md
-                                                    bg-green-700 px-4 py-2
-                                                    text-sm font-semibold text-white
-                                                    transition hover:bg-green-800"
-                                            >
-                                                View
-                                            </a>
-
-                                        @endif
+                                        <a
+                                            href="{{ route('data-management.personnel.edit', $person->id) }}"
+                                            class="inline-flex items-center rounded-md
+                                                bg-green-700 px-4 py-2
+                                                text-sm font-semibold text-white
+                                                transition hover:bg-green-800"
+                                        >
+                                            View
+                                        </a>
 
                                     </td>
 

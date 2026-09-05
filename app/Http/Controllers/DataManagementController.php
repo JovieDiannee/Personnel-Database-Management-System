@@ -89,9 +89,22 @@ class DataManagementController extends Controller
 
         if ($user->role === 'admin') {
 
+            /*
+            |--------------------------------------------------------------------------
+            | Get Admin's School
+            |--------------------------------------------------------------------------
+            */
+
             $adminSchoolId = $user->employmentStatus?->school_db_id;
 
+
             if ($adminSchoolId) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Same School Only
+                |--------------------------------------------------------------------------
+                */
 
                 $query->whereHas(
                     'user.employmentStatus',
@@ -105,14 +118,38 @@ class DataManagementController extends Controller
                     }
                 );
 
+
+                /*
+                |--------------------------------------------------------------------------
+                | Exclude Employee No. 1000001
+                |--------------------------------------------------------------------------
+                */
+
+                $query->whereDoesntHave(
+                    'issuedId',
+                    function ($issuedIdQuery) {
+
+                        $issuedIdQuery->where(
+                            'employee_id',
+                            '1000001'
+                        );
+
+                    }
+                );
+
             } else {
 
                 /*
-                | Admin without a school assignment
-                | should not see personnel from other schools.
+                |--------------------------------------------------------------------------
+                | Admin Without School Assignment
+                |--------------------------------------------------------------------------
+                |
+                | Do not allow the Admin to see personnel from other schools.
+                |
                 */
 
                 $query->whereRaw('1 = 0');
+
             }
         }
 
@@ -2246,6 +2283,25 @@ class DataManagementController extends Controller
                     }
                 );
 
+
+                /*
+                |--------------------------------------------------------------------------
+                | Exclude Employee No. 1000001
+                |--------------------------------------------------------------------------
+                */
+
+                $query->whereDoesntHave(
+                    'user.basicInformation.issuedId',
+                    function ($issuedIdQuery) {
+
+                        $issuedIdQuery->where(
+                            'employee_id',
+                            '1000001'
+                        );
+
+                    }
+                );
+
             }
         }
 
@@ -4193,7 +4249,7 @@ class DataManagementController extends Controller
 
     public function editEmploymentStatus($employmentStatus)
     {
-        
+
         /*
         |--------------------------------------------------------------------------
         | LOGGED-IN USER ACCESS CHECK
