@@ -467,7 +467,13 @@ class DataManagementController extends Controller
                 $errors[] = "Row {$excelRow}: Last name is required.";
             }
 
-            if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            if (
+                $email !== '' &&
+                !preg_match(
+                    '/^[\p{L}\p{N}._%+\-]+@[\p{L}\p{N}.-]+\.[\p{L}]{2,}$/u',
+                    $email
+                )
+            ) {
                 $errors[] = "Row {$excelRow}: Invalid email address.";
             }
 
@@ -2601,8 +2607,12 @@ class DataManagementController extends Controller
                 continue;
             }
 
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-
+            if (
+                !preg_match(
+                    '/^[\p{L}\p{N}._%+\-]+@[\p{L}\p{N}.-]+\.[\p{L}]{2,}$/u',
+                    $email
+                )
+            ) {
                 $errors[] = [
                     'row' => $excelRow,
                     'message' => "Invalid email address: {$email}"
@@ -7118,11 +7128,12 @@ class DataManagementController extends Controller
 
                 ];
 
-            } elseif (!filter_var(
-                $email,
-                FILTER_VALIDATE_EMAIL
-            )) {
-
+            }elseif (
+                !preg_match(
+                    '/^[\p{L}\p{N}._%+\-]+@[\p{L}\p{N}.-]+\.[\p{L}]{2,}$/u',
+                    $email
+                )
+            ) {
                 $errors[] = [
 
                     'row' => $excelRow,
