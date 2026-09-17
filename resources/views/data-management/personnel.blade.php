@@ -801,7 +801,6 @@
                                     </td>
                                     
                                     {{-- Action --}}
-
                                     @if (auth()->user()->role === 'super_admin')
                                         <td class="whitespace-nowrap px-6 py-4 text-center">
 
@@ -817,14 +816,16 @@
                                                 type="button"
                                                 data-person-id="{{ $person->id }}"
                                                 data-person-name="{{ $personName }}"
+                                                data-person-email="{{ $person->user?->email ?? '' }}"
+                                                data-person-birthday="{{ $person->birth_date ? \Carbon\Carbon::parse($person->birth_date)->format('m/d/Y') : '' }}"
                                                 data-role="{{ $person->user?->role ?? 'user' }}"
                                                 data-status="{{ $person->user?->status ?? 'active' }}"
                                                 onclick="openAccessModal(this)"
-                                                class="inline-flex items-center rounded-md bg-green-700 px-4 py-2
-                                                    text-sm font-semibold text-white transition hover:bg-green-800"
+                                                class="inline-flex items-center rounded-md bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
                                             >
                                                 Access
                                             </button>
+
                                         </td>
                                     @endif
                                     
@@ -928,57 +929,76 @@
 {{-- ACCESS MODAL --}}
 <div
     id="accessModal"
-    class="fixed inset-0 z-50 hidden items-center justify-center
-           bg-black/50 px-4 backdrop-blur-sm"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
     >
-
-    <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl">
+    <div class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white shadow-2xl">
 
         {{-- HEADER --}}
-        <div class="flex items-center justify-between
-                    border-b border-gray-200 px-6 py-5">
+        <div class="flex items-center justify-between rounded-t-2xl bg-green-700 px-6 py-5">
 
             <div>
-                <h3 class="text-lg font-semibold text-gray-900">
-                    Manage User Access
+                <h3 class="text-lg font-semibold text-white">
+                    Update role and account status
                 </h3>
 
-                <p class="mt-1 text-sm text-gray-500">
-                    Update role and account status.
-                </p>
-                
             </div>
 
             <button
                 type="button"
                 onclick="closeAccessModal()"
-                class="rounded-lg p-2 text-gray-400
-                       hover:bg-gray-100 hover:text-gray-600"
+                aria-label="Close modal"
+                class="rounded-lg p-2 text-green-100 transition hover:bg-green-600 hover:text-white"
             >
                 ✕
             </button>
 
         </div>
 
-
         {{-- FORM --}}
-        <form
-            id="accessForm"
-            method="POST"
-            class="p-6"
-        >
+        <form id="accessForm" method="POST" class="p-6">
 
             @csrf
             @method('PATCH')
 
+            {{-- SELECTED USER --}}
+            <div class="mb-5 rounded-xl border border-green-200 bg-green-50 p-4">
+
+                <dl class="space-y-2 text-sm">
+                    <div class="flex items-start gap-2">
+                        <dt class="w-16 shrink-0 font-medium text-gray-900">
+                            Name
+                        </dt>
+
+                        <dd id="accessPersonName" class="min-w-0 break-words text-gray-900">
+                            —
+                        </dd>
+
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <dt class="w-16 shrink-0 font-medium text-gray-900">
+                            Email
+                        </dt>
+
+                        <dd id="accessPersonEmail" class="min-w-0 break-words text-gray-800">
+                            —
+                        </dd>
+                    </div>
+
+                    <div class="flex items-start gap-2">
+                        <dt class="w-16 shrink-0 font-medium text-gray-900">
+                            Birthday
+                        </dt>
+
+                        <dd id="accessPersonBirthday" class="text-gray-800">
+                            —
+                        </dd>
+                    </div>
+                </dl>
+
+            </div>
 
             {{-- ROLE --}}
             <div>
-
-                <p class="text-sm font-semibold text-green-700">
-                    SELECTED USER: <span id="accessPersonName"></span>
-                </p>
-                <br>
                 <label
                     for="role"
                     class="mb-2 block text-sm font-medium text-gray-700"
@@ -989,32 +1009,16 @@
                 <select
                     id="role"
                     name="role"
-                    class="block w-full rounded-lg border-gray-300
-                           text-sm shadow-sm
-                           focus:border-green-600
-                           focus:ring-green-600"
+                    class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
                 >
-
-                    <option value="user">
-                        User
-                    </option>
-
-                    <option value="admin">
-                        Admin
-                    </option>
-
-                    <option value="super_admin">
-                        Super Admin
-                    </option>
-
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                    <option value="super_admin">Super Admin</option>
                 </select>
-
             </div>
-
 
             {{-- STATUS --}}
             <div class="mt-5">
-
                 <label
                     for="status"
                     class="mb-2 block text-sm font-medium text-gray-700"
@@ -1025,37 +1029,20 @@
                 <select
                     id="status"
                     name="status"
-                    class="block w-full rounded-lg border-gray-300
-                           text-sm shadow-sm
-                           focus:border-green-600
-                           focus:ring-green-600"
+                    class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
                 >
-
-                    <option value="active">
-                        Active
-                    </option>
-
-                    <option value="inactive">
-                        Inactive
-                    </option>
-
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
                 </select>
-
             </div>
-
 
             {{-- RESET PASSWORD --}}
             <div class="mt-5">
-
-                <label class="mb-2 block text-sm font-medium text-gray-700">
+                <p class="mb-2 text-sm font-medium text-gray-700">
                     Password Management
-                </label>
+                </p>
 
-                <div
-                    class="rounded-xl border border-red-200
-                        bg-red-50 p-4"
-                >
-
+                <div class="rounded-xl border border-red-200 bg-red-50 p-4">
                     <label class="flex cursor-pointer items-start gap-3">
 
                         <input
@@ -1063,50 +1050,23 @@
                             id="reset_password"
                             name="reset_password"
                             value="1"
-                            class="mt-1 h-4 w-4 rounded
-                                border-gray-300
-                                text-red-600
-                                focus:ring-red-500"
+                            class="mt-1 h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
                         >
 
-                        <div>
-
-                            <p class="text-sm font-semibold text-red-800">
+                        <span>
+                            <span class="block text-sm font-semibold text-red-800">
                                 Reset User Password
-                            </p>
+                            </span>
 
-                            <p class="mt-1 text-xs leading-5 text-red-700">
+                            <span class="mt-1 block text-xs leading-5 text-red-700">
                                 Reset this user's password to the default password:
                                 <strong>pdms@123</strong>
-                            </p>
-
-                        </div>
+                            </span>
+                        </span>
 
                     </label>
-
                 </div>
-
             </div>
-
-
-            {{-- WARNING --}}
-            <div class="mt-5 rounded-lg border border-yellow-200
-                        bg-yellow-50 p-4">
-
-                <p class="text-xs leading-relaxed text-yellow-800">
-
-                    <strong>Note:</strong>
-                    Changing the user's role will change the areas
-                    of the system they can access.
-
-                    If password reset is selected, the user's current
-                    password will immediately be replaced with
-                    <strong>pdms@123</strong>.
-
-                </p>
-
-            </div>
-
 
             {{-- BUTTONS --}}
             <div class="mt-6 flex justify-end gap-3">
@@ -1114,20 +1074,14 @@
                 <button
                     type="button"
                     onclick="closeAccessModal()"
-                    class="rounded-lg border border-gray-300
-                           bg-white px-5 py-2.5
-                           text-sm font-semibold text-gray-700
-                           hover:bg-gray-50"
+                    class="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
                 >
                     Cancel
                 </button>
 
                 <button
                     type="submit"
-                    class="rounded-lg bg-green-700
-                           px-5 py-2.5
-                           text-sm font-semibold text-white
-                           hover:bg-green-800"
+                    class="rounded-lg bg-green-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-800"
                 >
                     Save Changes
                 </button>
@@ -1137,27 +1091,37 @@
         </form>
 
     </div>
-
 </div>
 
 
 <script>
-
-
     function openAccessModal(button) {
         const modal = document.getElementById('accessModal');
         const form = document.getElementById('accessForm');
 
         const personId = button.dataset.personId;
         const personName = button.dataset.personName;
+        const email = button.dataset.personEmail;
+        const birthday = button.dataset.personBirthday;
         const role = button.dataset.role;
         const status = button.dataset.status;
 
         form.action = `/data-management/personnel/${personId}/access`;
 
-        document.getElementById('accessPersonName').textContent = personName;
-        document.getElementById('role').value = role;
-        document.getElementById('status').value = status;
+        document.getElementById('accessPersonName').textContent =
+            personName || '—';
+
+        document.getElementById('accessPersonEmail').textContent =
+            email || '—';
+
+        document.getElementById('accessPersonBirthday').textContent =
+            birthday || '—';
+
+        document.getElementById('role').value = role || 'user';
+        document.getElementById('status').value = status || 'active';
+
+        // Clear any password reset selection from the previous user.
+        document.getElementById('reset_password').checked = false;
 
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -1170,26 +1134,11 @@
         modal.classList.remove('flex');
     }
 
-
-
-    function closeAccessModal()
-    {
-        const modal = document.getElementById('accessModal');
-
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
-
-
-    // Close when clicking outside
-    document
-        .getElementById('accessModal')
+    // Close when clicking outside the modal.
+    document.getElementById('accessModal')
         .addEventListener('click', function (event) {
-
             if (event.target === this) {
                 closeAccessModal();
             }
-
         });
-
 </script>
