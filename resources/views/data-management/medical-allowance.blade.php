@@ -1280,10 +1280,6 @@
                                                             >
                                                                 Update Medical Allowance Availment
                                                             </h3>
-
-                                                            <p class="mt-1 truncate text-sm text-green-100">
-                                                                Name: {{ $name ?: 'Unknown personnel' }}
-                                                            </p>
                                                         </div>
 
                                                         <button
@@ -1328,28 +1324,28 @@
                                                                 style="padding: 18px 20px;"
                                                                 >
                                                                 <div class="space-y-4">
-                                                                    {{-- SCHOOL --}}
+                                                                    {{-- NAME --}}
                                                                     <div style="padding-bottom: 12px;">
                                                                         <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                                                            School
+                                                                            Employee Name
                                                                         </p>
 
                                                                         <p class="mt-1 text-sm font-medium text-gray-800">
-                                                                            {{ $school?->school_name ?? '—' }}
+                                                                            {{ $name ?: 'Unknown personnel' }}
                                                                         </p>
                                                                     </div>
 
-                                                                    {{-- DISTRICT --}}
+                                                                    {{-- SCHOOL DISTRICT --}}
                                                                     <div
                                                                         class="border-t border-green-100"
                                                                         style="padding-top: 12px;"
                                                                     >
                                                                         <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                                                            District
+                                                                            School Assignment
                                                                         </p>
 
                                                                         <p class="mt-1 text-sm font-medium text-gray-800">
-                                                                            {{ $school?->school_district ?? '—' }}
+                                                                            {{ $school?->school_name ?? '—' }} - {{ $school?->school_district ?? '—' }}
                                                                         </p>
                                                                     </div>
                                                                 </div>
