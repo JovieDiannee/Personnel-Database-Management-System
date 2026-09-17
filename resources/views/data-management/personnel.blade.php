@@ -243,7 +243,7 @@
                                                     <td class="whitespace-nowrap px-4 py-3 text-sm
                                                             font-semibold text-gray-700">
 
-                                                        {{ $error['row'] ?? '-' }}
+                                                        {{ isset($error['row']) ? $error['row'] + 4 : '-' }}
 
                                                     </td>
 
