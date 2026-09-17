@@ -27,6 +27,10 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use App\Exports\EnrollmentTemplateExport;
+use App\Models\BasicInformation;
+use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 
 class DataManagementController extends Controller
@@ -1889,304 +1893,292 @@ class DataManagementController extends Controller
 
     public function editPersonnel($id)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | LOGGED-IN USER ACCESS CHECK
-        |--------------------------------------------------------------------------
-        */
-
         $loggedInUser = auth()->user();
 
+        abort_unless($loggedInUser, 401);
+
         $loggedInEmployeeId = $loggedInUser
-            ?->basicInformation
+            ->basicInformation
             ?->issuedId
             ?->employee_id;
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | RESTRICT EMPLOYEE NO. 1000001
-        |--------------------------------------------------------------------------
-        */
 
         if ((string) $loggedInEmployeeId === '1000001') {
             abort(403, 'You are not authorized to access this page.');
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | PERSONNEL RECORD
-        |--------------------------------------------------------------------------
-        */
-
-        $person = \App\Models\BasicInformation::with([
+        $person = BasicInformation::with([
             'user',
             'issuedId',
             'employmentStatus',
         ])->findOrFail($id);
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | ADDRESS
-        |--------------------------------------------------------------------------
-        */
-
         $addresses = DB::table('address')
             ->where('basic_information_id', $person->id)
+            ->orderBy('id')
             ->get();
-
 
         return view(
             'data-management.personnel-edit',
-            compact(
-                'person',
-                'addresses'
-            )
+            compact('person', 'addresses')
         );
     }
 
     public function updatePersonnel(Request $request, $id)
     {
-        $person = \App\Models\BasicInformation::findOrFail($id);
+        // ACCESS CHECK
+        $loggedInUser = $request->user();
 
-        $validated = $request->validate([
+        abort_unless($loggedInUser, 401);
 
+        $loggedInEmployeeId = $loggedInUser
+            ->basicInformation
+            ?->issuedId
+            ?->employee_id;
+
+        if ((string) $loggedInEmployeeId === '1000001') {
+            abort(403, 'You are not authorized to update personnel.');
+        }
+
+        $person = BasicInformation::with([
+            'user',
+            'issuedId',
+        ])->findOrFail($id);
+
+        if (! $person->user) {
+            throw ValidationException::withMessages([
+                'email' => 'This personnel record has no linked user account.',
+            ]);
+        }
+
+        // FIELDS PER TABLE
+        $basicFields = [
+            'first_name',
+            'middle_name',
+            'last_name',
+            'extension_name',
+            'sex',
+            'birth_place',
+            'birth_date',
+            'civil_status',
+            'religion',
+            'citizenship',
+            'mode_of_citizenship',
+            'height_m',
+            'weight_kg',
+            'blood_type',
+            'mobile_number',
+            'telephone_number',
+            'specialization',
+        ];
+
+        $issuedIdFields = [
+            'umid_no',
+            'gsis_no',
+            'philsys_no',
+            'pagibig_no',
+            'tin_no',
+            'philhealth_no',
+            'employee_id',
+        ];
+
+        $addressFields = [
+            'type',
+            'street',
+            'brgy',
+            'subd_village',
+            'municipality_city',
+            'province',
+            'zip_postal',
+        ];
+
+        // VALIDATION
+        $rules = [
             'email' => [
                 'required',
                 'email',
-            ],
-
-            'first_name' => [
-                'required',
-                'string',
                 'max:255',
+                Rule::unique(get_class($person->user), 'email')
+                    ->ignore($person->user),
             ],
 
-            'middle_name' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
-
-            'last_name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
-            'extension_name' => [
-                'nullable',
-                'string',
-                'max:50',
-            ],
+            'first_name' => ['required', 'string', 'max:255'],
+            'middle_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'extension_name' => ['sometimes', 'nullable', 'string', 'max:50'],
 
             'sex' => [
+                'sometimes',
                 'nullable',
-                'string',
-                'max:20',
+                Rule::in(['Male', 'Female']),
             ],
 
-            'birth_place' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
+            'birth_place' => ['sometimes', 'nullable', 'string', 'max:255'],
 
             'birth_date' => [
+                'sometimes',
                 'nullable',
-                'date',
+                'date_format:Y-m-d',
+                'before_or_equal:today',
             ],
 
             'civil_status' => [
+                'sometimes',
                 'nullable',
-                'string',
-                'max:50',
+                Rule::in([
+                    'Single',
+                    'Married',
+                    'Widowed',
+                    'Separated',
+                    'Annulled',
+                ]),
             ],
 
-            'religion' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-
-            'citizenship' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
+            'religion' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'citizenship' => ['sometimes', 'nullable', 'string', 'max:100'],
 
             'mode_of_citizenship' => [
+                'sometimes',
                 'nullable',
-                'string',
-                'max:100',
+                Rule::in(['By Birth', 'By Naturalization']),
             ],
 
-            'height_m' => [
-                'nullable',
-                'numeric',
-            ],
-
-            'weight_kg' => [
-                'nullable',
-                'numeric',
-            ],
+            'height_m' => ['sometimes', 'nullable', 'numeric', 'gt:0'],
+            'weight_kg' => ['sometimes', 'nullable', 'numeric', 'gt:0'],
 
             'blood_type' => [
+                'sometimes',
                 'nullable',
-                'string',
-                'max:10',
+                Rule::in([
+                    'A+', 'A-', 'B+', 'B-',
+                    'AB+', 'AB-', 'O+', 'O-', 'Unknown',
+                ]),
             ],
 
-            'mobile_number' => [
-                'nullable',
-                'string',
-                'max:50',
+            'mobile_number' => ['sometimes', 'nullable', 'string', 'max:50'],
+            'telephone_number' => ['sometimes', 'nullable', 'string', 'max:50'],
+            'specialization' => ['sometimes', 'nullable', 'string', 'max:255'],
+
+            'addresses' => ['sometimes', 'array'],
+
+            'addresses.*' => [
+                'array:id,type,street,brgy,subd_village,municipality_city,province,zip_postal',
             ],
 
-            'telephone_number' => [
-                'nullable',
-                'string',
-                'max:50',
+            'addresses.*.id' => [
+                'required',
+                'integer',
+                'distinct',
+                Rule::exists('address', 'id')->where(
+                    fn ($query) => $query->where(
+                        'basic_information_id',
+                        $person->id
+                    )
+                ),
             ],
+        ];
 
-            'specialization' => [
+        foreach ($issuedIdFields as $field) {
+            $rules[$field] = [
+                'sometimes',
                 'nullable',
                 'string',
                 'max:255',
-            ],
+            ];
+        }
 
-            'employee_id' => [
+        foreach ($addressFields as $field) {
+            $rules["addresses.*.$field"] = [
+                'sometimes',
                 'nullable',
                 'string',
                 'max:255',
-            ],
+            ];
+        }
 
-        ]);
+        // Override the generic rule AFTER the loop.
+        $rules['addresses.*.type'] = [
+            'required',
+            'string',
+            Rule::in(['permanent', 'residential']),
+        ];
 
+        $validated = $request->validate($rules);
 
-        DB::transaction(function () use ($person, $validated) {
+        // SAVE ALL CHANGES TOGETHER
+        DB::transaction(function () use (
+            $person,
+            $validated,
+            $basicFields,
+            $issuedIdFields,
+            $addressFields
+        ) {
+            // BASIC INFORMATION
+            $person->fill(Arr::only($validated, $basicFields));
+            $person->saveOrFail();
 
-            /*
-            |--------------------------------------------------------------------------
-            | BASIC INFORMATION
-            |--------------------------------------------------------------------------
-            */
+            // USER NAME AND EMAIL
+            $user = $person->user;
 
-            $person->update([
+            $user->name = collect([
+                $person->first_name,
+                $person->middle_name,
+                $person->last_name,
+                $person->extension_name,
+            ])
+                ->filter(fn ($value) => filled($value))
+                ->implode(' ');
 
-                'first_name' =>
-                    $validated['first_name'],
+            $user->email = $validated['email'];
+            $user->saveOrFail();
 
-                'middle_name' =>
-                    $validated['middle_name'] ?? null,
+            // GOVERNMENT IDs AND EMPLOYEE ID
+            $issuedIdData = Arr::only($validated, $issuedIdFields);
 
-                'last_name' =>
-                    $validated['last_name'],
+            if ($issuedIdData !== []) {
+                $issuedId = $person->issuedId;
 
-                'extension_name' =>
-                    $validated['extension_name'] ?? null,
+                if (
+                    ! $issuedId &&
+                    collect($issuedIdData)->contains(
+                        fn ($value) => filled($value)
+                    )
+                ) {
+                    $issuedId = $person->issuedId()->make();
+                }
 
-                'sex' =>
-                    $validated['sex'] ?? null,
-
-                'birth_place' =>
-                    $validated['birth_place'] ?? null,
-
-                'birth_date' =>
-                    $validated['birth_date'] ?? null,
-
-                'civil_status' =>
-                    $validated['civil_status'] ?? null,
-
-                'religion' =>
-                    $validated['religion'] ?? null,
-
-                'citizenship' =>
-                    $validated['citizenship'] ?? null,
-
-                'mode_of_citizenship' =>
-                    $validated['mode_of_citizenship'] ?? null,
-
-                'height_m' =>
-                    $validated['height_m'] ?? null,
-
-                'weight_kg' =>
-                    $validated['weight_kg'] ?? null,
-
-                'blood_type' =>
-                    $validated['blood_type'] ?? null,
-
-                'mobile_number' =>
-                    $validated['mobile_number'] ?? null,
-
-                'telephone_number' =>
-                    $validated['telephone_number'] ?? null,
-
-                'specialization' =>
-                    $validated['specialization'] ?? null,
-
-            ]);
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | USER NAME AND EMAIL
-            |--------------------------------------------------------------------------
-            */
-
-            if ($person->user) {
-                $fullName = collect([
-                    $validated['first_name'],
-                    $validated['middle_name'] ?? null,
-                    $validated['last_name'],
-                    $validated['extension_name'] ?? null,
-                ])
-                    ->filter(fn ($value) => filled($value))
-                    ->implode(' ');
-
-                $person->user->update([
-                    'name' => $fullName,
-                    'email' => $validated['email'],
-                ]);
+                if ($issuedId) {
+                    $issuedId->fill($issuedIdData);
+                    $issuedId->saveOrFail();
+                }
             }
 
+            // EXISTING ADDRESSES
+            foreach ($validated['addresses'] ?? [] as $index => $addressData) {
+                $address = DB::table('address')
+                    ->where('basic_information_id', $person->id)
+                    ->where('id', $addressData['id'])
+                    ->lockForUpdate()
+                    ->first();
 
-            /*
-            |--------------------------------------------------------------------------
-            | ISSUED ID
-            |--------------------------------------------------------------------------
-            */
+                if (! $address) {
+                    throw ValidationException::withMessages([
+                        "addresses.$index.id" =>
+                            'This address is no longer available. Reload the page.',
+                    ]);
+                }
 
-            if ($person->issuedId) {
+                $values = Arr::only($addressData, $addressFields);
+                $values['updated_at'] = now();
 
-                $person->issuedId->update([
-                    'employee_id' =>
-                        $validated['employee_id'] ?? null,
-                ]);
-
-            } else {
-
-                \App\Models\IssuedId::create([
-
-                    'basic_information_id' =>
-                        $person->id,
-
-                    'employee_id' =>
-                        $validated['employee_id'] ?? null,
-
-                ]);
+                DB::table('address')
+                    ->where('basic_information_id', $person->id)
+                    ->where('id', $address->id)
+                    ->update($values);
             }
-
         });
 
-
         return redirect()
-            ->route(
-                'data-management.personnel.edit',
-                $person->id
-            )
+            ->route('data-management.personnel.edit', $person->id)
             ->with(
                 'success',
                 'Personnel information updated successfully.'

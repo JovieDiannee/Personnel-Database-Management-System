@@ -151,6 +151,25 @@
 
         @endif
 
+        {{-- VALIDATION ERRORS --}}
+        @if ($errors->any())
+            <div
+                role="alert"
+                class="mb-6 rounded-xl border border-red-300
+                    bg-red-100 px-5 py-4 text-sm text-red-900"
+            >
+                <p class="font-bold">
+                    Please check the following fields:
+                </p>
+
+                <ul class="mt-2 list-inside list-disc space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
 
         {{-- =====================================================
         PERSONNEL SUMMARY
@@ -223,7 +242,7 @@
         <form
             method="POST"
             action="{{ route('data-management.personnel.update', $person->id) }}"
-        >
+            >
 
             @csrf
             @method('PUT')
@@ -802,6 +821,156 @@
                 </div>
 
             </div>
+
+            {{-- =================================================
+            GOVERNMENT IDs
+            ================================================== --}}
+            <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h3 class="mb-4 font-bold text-gray-900">Government IDs</h3>
+
+                <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                    @foreach ([
+                        'umid_no' => 'UMID Number',
+                        'gsis_no' => 'GSIS Number',
+                        'philsys_no' => 'PhilSys Number',
+                        'pagibig_no' => 'Pag-IBIG Number',
+                        'tin_no' => 'TIN',
+                        'philhealth_no' => 'PhilHealth Number',
+                    ] as $field => $label)
+                        <div>
+                            <label for="{{ $field }}"
+                                class="mb-1 block text-sm font-medium text-gray-700">
+                                {{ $label }}
+                            </label>
+
+                            <input
+                                id="{{ $field }}"
+                                type="text"
+                                name="{{ $field }}"
+                                value="{{ old($field, data_get($person->issuedId, $field)) }}"
+                                class="w-full rounded-lg border-gray-300
+                                    focus:border-green-600 focus:ring-green-600"
+                            >
+
+                            @error($field)
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- =================================================
+            ADDRESS
+            ================================================== --}}
+            
+            @php
+                $addressLabels = [
+                    'street' => 'Street',
+                    'brgy' => 'Barangay',
+                    'subd_village' => 'Subdivision / Village',
+                    'municipality_city' => 'Municipality / City',
+                    'province' => 'Province',
+                    'zip_postal' => 'ZIP / Postal Code',
+                ];
+            @endphp
+
+            @forelse ($addresses as $address)
+                @php
+                    $addressKey = $address->id;
+                @endphp
+
+                <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                    <h3 class="mb-4 font-bold text-gray-900">
+                        Home Address
+                    </h3>
+
+                    {{-- Keep this hidden ID to identify the address being updated. --}}
+                    <input
+                        type="hidden"
+                        name="addresses[{{ $addressKey }}][id]"
+                        value="{{ $address->id }}"
+                    >
+
+                    @error("addresses.$addressKey.id")
+                        <p class="mb-3 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+
+                    <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+                        {{-- ADDRESS TYPE --}}
+                        <div>
+                            <label
+                                for="address_{{ $addressKey }}_type"
+                                class="mb-1 block text-sm font-medium text-gray-700"
+                            >
+                                Address Type
+                            </label>
+
+                            <select
+                                id="address_{{ $addressKey }}_type"
+                                name="addresses[{{ $addressKey }}][type]"
+                                required
+                                class="w-full rounded-lg border-gray-300
+                                    focus:border-green-600 focus:ring-green-600"
+                            >
+                                
+                                @foreach ([
+                                    'permanent' => 'Permanent',
+                                    'residential' => 'Residential',
+                                ] as $value => $label)
+                                    <option
+                                        value="{{ $value }}"
+                                        @selected(
+                                            old(
+                                                'addresses.'.$addressKey.'.type',
+                                                $address->type
+                                            ) === $value
+                                        )
+                                    >
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            @error("addresses.$addressKey.type")
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- OTHER ADDRESS FIELDS --}}
+                        @foreach ($addressLabels as $field => $label)
+                            <div>
+                                <label
+                                    for="address_{{ $addressKey }}_{{ $field }}"
+                                    class="mb-1 block text-sm font-medium text-gray-700"
+                                >
+                                    {{ $label }}
+                                </label>
+
+                                <input
+                                    id="address_{{ $addressKey }}_{{ $field }}"
+                                    type="text"
+                                    name="addresses[{{ $addressKey }}][{{ $field }}]"
+                                    value="{{ old(
+                                        'addresses.'.$addressKey.'.'.$field,
+                                        data_get($address, $field)
+                                    ) }}"
+                                    class="w-full rounded-lg border-gray-300
+                                        focus:border-green-600 focus:ring-green-600"
+                                >
+
+                                @error("addresses.$addressKey.$field")
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @empty
+                <p class="mb-6 text-sm text-gray-500">
+                    No address is currently recorded for this person.
+                </p>
+            @endforelse
 
 
             {{-- =================================================

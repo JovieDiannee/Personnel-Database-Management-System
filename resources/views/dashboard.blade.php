@@ -342,7 +342,7 @@
                             </span>
 
                             <span class="ml-1 font-bold">
-                                September 9, 2026 • 5:00 P.M.
+                                September 18, 2026 • 5:00 P.M.
                             </span>
 
                         </div>

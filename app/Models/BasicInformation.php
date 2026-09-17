@@ -42,9 +42,14 @@ class BasicInformation extends Model
         return $this->belongsTo(User::class, 'users_id');
     }
 
+//  public function employmentStatus(): HasOne
+//  {
+//      return $this->hasOne(EmploymentStatus::class,'users_id');
+//  }
+
     public function employmentStatus(): HasOne
     {
-        return $this->hasOne(EmploymentStatus::class,'users_id');
+        return $this->hasOne(EmploymentStatus::class,'users_id','users_id');
     }
 
     public function issuedId(): HasOne

@@ -396,6 +396,7 @@
                     Medical Allowance
                 </a>
 
+                 @if(auth()->user()->role === 'super_admin')
 
                 {{-- PLANTILLA --}}
                 <a
@@ -441,17 +442,20 @@
                     Enrollment Records
                 </a>
 
+                @endif
+
             
 
             </div>
 
         </div>
-
+  
 
         {{-- =================================================
             HR TRANSACTIONS
         ================================================== --}}
 
+         @if(auth()->user()->role === 'super_admin')
         <div class="mb-2">
 
             {{-- MAIN BUTTON --}}
@@ -595,6 +599,7 @@
             </div>
 
         </div>
+        @endif
 
     </nav>
 
