@@ -7504,17 +7504,16 @@ class DataManagementController extends Controller
     {
         /*
         |--------------------------------------------------------------------------
-        | Search
+        | Search and District Filters
         |--------------------------------------------------------------------------
         */
 
-        $search = $request->input('search');
-
+        $search = trim((string) $request->input('search', ''));
         $district = $request->input('district');
 
         /*
         |--------------------------------------------------------------------------
-        | Medical Allowance Summary
+        | Medical Allowance Summary Per School
         |--------------------------------------------------------------------------
         */
 
@@ -7538,15 +7537,10 @@ class DataManagementController extends Controller
                 'employment_status.school_db_id'
             )
             ->select(
-
                 'school_db.id as school_db_id',
-
                 'school_db.school_id',
-
                 'school_db.school_name',
-
                 'school_db.school_district',
-
                 'school_db.school_area',
 
                 DB::raw("
@@ -7586,67 +7580,73 @@ class DataManagementController extends Controller
                     COUNT(DISTINCT medical_allowance.users_id)
                     as total_eligible_employee
                 ")
-
             )
-
-            ->when($search, function ($query) use ($search) {
-
+            ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
-
                     $q->where(
                         'school_db.school_id',
                         'like',
                         "%{$search}%"
                     )
-
-                    ->orWhere(
-                        'school_db.school_name',
-                        'like',
-                        "%{$search}%"
-                    )
-
-                    ->orWhere(
-                        'school_db.school_district',
-                        'like',
-                        "%{$search}%"
-                    );
-
+                        ->orWhere(
+                            'school_db.school_name',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'school_db.school_district',
+                            'like',
+                            "%{$search}%"
+                        );
                 });
-
             })
-
             ->when($district, function ($query) use ($district) {
-
                 $query->where(
                     'school_db.school_district',
                     $district
                 );
-
             })
-
             ->groupBy(
                 'school_db.id',
                 'school_db.school_id',
                 'school_db.school_name',
                 'school_db.school_district',
                 'school_db.school_area'
-            )
-
-            ->orderBy(
-                'school_db.school_name'
             );
-
 
         /*
         |--------------------------------------------------------------------------
-        | Pagination
+        | Summary Card Totals Across All Matching Schools
+        |--------------------------------------------------------------------------
+        */
+
+        $summary = DB::query()
+            ->fromSub(clone $query, 'school_summary')
+            ->selectRaw('
+                COUNT(*) as total_schools,
+                COALESCE(SUM(group_hmo), 0) as total_group_availment,
+                COALESCE(SUM(individual_hmo), 0) as total_individual_availment
+            ')
+            ->first();
+
+        $totalSchools = (int) $summary->total_schools;
+
+        $totalGroupAvailment = (int) $summary->total_group_availment;
+
+        $totalIndividualAvailment = (int) $summary->total_individual_availment;
+
+        $totalEligible = $totalGroupAvailment + $totalIndividualAvailment;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sorting and Pagination
         |--------------------------------------------------------------------------
         */
 
         $reports = $query
+            ->orderBy('school_db.school_name')
             ->paginate(15)
             ->withQueryString();
-
 
         /*
         |--------------------------------------------------------------------------
@@ -7662,6 +7662,11 @@ class DataManagementController extends Controller
             ->orderBy('school_district')
             ->pluck('school_district');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Return View
+        |--------------------------------------------------------------------------
+        */
 
         return view(
             'data-management.medical-allowance-report-per-school',
@@ -7669,7 +7674,11 @@ class DataManagementController extends Controller
                 'reports',
                 'districts',
                 'search',
-                'district'
+                'district',
+                'totalSchools',
+                'totalGroupAvailment',
+                'totalIndividualAvailment',
+                'totalEligible'
             )
         );
     }

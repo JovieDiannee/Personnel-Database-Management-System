@@ -217,33 +217,50 @@
             <div>
 
                 {{-- SUMMARY CARDS --}}
-                <div class="mb-6 grid gap-4 md:grid-cols-2">
+                <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 
                     {{-- TOTAL SCHOOLS --}}
                     <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-
                         <p class="text-sm text-gray-500">
-                            Schools
+                            Total Schools
                         </p>
 
                         <p class="mt-1 text-3xl font-bold text-green-700">
-                            {{ $reports->total() }}
+                            {{ number_format($totalSchools) }}
                         </p>
-
                     </div>
 
-
-                    {{-- TOTAL RECORDS ON CURRENT PAGE --}}
+                    {{-- TOTAL GROUP AVAILMENT --}}
                     <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-
                         <p class="text-sm text-gray-500">
-                            Records on Current Page
+                            Total Group Availment
                         </p>
 
                         <p class="mt-1 text-3xl font-bold text-blue-700">
-                            {{ $reports->count() }}
+                            {{ number_format($totalGroupAvailment) }}
+                        </p>
+                    </div>
+
+                    {{-- TOTAL INDIVIDUAL AVAILMENT --}}
+                    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                        <p class="text-sm text-gray-500">
+                            Total Individual Availment
                         </p>
 
+                        <p class="mt-1 text-3xl font-bold text-purple-700">
+                            {{ number_format($totalIndividualAvailment) }}
+                        </p>
+                    </div>
+
+                    {{-- TOTAL ELIGIBLE --}}
+                    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                        <p class="text-sm text-gray-500">
+                            Total Eligible (Group + Individual)
+                        </p>
+
+                        <p class="mt-1 text-3xl font-bold text-orange-700">
+                            {{ number_format($totalEligible) }}
+                        </p>
                     </div>
 
                 </div>
@@ -432,139 +449,119 @@
                 {{-- REPORT TABLE --}}
                 {{-- ===================================================== --}}
 
-                <div class="overflow-hidden rounded-xl
-                            border border-gray-200
-                            bg-white shadow-sm">
+                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 
                     <div class="overflow-x-auto">
 
-                        <table class="min-w-[1200px] w-full divide-y divide-gray-200">
+                        <table class="w-full min-w-[1200px] divide-y divide-gray-200">
 
-                            <thead class="bg-gray-50">
+                            <thead>
+                                <tr class="bg-gray-50">
 
-                                <tr>
-
-                                    <th class="px-5 py-3 text-left text-xs
-                                            font-semibold uppercase
-                                            tracking-wider text-gray-600">
+                                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                         School ID
                                     </th>
 
-                                    <th class="px-5 py-3 text-left text-xs
-                                            font-semibold uppercase
-                                            tracking-wider text-gray-600">
+                                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                         School Name
                                     </th>
 
-                                    <th class="px-5 py-3 text-left text-xs
-                                            font-semibold uppercase
-                                            tracking-wider text-gray-600">
+                                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                         District Name
                                     </th>
 
-                                    <th class="px-5 py-3 text-left text-xs
-                                            font-semibold uppercase
-                                            tracking-wider text-gray-600">
+                                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                         Area
                                     </th>
 
-                                    <th class="px-5 py-3 text-center text-xs
-                                            font-semibold uppercase
-                                            tracking-wider text-gray-600">
+                                    <th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
                                         Group Availment
-                                        <br>
-                                        (HMO)
+                                        <span class="mt-1 block text-gray-500">(HMO)</span>
                                     </th>
 
-                                    <th class="px-5 py-3 text-center text-xs
-                                            font-semibold uppercase
-                                            tracking-wider text-gray-600">
+                                    <th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
                                         Individual Availment
-                                        <br>
-                                        (HMO)
+                                        <span class="mt-1 block text-gray-500">(HMO)</span>
                                     </th>
 
-                                    <th class="px-5 py-3 text-center text-xs
-                                            font-semibold uppercase
-                                            tracking-wider text-gray-600">
+                                    {{-- TOTAL ELIGIBLE HEADER --}}
+                                    <th class="border-x border-green-200 bg-green-100 px-4 py-3 text-center">
+                                        <span class="block text-xs font-bold uppercase tracking-wide text-green-800">
+                                            Total Eligible
+                                        </span>
+
+                                        <span class="mt-1 block whitespace-nowrap text-xs font-normal text-green-700">
+                                            Group + Individual
+                                        </span>
+                                    </th>
+
+                                    <th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
                                         Not Eligible
                                     </th>
 
-                                    <th class="px-5 py-3 text-center text-xs
-                                            font-semibold uppercase
-                                            tracking-wider text-gray-600">
-                                        Total Eligible
-                                        <br>
-                                        Employee
+                                    <th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
+                                        Total Employees
                                     </th>
 
                                 </tr>
-
                             </thead>
 
-
-                            <tbody class="divide-y divide-gray-200 bg-white">
+                            <tbody class="divide-y divide-gray-200">
 
                                 @forelse($reports as $report)
+                                    @php
+                                        $schoolTotalEligible = (int) $report->group_hmo
+                                            + (int) $report->individual_hmo;
+                                    @endphp
 
-                                    <tr class="transition hover:bg-green-50">
+                                    <tr class="group transition-colors hover:bg-gray-50">
 
-                                        <td class="whitespace-nowrap px-5 py-4
-                                                text-sm font-semibold text-gray-800">
+                                        <td class="whitespace-nowrap px-5 py-4 text-sm font-semibold text-gray-800">
                                             {{ $report->school_id }}
                                         </td>
 
-                                        <td class="min-w-[280px] px-5 py-4
-                                                text-sm font-medium text-gray-800">
+                                        <td class="min-w-[280px] px-5 py-4 text-sm font-semibold text-gray-900">
                                             {{ $report->school_name }}
                                         </td>
 
-                                        <td class="whitespace-nowrap px-5 py-4
-                                                text-sm text-gray-700">
+                                        <td class="whitespace-nowrap px-5 py-4 text-sm text-gray-600">
                                             {{ $report->school_district ?: '—' }}
                                         </td>
 
-                                        <td class="whitespace-nowrap px-5 py-4
-                                                text-sm text-gray-700">
+                                        <td class="whitespace-nowrap px-5 py-4 text-sm text-gray-600">
                                             {{ $report->school_area ?: '—' }}
                                         </td>
 
-                                        <td class="px-5 py-4 text-center
-                                                text-sm font-semibold text-green-700">
-                                            {{ $report->group_hmo }}
+                                        <td class="px-5 py-4 text-center text-sm font-semibold tabular-nums text-green-700">
+                                            {{ number_format($report->group_hmo) }}
                                         </td>
 
-                                        <td class="px-5 py-4 text-center
-                                                text-sm font-semibold text-blue-700">
-                                            {{ $report->individual_hmo }}
+                                        <td class="px-5 py-4 text-center text-sm font-semibold tabular-nums text-blue-700">
+                                            {{ number_format($report->individual_hmo) }}
                                         </td>
 
-                                        <td class="px-5 py-4 text-center
-                                                text-sm font-semibold text-purple-700">
-                                            {{ $report->not_eligible }}
+                                        {{-- TOTAL ELIGIBLE: GROUP + INDIVIDUAL --}}
+                                        <td class="border-x border-green-200 bg-green-50 px-4 py-3 text-center transition-colors group-hover:bg-green-100">
+                                            <span class="inline-flex items-center justify-center rounded-md bg-green-100 px-3 py-1 text-sm font-bold tabular-nums text-green-800">
+                                                {{ number_format($schoolTotalEligible) }}
+                                            </span>
                                         </td>
 
-                                        <td class="px-5 py-4 text-center
-                                                text-sm font-bold text-gray-900">
-                                            {{ $report->total_eligible_employee }}
+                                        <td class="px-5 py-4 text-center text-sm font-medium tabular-nums text-gray-500">
+                                            {{ number_format($report->not_eligible) }}
+                                        </td>
+
+                                        <td class="px-5 py-4 text-center text-sm font-semibold tabular-nums text-gray-700">
+                                            {{ number_format($report->total_eligible_employee) }}
                                         </td>
 
                                     </tr>
-
                                 @empty
-
                                     <tr>
-
-                                        <td
-                                            colspan="8"
-                                            class="px-6 py-10 text-center
-                                                text-sm text-gray-500"
-                                        >
+                                        <td colspan="9" class="px-6 py-12 text-center text-sm text-gray-500">
                                             No medical allowance records found.
                                         </td>
-
                                     </tr>
-
                                 @endforelse
 
                             </tbody>
@@ -573,37 +570,31 @@
 
                     </div>
 
-
                     {{-- PAGINATION --}}
-                    <div class="border-t border-gray-200 px-6 py-4">
+                    <div class="border-t border-gray-200 bg-gray-50 px-6 py-4">
 
-                        <div class="flex flex-col gap-3
-                                    md:flex-row
-                                    md:items-center
-                                    md:justify-between">
+                        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 
                             <p class="text-sm text-gray-500">
-
                                 Showing
 
-                                <span class="font-medium text-gray-700">
+                                <span class="font-semibold text-gray-700">
                                     {{ $reports->firstItem() ?? 0 }}
                                 </span>
 
                                 to
 
-                                <span class="font-medium text-gray-700">
+                                <span class="font-semibold text-gray-700">
                                     {{ $reports->lastItem() ?? 0 }}
                                 </span>
 
                                 of
 
-                                <span class="font-medium text-gray-700">
+                                <span class="font-semibold text-gray-700">
                                     {{ $reports->total() }}
                                 </span>
 
                                 schools.
-
                             </p>
 
                             <div>
@@ -617,7 +608,6 @@
                 </div>
 
             </div>
-            <br>
 
             
             {{-- GENERAL ERROR --}}
