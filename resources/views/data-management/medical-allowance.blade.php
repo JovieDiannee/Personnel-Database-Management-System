@@ -1,23 +1,22 @@
 <x-app-layout>
 
-    <div class="min-h-screen bg-gray-50 py-8">
+    <div class="min-h-screen min-w-0 bg-gray-50 py-4 sm:py-8">
 
-        <div class="mx-auto max-w-7xl px-6">
+        <div class="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6">
 
 
             {{-- BREADCRUMB TRAIL --}}
             <div class="mb-4">
 
                 <nav
-                    class="flex items-center text-sm"
+                    class="flex flex-wrap items-center gap-y-2 text-xs sm:text-sm"
                     aria-label="Breadcrumb"
                 >
 
                     {{-- Home --}}
                     <a
                         href="{{ route('dashboard') }}"
-                        class="flex items-center font-medium text-gray-500
-                            transition hover:text-green-700"
+                        class="flex items-center font-medium text-gray-500 transition hover:text-green-700"
                     >
                         <svg
                             class="mr-1.5 h-4 w-4"
@@ -54,8 +53,7 @@
                     {{-- Data Management --}}
                     <a
                         href="{{ route('data-management') }}"
-                        class="font-medium text-gray-500
-                            transition hover:text-green-700"
+                        class="font-medium text-gray-500 transition hover:text-green-700"
                     >
                         Data Management
                     </a>
@@ -87,18 +85,12 @@
             {{-- TAB NAVIGATION --}}
             <div class="mb-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 
-                <div class="flex w-full">
+                <div class="grid w-full min-w-0 grid-cols-1 sm:grid-cols-2">
 
                     {{-- TAB 1: RECORDS --}}
                     <a
                         href="{{ route('data-management.medical-allowance') }}"
-                        class="flex flex-1 items-center justify-center gap-2
-                            border-b-2 border-green-700
-                            bg-green-50 px-5 py-4
-                            text-center text-sm font-semibold
-                            text-green-800
-                            transition duration-200
-                            hover:bg-green-100"
+                        class="flex flex-1 items-center justify-center gap-2 border-b-2 border-green-700 bg-green-50 px-5 py-4 text-center text-sm font-semibold text-green-800 transition duration-200 hover:bg-green-100"
                     >
 
                         {{-- ICON --}}
@@ -136,14 +128,7 @@
                     {{-- TAB 2: REPORT --}}
                     <a
                         href="{{ route('data-management.medical-allowance.report') }}"
-                        class="flex flex-1 items-center justify-center gap-2
-                            border-b-2 border-transparent
-                            bg-white px-5 py-4
-                            text-center text-sm font-semibold
-                            text-gray-700
-                            transition duration-200
-                            hover:bg-green-50
-                            hover:text-green-800"
+                        class="flex flex-1 items-center justify-center gap-2 border-b-2 border-transparent bg-white px-5 py-4 text-center text-sm font-semibold text-gray-700 transition duration-200 hover:bg-green-50 hover:text-green-800"
                     >
 
                         {{-- ICON --}}
@@ -184,15 +169,12 @@
             </div>
 
             {{-- DEADLINE NOTICE --}}
-            <div class="mt-3 flex items-center justify-center rounded-xl
-                        border border-red-200 bg-red-50 px-5 py-3
-                        shadow-sm">
+            <div class="mt-3 flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-5 py-3 shadow-sm">
 
                 <div class="flex items-center gap-3">
 
                     {{-- CLOCK ICON --}}
-                    <div class="flex h-8 w-8 shrink-0 items-center justify-center
-                                rounded-full bg-red-100 text-red-600">
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
 
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -251,7 +233,7 @@
                         Medical Allowance Import Completed
                     </h3>
 
-                    <div class="mt-4 grid gap-4 md:grid-cols-4">
+                    <div class="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
 
                         {{-- NEW RECORDS --}}
                         <div>
@@ -349,7 +331,7 @@
             ====================================================== --}}
             @if(auth()->user()->role === 'super_admin')
 
-                <div id="import" class="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div id="import" class="mb-6 rounded-xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
 
                     <div class="mb-5">
 
@@ -385,7 +367,7 @@
 
 
                             {{-- CUSTOM FILE INPUT --}}
-                            <div class="relative flex h-10 flex-1">
+                            <div class="relative flex h-11 min-w-0 w-full shrink-0 md:flex-1">
 
                                 {{-- REAL FILE INPUT --}}
                                 <input
@@ -402,19 +384,12 @@
 
                                 {{-- CUSTOM FILE DISPLAY --}}
                                 <div
-                                    class="flex h-full w-full items-center overflow-hidden
-                                        rounded-lg border border-gray-300
-                                        bg-white shadow-sm"
+                                    class="flex h-full w-full items-center overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm"
                                 >
 
                                     {{-- BROWSE BUTTON --}}
                                     <span
-                                        class="flex h-full shrink-0 items-center
-                                            border-r border-green-200
-                                            bg-green-50
-                                            px-4
-                                            text-sm font-semibold
-                                            text-green-700"
+                                        class="flex h-full shrink-0 items-center border-r border-green-200 bg-green-50 px-4 text-sm font-semibold text-green-700"
                                     >
                                         Browse...
                                     </span>
@@ -434,26 +409,12 @@
 
 
                             {{-- ACTION BUTTONS --}}
-                            <div class="flex shrink-0 items-center gap-2">
+                            <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
 
                                 {{-- UPLOAD BUTTON --}}
                                 <button
                                     type="submit"
-                                    class="flex h-10 items-center justify-center gap-2
-                                        rounded-lg
-                                        bg-green-700
-                                        px-5
-                                        text-sm
-                                        font-semibold
-                                        text-white
-                                        shadow-sm
-                                        transition
-                                        duration-200
-                                        hover:bg-green-800
-                                        focus:outline-none
-                                        focus:ring-2
-                                        focus:ring-green-500
-                                        focus:ring-offset-2"
+                                    class="flex min-h-11 w-full items-center justify-center gap-2 sm:w-auto rounded-lg bg-green-700 px-5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                                     >
 
                                     {{-- UPLOAD ICON --}}
@@ -486,22 +447,7 @@
                                 {{-- DOWNLOAD TEMPLATE --}}
                                 <a
                                     href="{{ route('data-management.medical-allowance.template') }}"
-                                    class="flex h-10 items-center justify-center gap-2
-                                        rounded-lg
-                                        border border-green-700
-                                        bg-white
-                                        px-4
-                                        text-sm
-                                        font-semibold
-                                        text-green-700
-                                        shadow-sm
-                                        transition
-                                        duration-200
-                                        hover:bg-green-50
-                                        focus:outline-none
-                                        focus:ring-2
-                                        focus:ring-green-500
-                                        focus:ring-offset-2"
+                                    class="flex min-h-11 w-full items-center justify-center gap-2 sm:w-auto rounded-lg border border-green-700 bg-white px-4 text-sm font-semibold text-green-700 shadow-sm transition duration-200 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                                     >
 
                                     {{-- DOWNLOAD ICON --}}
@@ -556,14 +502,11 @@
             @elseif(auth()->user()->role === 'admin')
             
                 <div
-                    class="rounded-2xl border border-green-200
-                        bg-white p-6 shadow-sm"
+                    class="rounded-2xl border border-green-200 bg-white p-4 sm:p-6 shadow-sm"
                     >
 
                     <div
-                        class="flex flex-col gap-5
-                            md:flex-row md:items-center
-                            md:justify-between"
+                        class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between"
                     >
 
                         <div class="flex items-start gap-4">
@@ -588,15 +531,7 @@
                             href="https://forms.gle/zrz8AGM3bdvAWoJ67"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="inline-flex h-10 shrink-0
-                                items-center justify-center gap-2
-                                rounded-lg bg-green-700
-                                px-5 text-sm font-semibold
-                                text-white shadow-sm
-                                transition hover:bg-green-800
-                                focus:outline-none
-                                focus:ring-2 focus:ring-green-500
-                                focus:ring-offset-2"
+                            class="inline-flex min-h-11 w-full shrink-0 md:w-auto items-center justify-center gap-2 rounded-lg bg-green-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                         >
 
                             <svg
@@ -629,7 +564,7 @@
             {{-- MEDICAL ALLOWANCE RECORDS --}}
             {{-- ========================================================= --}}
 
-            <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div class="min-w-0 rounded-xl border border-gray-200 bg-white shadow-sm">
 
                 {{-- UPDATE NOTIFICATION --}}
                 @if (session('success'))
@@ -653,17 +588,13 @@
                         "
                         x-show="show"
                         x-transition
-                        class="mb-4 flex items-start justify-between rounded-lg
-                            border border-green-200 bg-green-50 text-green-800
-                            focus:outline-none focus:ring-2 focus:ring-green-500
-                            focus:ring-offset-2"
+                        class="mb-4 flex items-start justify-between rounded-lg border border-green-200 bg-green-50 text-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                         style="padding: 14px 18px;"
                         role="alert"
                     >
                         <div class="flex items-center gap-3">
                             <div
-                                class="flex h-8 w-8 shrink-0 items-center justify-center
-                                    rounded-full bg-green-100"
+                                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100"
                             >
                                 <svg
                                     class="h-5 w-5 text-green-700"
@@ -694,8 +625,7 @@
                         <button
                             type="button"
                             @click="show = false"
-                            class="ml-4 rounded-md p-1 text-green-600
-                                hover:bg-green-100 hover:text-green-800"
+                            class="ml-4 rounded-md p-1 text-green-600 hover:bg-green-100 hover:text-green-800"
                             aria-label="Close notification"
                         >
                             <svg
@@ -716,7 +646,7 @@
                 @endif
 
                 {{-- HEADER --}}
-                <div class="flex flex-col gap-4 border-b border-gray-200 p-6 md:flex-row md:items-center md:justify-between bg-green-800">
+                <div class="flex flex-col gap-4 border-b border-gray-200 p-4 sm:p-6 md:flex-row md:items-center md:justify-between bg-green-800">
 
                     <div>
 
@@ -747,7 +677,7 @@
                 {{-- SEARCH --}}
                 <div 
                     id="medical-allowance-table"
-                    class="border-b border-gray-200 p-6">
+                    class="border-b border-gray-200 p-4 sm:p-6">
 
                     <form
                         action="{{ route('data-management.medical-allowance') }}"
@@ -756,7 +686,7 @@
 
                         <div class="flex flex-col gap-3 md:flex-row">
 
-                            <div class="flex-1">
+                            <div class="min-w-0 flex-1">
 
                                 <label
                                     for="search"
@@ -771,23 +701,17 @@
                                     name="search"
                                     value="{{ $search }}"
                                     placeholder="Search by name, email, school, or status..."
-                                    class="w-full rounded-md border-gray-300
-                                        text-sm shadow-sm
-                                        focus:border-green-600
-                                        focus:ring-green-600"
+                                    class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
                                 >
 
                             </div>
 
 
-                            <div class="flex items-end gap-2">
+                            <div class="flex flex-wrap items-end gap-2 [&>*]:flex-1 md:[&>*]:flex-none">
 
                                 <button
                                     type="submit"
-                                    class="rounded-md bg-green-700
-                                        px-5 py-2.5
-                                        text-sm font-semibold text-white
-                                        hover:bg-green-800"
+                                    class="rounded-md bg-green-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-800"
                                 >
                                     Search
                                 </button>
@@ -797,10 +721,7 @@
 
                                     <a
                                         href="{{ route('data-management.medical-allowance') }}"
-                                        class="rounded-md border border-gray-300
-                                            bg-white px-5 py-2.5
-                                            text-sm font-semibold text-gray-700
-                                            hover:bg-gray-50"
+                                        class="rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
                                     >
                                         Clear
                                     </a>
@@ -817,8 +738,11 @@
 
 
                 {{-- TABLE --}}
+                <p class="px-4 py-2 text-xs text-gray-500 lg:hidden">
+                    Swipe left or right to view all columns and the Update button.
+                </p>
                 <div
-                    class="overflow-x-auto scroll-mt-24"
+                    class="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain scroll-mt-24" tabindex="0" role="region" aria-label="Medical allowance records, horizontally scrollable"
                 >
 
                      @php
@@ -842,8 +766,7 @@
                         <tr>
 
                             {{-- NAME AND EMAIL --}}
-                            <th class="min-w-[220px] px-4 py-3 text-left text-xs font-semibold
-                                    uppercase tracking-wider text-gray-600">
+                            <th class="min-w-[220px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
 
                                 <a
                                     href="{{ $sortUrl('name') }}"
@@ -881,8 +804,7 @@
                             @if (auth()->user()->role === 'super_admin')
 
                                 {{-- SCHOOL NAME --}}
-                                <th class="min-w-[220px] px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="min-w-[220px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
 
                                     <a
                                         href="{{ $sortUrl('school') }}"
@@ -915,8 +837,7 @@
 
 
                                 {{-- DISTRICT --}}
-                                <th class="min-w-[140px] px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="min-w-[140px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
 
                                     <a
                                         href="{{ $sortUrl('district') }}"
@@ -949,8 +870,7 @@
 
 
                                 {{-- ITEM FROM SCHOOL LEVEL --}}
-                                <th class="min-w-[180px] px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="min-w-[180px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
 
                                     <a
                                         href="{{ $sortUrl('school_level') }}"
@@ -988,8 +908,7 @@
 
 
                             {{-- POSITION TITLE --}}
-                            <th class="min-w-[200px] px-4 py-3 text-left text-xs font-semibold
-                                    uppercase tracking-wider text-gray-600">
+                            <th class="min-w-[200px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
 
                                 <a
                                     href="{{ $sortUrl('position') }}"
@@ -1022,8 +941,7 @@
 
 
                             {{-- EMPLOYMENT STATUS --}}
-                            <th class="min-w-[170px] px-4 py-3 text-left text-xs font-semibold
-                                    uppercase tracking-wider text-gray-600">
+                            <th class="min-w-[170px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
 
                                 <a
                                     href="{{ $sortUrl('employment_status') }}"
@@ -1059,8 +977,7 @@
 
 
                             {{-- MEDICAL ALLOWANCE MODE AVAILMENT --}}
-                            <th class="min-w-[230px] px-4 py-3 text-left text-xs font-semibold
-                                    uppercase tracking-wider text-gray-600">
+                            <th class="min-w-[230px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
 
                                 <a
                                     href="{{ $sortUrl('mode_of_availment') }}"
@@ -1096,8 +1013,7 @@
 
 
                             {{-- DISBURSEMENT STATUS --}}
-                            <th class="min-w-[190px] px-4 py-3 text-left text-xs font-semibold
-                                    uppercase tracking-wider text-gray-600">
+                            <th class="min-w-[190px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
 
                                 <a
                                     href="{{ $sortUrl('disbursement_status') }}"
@@ -1133,8 +1049,7 @@
 
 
                             {{-- ACTION --}}
-                            <th class="min-w-[110px] px-4 py-3 text-center text-xs font-semibold
-                                    uppercase tracking-wider text-gray-600">
+                            <th class="min-w-[110px] px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
                                 Action
                             </th>
 
@@ -1202,8 +1117,7 @@
                                     {{-- EMPLOYMENT STATUS --}}
                                     <td class="min-w-[160px] px-4 py-4">
                                         @if ($employment?->employment_status)
-                                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1
-                                                        text-xs font-semibold text-green-700">
+                                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
                                                 {{ $employment->employment_status }}
                                             </span>
                                         @else
@@ -1220,18 +1134,15 @@
                                     <td class="min-w-[180px] px-4 py-4">
                                         @if ($record->disbursement_status)
                                             @if ($disbursementStatus === 'paid')
-                                                <span class="inline-flex rounded-full bg-green-100 px-3 py-1
-                                                            text-xs font-semibold text-green-700">
+                                                <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
                                                     {{ $record->disbursement_status }}
                                                 </span>
                                             @elseif ($disbursementStatus === 'pending')
-                                                <span class="inline-flex rounded-full bg-yellow-100 px-3 py-1
-                                                            text-xs font-semibold text-yellow-700">
+                                                <span class="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
                                                     {{ $record->disbursement_status }}
                                                 </span>
                                             @else
-                                                <span class="inline-flex rounded-full bg-gray-100 px-3 py-1
-                                                            text-xs font-semibold text-gray-700">
+                                                <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
                                                     {{ $record->disbursement_status }}
                                                 </span>
                                             @endif
@@ -1245,9 +1156,7 @@
                                         <button
                                             type="button"
                                             @click="updateModalOpen = true"
-                                            class="inline-flex items-center rounded-md bg-green-700
-                                                px-4 py-2 text-sm font-semibold text-white
-                                                transition hover:bg-green-800"
+                                            class="inline-flex items-center rounded-md bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
                                         >
                                             Update
                                         </button>
@@ -1268,7 +1177,7 @@
                                                     x-show="updateModalOpen"
                                                     x-transition.scale.origin.center
                                                     @click.outside="updateModalOpen = false"
-                                                    class="w-full overflow-hidden rounded-xl bg-white text-left shadow-2xl"
+                                                    class="w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-xl bg-white text-left shadow-2xl"
                                                     style="max-width: 420px;"
                                                 >
                                                     {{-- GREEN HEADER --}}
@@ -1285,9 +1194,7 @@
                                                         <button
                                                             type="button"
                                                             @click="updateModalOpen = false"
-                                                            class="flex h-8 w-8 shrink-0 items-center justify-center
-                                                                rounded-full text-green-100 transition
-                                                                hover:bg-green-800 hover:text-white"
+                                                            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-green-100 transition hover:bg-green-800 hover:text-white"
                                                             aria-label="Close modal"
                                                         >
                                                             <svg
@@ -1443,9 +1350,7 @@
                                                                         ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
                                                                         : 'border-gray-300 focus:border-green-600 focus:ring-green-200'"
 
-                                                                    class="w-full rounded-lg border bg-white
-                                                                        px-3 py-2.5 text-sm text-gray-900
-                                                                        focus:outline-none focus:ring-2"
+                                                                    class="w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2"
                                                                 >
 
                                                                     <option value="Group Availment (HMO)">
@@ -1471,9 +1376,7 @@
                                                                     x-show="isInvalid"
                                                                     x-transition
 
-                                                                    class="mt-3 flex items-start gap-3
-                                                                        rounded-lg border border-red-200
-                                                                        bg-red-50 px-4 py-3"
+                                                                    class="mt-3 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3"
                                                                 >
 
                                                                     {{-- WARNING ICON --}}
@@ -1526,9 +1429,7 @@
                                                                     x-show="hasChanged && !isInvalid"
                                                                     x-transition
 
-                                                                    class="mt-3 flex items-start gap-3
-                                                                        rounded-lg border border-green-200
-                                                                        bg-green-50 px-4 py-3"
+                                                                    class="mt-3 flex items-start gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3"
                                                                 >
 
                                                                     {{-- CHECK ICON --}}
@@ -1578,7 +1479,7 @@
                                                                 {{-- =====================================================
                                                                     SAVE BUTTON
                                                                 ====================================================== --}}
-                                                                <div class="mt-5 flex justify-end">
+                                                                <div class="mt-5 flex justify-end [&>button]:min-h-11 [&>button]:w-full sm:[&>button]:w-auto">
 
                                                                     <button
                                                                         type="submit"
@@ -1589,12 +1490,7 @@
                                                                             ? 'cursor-not-allowed bg-gray-300 text-gray-500'
                                                                             : 'bg-green-700 text-white hover:bg-green-800'"
 
-                                                                        class="rounded-lg px-4 py-2
-                                                                            text-sm font-semibold
-                                                                            transition
-                                                                            focus:outline-none
-                                                                            focus:ring-2
-                                                                            focus:ring-green-300"
+                                                                        class="rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-green-300"
                                                                     >
                                                                         Save Changes
                                                                     </button>
@@ -1614,7 +1510,7 @@
                                 <tr>
                                     <td
                                         colspan="{{ auth()->user()->role === 'super_admin' ? 10 : 7 }}"
-                                        class="px-6 py-12 text-center"
+                                        class="px-4 sm:px-6 py-12 text-center"
                                     >
                                         <div class="text-sm font-medium text-gray-700">
                                             No medical allowance records found.
@@ -1646,7 +1542,7 @@
 
 
                 {{-- PAGINATION --}}
-                <div class="border-t border-gray-200 px-6 py-4">
+                <div class="border-t border-gray-200 px-4 sm:px-6 py-4">
 
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 

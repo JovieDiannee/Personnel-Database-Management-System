@@ -5,17 +5,17 @@
 {{-- =====================================================
     DASHBOARD CONTENT
 ====================================================== --}}
-<div class="min-h-screen bg-gradient-to-br from-green-50 via-gray-50 to-emerald-100 py-8">
+<div class="min-h-screen bg-gradient-to-br from-green-50 via-gray-50 to-emerald-100 py-4 sm:py-8">
 
-    <div class="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8" >
+    <div class="mx-auto w-full min-w-0 max-w-7xl space-y-6 px-4 sm:space-y-8 sm:px-6 lg:px-8" >
 
 
         {{-- =====================================================
             WELCOME SECTION
         ====================================================== --}}
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 p-6 text-white shadow-lg">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 p-4 sm:p-6 text-white shadow-lg">
 
-            <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+            <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center [&>div]:min-w-0">
 
                 <div>
 
@@ -23,7 +23,7 @@
                         Welcome back,
                     </p>
 
-                    <h1 class="mt-1 text-2xl font-bold">
+                    <h1 class="mt-1 text-xl sm:text-2xl font-bold break-words">
                         {{ auth()->user()->name }}
                     </h1>
 
@@ -62,18 +62,18 @@
                         PERSONNEL AND SCHOOL STATISTICS
                     </h3>
 
-                    <p class="text-sm text-gray-500">
+                    <p class="text-sm text-gray-500 break-words">
                         Summary of current personnel and school records
                     </p>
 
                 </div>
-                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
 
 
                     {{-- PLANTILLA-BASED EMPLOYEES --}}
-                    <div class="rounded-2xl border-l-4 border-green-600 bg-white p-6 shadow-sm ring-1 ring-green-100">
+                    <div class="rounded-2xl border-l-4 border-green-600 bg-white p-4 sm:p-6 shadow-sm ring-1 ring-green-100">
 
-                        <div class="flex items-start justify-between">
+                        <div class="flex items-start justify-between gap-3 [&>div]:min-w-0">
 
                             <div>
 
@@ -81,13 +81,13 @@
                                     Plantilla-Based Employees
                                 </p>
 
-                                <p class="mt-3 text-4xl font-bold text-green-800">
+                                <p class="mt-3 text-3xl lg:text-4xl font-bold text-green-800">
                                     {{ number_format($plantillaEmployees) }}
                                 </p>
 
                             </div>
 
-                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 shrink-0">
 
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -123,9 +123,9 @@
 
 
                     {{-- OTHER FUNDS --}}
-                    <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
+                    <div class="rounded-2xl bg-white p-4 sm:p-6 shadow-sm ring-1 ring-gray-100">
 
-                        <div class="flex items-start justify-between">
+                        <div class="flex items-start justify-between gap-3 [&>div]:min-w-0">
 
                             <div>
 
@@ -133,13 +133,13 @@
                                     Other Funds Employees
                                 </p>
 
-                                <p class="mt-3 text-4xl font-bold text-green-800">
+                                <p class="mt-3 text-3xl lg:text-4xl font-bold text-green-800">
                                     {{ number_format($otherFundsEmployees) }}
                                 </p>
 
                             </div>
 
-                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 shrink-0">
 
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -175,9 +175,9 @@
 
 
                     {{-- NUMBER OF SCHOOLS --}}
-                    <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
+                    <div class="rounded-2xl bg-white p-4 sm:p-6 shadow-sm ring-1 ring-gray-100">
 
-                        <div class="flex items-start justify-between">
+                        <div class="flex items-start justify-between gap-3 [&>div]:min-w-0">
 
                             <div>
 
@@ -185,13 +185,13 @@
                                     Number of Schools
                                 </p>
 
-                                <p class="mt-3 text-4xl font-bold text-green-800">
+                                <p class="mt-3 text-3xl lg:text-4xl font-bold text-green-800">
                                     {{ number_format($numberOfSchools) }}
                                 </p>
 
                             </div>
 
-                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 shrink-0">
 
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -227,9 +227,9 @@
 
 
                     {{-- HR TRANSACTIONS --}}
-                    <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
+                    <div class="rounded-2xl bg-white p-4 sm:p-6 shadow-sm ring-1 ring-gray-100">
 
-                        <div class="flex items-start justify-between">
+                        <div class="flex items-start justify-between gap-3 [&>div]:min-w-0">
 
                             <div>
 
@@ -237,13 +237,13 @@
                                     HR Transactions
                                 </p>
 
-                                <p class="mt-3 text-4xl font-bold text-green-800">
+                                <p class="mt-3 text-3xl lg:text-4xl font-bold text-green-800">
                                     {{ number_format($hrTransactions) }}
                                 </p>
 
                             </div>
 
-                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 shrink-0">
 
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -288,13 +288,11 @@
             <div>
 
                 {{-- SECTION TITLE --}}
-                <div class="relative overflow-hidden rounded-2xl
-                            bg-gradient-to-br from-green-950 via-green-900 to-green-800
-                            px-6 py-4 text-white shadow-lg">
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-4 sm:px-6 py-4 text-white shadow-lg">
 
                     <div class="text-center">
 
-                        <h3 class="text-xl font-bold uppercase tracking-wide text-white">
+                        <h3 class="text-base sm:text-xl font-bold uppercase tracking-wide text-white">
                             Medical Allowance Report School Year 2026–2027
                         </h3>
 
@@ -308,15 +306,12 @@
 
 
                 {{-- DEADLINE NOTICE --}}
-                <div class="mt-3 flex items-center justify-center rounded-xl
-                            border border-red-200 bg-red-50 px-5 py-3
-                            shadow-sm">
+                <div class="mt-3 flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-5 py-3 shadow-sm">
 
                     <div class="flex items-center gap-3">
 
                         {{-- CLOCK ICON --}}
-                        <div class="flex h-8 w-8 shrink-0 items-center justify-center
-                                    rounded-full bg-red-100 text-red-600">
+                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -354,21 +349,18 @@
                 <br>
                 
 
-                {{-- 3 CARDS IN ONE ROW --}}
-                <div class="flex w-full flex-nowrap gap-6">
+                {{-- RESPONSIVE MEDICAL ALLOWANCE CARDS --}}
+                <div class="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
 
                     {{-- =================================================
                         GROUP AVAILMENT
                     ================================================== --}}
                     <a
                         href="{{ route('data-management.medical-allowance') }}"
-                        class="group block min-w-0 flex-1 cursor-pointer rounded-2xl bg-white p-5 shadow-sm
-                            ring-1 ring-gray-100 transition duration-300
-                            hover:-translate-y-1 hover:shadow-lg hover:ring-green-200
-                            focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                        class="group block min-w-0 flex-1 cursor-pointer rounded-2xl bg-white p-4 sm:p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:ring-green-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                         aria-label="View medical allowance records"
                     >
-                        <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-start justify-between gap-4 [&>div]:min-w-0">
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium text-gray-500">
                                     Group Availment (HMO)
@@ -385,8 +377,7 @@
 
                             {{-- ICON --}}
                             <div
-                                class="flex h-12 w-12 shrink-0 items-center justify-center
-                                    rounded-xl bg-green-100 text-green-700"
+                                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700"
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -412,13 +403,10 @@
                     ================================================== --}}
                     <a
                         href="{{ route('data-management.medical-allowance') }}"
-                        class="group block min-w-0 flex-1 cursor-pointer rounded-2xl bg-white p-5 shadow-sm
-                            ring-1 ring-gray-100 transition duration-300
-                            hover:-translate-y-1 hover:shadow-lg hover:ring-blue-200
-                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        class="group block min-w-0 flex-1 cursor-pointer rounded-2xl bg-white p-4 sm:p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:ring-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                         aria-label="View medical allowance records"
                     >
-                        <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-start justify-between gap-4 [&>div]:min-w-0">
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-medium text-gray-500">
                                     Individual Availment (HMO)
@@ -435,8 +423,7 @@
 
                             {{-- ICON --}}
                             <div
-                                class="flex h-12 w-12 shrink-0 items-center justify-center
-                                    rounded-xl bg-blue-100 text-blue-600"
+                                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600"
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -462,19 +449,13 @@
                     ================================================== --}}
                     <a
                         href="{{ route('data-management.medical-allowance') }}"
-                        class="group block min-w-0 flex-1 cursor-pointer rounded-2xl
-                            bg-white p-5 shadow-sm ring-1 ring-gray-100
-                            transition duration-300
-                            hover:-translate-y-1 hover:shadow-lg hover:ring-red-200
-                            focus:outline-none focus:ring-2 focus:ring-red-500
-                            focus:ring-offset-2"
+                        class="group block min-w-0 flex-1 cursor-pointer rounded-2xl bg-white p-4 sm:p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:ring-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                         aria-label="View medical allowance records"
                     >
-                        <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-start justify-between gap-4 [&>div]:min-w-0">
                             <div class="min-w-0 flex-1">
                                 <p
-                                    class="text-sm font-medium text-gray-500
-                                        transition group-hover:text-red-600"
+                                    class="text-sm font-medium text-gray-500 transition group-hover:text-red-600"
                                 >
                                     Medical Allowance Received
                                 </p>
@@ -490,9 +471,7 @@
 
                             {{-- ICON --}}
                             <div
-                                class="flex h-12 w-12 shrink-0 items-center justify-center
-                                    rounded-xl bg-red-100 text-red-600 transition
-                                    group-hover:bg-red-600 group-hover:text-white"
+                                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600 transition group-hover:bg-red-600 group-hover:text-white"
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -524,12 +503,12 @@
 
             <div class="mt-10">
                 {{-- SECTION TITLE --}}
-                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-6 py-4 text-white shadow-lg">
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-4 sm:px-6 py-4 text-white shadow-lg">
 
                     <div class="text-center">
 
                         {{-- LINE 1 --}}
-                        <h3 class="text-xl font-bold uppercase tracking-wide text-white">
+                        <h3 class="text-base sm:text-xl font-bold uppercase tracking-wide text-white">
                             Teacher Requirement Analysis School Year 2026–2027
                         </h3>
 
@@ -543,17 +522,17 @@
                 </div>
                 <br>
                 {{-- =================================================
-                    THREE CARDS - HORIZONTAL
+                    RESPONSIVE TEACHER SUMMARY CARDS
                 ================================================== --}}
-                <div class="flex w-full flex-nowrap gap-6">
+                <div class="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
 
 
                     {{-- =================================================
                         TEACHER INVENTORY
                     ================================================== --}}
-                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-4 sm:p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
 
-                        <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-start justify-between gap-4 [&>div]:min-w-0">
 
                             <div class="min-w-0 flex-1">
 
@@ -616,9 +595,9 @@
                     {{-- =================================================
                         EXCESS TEACHERS
                     ================================================== --}}
-                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-4 sm:p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
 
-                        <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-start justify-between gap-4 [&>div]:min-w-0">
 
                             <div class="min-w-0 flex-1">
 
@@ -675,9 +654,9 @@
                     {{-- =================================================
                         TEACHER SHORTAGE
                     ================================================== --}}
-                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    <div class="min-w-0 flex-1 rounded-2xl bg-white p-4 sm:p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
 
-                        <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-start justify-between gap-4 [&>div]:min-w-0">
 
                             <div class="min-w-0 flex-1">
 
@@ -742,7 +721,7 @@
 
 
                 {{-- THREE LEVEL CARDS --}}
-                <div class="flex gap-6">
+                <div class="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
 
 
                     {{-- =================================================
@@ -751,11 +730,11 @@
                     <div class="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
 
                         {{-- Card Header --}}
-                        <div class="flex items-center justify-between bg-green-700 px-5 py-4 text-white">
+                        <div class="flex items-center justify-between bg-green-700 px-5 py-4 text-white gap-3 [&>div]:min-w-0">
 
                             <div>
 
-                                <h4 class="text-lg font-bold">
+                                <h4 class="text-base font-bold sm:text-lg">
                                     ENROLLMENT COUNT S.Y. 2025-2026
                                 </h4>
 
@@ -767,7 +746,7 @@
 
 
                             {{-- School Icon --}}
-                            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15">
+                            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 shrink-0">
 
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -790,7 +769,7 @@
 
 
                         {{-- Grade Levels --}}
-                        <div class="p-5">
+                        <div class="p-4 sm:p-5">
 
                             <div class="space-y-3">
 
@@ -810,7 +789,7 @@
                                     'Grade 12'
                                 ] as $grade)
 
-                                    <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+                                    <div class="flex items-center justify-between border-b border-gray-100 pb-2 gap-3 [&>div]:min-w-0">
 
                                         <span class="text-sm font-medium text-gray-600">
                                             {{ $grade }}
@@ -838,11 +817,11 @@
                     <div class="flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
 
                         {{-- Card Header --}}
-                        <div class="flex items-center justify-between bg-green-800 px-5 py-4 text-white">
+                        <div class="flex items-center justify-between bg-green-800 px-5 py-4 text-white gap-3 [&>div]:min-w-0">
 
                             <div>
 
-                                <h4 class="text-lg font-bold">
+                                <h4 class="text-base font-bold sm:text-lg">
                                     TEACHER COUNT PER POSITION
                                 </h4>
 
@@ -854,7 +833,7 @@
 
 
                             {{-- School Icon --}}
-                            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15">
+                            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 shrink-0">
 
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -891,7 +870,7 @@
 
 
                         {{-- Grade Levels --}}
-                        <div class="p-5">
+                        <div class="p-4 sm:p-5">
 
                             <div class="space-y-3">
 
@@ -908,7 +887,7 @@
                                     'Master Teacher IV',
                                 ] as $position)
 
-                                    <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+                                    <div class="flex items-center justify-between border-b border-gray-100 pb-2 gap-3 [&>div]:min-w-0">
 
                                         <span class="text-sm font-medium text-gray-600">
                                             {{ $position }}
@@ -938,11 +917,11 @@
                     <div class="min-w-0 flex-1 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
 
                         {{-- CARD HEADER --}}
-                        <div class="flex items-center justify-between bg-green-700 px-5 py-4 text-white">
+                        <div class="flex items-center justify-between bg-green-700 px-5 py-4 text-white gap-3 [&>div]:min-w-0">
 
                             <div>
 
-                                <h4 class="text-lg font-bold">
+                                <h4 class="text-base font-bold sm:text-lg">
                                     TEACHER SPECIALIZATION
                                 </h4>
 
@@ -991,7 +970,7 @@
 
 
                         {{-- CARD CONTENT --}}
-                        <div class="p-5">
+                        <div class="p-4 sm:p-5">
 
 
 
@@ -1000,7 +979,7 @@
 
 
                                 {{-- EARLY CHILDHOOD --}}
-                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2 gap-3 [&>div]:min-w-0">
 
                                     <span class="text-xs font-medium text-gray-600">
                                         Early Childhood Education
@@ -1014,7 +993,7 @@
 
 
                                 {{-- ENGLISH --}}
-                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2 gap-3 [&>div]:min-w-0">
 
                                     <span class="text-xs font-medium text-gray-600">
                                         English
@@ -1028,7 +1007,7 @@
 
 
                                 {{-- FILIPINO --}}
-                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2 gap-3 [&>div]:min-w-0">
 
                                     <span class="text-xs font-medium text-gray-600">
                                         Filipino
@@ -1042,7 +1021,7 @@
 
 
                                 {{-- GENERAL EDUCATION --}}
-                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2 gap-3 [&>div]:min-w-0">
 
                                     <span class="text-xs font-medium text-gray-600">
                                         General Education
@@ -1056,7 +1035,7 @@
 
 
                                 {{-- MATHEMATICS --}}
-                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2 gap-3 [&>div]:min-w-0">
 
                                     <span class="text-xs font-medium text-gray-600">
                                         Mathematics
@@ -1070,7 +1049,7 @@
 
 
                                 {{-- GENERAL SCIENCE --}}
-                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2 gap-3 [&>div]:min-w-0">
 
                                     <span class="text-xs font-medium text-gray-600">
                                         General Science
@@ -1084,7 +1063,7 @@
 
 
                                 {{-- PHYSICAL SCIENCE --}}
-                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2 gap-3 [&>div]:min-w-0">
 
                                     <span class="text-xs font-medium text-gray-600">
                                         Physical Science
@@ -1098,7 +1077,7 @@
 
 
                                 {{-- VALUES EDUCATION --}}
-                                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+                                <div class="flex items-center justify-between border-b border-gray-100 pb-2 gap-3 [&>div]:min-w-0">
 
                                     <span class="text-xs font-medium text-gray-600">
                                         Values Education
@@ -1233,17 +1212,17 @@
             {{-- =====================================================
                 REQUEST STATUS SUMMARY
             ====================================================== --}}
-            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-6 py-4 text-white shadow-lg">
-                <h3 class="mb-4 text-lg font-bold text-gray-800 text-center text-white">
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-4 sm:px-6 py-4 text-white shadow-lg">
+                <h3 class="text-center text-base font-bold text-white sm:text-lg">
                     PERSONNEL TRANSACTION REQUEST
                 </h3>
             </div>
             <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
                 {{-- PENDING --}}
-                <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+                <div class="rounded-2xl bg-white p-4 sm:p-5 shadow-sm ring-1 ring-gray-100">
 
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between gap-3 [&>div]:min-w-0">
 
                         <div>
 
@@ -1262,7 +1241,7 @@
                         </div>
 
 
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600 shrink-0">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -1287,9 +1266,9 @@
 
 
                 {{-- APPROVED --}}
-                <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+                <div class="rounded-2xl bg-white p-4 sm:p-5 shadow-sm ring-1 ring-gray-100">
 
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between gap-3 [&>div]:min-w-0">
 
                         <div>
 
@@ -1308,7 +1287,7 @@
                         </div>
 
 
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-700">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-700 shrink-0">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -1333,9 +1312,9 @@
 
 
                 {{-- SUBMITTED --}}
-                <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+                <div class="rounded-2xl bg-white p-4 sm:p-5 shadow-sm ring-1 ring-gray-100">
 
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between gap-3 [&>div]:min-w-0">
 
                         <div>
 
@@ -1354,7 +1333,7 @@
                         </div>
 
 
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600 shrink-0">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -1379,9 +1358,9 @@
 
 
                 {{-- DISAPPROVED --}}
-                <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+                <div class="rounded-2xl bg-white p-4 sm:p-5 shadow-sm ring-1 ring-gray-100">
 
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between gap-3 [&>div]:min-w-0">
 
                         <div>
 
@@ -1400,7 +1379,7 @@
                         </div>
 
 
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 text-red-600">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 text-red-600 shrink-0">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -1430,18 +1409,18 @@
                 QUICK ACTIONS
             ====================================================== --}}
             <div>
-                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-6 py-4 text-white shadow-lg">
-                    <h3 class="mb-4 text-lg font-bold text-gray-800 text-center text-white">
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-4 sm:px-6 py-4 text-white shadow-lg">
+                    <h3 class="text-center text-base font-bold text-white sm:text-lg">
                         QUICK ACTIONS
                     </h3>
                 </div>
                 <br>
 
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
                     <a
                         href="#"
-                        class="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-green-500 hover:shadow-md"
+                        class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 transition hover:border-green-500 hover:shadow-md"
                     >
 
                         <p class="font-semibold text-gray-800">
@@ -1457,7 +1436,7 @@
 
                     <a
                         href="#"
-                        class="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-green-500 hover:shadow-md"
+                        class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 transition hover:border-green-500 hover:shadow-md"
                     >
 
                         <p class="font-semibold text-gray-800">
@@ -1473,7 +1452,7 @@
 
                     <a
                         href="#"
-                        class="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-green-500 hover:shadow-md"
+                        class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 transition hover:border-green-500 hover:shadow-md"
                     >
 
                         <p class="font-semibold text-gray-800">
@@ -1489,7 +1468,7 @@
 
                     <a
                         href="#"
-                        class="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-green-500 hover:shadow-md"
+                        class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 transition hover:border-green-500 hover:shadow-md"
                     >
 
                         <p class="font-semibold text-gray-800">
@@ -1512,21 +1491,18 @@
                 403 CONTENT
             ====================================================== --}}
             <div
-                class="overflow-hidden rounded-2xl bg-white
-                        shadow-sm ring-1 ring-gray-100"
+                class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100"
                 >
 
                 {{-- Section Header --}}
                 <div
-                    class="border-b border-green-100
-                            bg-green-50 px-6 py-4"
+                    class="border-b border-green-100 bg-green-50 px-4 sm:px-6 py-4"
                 >
 
                     <div class="flex items-center gap-3">
 
                         <div
-                            class="flex h-10 w-10 items-center justify-center
-                                    rounded-lg bg-green-700 text-white"
+                            class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-700 text-white shrink-0"
                         >
 
                             {{-- Lock Icon --}}
@@ -1561,7 +1537,7 @@
                                 Permission Required
                             </h2>
 
-                            <p class="text-sm text-gray-500">
+                            <p class="text-sm text-gray-500 break-words">
                                 This resource is restricted based on your account role.
                             </p>
 
@@ -1573,7 +1549,7 @@
 
 
                 {{-- Main Content --}}
-                <div class="px-6 py-10 sm:px-10 sm:py-14">
+                <div class="px-4 sm:px-6 py-10 sm:px-10 sm:py-14">
 
                     <div class="mx-auto max-w-3xl">
 
@@ -1585,20 +1561,17 @@
                             <div class="text-center md:text-left">
 
                                 <div
-                                    class="text-7xl font-black tracking-tight
-                                            text-green-900 sm:text-8xl"
+                                    class="text-7xl font-black tracking-tight text-green-900 sm:text-8xl"
                                 >
                                     403
                                 </div>
 
                                 <div
-                                    class="mt-3 h-1 w-20 rounded-full
-                                            bg-green-600
-                                            mx-auto md:mx-0"
+                                    class="mt-3 h-1 w-20 rounded-full bg-green-600 mx-auto md:mx-0"
                                 ></div>
 
                                 <h3
-                                    class="mt-5 text-xl font-bold text-gray-800"
+                                    class="mt-5 text-base sm:text-xl font-bold text-gray-800"
                                 >
                                     Unauthorized Action
                                 </h3>
@@ -1622,17 +1595,13 @@
 
                                 {{-- Current Account --}}
                                 <div
-                                    class="rounded-xl border border-green-100
-                                            bg-green-50 p-5"
+                                    class="rounded-xl border border-green-100 bg-green-50 p-4 sm:p-5"
                                 >
 
                                     <div class="flex items-start gap-4">
 
                                         <div
-                                            class="flex h-11 w-11 shrink-0
-                                                    items-center justify-center
-                                                    rounded-lg bg-green-700
-                                                    text-white"
+                                            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-green-700 text-white"
                                         >
 
                                             <svg
@@ -1662,21 +1631,18 @@
                                         <div class="min-w-0">
 
                                             <p
-                                                class="text-xs font-semibold
-                                                        uppercase tracking-wider
-                                                        text-green-700"
+                                                class="text-xs font-semibold uppercase tracking-wider text-green-700"
                                             >
                                                 Current Account
                                             </p>
 
                                             <p
-                                                class="mt-1 truncate
-                                                        font-bold text-gray-800"
+                                                class="mt-1 break-words font-bold text-gray-800"
                                             >
                                                 {{ Auth::user()->name }}
                                             </p>
 
-                                            <p class="text-sm text-gray-500">
+                                            <p class="text-sm text-gray-500 break-words">
                                                 {{ Auth::user()->email }}
                                             </p>
 
@@ -1689,18 +1655,13 @@
 
                                 {{-- Role --}}
                                 <div
-                                    class="mt-4 flex items-center justify-between
-                                            rounded-xl border border-gray-100
-                                            bg-white px-5 py-4
-                                            shadow-sm"
+                                    class="mt-4 flex items-center justify-between rounded-xl border border-gray-100 bg-white px-5 py-4 shadow-sm"
                                 >
 
                                     <div>
 
                                         <p
-                                            class="text-xs font-semibold
-                                                    uppercase tracking-wider
-                                                    text-gray-400"
+                                            class="text-xs font-semibold uppercase tracking-wider text-gray-400"
                                         >
                                             Your Role
                                         </p>
@@ -1715,9 +1676,7 @@
 
 
                                     <div
-                                        class="flex h-10 w-10 items-center
-                                                justify-center rounded-lg
-                                                bg-green-100 text-green-700"
+                                        class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 text-green-700 shrink-0"
                                     >
 
                                         <svg
@@ -1748,9 +1707,7 @@
 
                                 {{-- Information --}}
                                 <div
-                                    class="mt-4 flex gap-3 rounded-xl
-                                            border border-green-100
-                                            bg-green-50/70 p-4"
+                                    class="mt-4 flex gap-3 rounded-xl border border-green-100 bg-green-50/70 p-4"
                                 >
 
                                     <svg
@@ -1795,16 +1752,7 @@
 
                                     <a
                                         href="{{ route('profile.edit') }}"
-                                        class="inline-flex w-full items-center
-                                                justify-center gap-2 rounded-lg
-                                                bg-green-700 px-5 py-3
-                                                text-sm font-semibold text-white
-                                                shadow-sm transition
-                                                hover:bg-green-800
-                                                focus:outline-none
-                                                focus:ring-2
-                                                focus:ring-green-500
-                                                focus:ring-offset-2"
+                                        class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-green-700 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                                     >
 
                                         <svg

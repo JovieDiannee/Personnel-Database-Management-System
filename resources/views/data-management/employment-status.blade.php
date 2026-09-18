@@ -1,23 +1,22 @@
 <x-app-layout>
 
-    <div class="min-h-screen bg-gray-50 py-8">
+    <div class="min-h-screen min-w-0 bg-gray-50 py-4 sm:py-8">
 
-        <div class="mx-auto max-w-7xl px-6">
+        <div class="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6">
 
 
             {{-- BREADCRUMB TRAIL --}}
             <div class="mb-4">
 
                 <nav
-                    class="flex items-center text-sm"
+                    class="flex flex-wrap items-center gap-y-2 text-xs sm:text-sm"
                     aria-label="Breadcrumb"
                 >
 
                     {{-- Home --}}
                     <a
                         href="{{ route('dashboard') }}"
-                        class="flex items-center font-medium text-gray-500
-                            transition hover:text-green-700"
+                        class="flex items-center font-medium text-gray-500 transition hover:text-green-700"
                     >
                         <svg
                             class="mr-1.5 h-4 w-4"
@@ -54,8 +53,7 @@
                     {{-- Data Management --}}
                     <a
                         href="{{ route('data-management') }}"
-                        class="font-medium text-gray-500
-                            transition hover:text-green-700"
+                        class="font-medium text-gray-500 transition hover:text-green-700"
                     >
                         Data Management
                     </a>
@@ -86,7 +84,7 @@
 
             @if(session('error'))
 
-                <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-5">
+                <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 sm:p-5">
 
                     <p class="font-semibold text-red-800">
                         {{ session('error') }}
@@ -99,13 +97,13 @@
 
             @if(session('employment_import_result'))
 
-                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-5">
+                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 sm:p-5">
 
                     <h3 class="text-lg font-bold text-green-900">
                         Employment Import Completed
                     </h3>
 
-                    <div class="mt-4 grid gap-4 md:grid-cols-4">
+                    <div class="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
 
                         <div>
 
@@ -171,7 +169,7 @@
                                 Import Errors
                             </h4>
 
-                            <ul class="mt-2 list-disc pl-5 text-sm text-red-700">
+                            <ul class="mt-2 list-disc pl-5 text-sm text-red-700 break-words">
 
                                 @foreach(session('employment_import_result.errors', []) as $error)
 
@@ -197,13 +195,13 @@
                 SUPER ADMIN - IMPORT PERSONNEL
             ====================================================== --}}
             @if(auth()->user()->role === 'super_admin')
-                <div class="rounded-xl border bg-white p-6 shadow-sm">
+                <div class="rounded-xl border bg-white p-4 sm:p-6 shadow-sm">
 
                     <h2 class="text-lg font-bold text-gray-800">
                         Import Employment Status
                     </h2>
 
-                    <p class="mt-1 text-sm text-gray-500">
+                    <p class="mt-1 text-sm text-gray-500 break-words">
                         Upload the official Employment Status Excel file.
                     </p>
 
@@ -217,7 +215,7 @@
 
                         @csrf
                         
-                                            <div class="flex flex-col gap-3 md:flex-row md:items-center">
+                                            <div class="flex flex-col gap-3 xl:flex-row xl:items-center">
 
                             {{-- EXCEL FILE LABEL --}}
                             <label
@@ -229,7 +227,7 @@
 
 
                             {{-- CUSTOM FILE INPUT --}}
-                            <div class="relative flex h-10 flex-1">
+                            <div class="relative flex h-11 min-w-0 w-full shrink-0 xl:flex-1">
 
                                 {{-- REAL FILE INPUT --}}
                                 <input
@@ -246,19 +244,12 @@
 
                                 {{-- CUSTOM FILE DISPLAY --}}
                                 <div
-                                    class="flex h-full w-full items-center overflow-hidden
-                                        rounded-lg border border-gray-300
-                                        bg-white shadow-sm"
+                                    class="flex h-full w-full items-center overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm"
                                 >
 
                                     {{-- BROWSE BUTTON --}}
                                     <span
-                                        class="flex h-full shrink-0 items-center
-                                            border-r border-green-200
-                                            bg-green-50
-                                            px-4
-                                            text-sm font-semibold
-                                            text-green-700"
+                                        class="flex h-full shrink-0 items-center border-r border-green-200 bg-green-50 px-4 text-sm font-semibold text-green-700"
                                     >
                                         Browse...
                                     </span>
@@ -278,26 +269,12 @@
 
 
                             {{-- ACTION BUTTONS --}}
-                            <div class="flex shrink-0 items-center gap-2">
+                            <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
 
                                 {{-- UPLOAD BUTTON --}}
                                 <button
                                     type="submit"
-                                    class="flex h-10 items-center justify-center gap-2
-                                        rounded-lg
-                                        bg-green-700
-                                        px-5
-                                        text-sm
-                                        font-semibold
-                                        text-white
-                                        shadow-sm
-                                        transition
-                                        duration-200
-                                        hover:bg-green-800
-                                        focus:outline-none
-                                        focus:ring-2
-                                        focus:ring-green-500
-                                        focus:ring-offset-2"
+                                    class="flex min-h-11 w-full items-center justify-center gap-2 sm:w-auto rounded-lg bg-green-700 px-5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                                     >
 
                                     {{-- UPLOAD ICON --}}
@@ -330,22 +307,7 @@
                                 {{-- DOWNLOAD TEMPLATE --}}
                                 <a
                                     href="{{ route('data-management.employment-status.download-template') }}"
-                                    class="flex h-10 items-center justify-center gap-2
-                                        rounded-lg
-                                        border border-green-700
-                                        bg-white
-                                        px-4
-                                        text-sm
-                                        font-semibold
-                                        text-green-700
-                                        shadow-sm
-                                        transition
-                                        duration-200
-                                        hover:bg-green-50
-                                        focus:outline-none
-                                        focus:ring-2
-                                        focus:ring-green-500
-                                        focus:ring-offset-2"
+                                    class="flex min-h-11 w-full items-center justify-center gap-2 sm:w-auto rounded-lg border border-green-700 bg-white px-4 text-sm font-semibold text-green-700 shadow-sm transition duration-200 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                                     >
 
                                     {{-- DOWNLOAD ICON --}}
@@ -399,14 +361,11 @@
             @elseif(auth()->user()->role === 'admin')
             
                 <div
-                    class="rounded-2xl border border-green-200
-                        bg-white p-6 shadow-sm"
+                    class="rounded-2xl border border-green-200 bg-white p-4 sm:p-6 shadow-sm"
                     >
 
                     <div
-                        class="flex flex-col gap-5
-                            md:flex-row md:items-center
-                            md:justify-between"
+                        class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between"
                     >
 
                         <div class="flex items-start gap-4">
@@ -431,15 +390,7 @@
                             href="https://forms.gle/zrz8AGM3bdvAWoJ67"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="inline-flex h-10 shrink-0
-                                items-center justify-center gap-2
-                                rounded-lg bg-green-700
-                                px-5 text-sm font-semibold
-                                text-white shadow-sm
-                                transition hover:bg-green-800
-                                focus:outline-none
-                                focus:ring-2 focus:ring-green-500
-                                focus:ring-offset-2"
+                            class="inline-flex min-h-11 w-full shrink-0 md:w-auto items-center justify-center gap-2 rounded-lg bg-green-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                         >
 
                             <svg
@@ -470,13 +421,11 @@
             <br>
 
             {{-- RECORDS TABLE --}}
-            <div class="overflow-hidden rounded-xl
-                        border border-gray-200 bg-white shadow-sm">
+            <div class="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 
 
                 {{-- TABLE HEADER --}}
-                <div class="flex items-center justify-between
-                            border-b border-gray-200 p-6">
+                <div class="flex items-center justify-between border-b border-gray-200 p-4 sm:p-6">
 
                     <div>
 
@@ -484,7 +433,7 @@
                             Employment Status Records
                         </h2>
 
-                        <p class="mt-1 text-sm text-gray-500">
+                        <p class="mt-1 text-sm text-gray-500 break-words">
                             List of personnel employment status records
                             maintained in the system.
                         </p>
@@ -494,7 +443,7 @@
 
 
                 {{-- SEARCH --}}
-                <div class="border-b border-gray-200 p-6">
+                <div class="border-b border-gray-200 p-4 sm:p-6">
 
                     <form
                         action="{{ route('data-management.employment-status') }}"
@@ -504,7 +453,7 @@
                         <div class="flex flex-col gap-3 md:flex-row">
 
                             {{-- SEARCH INPUT --}}
-                            <div class="flex-1">
+                            <div class="min-w-0 flex-1">
 
                                 <label
                                     for="search"
@@ -519,26 +468,19 @@
                                     name="search"
                                     value="{{ $search }}"
                                     placeholder="Search name, school, item no., position, status..."
-                                    class="w-full rounded-md border-gray-300
-                                        text-sm shadow-sm
-                                        focus:border-green-600
-                                        focus:ring-green-600"
+                                    class="min-h-11 w-full min-w-0 rounded-md border-gray-300 text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
                                 >
 
                             </div>
 
 
                             {{-- BUTTONS --}}
-                            <div class="flex items-end gap-2">
+                            <div class="flex flex-wrap items-end gap-2 [&>*]:min-h-11 [&>*]:flex-1 [&>*]:text-center md:[&>*]:flex-none">
 
                                 {{-- SEARCH --}}
                                 <button
                                     type="submit"
-                                    class="rounded-md bg-green-700
-                                        px-5 py-2.5
-                                        text-sm font-semibold text-white
-                                        transition
-                                        hover:bg-green-800"
+                                    class="rounded-md bg-green-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800"
                                 >
                                     Search
                                 </button>
@@ -549,11 +491,7 @@
 
                                     <a
                                         href="{{ route('data-management.employment-status') }}"
-                                        class="rounded-md border border-gray-300
-                                            bg-white px-5 py-2.5
-                                            text-sm font-semibold text-gray-700
-                                            transition
-                                            hover:bg-gray-50"
+                                        class="rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
                                     >
                                         Clear
                                     </a>
@@ -570,7 +508,10 @@
 
 
                 {{-- TABLE --}}
-                <div class="overflow-x-auto">
+                <p class="border-b border-gray-100 px-4 py-2 text-xs text-gray-500 lg:hidden">
+                    Swipe left or right to view all columns and the Update button.
+                </p>
+                <div class="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain" tabindex="0" role="region" aria-label="Employment status records, horizontally scrollable">
 
                     <table class="min-w-full divide-y divide-gray-200">
 
@@ -578,63 +519,51 @@
 
                             <tr>
 
-                                <th class="px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     #
                                 </th>
 
-                                <th class="px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Name
                                 </th>
 
-                                <th class="px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     School Name
                                 </th>
 
-                                <th class="px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Item From School Level
                                 </th>
 
-                                <th class="px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Plantilla Item No.
                                 </th>
 
-                                <th class="px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Position Title
                                 </th>
 
-                                <th class="px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Employment Status
                                 </th>
 
-                                <th class="px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Date of Original Appointment
                                 </th>
 
-                                <th class="px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Date of Last Promotion
                                 </th>
 
-                                <th class="px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Warm Body Status
                                 </th>
 
-                                <th class="px-4 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Nature of Work
                                 </th>
 
-                                <th class="px-4 py-3 text-right text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Action
                                 </th>
 
@@ -685,7 +614,7 @@
 
                                         </div>
 
-                                        <div class="mt-1 text-sm text-gray-500">
+                                        <div class="mt-1 text-sm text-gray-500 break-words">
 
                                             {{ $record->user?->email ?? '—' }}
 
@@ -732,10 +661,7 @@
                                         @if($record->employment_status)
 
                                             <span
-                                                class="inline-flex rounded-full
-                                                    bg-green-100 px-3 py-1
-                                                    text-xs font-semibold
-                                                    text-green-800"
+                                                class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800"
                                             >
 
                                                 {{ $record->employment_status }}
@@ -816,19 +742,7 @@
                                                 'data-management.employment-status.edit',
                                                 $record->id
                                             ) }}"
-                                            class="inline-flex items-center
-                                                rounded-md
-                                                bg-green-700
-                                                px-3 py-2
-                                                text-sm font-semibold
-                                                text-white
-                                                shadow-sm
-                                                transition
-                                                hover:bg-green-800
-                                                focus:outline-none
-                                                focus:ring-2
-                                                focus:ring-green-500
-                                                focus:ring-offset-2"
+                                            class="inline-flex min-h-11 items-center rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                                         >
                                             Update
                                         </a>
@@ -844,7 +758,7 @@
 
                                     <td
                                         colspan="12"
-                                        class="px-6 py-12 text-center"
+                                        class="px-4 sm:px-6 py-12 text-center"
                                     >
 
                                         <div class="text-sm font-medium text-gray-700">
@@ -855,7 +769,7 @@
 
                                         @if($search !== '')
 
-                                            <div class="mt-1 text-sm text-gray-500">
+                                            <div class="mt-1 text-sm text-gray-500 break-words">
 
                                                 No records matched your search for
                                                 <span class="font-semibold">
@@ -879,7 +793,7 @@
                 </div>
 
                 {{-- PAGINATION --}}
-                    <div class="border-t border-gray-200 px-6 py-4">
+                    <div class="border-t border-gray-200 px-4 sm:px-6 py-4">
 
                         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 

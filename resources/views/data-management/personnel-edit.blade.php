@@ -1,20 +1,19 @@
 <x-app-layout>
 
-    <div class="mx-auto max-w-7xl px-6 py-8">
+    <div class="mx-auto w-full min-w-0 max-w-7xl px-4 py-4 sm:px-6 sm:py-8">
 
         {{-- BREADCRUMB TRAIL --}}
         <div class="mb-4">
 
             <nav
-                class="flex items-center text-sm"
+                class="flex flex-wrap items-center gap-y-2 text-xs sm:text-sm"
                 aria-label="Breadcrumb"
             >
 
                 {{-- Home --}}
                 <a
                     href="{{ route('dashboard') }}"
-                    class="flex items-center font-medium text-gray-500
-                        transition hover:text-green-700"
+                    class="flex items-center font-medium text-gray-500 transition hover:text-green-700"
                 >
                     <svg
                         class="mr-1.5 h-4 w-4"
@@ -51,8 +50,7 @@
                 {{-- Data Management --}}
                 <a
                     href="{{ route('data-management') }}"
-                    class="font-medium text-gray-500
-                        transition hover:text-green-700"
+                    class="font-medium text-gray-500 transition hover:text-green-700"
                 >
                     Data Management
                 </a>
@@ -75,8 +73,7 @@
                 {{-- Personnel Information --}}
                 <a
                     href="{{ route('data-management.personnel') }}"
-                    class="font-medium text-gray-500
-                        transition hover:text-green-700"
+                    class="font-medium text-gray-500 transition hover:text-green-700"
                 >
                     Personnel Information
                 </a>
@@ -98,7 +95,7 @@
 
                 {{-- Current Page --}}
                 <span class="font-semibold text-green-800">
-                    Employee Profile
+                    Update
                 </span>
 
             </nav>
@@ -109,16 +106,12 @@
         @if(session('success'))
 
             <div
-                class="mb-6 flex items-center gap-3 rounded-xl
-                    border border-green-300 bg-green-100
-                    px-5 py-4
-                    text-sm font-medium text-green-900"
+                class="mb-6 flex items-center gap-3 rounded-xl border border-green-300 bg-green-100 px-5 py-4 text-sm font-medium text-green-900"
             >
 
                 {{-- SUCCESS ICON --}}
                 <div
-                    class="flex h-9 w-9 shrink-0 items-center justify-center
-                        rounded-full bg-green-600 text-white"
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-600 text-white"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -155,8 +148,7 @@
         @if ($errors->any())
             <div
                 role="alert"
-                class="mb-6 rounded-xl border border-red-300
-                    bg-red-100 px-5 py-4 text-sm text-red-900"
+                class="mb-6 rounded-xl border border-red-300 bg-red-100 px-5 py-4 text-sm text-red-900 break-words"
             >
                 <p class="font-bold">
                     Please check the following fields:
@@ -175,14 +167,12 @@
         PERSONNEL SUMMARY
         ====================================================== --}}
 
-        <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
 
-            <div class="flex items-center gap-4">
+            <div class="flex min-w-0 items-start gap-3 sm:items-center sm:gap-4 [&>div]:min-w-0">
 
                 <div
-                    class="flex h-14 w-14 items-center justify-center
-                           rounded-full bg-green-100
-                           text-xl font-bold text-green-700"
+                    class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700"
                 >
                     {{ strtoupper(substr($person->first_name, 0, 1)) }}
                     {{ strtoupper(substr($person->last_name, 0, 1)) }}
@@ -190,14 +180,14 @@
 
                 <div>
 
-                    <h2 class="text-xl font-bold text-gray-900">
+                    <h2 class="break-words text-lg font-bold text-gray-900 sm:text-xl">
                         {{ $person->last_name }},
                         {{ $person->first_name }}
                         {{ $person->middle_name }}
                         {{ $person->extension_name }}
                     </h2>
 
-                    <p class="text-sm text-gray-500">
+                    <p class="text-sm text-gray-500 break-words">
                         {{ $person->user?->email ?? 'No email address' }}
                     </p>
 
@@ -212,15 +202,14 @@
         @if($errors->any())
 
             <div
-                class="mb-6 rounded-xl border border-red-200
-                       bg-red-50 px-5 py-4"
+                class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4"
             >
 
                 <p class="font-semibold text-red-700">
                     Please correct the following:
                 </p>
 
-                <ul class="mt-2 list-disc pl-5 text-sm text-red-600">
+                <ul class="mt-2 list-disc pl-5 text-sm text-red-600 break-words">
 
                     @foreach($errors->all() as $error)
 
@@ -254,7 +243,7 @@
 
             <div class="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
 
-                <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+                <div class="border-b border-gray-200 bg-gray-50 px-4 sm:px-6 py-4">
 
                     <h3 class="font-bold text-gray-900">
                         Account Information
@@ -267,7 +256,7 @@
                 </div>
 
 
-                <div class="grid gap-5 p-6 md:grid-cols-2">
+                <div class="grid min-w-0 grid-cols-1 gap-4 sm:gap-5 p-4 sm:p-6 md:grid-cols-2 [&>div]:min-w-0">
 
                     <div>
 
@@ -279,9 +268,7 @@
                             type="email"
                             name="email"
                             value="{{ old('email', $person->user?->email) }}"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                     </div>
@@ -297,9 +284,7 @@
                             type="text"
                             name="employee_id"
                             value="{{ old('employee_id', $person->issuedId?->employee_id) }}"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                     </div>
@@ -315,7 +300,7 @@
 
             <div class="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
 
-                <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+                <div class="border-b border-gray-200 bg-gray-50 px-4 sm:px-6 py-4">
 
                     <h3 class="font-bold text-gray-900">
                         Basic Information
@@ -328,7 +313,7 @@
                 </div>
 
 
-                <div class="grid gap-5 p-6 md:grid-cols-2 lg:grid-cols-4">
+                <div class="grid min-w-0 grid-cols-1 gap-4 sm:gap-5 p-4 sm:p-6 md:grid-cols-2 xl:grid-cols-4 [&>div]:min-w-0">
 
                     {{-- FIRST NAME --}}
                     <div>
@@ -341,9 +326,7 @@
                             type="text"
                             name="first_name"
                             value="{{ old('first_name', $person->first_name) }}"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                     </div>
@@ -360,9 +343,7 @@
                             type="text"
                             name="middle_name"
                             value="{{ old('middle_name', $person->middle_name) }}"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                     </div>
@@ -379,9 +360,7 @@
                             type="text"
                             name="last_name"
                             value="{{ old('last_name', $person->last_name) }}"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                     </div>
@@ -399,9 +378,7 @@
                             name="extension_name"
                             value="{{ old('extension_name', $person->extension_name) }}"
                             placeholder="Jr., Sr., III"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                     </div>
@@ -416,9 +393,7 @@
 
                         <select
                             name="sex"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                             <option
@@ -454,16 +429,14 @@
                                 'birth_date',
                                 $person->birth_date?->format('Y-m-d')
                             ) }}"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                     </div>
 
 
                     {{-- BIRTH PLACE --}}
-                    <div class="lg:col-span-2">
+                    <div class="xl:col-span-2">
 
                         <label class="mb-1 block text-sm font-medium text-gray-700">
                             Birth Place
@@ -473,9 +446,7 @@
                             type="text"
                             name="birth_place"
                             value="{{ old('birth_place', $person->birth_place) }}"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                     </div>
@@ -490,9 +461,7 @@
 
                         <select
                             name="civil_status"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                             @foreach([
@@ -533,9 +502,7 @@
                             type="text"
                             name="religion"
                             value="{{ old('religion', $person->religion) }}"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                     </div>
@@ -552,9 +519,7 @@
                             type="text"
                             name="citizenship"
                             value="{{ old('citizenship', $person->citizenship) }}"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                     </div>
@@ -569,8 +534,7 @@
                         <select
                             id="mode_of_citizenship"
                             name="mode_of_citizenship"
-                            class="w-full rounded-lg border-gray-300
-                                focus:border-green-600 focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                             @foreach ([
@@ -587,7 +551,7 @@
                         </select>
 
                         @error('mode_of_citizenship')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-1 text-sm text-red-600 break-words">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -600,8 +564,7 @@
                         <select
                             id="blood_type"
                             name="blood_type"
-                            class="w-full rounded-lg border-gray-300
-                                focus:border-green-600 focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
                             
                             @foreach ([
@@ -625,7 +588,7 @@
                         </select>
 
                         @error('blood_type')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-1 text-sm text-red-600 break-words">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -642,9 +605,7 @@
                             step="0.01"
                             name="height_m"
                             value="{{ old('height_m', $person->height_m) }}"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                     </div>
@@ -662,9 +623,7 @@
                             step="0.01"
                             name="weight_kg"
                             value="{{ old('weight_kg', $person->weight_kg) }}"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                     </div>                    
@@ -679,8 +638,7 @@
                         <select
                             id="specialization"
                             name="specialization"
-                            class="w-full rounded-lg border-gray-300
-                                focus:border-green-600 focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                             @foreach ([
@@ -770,7 +728,7 @@
                         </select>
 
                         @error('specialization')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            <p class="mt-1 text-sm text-red-600 break-words">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -789,9 +747,7 @@
                                 'mobile_number',
                                 $person->mobile_number
                             ) }}"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                     </div>
@@ -811,9 +767,7 @@
                                 'telephone_number',
                                 $person->telephone_number
                             ) }}"
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                     </div>
@@ -825,10 +779,10 @@
             {{-- =================================================
             GOVERNMENT IDs
             ================================================== --}}
-            <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
                 <h3 class="mb-4 font-bold text-gray-900">Government IDs</h3>
 
-                <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                <div class="grid min-w-0 grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3 [&>div]:min-w-0">
                     @foreach ([
                         'umid_no' => 'UMID Number',
                         'gsis_no' => 'GSIS Number',
@@ -848,12 +802,11 @@
                                 type="text"
                                 name="{{ $field }}"
                                 value="{{ old($field, data_get($person->issuedId, $field)) }}"
-                                class="w-full rounded-lg border-gray-300
-                                    focus:border-green-600 focus:ring-green-600"
+                                class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                             >
 
                             @error($field)
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-1 text-sm text-red-600 break-words">{{ $message }}</p>
                             @enderror
                         </div>
                     @endforeach
@@ -880,7 +833,7 @@
                     $addressKey = $address->id;
                 @endphp
 
-                <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
                     <h3 class="mb-4 font-bold text-gray-900">
                         Home Address
                     </h3>
@@ -893,10 +846,10 @@
                     >
 
                     @error("addresses.$addressKey.id")
-                        <p class="mb-3 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mb-3 text-sm text-red-600 break-words">{{ $message }}</p>
                     @enderror
 
-                    <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+                    <div class="grid min-w-0 grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-4 [&>div]:min-w-0">
                         {{-- ADDRESS TYPE --}}
                         <div>
                             <label
@@ -910,8 +863,7 @@
                                 id="address_{{ $addressKey }}_type"
                                 name="addresses[{{ $addressKey }}][type]"
                                 required
-                                class="w-full rounded-lg border-gray-300
-                                    focus:border-green-600 focus:ring-green-600"
+                                class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                             >
                                 
                                 @foreach ([
@@ -933,7 +885,7 @@
                             </select>
 
                             @error("addresses.$addressKey.type")
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-1 text-sm text-red-600 break-words">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -955,12 +907,11 @@
                                         'addresses.'.$addressKey.'.'.$field,
                                         data_get($address, $field)
                                     ) }}"
-                                    class="w-full rounded-lg border-gray-300
-                                        focus:border-green-600 focus:ring-green-600"
+                                    class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                                 >
 
                                 @error("addresses.$addressKey.$field")
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    <p class="mt-1 text-sm text-red-600 break-words">{{ $message }}</p>
                                 @enderror
                             </div>
                         @endforeach
@@ -978,19 +929,12 @@
             ================================================== --}}
 
             <div
-                class="sticky bottom-0
-                       flex justify-end gap-3
-                       border-t border-gray-200
-                       bg-white/95 px-6 py-4
-                       shadow-lg backdrop-blur"
+                class="relative flex flex-col gap-3 sm:sticky sm:bottom-0 sm:flex-row sm:justify-end border-t border-gray-200 bg-white/95 px-4 sm:px-6 py-4 shadow-lg backdrop-blur"
             >
 
                 <a
                     href="{{ route('data-management.personnel') }}"
-                    class="rounded-lg border border-gray-300
-                           bg-white px-5 py-2.5
-                           text-sm font-semibold text-gray-700
-                           hover:bg-gray-50"
+                    class="inline-flex min-h-11 w-full items-center justify-center text-center sm:w-auto rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
                 >
                     Cancel
                 </a>
@@ -998,11 +942,7 @@
 
                 <button
                     type="submit"
-                    class="rounded-lg bg-green-700
-                           px-6 py-2.5
-                           text-sm font-semibold text-white
-                           shadow-sm
-                           transition hover:bg-green-800"
+                    class="inline-flex min-h-11 w-full items-center justify-center text-center sm:w-auto rounded-lg bg-green-700 px-4 sm:px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800"
                 >
                     Save Changes
                 </button>

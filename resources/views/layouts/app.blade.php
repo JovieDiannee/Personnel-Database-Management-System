@@ -2,20 +2,22 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-
     <meta charset="utf-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>
         {{ config('app.name', 'Personnel Database Management System') }}
     </title>
 
-     {{-- FAVICON --}}
-    <link rel="icon" type="image/png" href="{{ asset('images/pdms-favicon.png') }}">
+    {{-- FAVICON --}}
+    <link
+        rel="icon"
+        type="image/png"
+        href="{{ asset('images/pdms-favicon.png') }}"
+    >
 
+    {{-- FONTS --}}
     <link rel="preconnect" href="https://fonts.bunny.net">
 
     <link
@@ -28,90 +30,49 @@
         'resources/js/app.js'
     ])
 
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+
     @stack('styles')
-
 </head>
-
 
 <body class="font-sans antialiased">
 
-    {{-- =====================================================
-        GLOBAL ALPINE STATE
-    ====================================================== --}}
-
+    {{-- GLOBAL ALPINE STATE --}}
     <div
         x-data="{ sidebarOpen: true }"
         class="min-h-screen bg-gray-50"
     >
 
+        {{-- SIDEBAR: DESKTOP ONLY --}}
+        <div class="hidden lg:block">
+            @include('layouts.sidebar')
+        </div>
 
-        {{-- =================================================
-            SIDEBAR
-        ================================================== --}}
-
-        @include('layouts.sidebar')
-
-
-        {{-- =================================================
-            MAIN APPLICATION
-
-            IMPORTANT:
-            The margin MUST match the sidebar width.
-        ================================================== --}}
-
+        {{-- MAIN APPLICATION --}}
         <div
-            class="min-h-screen
-                   transition-all duration-300 ease-in-out"
-
-            :class="sidebarOpen
-                ? 'ml-72'
-                : 'ml-20'"
+            class="min-h-screen min-w-0 transition-all duration-300 ease-in-out"
+            :class="sidebarOpen ? 'lg:ml-72' : 'lg:ml-20'"
         >
 
-
-            {{-- =================================================
-                TOP NAVIGATION
-            ================================================== --}}
-
+            {{-- TOP NAVIGATION --}}
             @include('layouts.navigation')
 
-
-            {{-- =================================================
-                PAGE HEADING
-            ================================================== --}}
-
+            {{-- PAGE HEADING --}}
             @isset($header)
-
-                <header
-                    class="border-b-4
-                           border-green-700
-                           bg-white
-                           shadow-sm"
-                >
-
-                    <div
-                        class="mx-auto max-w-7xl
-                               px-4 py-6
-                               sm:px-6 lg:px-8"
-                    >
-
+                <header class="border-b-4 border-green-700 bg-white shadow-sm">
+                    <div class="mx-auto max-w-7xl break-words px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
                         {{ $header }}
-
                     </div>
-
                 </header>
-
             @endisset
 
-
-            {{-- =================================================
-                PAGE CONTENT
-            ================================================== --}}
-
-            <main>
-
+            {{-- PAGE CONTENT --}}
+            <main class="min-w-0">
                 {{ $slot }}
-
             </main>
 
         </div>
@@ -121,5 +82,4 @@
     @stack('scripts')
 
 </body>
-
 </html>

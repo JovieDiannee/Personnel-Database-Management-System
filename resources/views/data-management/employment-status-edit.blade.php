@@ -3,11 +3,48 @@
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css"
     >
+    <style>
+        .employment-profile .ts-wrapper {
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+        }
+        .employment-profile .ts-control {
+            min-height: 44px;
+            border-radius: 0.5rem;
+            align-items: center;
+        }
+        .employment-profile .ts-control > .item,
+        .employment-profile .ts-dropdown .option {
+            white-space: normal;
+            overflow-wrap: anywhere;
+            max-width: 100%;
+        }
+        .employment-profile .ts-control > input {
+            min-width: 0 !important;
+            max-width: 100% !important;
+        }
+        .employment-profile .ts-dropdown {
+            max-width: 100%;
+        }
+        .employment-profile .ts-dropdown-content {
+            max-height: 240px;
+            max-height: min(240px, 40dvh);
+            overscroll-behavior: contain;
+        }
+        @media (max-width: 639px) {
+            .employment-profile .ts-control,
+            .employment-profile .ts-control > input,
+            .employment-profile .ts-dropdown {
+                font-size: 16px;
+            }
+        }
+    </style>
 @endpush
 
 <x-app-layout>
 
-    <div class="mx-auto max-w-7xl px-6 py-8">
+    <div class="employment-profile mx-auto w-full min-w-0 max-w-7xl px-4 py-4 sm:px-6 sm:py-8">
 
         {{-- =====================================================
             BREADCRUMB TRAIL
@@ -15,15 +52,14 @@
         <div class="mb-4">
 
             <nav
-                class="flex items-center text-sm"
+                class="flex flex-wrap items-center gap-y-2 text-xs sm:text-sm"
                 aria-label="Breadcrumb"
             >
 
                 {{-- Home --}}
                 <a
                     href="{{ route('dashboard') }}"
-                    class="flex items-center font-medium text-gray-500
-                           transition hover:text-green-700"
+                    class="flex items-center font-medium text-gray-500 transition hover:text-green-700"
                 >
                     <svg
                         class="mr-1.5 h-4 w-4"
@@ -62,8 +98,7 @@
                 {{-- Data Management --}}
                 <a
                     href="{{ route('data-management') }}"
-                    class="font-medium text-gray-500
-                           transition hover:text-green-700"
+                    class="font-medium text-gray-500 transition hover:text-green-700"
                 >
                     Data Management
                 </a>
@@ -88,8 +123,7 @@
                 {{-- Employment Status --}}
                 <a
                     href="{{ route('data-management.employment-status') }}"
-                    class="font-medium text-gray-500
-                           transition hover:text-green-700"
+                    class="font-medium text-gray-500 transition hover:text-green-700"
                 >
                     Employment Status
                 </a>
@@ -113,7 +147,7 @@
 
                 {{-- Current Page --}}
                 <span class="font-semibold text-green-800">
-                    Employee Employment Profile
+                    Update
                 </span>
 
             </nav>
@@ -127,16 +161,12 @@
         @if(session('success'))
 
             <div
-                class="mb-6 flex items-center gap-3 rounded-xl
-                       border border-green-300 bg-green-100
-                       px-5 py-4
-                       text-sm font-medium text-green-900"
+                class="mb-6 flex items-center gap-3 rounded-xl border border-green-300 bg-green-100 px-5 py-4 text-sm font-medium text-green-900"
             >
 
                 {{-- SUCCESS ICON --}}
                 <div
-                    class="flex h-9 w-9 shrink-0 items-center justify-center
-                           rounded-full bg-green-600 text-white"
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-600 text-white"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -179,9 +209,7 @@
         @if(session('error'))
 
             <div
-                class="mb-6 rounded-xl border border-red-200
-                       bg-red-50 px-5 py-4
-                       text-sm text-red-700"
+                class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700"
             >
                 {{ session('error') }}
             </div>
@@ -196,14 +224,12 @@
             $basic = $record->user?->basicInformation;
         @endphp
 
-        <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
 
-            <div class="flex items-center gap-4">
+            <div class="flex min-w-0 items-start gap-3 sm:items-center sm:gap-4 [&>div]:min-w-0">
 
                 <div
-                    class="flex h-14 w-14 items-center justify-center
-                           rounded-full bg-green-100
-                           text-xl font-bold text-green-700"
+                    class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-green-100 text-xl font-bold text-green-700"
                 >
                     {{ strtoupper(substr($basic?->first_name ?? '?', 0, 1)) }}
                     {{ strtoupper(substr($basic?->last_name ?? '?', 0, 1)) }}
@@ -212,14 +238,14 @@
 
                 <div>
 
-                    <h2 class="text-xl font-bold text-gray-900">
+                    <h2 class="break-words text-lg font-bold text-gray-900 sm:text-xl">
                         {{ $basic?->last_name ?? '—' }},
                         {{ $basic?->first_name ?? '—' }}
                         {{ $basic?->middle_name ?? '' }}
                         {{ $basic?->extension_name ?? '' }}
                     </h2>
 
-                    <p class="text-sm text-gray-500">
+                    <p class="text-sm text-gray-500 break-words">
                         {{ $record->user?->email ?? 'No email address' }}
                     </p>
 
@@ -236,8 +262,7 @@
         @if($errors->any())
 
             <div
-                class="mb-6 rounded-xl border border-red-200
-                       bg-red-50 px-5 py-4"
+                class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4"
             >
 
                 <p class="font-semibold text-red-700">
@@ -277,10 +302,10 @@
             {{-- =================================================
                 EMPLOYMENT INFORMATION
             ================================================== --}}
-            <div class="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <div class="mb-6 min-w-0 rounded-2xl border border-gray-200 bg-white shadow-sm">
 
                 {{-- SECTION HEADER --}}
-                <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+                <div class="border-b border-gray-200 bg-gray-50 px-4 sm:px-6 py-4">
                     <h3 class="font-bold text-gray-900">
                         Employment Information
                     </h3>
@@ -291,12 +316,12 @@
                 </div>
 
                 {{-- FORM GRID --}}
-                <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2 lg:grid-cols-4">
+                <div class="grid grid-cols-1 gap-5 p-4 sm:p-6 md:grid-cols-2 xl:grid-cols-4 [&>div]:min-w-0">
 
                     {{-- =================================================
                         PLANTILLA ITEM NUMBER — FULL WIDTH
                     ================================================== --}}
-                    <div class="md:col-span-2 lg:col-span-4">
+                    <div class="min-w-0 md:col-span-2 xl:col-span-4">
                         <label
                             for="item_number"
                             class="mb-1 block text-sm font-medium text-gray-700"
@@ -307,7 +332,7 @@
                         <select
                             id="item_number"
                             name="item_number"
-                            class="searchable-dropdown"
+                            class="searchable-dropdown w-full min-w-0"
                             data-placeholder="Search by item number or position title..."
                         >
                             
@@ -336,7 +361,7 @@
                     {{-- =================================================
                         SCHOOL — FULL WIDTH
                     ================================================== --}}
-                    <div class="md:col-span-2 lg:col-span-4">
+                    <div class="min-w-0 md:col-span-2 xl:col-span-4">
                         <label
                             for="school_id"
                             class="mb-1 block text-sm font-medium text-gray-700"
@@ -347,7 +372,7 @@
                         <select
                             id="school_id"
                             name="school_id"
-                            class="searchable-dropdown"
+                            class="searchable-dropdown w-full min-w-0"
                             data-placeholder="Search by school ID or school name..."
                         >
 
@@ -376,7 +401,7 @@
                     {{-- =================================================
                         DATE OF ORIGINAL APPOINTMENT — 25%
                     ================================================== --}}
-                    <div class="lg:col-span-1">
+                    <div class="min-w-0 xl:col-span-1">
                         <label
                             for="date_of_original_appointment"
                             class="mb-1 block text-sm font-medium text-gray-700"
@@ -396,8 +421,7 @@
                                     )->format('Y-m-d')
                                     : ''
                             ) }}"
-                            class="w-full rounded-lg border-gray-300
-                                focus:border-green-600 focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                         @error('date_of_original_appointment')
@@ -410,7 +434,7 @@
                     {{-- =================================================
                         DATE OF LAST PROMOTION — 25%
                     ================================================== --}}
-                    <div class="lg:col-span-1">
+                    <div class="min-w-0 xl:col-span-1">
                         <label
                             for="date_of_last_promotion"
                             class="mb-1 block text-sm font-medium text-gray-700"
@@ -430,8 +454,7 @@
                                     )->format('Y-m-d')
                                     : ''
                             ) }}"
-                            class="w-full rounded-lg border-gray-300
-                                focus:border-green-600 focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                         @error('date_of_last_promotion')
@@ -444,7 +467,7 @@
                     {{-- =================================================
                         EMPLOYMENT STATUS — 25%
                     ================================================== --}}
-                    <div class="lg:col-span-1">
+                    <div class="min-w-0 xl:col-span-1">
                         <label
                             for="employment_status"
                             class="mb-1 block text-sm font-medium text-gray-700"
@@ -468,8 +491,7 @@
                         <select
                             id="employment_status"
                             name="employment_status"
-                            class="w-full rounded-lg border-gray-300
-                                focus:border-green-600 focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
                             @foreach ($employmentStatuses as $status)
                                 <option
@@ -496,7 +518,7 @@
                     {{-- =================================================
                         WARM BODY STATUS — 25%
                     ================================================== --}}
-                    <div class="lg:col-span-1">
+                    <div class="min-w-0 xl:col-span-1">
                         <label
                             for="warm_body_status"
                             class="mb-1 block text-sm font-medium text-gray-700"
@@ -507,8 +529,7 @@
                         <select
                             id="warm_body_status"
                             name="warm_body_status"
-                            class="w-full rounded-lg border-gray-300
-                                focus:border-green-600 focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
                             @foreach ([
                                 'Original',
@@ -545,7 +566,7 @@
                     {{-- =================================================
                         NATURE OF WORK — 25%
                     ================================================== --}}
-                    <div class="lg:col-span-1">
+                    <div class="min-w-0 xl:col-span-1">
                         <label
                             for="nature_of_work"
                             class="mb-1 block text-sm font-medium text-gray-700"
@@ -556,8 +577,7 @@
                         <select
                             id="nature_of_work"
                             name="nature_of_work"
-                            class="w-full rounded-lg border-gray-300
-                                focus:border-green-600 focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
                             @foreach ([
                                 'District Supervisor',
@@ -601,7 +621,7 @@
                     {{-- =================================================
                         SOURCE OF FUND — 25%
                     ================================================== --}}
-                    <div class="lg:col-span-1">
+                    <div class="min-w-0 xl:col-span-1">
                         <label
                             for="source_of_fund"
                             class="mb-1 block text-sm font-medium text-gray-700"
@@ -612,8 +632,7 @@
                         <select
                             id="source_of_fund"
                             name="source_of_fund"
-                            class="w-full rounded-lg border-gray-300
-                                focus:border-green-600 focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
                             @foreach ([
                                 'Plantilla',
@@ -646,7 +665,7 @@
                     {{-- =================================================
                         MONTHLY SALARY — 25%
                     ================================================== --}}
-                    <div class="lg:col-span-1">
+                    <div class="min-w-0 xl:col-span-1">
                         <label
                             for="monthly_salary"
                             class="mb-1 block text-sm font-medium text-gray-700"
@@ -664,8 +683,7 @@
                                 'monthly_salary',
                                 $record->monthly_salary
                             ) }}"
-                            class="w-full rounded-lg border-gray-300
-                                focus:border-green-600 focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                         @error('monthly_salary')
@@ -678,7 +696,7 @@
                     {{-- =================================================
                         CONTRACT DURATION — 25%
                     ================================================== --}}
-                    <div class="lg:col-span-1">
+                    <div class="min-w-0 xl:col-span-1">
                         <label
                             for="contract_duration"
                             class="mb-1 block text-sm font-medium text-gray-700"
@@ -695,8 +713,7 @@
                                 $record->contract_duration
                             ) }}"
                             placeholder="Example: Jan 2026 - Dec 2026"
-                            class="w-full rounded-lg border-gray-300
-                                focus:border-green-600 focus:ring-green-600"
+                            class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
 
                         @error('contract_duration')
@@ -713,9 +730,9 @@
             {{-- =================================================
                 CURRENT ASSIGNMENT SUMMARY
             ================================================== --}}
-            <div class="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <div class="mb-6 min-w-0 rounded-2xl border border-gray-200 bg-white shadow-sm">
 
-                <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+                <div class="border-b border-gray-200 bg-gray-50 px-4 sm:px-6 py-4">
 
                     <h3 class="font-bold text-gray-900">
                         Current Assignment Summary
@@ -728,7 +745,7 @@
                 </div>
 
 
-                <div class="grid gap-5 p-6 md:grid-cols-2 lg:grid-cols-4">
+                <div class="grid grid-cols-1 gap-5 p-4 sm:p-6 md:grid-cols-2 xl:grid-cols-4 [&>div]:min-w-0">
 
                     <div>
 
@@ -736,7 +753,7 @@
                             School 
                         </p>
 
-                        <p class="mt-1 text-sm font-semibold text-gray-900">
+                        <p class="mt-1 text-sm font-semibold text-gray-900 break-words">
                             {{ $record->school?->school_id ?? '—' }} - {{ $record->school?->school_name ?? '—' }}
                         </p>
 
@@ -749,7 +766,7 @@
                             District
                         </p>
 
-                        <p class="mt-1 text-sm font-semibold text-gray-900">
+                        <p class="mt-1 text-sm font-semibold text-gray-900 break-words">
                             {{ $record->school?->school_district ?? '—' }}
                         </p>
 
@@ -762,7 +779,7 @@
                             Position
                         </p>
 
-                        <p class="mt-1 text-sm font-semibold text-gray-900">
+                        <p class="mt-1 text-sm font-semibold text-gray-900 break-words">
                             {{ $record->plantilla?->position_title ?? '—' }}
                         </p>
 
@@ -775,7 +792,7 @@
                             Plantilla Item
                         </p>
 
-                        <p class="mt-1 text-sm font-semibold text-gray-900">
+                        <p class="mt-1 text-sm font-semibold text-gray-900 break-words">
                             {{ $record->plantilla?->item_number ?? '—' }}
                         </p>
 
@@ -790,21 +807,14 @@
                 SAVE BUTTON
             ================================================== --}}
             <div
-                class="sticky bottom-0
-                       flex justify-end gap-3
-                       border-t border-gray-200
-                       bg-white/95 px-6 py-4
-                       shadow-lg backdrop-blur"
+                class="relative flex flex-col gap-3 sm:sticky sm:bottom-0 sm:flex-row sm:justify-end border-t border-gray-200 bg-white/95 px-4 sm:px-6 py-4 shadow-lg backdrop-blur"
             >
 
                 <a
                     href="{{ route(
                         'data-management.employment-status'
                     ) }}"
-                    class="rounded-lg border border-gray-300
-                           bg-white px-5 py-2.5
-                           text-sm font-semibold text-gray-700
-                           hover:bg-gray-50"
+                    class="inline-flex min-h-11 w-full items-center justify-center text-center sm:w-auto rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
                 >
                     Cancel
                 </a>
@@ -812,11 +822,7 @@
 
                 <button
                     type="submit"
-                    class="rounded-lg bg-green-700
-                           px-6 py-2.5
-                           text-sm font-semibold text-white
-                           shadow-sm
-                           transition hover:bg-green-800"
+                    class="inline-flex min-h-11 w-full items-center justify-center text-center sm:w-auto rounded-lg bg-green-700 px-4 sm:px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800"
                 >
                     Save Changes
                 </button>

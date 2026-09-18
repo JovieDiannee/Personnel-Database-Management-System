@@ -1,24 +1,23 @@
 
 <x-app-layout>
 
-    <div class="min-h-screen bg-gray-50 py-8">
+    <div class="min-h-screen min-w-0 bg-gray-50 py-4 sm:py-8">
 
-        <div class="mx-auto max-w-7xl px-6">
+        <div class="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6">
 
 
             {{-- BREADCRUMB TRAIL --}}
                 <div class="mb-4">
 
                     <nav
-                        class="flex items-center text-sm"
+                        class="flex flex-wrap items-center gap-y-2 text-xs sm:text-sm"
                         aria-label="Breadcrumb"
                     >
 
                         {{-- Home --}}
                         <a
                             href="{{ route('dashboard') }}"
-                            class="flex items-center font-medium text-gray-500
-                                transition hover:text-green-700"
+                            class="flex items-center font-medium text-gray-500 transition hover:text-green-700"
                         >
                             <svg
                                 class="mr-1.5 h-4 w-4"
@@ -55,8 +54,7 @@
                         {{-- Data Management --}}
                         <a
                             href="{{ route('data-management') }}"
-                            class="font-medium text-gray-500
-                                transition hover:text-green-700"
+                            class="font-medium text-gray-500 transition hover:text-green-700"
                         >
                             Data Management
                         </a>
@@ -79,8 +77,7 @@
                         {{-- Medical Allowance --}}
                         <a
                             href="{{ route('data-management.medical-allowance') }}"
-                            class="font-medium text-gray-500
-                                transition hover:text-green-700"
+                            class="font-medium text-gray-500 transition hover:text-green-700"
                         >
                             Medical Allowance
                         </a>
@@ -112,25 +109,18 @@
             {{-- TAB NAVIGATION --}}
             <div class="mb-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 
-                <div class="flex w-full">
+                <div class="grid w-full grid-cols-1 sm:grid-cols-2">
 
                     {{-- TAB 1: RECORDS --}}
                     <a
                         href="{{ route('data-management.medical-allowance') }}"
-                        class="flex flex-1 items-center justify-center gap-2
-                            border-b-2 border-transparent
-                            bg-white px-5 py-4
-                            text-center text-sm font-semibold
-                            text-gray-700
-                            transition duration-200
-                            hover:bg-green-50
-                            hover:text-green-800"
+                        class="flex flex-1 items-center justify-center gap-2 border-b-2 border-transparent bg-white px-5 py-4 text-center text-sm font-semibold text-gray-700 transition duration-200 hover:bg-green-50 hover:text-green-800"
                         >
 
                         {{-- ICON --}}
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5"
+                            class="h-5 w-5 shrink-0"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -162,19 +152,13 @@
                     {{-- TAB 2: REPORT --}}
                     <a
                         href="{{ route('data-management.medical-allowance.report') }}"
-                        class="flex flex-1 items-center justify-center gap-2
-                            border-b-2 border-green-700
-                            bg-green-50 px-5 py-4
-                            text-center text-sm font-semibold
-                            text-green-800
-                            transition duration-200
-                            hover:bg-green-100"
+                        class="flex flex-1 items-center justify-center gap-2 border-b-2 border-green-700 bg-green-50 px-5 py-4 text-center text-sm font-semibold text-green-800 transition duration-200 hover:bg-green-100"
                     >
 
                         {{-- ICON --}}
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5"
+                            class="h-5 w-5 shrink-0"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -217,10 +201,10 @@
             <div>
 
                 {{-- SUMMARY CARDS --}}
-                <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
                     {{-- TOTAL SCHOOLS --}}
-                    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <div class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
                         <p class="text-sm text-gray-500">
                             Total Schools
                         </p>
@@ -231,7 +215,7 @@
                     </div>
 
                     {{-- TOTAL GROUP AVAILMENT --}}
-                    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <div class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
                         <p class="text-sm text-gray-500">
                             Total Group Availment
                         </p>
@@ -242,7 +226,7 @@
                     </div>
 
                     {{-- TOTAL INDIVIDUAL AVAILMENT --}}
-                    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <div class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
                         <p class="text-sm text-gray-500">
                             Total Individual Availment
                         </p>
@@ -253,7 +237,7 @@
                     </div>
 
                     {{-- TOTAL ELIGIBLE --}}
-                    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <div class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
                         <p class="text-sm text-gray-500">
                             Total Eligible (Group + Individual)
                         </p>
@@ -278,8 +262,8 @@
                     >
 
                         <div
-                            class="flex items-center justify-between gap-4"
-                            style="display: flex; flex-direction: row;"
+                            class="flex min-w-0 flex-col items-stretch gap-4 xl:flex-row xl:items-center xl:justify-between"
+                            
                         >
 
                             {{-- ================================================= --}}
@@ -306,16 +290,16 @@
                             <form
                                 method="GET"
                                 action="{{ route('data-management.medical-allowance.report') }}"
-                                class="shrink-0"
+                                class="w-full min-w-0 xl:w-2/3"
                             >
 
                                 <div
-                                    class="flex items-end gap-1.5"
-                                    style="display: flex; flex-direction: row;"
+                                    class="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end"
+                                    
                                     >
 
                                     {{-- SEARCH --}}
-                                    <div style="width: 185px;">
+                                    <div class="min-w-0 w-full sm:flex-1">
 
                                         <label
                                             for="search"
@@ -330,23 +314,14 @@
                                             name="search"
                                             value="{{ $search }}"
                                             placeholder="School ID or name..."
-                                            class="h-8 w-full rounded-md
-                                                border-0
-                                                bg-white
-                                                px-2.5
-                                                text-xs
-                                                text-gray-700
-                                                shadow-sm
-                                                focus:outline-none
-                                                focus:ring-1
-                                                focus:ring-white"
+                                            class="h-11 min-w-0 w-full rounded-md border-0 bg-white px-2.5 text-xs text-gray-700 shadow-sm focus:outline-none focus:ring-1 focus:ring-white"
                                         >
 
                                     </div>
 
 
                                     {{-- DISTRICT --}}
-                                    <div style="width: 145px;">
+                                    <div class="min-w-0 w-full sm:flex-1">
 
                                         <label
                                             for="district"
@@ -358,16 +333,7 @@
                                         <select
                                             id="district"
                                             name="district"
-                                            class="h-8 w-full rounded-md
-                                                border-0
-                                                bg-white
-                                                px-2.5
-                                                text-xs
-                                                text-gray-700
-                                                shadow-sm
-                                                focus:outline-none
-                                                focus:ring-1
-                                                focus:ring-white"
+                                            class="h-11 min-w-0 w-full rounded-md border-0 bg-white px-2.5 text-xs text-gray-700 shadow-sm focus:outline-none focus:ring-1 focus:ring-white"
                                         >
 
                                             <option value="">
@@ -391,24 +357,11 @@
 
 
                                     {{-- BUTTONS --}}
-                                    <div class="flex items-end gap-2">
+                                    <div class="flex w-full items-end gap-2 sm:w-auto sm:shrink-0 [&>*]:flex-1 sm:[&>*]:flex-none">
                                         {{-- SEARCH --}}
                                         <button
                                             type="submit"
-                                            class="h-10 rounded-lg
-                                                bg-white
-                                                px-4
-                                                text-xs
-                                                font-semibold
-                                                text-green-800
-                                                shadow-sm
-                                                transition-all
-                                                duration-200
-                                                hover:bg-green-50
-                                                hover:shadow-md
-                                                focus:outline-none
-                                                focus:ring-2
-                                                focus:ring-white/50"
+                                            class="h-11 rounded-lg bg-white px-4 text-xs font-semibold text-green-800 shadow-sm transition-all duration-200 hover:bg-green-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-white/50"
                                         >
                                             Search
                                         </button>
@@ -416,19 +369,7 @@
                                         {{-- RESET --}}
                                         <a
                                             href="{{ route('data-management.medical-allowance.report') }}"
-                                            class="flex h-10 items-center justify-center
-                                                rounded-lg
-                                                border border-white/50
-                                                bg-white/10
-                                                px-4
-                                                text-xs
-                                                font-semibold
-                                                text-white
-                                                transition-all
-                                                duration-200
-                                                hover:bg-white
-                                                hover:text-green-800
-                                                hover:shadow-md"
+                                            class="flex h-11 items-center justify-center rounded-lg border border-white/50 bg-white/10 px-4 text-xs font-semibold text-white transition-all duration-200 hover:bg-white hover:text-green-800 hover:shadow-md"
                                         >
                                             Reset
                                         </a>
@@ -449,9 +390,12 @@
                 {{-- REPORT TABLE --}}
                 {{-- ===================================================== --}}
 
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div class="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 
-                    <div class="overflow-x-auto">
+                    <p class="border-b border-gray-100 px-4 py-2 text-xs text-gray-500 lg:hidden">
+                        Swipe left or right to view all report columns.
+                    </p>
+                    <div class="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain" tabindex="0" role="region" aria-label="School medical allowance report, horizontally scrollable">
 
                         <table class="w-full min-w-[1200px] divide-y divide-gray-200">
 
@@ -558,7 +502,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="px-6 py-12 text-center text-sm text-gray-500">
+                                        <td colspan="9" class="px-4 sm:px-6 py-12 text-center text-sm text-gray-500">
                                             No medical allowance records found.
                                         </td>
                                     </tr>
@@ -571,7 +515,7 @@
                     </div>
 
                     {{-- PAGINATION --}}
-                    <div class="border-t border-gray-200 bg-gray-50 px-6 py-4">
+                    <div class="border-t border-gray-200 bg-gray-50 px-4 sm:px-6 py-4">
 
                         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 
@@ -613,7 +557,7 @@
             {{-- GENERAL ERROR --}}
             @if(session('error'))
 
-                <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-5">
+                <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 sm:p-5">
 
                     <p class="font-semibold text-red-800">
                         {{ session('error') }}
@@ -627,13 +571,13 @@
             {{-- MEDICAL ALLOWANCE IMPORT RESULT --}}
             @if(session('medical_allowance_import_result'))
 
-                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-5">
+                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 sm:p-5">
 
                     <h3 class="text-lg font-bold text-green-900">
                         Medical Allowance Import Completed
                     </h3>
 
-                    <div class="mt-4 grid gap-4 md:grid-cols-4">
+                    <div class="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
 
                         {{-- NEW RECORDS --}}
                         <div>

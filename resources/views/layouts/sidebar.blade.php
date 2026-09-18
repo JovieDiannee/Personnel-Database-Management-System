@@ -4,11 +4,9 @@
 
 <aside
     class="fixed inset-y-0 left-0 z-50
-           flex flex-col
-           bg-white
-           shadow-xl
+           hidden flex-col lg:flex
+           bg-white shadow-xl
            transition-all duration-300"
-
     :class="sidebarOpen ? 'w-72' : 'w-20'"
 >
 

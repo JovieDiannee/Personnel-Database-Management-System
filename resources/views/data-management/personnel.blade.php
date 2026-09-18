@@ -1,22 +1,21 @@
 <x-app-layout>
 
-    <div class="min-h-screen bg-gray-50 py-8">
+    <div class="min-h-screen min-w-0 bg-gray-50 py-4 sm:py-8">
 
-        <div class="mx-auto max-w-7xl px-6">
+        <div class="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6">
 
             {{-- BREADCRUMB TRAIL --}}
             <div class="mb-4">
 
                 <nav
-                    class="flex items-center text-sm"
+                    class="flex flex-wrap items-center gap-y-2 text-xs sm:text-sm"
                     aria-label="Breadcrumb"
                 >
 
                     {{-- Home --}}
                     <a
                         href="{{ route('dashboard') }}"
-                        class="flex items-center font-medium text-gray-500
-                            transition hover:text-green-700"
+                        class="flex items-center font-medium text-gray-500 transition hover:text-green-700"
                     >
                         <svg
                             class="mr-1.5 h-4 w-4"
@@ -53,8 +52,7 @@
                     {{-- Data Management --}}
                     <a
                         href="{{ route('data-management') }}"
-                        class="font-medium text-gray-500
-                            transition hover:text-green-700"
+                        class="font-medium text-gray-500 transition hover:text-green-700"
                     >
                         Data Management
                     </a>
@@ -98,18 +96,17 @@
                 {{-- SUCCESS / UPDATE NOTIFICATION --}}
                 @if($imported > 0 || $updated > 0)
 
-                    <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-5">
+                    <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 sm:p-5">
 
                         <div class="flex items-start gap-3">
 
-                            <div class="mt-0.5 flex h-8 w-8 items-center justify-center
-                                        rounded-full bg-green-600 text-white">
+                            <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-600 text-white">
 
                                 ✓
 
                             </div>
 
-                            <div class="flex-1">
+                            <div class="min-w-0 flex-1">
 
                                 <h3 class="text-lg font-bold text-green-900">
                                     Import Completed Successfully
@@ -188,18 +185,17 @@
                 {{-- ERRORS --}}
                 @if(count($errors) > 0)
 
-                    <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-5">
+                    <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 sm:p-5">
 
                         <div class="flex items-start gap-3">
 
-                            <div class="mt-0.5 flex h-8 w-8 items-center justify-center
-                                        rounded-full bg-red-600 text-white">
+                            <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-600 text-white">
 
                                 !
 
                             </div>
 
-                            <div class="flex-1">
+                            <div class="min-w-0 flex-1">
 
                                 <h3 class="text-lg font-bold text-red-900">
                                     Import Errors
@@ -211,7 +207,7 @@
                                 </p>
 
 
-                                <div class="mt-4 overflow-x-auto rounded-lg border border-red-200 bg-white">
+                                <div class="mt-4 w-full min-w-0 max-w-full overflow-x-auto rounded-lg border border-red-200 bg-white">
 
                                     <table class="min-w-full divide-y divide-red-200">
 
@@ -219,13 +215,11 @@
 
                                             <tr>
 
-                                                <th class="px-4 py-3 text-left text-xs font-semibold
-                                                        uppercase tracking-wider text-red-800">
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-red-800">
                                                     Excel Row
                                                 </th>
 
-                                                <th class="px-4 py-3 text-left text-xs font-semibold
-                                                        uppercase tracking-wider text-red-800">
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-red-800">
                                                     Error
                                                 </th>
 
@@ -240,8 +234,7 @@
 
                                                 <tr>
 
-                                                    <td class="whitespace-nowrap px-4 py-3 text-sm
-                                                            font-semibold text-gray-700">
+                                                    <td class="whitespace-nowrap px-4 py-3 text-sm font-semibold text-gray-700">
 
                                                         {{ isset($error['row']) ? $error['row'] + 4 : '-' }}
 
@@ -280,7 +273,7 @@
             @if(auth()->user()->role === 'super_admin')
 
                 {{-- UPLOAD FILE SECTION --}}
-                <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+                <div class="rounded-2xl bg-white p-4 sm:p-6 shadow-sm ring-1 ring-gray-200">
 
                     <div class="mb-6">
                         <h2 class="text-lg font-bold text-gray-900">
@@ -302,7 +295,7 @@
 
                         @csrf
 
-                        <div class="flex flex-col gap-3 md:flex-row md:items-center">
+                        <div class="flex flex-col gap-3 xl:flex-row xl:items-center">
 
                             {{-- EXCEL FILE LABEL --}}
                             <label
@@ -314,7 +307,7 @@
 
 
                             {{-- CUSTOM FILE INPUT --}}
-                            <div class="relative flex h-10 flex-1">
+                            <div class="relative flex h-11 w-full min-w-0 shrink-0 xl:flex-1">
 
                                 <input
                                     type="file"
@@ -333,16 +326,11 @@
 
 
                                 <div
-                                    class="flex h-full w-full items-center overflow-hidden
-                                        rounded-lg border border-gray-300
-                                        bg-white shadow-sm"
+                                    class="flex h-full w-full items-center overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm"
                                 >
 
                                     <span
-                                        class="flex h-full shrink-0 items-center
-                                            border-r border-green-200
-                                            bg-green-50 px-4
-                                            text-sm font-semibold text-green-700"
+                                        class="flex h-full shrink-0 items-center border-r border-green-200 bg-green-50 px-4 text-sm font-semibold text-green-700"
                                     >
                                         Browse...
                                     </span>
@@ -360,18 +348,11 @@
 
 
                             {{-- ACTION BUTTONS --}}
-                            <div class="flex shrink-0 items-center gap-2">
+                            <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
 
                                 <button
                                     type="submit"
-                                    class="flex h-10 items-center justify-center gap-2
-                                        rounded-lg bg-green-700 px-5
-                                        text-sm font-semibold text-white
-                                        shadow-sm transition
-                                        hover:bg-green-800
-                                        focus:outline-none
-                                        focus:ring-2 focus:ring-green-500
-                                        focus:ring-offset-2"
+                                    class="flex min-h-11 w-full items-center justify-center gap-2 sm:w-auto rounded-lg bg-green-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                                 >
 
                                     <svg
@@ -402,15 +383,7 @@
 
                                 <a
                                     href="{{ route('data-management.personnel-basic-information.download-template') }}"
-                                    class="flex h-10 items-center justify-center gap-2
-                                        rounded-lg border border-green-700
-                                        bg-white px-4
-                                        text-sm font-semibold text-green-700
-                                        shadow-sm transition
-                                        hover:bg-green-50
-                                        focus:outline-none
-                                        focus:ring-2 focus:ring-green-500
-                                        focus:ring-offset-2"
+                                    class="flex min-h-11 w-full items-center justify-center gap-2 sm:w-auto rounded-lg border border-green-700 bg-white px-4 text-sm font-semibold text-green-700 shadow-sm transition hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                                 >
 
                                     <svg
@@ -464,14 +437,11 @@
             @elseif(auth()->user()->role === 'admin')
             
                 <div
-                    class="rounded-2xl border border-green-200
-                        bg-white p-6 shadow-sm"
+                    class="rounded-2xl border border-green-200 bg-white p-4 sm:p-6 shadow-sm"
                     >
 
                     <div
-                        class="flex flex-col gap-5
-                            md:flex-row md:items-center
-                            md:justify-between"
+                        class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between"
                     >
 
                         <div class="flex items-start gap-4">
@@ -496,15 +466,7 @@
                             href="https://forms.gle/zrz8AGM3bdvAWoJ67"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="inline-flex h-10 shrink-0
-                                items-center justify-center gap-2
-                                rounded-lg bg-green-700
-                                px-5 text-sm font-semibold
-                                text-white shadow-sm
-                                transition hover:bg-green-800
-                                focus:outline-none
-                                focus:ring-2 focus:ring-green-500
-                                focus:ring-offset-2"
+                            class="inline-flex min-h-11 w-full shrink-0 md:w-auto items-center justify-center gap-2 rounded-lg bg-green-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                         >
 
                             <svg
@@ -536,10 +498,10 @@
 
 
             {{-- RECORDS SECTION --}}
-            <div class="rounded-lg border border-gray-200 bg-white shadow-sm">
+            <div class="min-w-0 rounded-lg border border-gray-200 bg-white shadow-sm">
 
                 {{-- SECTION HEADER --}}
-                <div class="flex items-center justify-between border-b border-gray-200 p-6">
+                <div class="flex items-center justify-between border-b border-gray-200 p-4 sm:p-6">
 
                     <div>
                         <h2 class="text-lg font-semibold text-gray-800">
@@ -554,7 +516,7 @@
 
 
                 {{-- SEARCH --}}
-                <div class="border-b border-gray-200 p-6">
+                <div class="border-b border-gray-200 p-4 sm:p-6">
 
                     <form
                         action="{{ route('data-management.personnel') }}"
@@ -563,7 +525,7 @@
 
                         <div class="flex flex-col gap-3 md:flex-row">
 
-                            <div class="flex-1">
+                            <div class="min-w-0 flex-1">
 
                                 <label
                                     for="search"
@@ -578,29 +540,18 @@
                                     name="search"
                                     value="{{ $search }}"
                                     placeholder="Search by name, employee number, email, or school..."
-                                    class="w-full rounded-md border-gray-300
-                                        text-sm shadow-sm
-                                        focus:border-green-600
-                                        focus:ring-green-600"
+                                    class="min-h-11 w-full min-w-0 rounded-md border-gray-300 text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
                                 >
 
                             </div>
 
 
-                            <div class="flex items-end gap-2">
+                            <div class="flex flex-wrap items-end gap-2 [&>*]:min-h-11 [&>*]:flex-1 [&>*]:text-center md:[&>*]:flex-none">
 
                                 {{-- SEARCH BUTTON --}}
                                 <button
                                     type="submit"
-                                    class="rounded-md bg-green-700
-                                        px-5 py-2.5
-                                        text-sm font-semibold text-white
-                                        transition
-                                        hover:bg-green-800
-                                        focus:outline-none
-                                        focus:ring-2
-                                        focus:ring-green-500
-                                        focus:ring-offset-2"
+                                    class="rounded-md bg-green-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                                 >
                                     Search
                                 </button>
@@ -611,11 +562,7 @@
 
                                     <a
                                         href="{{ route('data-management.personnel') }}"
-                                        class="rounded-md border border-gray-300
-                                            bg-white px-5 py-2.5
-                                            text-sm font-semibold text-gray-700
-                                            transition
-                                            hover:bg-gray-50"
+                                        class="rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
                                     >
                                         Clear
                                     </a>
@@ -634,7 +581,10 @@
 
 
                 {{-- TABLE --}}
-                <div class="overflow-x-auto">
+                <p class="border-b border-gray-100 px-4 py-2 text-xs text-gray-500 lg:hidden">
+                    Swipe left or right to view all columns and available actions.
+                </p>
+                <div class="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain" tabindex="0" role="region" aria-label="Personnel records, horizontally scrollable">
 
                     <table class="min-w-full divide-y divide-gray-200">
 
@@ -643,50 +593,42 @@
                             <tr>
 
                                 {{-- Employee No. --}}
-                                <th class="px-6 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Employee No.
                                 </th>
 
                                 {{-- Name --}}
-                                <th class="px-6 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     COMPLETE Name
                                 </th>
 
                                 {{-- Mobile Number --}}
-                                <th class="px-6 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Mobile Number
                                 </th>
 
                                 {{-- User Role --}}
-                                <th class="px-6 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     User Role
                                 </th>
 
                                 {{-- Status --}}
-                                <th class="px-6 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Status
                                 </th>
 
                                 {{-- Date Created --}}
-                                <th class="px-6 py-3 text-left text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Date Created
                                 </th>
 
                                 {{-- Action --}}
                                 @if (auth()->user()->role === 'super_admin')
-                                    <th class="px-6 py-3 text-center text-xs font-semibold
-                                            uppercase tracking-wider text-gray-600">
+                                    <th class="px-4 sm:px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
                                         User Status
                                     </th>
                                 @endif
-                                <th class="px-6 py-3 text-center text-xs font-semibold
-                                        uppercase tracking-wider text-gray-600">
+                                <th class="px-4 sm:px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Profile
                                 </th>
 
@@ -702,7 +644,7 @@
                                 <tr class="hover:bg-gray-50">
 
                                     {{-- Employee No. --}}
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                                    <td class="whitespace-nowrap px-4 sm:px-6 py-4 text-sm font-medium text-gray-900">
 
                                         @if((string) $person->issuedId?->employee_id === '1000001')
                                             —
@@ -714,7 +656,7 @@
 
 
                                     {{-- Name --}}
-                                    <td class="whitespace-nowrap px-6 py-4">
+                                    <td class="whitespace-nowrap px-4 sm:px-6 py-4">
 
                                         <div class="text-sm font-semibold text-gray-900">
 
@@ -730,34 +672,28 @@
                                     </td>
 
                                     {{-- mobile_number --}}
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                                    <td class="whitespace-nowrap px-4 sm:px-6 py-4 text-sm text-gray-700">
                                         {{ $person->mobile_number ?? '—' }}
                                     </td>
 
                                     {{-- USER ROLE --}}
-                                    <td class="whitespace-nowrap px-6 py-4">
+                                    <td class="whitespace-nowrap px-4 sm:px-6 py-4">
 
                                         @if ($person->user?->role === 'super_admin')
 
-                                            <span class="inline-flex items-center rounded-full
-                                                        bg-amber-100 px-3 py-1
-                                                        text-xs font-semibold text-amber-700">
+                                            <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
                                                 Super Admin
                                             </span>
 
                                         @elseif ($person->user?->role === 'admin')
                                             
-                                            <span class="inline-flex items-center rounded-full
-                                                        bg-purple-100 px-3 py-1
-                                                        text-xs font-semibold text-purple-700">
+                                            <span class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
                                                 Admin
                                             </span>
 
                                         @elseif ($person->user?->role === 'user')
 
-                                            <span class="inline-flex items-center rounded-full
-                                                        bg-blue-100 px-3 py-1
-                                                        text-xs font-semibold text-blue-700">
+                                            <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
                                                 User
                                             </span>
 
@@ -773,16 +709,14 @@
 
 
                                     {{-- Status --}}
-                                    <td class="whitespace-nowrap px-6 py-4">
+                                    <td class="whitespace-nowrap px-4 sm:px-6 py-4">
 
                                         @if ($person->user?->status === 'active')
-                                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1
-                                                        text-xs font-semibold text-green-800">
+                                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
                                                 Active
                                             </span>
                                         @elseif ($person->user?->status === 'inactive')
-                                            <span class="inline-flex rounded-full bg-red-100 px-3 py-1
-                                                        text-xs font-semibold text-red-700">
+                                            <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
                                                 Inactive
                                             </span>
                                         @endif
@@ -791,7 +725,7 @@
 
 
                                     {{-- Date Created --}}
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                                    <td class="whitespace-nowrap px-4 sm:px-6 py-4 text-sm text-gray-700">
 
                                         {{ $person->created_at
                                             ? str_replace('Sep.', 'Sept.', $person->created_at->format('M. j, Y'))
@@ -802,7 +736,7 @@
                                     
                                     {{-- Action --}}
                                     @if (auth()->user()->role === 'super_admin')
-                                        <td class="whitespace-nowrap px-6 py-4 text-center">
+                                        <td class="whitespace-nowrap px-4 sm:px-6 py-4 text-center">
 
                                             @php
                                                 $personName = trim(collect([
@@ -821,7 +755,7 @@
                                                 data-role="{{ $person->user?->role ?? 'user' }}"
                                                 data-status="{{ $person->user?->status ?? 'active' }}"
                                                 onclick="openAccessModal(this)"
-                                                class="inline-flex items-center rounded-md bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
+                                                class="inline-flex min-h-11 items-center justify-center rounded-md bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
                                             >
                                                 Access
                                             </button>
@@ -830,14 +764,11 @@
                                     @endif
                                     
                                     {{-- Action --}}
-                                    <td class="whitespace-nowrap px-6 py-4 text-center">
+                                    <td class="whitespace-nowrap px-4 sm:px-6 py-4 text-center">
 
                                         <a
                                             href="{{ route('data-management.personnel.edit', $person->id) }}"
-                                            class="inline-flex items-center rounded-md
-                                                bg-green-700 px-4 py-2
-                                                text-sm font-semibold text-white
-                                                transition hover:bg-green-800"
+                                            class="inline-flex min-h-11 items-center justify-center rounded-md bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
                                         >
                                             View
                                         </a>
@@ -852,7 +783,7 @@
 
                                     <td
                                         colspan="7"
-                                        class="px-6 py-10 text-center text-sm text-gray-500"
+                                        class="px-4 sm:px-6 py-10 text-center text-sm text-gray-500"
                                     >
                                         No personnel records found.
                                     </td>
@@ -869,7 +800,7 @@
 
 
                 {{-- PAGINATION --}}
-                <div class="border-t border-gray-200 px-6 py-4">
+                <div class="border-t border-gray-200 px-4 sm:px-6 py-4">
 
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
@@ -922,19 +853,19 @@
     </div>
 
 
-</x-app-layout>
+
 
 
 
 {{-- ACCESS MODAL --}}
 <div
     id="accessModal"
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
     >
-    <div class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white shadow-2xl">
+    <div class="max-h-[calc(100dvh-2rem)] w-full min-w-0 max-w-md overflow-y-auto overscroll-contain rounded-2xl bg-white shadow-2xl">
 
         {{-- HEADER --}}
-        <div class="flex items-center justify-between rounded-t-2xl bg-green-700 px-6 py-5">
+        <div class="flex items-center justify-between rounded-t-2xl bg-green-700 px-4 sm:px-6 py-5 gap-3">
 
             <div>
                 <h3 class="text-lg font-semibold text-white">
@@ -947,7 +878,7 @@
                 type="button"
                 onclick="closeAccessModal()"
                 aria-label="Close modal"
-                class="rounded-lg p-2 text-green-100 transition hover:bg-green-600 hover:text-white"
+                class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg p-2 text-green-100 transition hover:bg-green-600 hover:text-white"
             >
                 ✕
             </button>
@@ -955,7 +886,7 @@
         </div>
 
         {{-- FORM --}}
-        <form id="accessForm" method="POST" class="p-6">
+        <form id="accessForm" method="POST" class="p-4 sm:p-6">
 
             @csrf
             @method('PATCH')
@@ -1009,7 +940,7 @@
                 <select
                     id="role"
                     name="role"
-                    class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
+                    class="block min-h-11 w-full min-w-0 rounded-lg border-gray-300 text-base sm:text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
                 >
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
@@ -1029,7 +960,7 @@
                 <select
                     id="status"
                     name="status"
-                    class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
+                    class="block min-h-11 w-full min-w-0 rounded-lg border-gray-300 text-base sm:text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
                 >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -1069,7 +1000,7 @@
             </div>
 
             {{-- BUTTONS --}}
-            <div class="mt-6 flex justify-end gap-3">
+            <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end [&>button]:min-h-11 [&>button]:w-full sm:[&>button]:w-auto">
 
                 <button
                     type="button"
@@ -1142,3 +1073,4 @@
             }
         });
 </script>
+</x-app-layout>
