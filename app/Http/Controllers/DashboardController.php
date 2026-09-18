@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EmploymentStatus;
 use App\Models\SchoolDb;
 use App\Models\MedicalAllowance;
+use App\Models\Report;
 
 class DashboardController extends Controller
 {
@@ -218,6 +219,16 @@ class DashboardController extends Controller
 
         $hrTransactions = 0;
 
+        /*
+        |--------------------------------------------------------------------------
+        | Medical Allowance Report Deadline
+        |--------------------------------------------------------------------------
+        */
+
+        $medicalReport = Report::where(
+            'name_of_report',
+            'Medical Allowance Report'
+        )->latest('id')->first();
 
         /*
         |--------------------------------------------------------------------------
@@ -232,7 +243,8 @@ class DashboardController extends Controller
             'hrTransactions',
             'groupAvailment',
             'individualAvailment',
-            'numberOfDisbursement'
+            'numberOfDisbursement',
+            'medicalReport'
         ));
     }
 }

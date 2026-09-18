@@ -143,7 +143,7 @@
 
         x-data="{
             dataManagementOpen:
-                {{ request()->routeIs('data-management*') ? 'true' : 'false' }},
+                {{ (request()->routeIs('data-management*') && !request()->routeIs('data-management.reports*')) ? 'true' : 'false' }},
 
             hrTransactionsOpen:
                 {{ request()->routeIs('hr-transactions*') ? 'true' : 'false' }}
@@ -260,7 +260,7 @@
                        text-sm font-semibold
                        transition-all duration-200
 
-                       {{ request()->routeIs('data-management*')
+                       {{ (request()->routeIs('data-management*') && !request()->routeIs('data-management.reports*'))
                             ? 'bg-green-700 text-white shadow-md'
                             : 'text-gray-600 hover:bg-green-50 hover:text-green-800'
                        }}"
@@ -272,7 +272,7 @@
                            items-center justify-center
                            rounded-lg
 
-                           {{ request()->routeIs('data-management*')
+                           {{ (request()->routeIs('data-management*') && !request()->routeIs('data-management.reports*'))
                                 ? 'bg-white/15 text-white'
                                 : 'bg-green-50 text-green-700'
                            }}"
@@ -348,7 +348,7 @@
                 class="ml-5 mt-1 space-y-1
                        border-l-2 border-green-100
                        pl-4"
-            >
+                >
 
                 {{-- PERSONNEL INFORMATION --}}
                 <a
@@ -597,6 +597,140 @@
             </div>
 
         </div>
+        @endif
+
+        {{-- =================================================
+            REPORT MANAGEMENT
+        ================================================== --}}
+        @if(auth()->user()?->role === 'super_admin')
+            @php
+                $reportsActive = request()->routeIs('data-management.reports*');
+            @endphp
+
+            <div
+                class="mb-2"
+                x-data="{ reportsOpen: {{ $reportsActive ? 'true' : 'false' }} }"
+            >
+                {{-- MAIN BUTTON --}}
+                <button
+                    type="button"
+                    @click="
+                        if (!sidebarOpen) {
+                            sidebarOpen = true;
+                            reportsOpen = true;
+                        } else {
+                            reportsOpen = !reportsOpen;
+                        }
+                    "
+                    :aria-expanded="reportsOpen && sidebarOpen"
+                    aria-controls="report-management-submenu"
+                    aria-label="Report Management"
+                    title="Report Management"
+                    class="group flex w-full items-center gap-3
+                        rounded-xl px-2 py-3
+                        text-sm font-semibold
+                        transition-all duration-200
+                        {{ $reportsActive
+                                ? 'bg-green-700 text-white shadow-md'
+                                : 'text-gray-600 hover:bg-green-50 hover:text-green-800'
+                        }}"
+                >
+                    {{-- ICON --}}
+                    <span
+                        class="flex h-10 w-10 shrink-0
+                            items-center justify-center rounded-lg
+                            {{ $reportsActive
+                                    ? 'bg-white/15 text-white'
+                                    : 'bg-green-50 text-green-700'
+                            }}"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            aria-hidden="true"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"
+                            />
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M14 2v6h6M8 13h8M8 17h5"
+                            />
+                        </svg>
+                    </span>
+
+                    <span
+                        x-show="sidebarOpen"
+                        x-transition
+                        class="flex-1 whitespace-nowrap text-left"
+                    >
+                        Report Management
+                    </span>
+
+                    {{-- ARROW --}}
+                    <svg
+                        x-show="sidebarOpen"
+                        :class="{ 'rotate-180': reportsOpen }"
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4 shrink-0 transition-transform duration-200"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        aria-hidden="true"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M6 9l6 6 6-6"
+                        />
+                    </svg>
+                </button>
+
+                {{-- SUBMENU --}}
+                <div
+                    id="report-management-submenu"
+                    x-show="reportsOpen && sidebarOpen"
+                    x-transition
+                    style="display: none;"
+                    class="ml-5 mt-1 space-y-1 border-l-2 border-green-100 pl-4"
+                >
+                    <a
+                        href="{{ route('data-management.reports') }}"
+                        @if(request()->routeIs('data-management.reports'))
+                            aria-current="page"
+                        @endif
+                        class="block rounded-lg px-3 py-2.5 text-sm transition
+                            {{ request()->routeIs('data-management.reports')
+                                    ? 'bg-green-50 font-semibold text-green-800'
+                                    : 'text-gray-500 hover:bg-green-50 hover:text-green-700'
+                            }}"
+                    >
+                        Report List
+                    </a>
+
+                    <a
+                        href="{{ route('data-management.reports.submissions') }}"
+                        @if(request()->routeIs('data-management.reports.submissions*'))
+                            aria-current="page"
+                        @endif
+                        class="block rounded-lg px-3 py-2.5 text-sm transition
+                            {{ request()->routeIs('data-management.reports.submissions*')
+                                    ? 'bg-green-50 font-semibold text-green-800'
+                                    : 'text-gray-500 hover:bg-green-50 hover:text-green-700'
+                            }}"
+                    >
+                        Report Submissions
+                    </a>
+                </div>
+            </div>
         @endif
 
     </nav>

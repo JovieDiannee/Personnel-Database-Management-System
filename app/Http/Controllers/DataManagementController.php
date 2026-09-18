@@ -31,6 +31,9 @@ use App\Models\BasicInformation;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use App\Models\Report;
+use App\Models\ReportSubmission;
+use Illuminate\Http\RedirectResponse;
 
 
 class DataManagementController extends Controller
@@ -6916,6 +6919,37 @@ class DataManagementController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | MEDICAL ALLOWANCE REPORT
+        |--------------------------------------------------------------------------
+        */
+
+        $medicalReport = Report::where(
+            'name_of_report',
+            'Medical Allowance Report'
+        )->latest('id')->first();
+
+        // employmentStatus.school_db_id references school_db.id.
+        // Submissions use school_db.school_id instead.
+        $schoolCode = DB::table('school_db')
+            ->where('id', $user->employmentStatus?->school_db_id)
+            ->value('school_id');
+
+        $medicalSubmission = null;
+
+        if (
+            $user->role === 'admin'
+            && $medicalReport
+            && $schoolCode !== null
+            && $schoolCode !== ''
+        ) {
+            $medicalSubmission = ReportSubmission::with('validatedBy')
+                ->where('report_id', $medicalReport->id)
+                ->where('school_id', $schoolCode)
+                ->first();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | RETURN VIEW
         |--------------------------------------------------------------------------
         */
@@ -6926,10 +6960,13 @@ class DataManagementController extends Controller
                 'medicalAllowances',
                 'search',
                 'sort',
-                'direction'
+                'direction',
+                'medicalReport',
+                'medicalSubmission',
+                'schoolCode'
             )
         );
-    }
+    } 
 
     public function importMedicalAllowance(Request $request)
     {
@@ -8113,6 +8150,89 @@ class DataManagementController extends Controller
             'success',
             'Mode of availment updated successfully from Individual Availment (HMO) to Group Availment (HMO).'
         );
+    }
+
+    public function validateMedicalAllowance(Request $request, Report $report): RedirectResponse 
+    {
+        $user = $request->user();
+
+        abort_unless($user && $user->role === 'admin', 403);
+
+        $schoolCode = DB::table('school_db')
+            ->where('id', $user->employmentStatus?->school_db_id)
+            ->value('school_id');
+
+        abort_if(
+            $schoolCode === null || $schoolCode === '',
+            403,
+            'Your account has no assigned school.'
+        );
+
+        $changed = DB::transaction(function () use (
+            $report,
+            $user,
+            $schoolCode
+        ) {
+            $lockedReport = Report::query()
+                ->lockForUpdate()
+                ->findOrFail($report->id);
+
+            abort_unless(
+                $lockedReport->name_of_report === 'Medical Allowance Report',
+                404
+            );
+
+            abort_unless(
+                $lockedReport->status === 'Ongoing',
+                409,
+                'This report is closed.'
+            );
+
+            $submission = ReportSubmission::query()
+                ->where('report_id', $lockedReport->id)
+                ->where('school_id', $schoolCode)
+                ->lockForUpdate()
+                ->first();
+
+            // Preserve the original validation details on repeated requests.
+            if ($submission?->status === 'Verified') {
+                return false;
+            }
+
+            if (!$submission) {
+                $submission = new ReportSubmission();
+                $submission->report_id = $lockedReport->id;
+                $submission->school_id = $schoolCode;
+                $submission->status = 'Pending';
+            }
+
+            abort_unless(
+                in_array($submission->status, ['Pending', 'Done'], true),
+                409,
+                'This submission cannot be validated.'
+            );
+
+            // Preserve the submitter if the report was already submitted.
+            if ($submission->user_id === null) {
+                $submission->user_id = $user->id;
+            }
+
+            $submission->status = 'Verified';
+            $submission->validated_by = $user->id;
+            $submission->validated_at = now();
+            $submission->save();
+
+            return true;
+        });
+
+        return redirect()
+            ->route('data-management.medical-allowance')
+            ->with(
+                'success',
+                $changed
+                    ? 'Your school’s Medical Allowance Report was validated and submitted.'
+                    : 'Your school’s Medical Allowance Report is already verified.'
+            );
     }
 
     /*   

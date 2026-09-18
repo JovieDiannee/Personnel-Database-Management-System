@@ -168,46 +168,161 @@
 
             </div>
 
-            {{-- DEADLINE NOTICE --}}
-            <div class="mt-3 flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-5 py-3 shadow-sm">
+            {{-- DEADLINE AND SUBMISSION --}}
+            @if (auth()->user()?->role === 'admin' && $medicalSubmission?->status === 'Verified')
 
-                <div class="flex items-center gap-3">
+                {{-- VERIFIED: SHOW VALIDATION DETAILS ONLY --}}
+                <div
+                    class="mt-3 rounded-xl border px-5 py-4 shadow-sm"
+                    style="background-color: #f0fdf4; border-color: #86efac; color: #166534;"
+                    role="status"
+                >
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
 
-                    {{-- CLOCK ICON --}}
-                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
-
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="2"
+                        {{-- CHECK ICON --}}
+                        <span
+                            style="display: inline-flex; align-items: center; justify-content: center;
+                                width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%;
+                                background-color: #dcfce7;"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
-
-                    </div>
-
-                    <div class="text-sm text-red-700">
-
-                        <span class="font-medium">
-                            Deadline for Updating and Adding Personnel:
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M5 12l4 4L19 6"
+                                />
+                            </svg>
                         </span>
 
-                        <span class="ml-1 font-bold">
-                            September 18, 2026 • 5:00 P.M.
-                        </span>
+                        <div class="text-center">
+                            <p class="font-semibold">
+                                Medical Allowance Report — Validated and Submitted
+                            </p>
 
+                            <p class="mt-1 text-sm">
+                                <strong>Validated by:</strong>
+                                {{ $medicalSubmission->validatedBy?->name ?? 'Unavailable' }}
+
+                                <span class="mx-2">&bull;</span>
+
+                                <strong>Date:</strong>
+                                {{ $medicalSubmission->validated_at
+                                    ?->copy()
+                                    ->timezone('Asia/Manila')
+                                    ->format('F j, Y • g:i A') ?? 'Unavailable' }}
+                            </p>
+                        </div>
                     </div>
-
                 </div>
 
-            </div>
+            @else
+
+                {{-- NOT VERIFIED: SHOW DEADLINE AND BUTTON --}}
+                <div
+                    class="mt-3 rounded-xl border px-5 py-4 shadow-sm"
+                    style="background-color: #fef2f2; border-color: #fecaca;"
+                >
+                    <div style="display: flex; align-items: center; gap: 24px; width: 100%;">
+
+                        <div style="flex: 1; min-width: 0; text-align: center;">
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+
+                                {{-- CLOCK ICON --}}
+                                <span
+                                    style="display: inline-flex; align-items: center; justify-content: center;
+                                        width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%;
+                                        background-color: #fee2e2; color: #dc2626;"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="20"
+                                        height="20"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        aria-hidden="true"
+                                    >
+                                        <circle cx="12" cy="12" r="9" />
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M12 7v5l3 2"
+                                        />
+                                    </svg>
+                                </span>
+
+                                <p class="text-sm font-bold" style="color: #9a3412;">
+                                    Deadline for Personnel Updates and Report Submission
+
+                                    <span style="display: inline-block; margin-left: 8px;">
+                                        @if ($medicalReport)
+                                            {{ $medicalReport->deadline->format('F j, Y • g:i A') }}
+                                        @else
+                                            Not yet configured
+                                        @endif
+                                    </span>
+                                </p>
+                            </div>
+
+                            @if (auth()->user()?->role === 'admin' && $medicalReport)
+                                <p class="mt-1 text-sm text-gray-600">
+                                    Please ensure that your school’s personnel information is complete,
+                                    accurate, and verified before submitting the report.
+                                </p>
+                            @endif
+                        </div>
+
+                        @if (auth()->user()?->role === 'admin' && $medicalReport)
+                            <div style="flex-shrink: 0;">
+                                @if ($medicalReport->status !== 'Ongoing')
+                                    <p class="text-sm font-semibold text-gray-600">
+                                        This report is closed.
+                                    </p>
+                                @elseif ($schoolCode === null || $schoolCode === '')
+                                    <p class="text-sm font-semibold text-red-700">
+                                        Your account has no assigned school.
+                                    </p>
+                                @else
+                                    <form
+                                        method="POST"
+                                        style="margin: 0;"
+                                        action="{{ route('data-management.medical-allowance.validate', [
+                                            'report' => $medicalReport->id,
+                                        ]) }}"
+                                        onsubmit="return confirm('Confirm that your school’s personnel information is complete, accurate, and verified. Submit this report?');"
+                                    >
+                                        @csrf
+                                        @method('PATCH')
+
+                                        <button
+                                            type="submit"
+                                            style="background-color: #c2410c; color: #ffffff; white-space: nowrap;"
+                                            class="rounded-lg px-5 py-3 text-sm font-semibold
+                                                transition hover:opacity-90
+                                                focus-visible:outline focus-visible:outline-2
+                                                focus-visible:outline-offset-2"
+                                        >
+                                            Validate &amp; Submit Report
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        @endif
+
+                    </div>
+                </div>
+
+            @endif
 
             
             {{-- GENERAL ERROR --}}
@@ -1153,10 +1268,25 @@
 
                                     {{-- ACTION --}}
                                     <td class="whitespace-nowrap px-4 py-4 text-center">
+                                        @php
+                                            $isValidated = auth()->user()?->role === 'admin'
+                                                && $medicalSubmission?->status === 'Verified';
+                                        @endphp
+
                                         <button
                                             type="button"
-                                            @click="updateModalOpen = true"
-                                            class="inline-flex items-center rounded-md bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
+                                            @disabled($isValidated)
+                                            @if (!$isValidated)
+                                                @click="updateModalOpen = true"
+                                            @endif
+                                            title="{{ $isValidated
+                                                ? 'Updates are disabled because this report has been validated.'
+                                                : 'Update medical allowance' }}"
+                                            style="{{ $isValidated
+                                                ? 'background-color: #d1d5db; color: #6b7280; cursor: not-allowed;'
+                                                : 'background-color: #15803d; color: #ffffff;' }}"
+                                            class="inline-flex items-center rounded-md px-4 py-2
+                                                text-sm font-semibold transition"
                                         >
                                             Update
                                         </button>

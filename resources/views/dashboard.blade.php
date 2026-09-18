@@ -331,15 +331,17 @@
                         </div>
 
                         <div class="text-sm text-red-700">
-
                             <span class="font-medium">
-                                Deadline for Updating and Adding Personnel: 
+                                Deadline for Updating and Adding Personnel:
                             </span>
 
                             <span class="ml-1 font-bold">
-                                September 18, 2026 • 5:00 P.M.
+                                @if ($medicalReport?->deadline)
+                                    {{ $medicalReport->deadline->format('F j, Y • g:i A') }}
+                                @else
+                                    No deadline has been configured.
+                                @endif
                             </span>
-
                         </div>
 
                     </div>

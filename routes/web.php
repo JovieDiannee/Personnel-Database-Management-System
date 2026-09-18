@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DataManagementController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReportController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -65,8 +66,8 @@ Route::middleware(['auth', 'role:super_admin'])->group(function () {
 
 });
 
+// Data Management -> Medical Allowance Records
 Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
-    // Data Management -> Medical Allowance Records
     Route::get('/data-management/medical-allowance',[DataManagementController::class, 'medicalAllowance'])->name('data-management.medical-allowance');
     Route::post('/data-management/medical-allowance/import',[DataManagementController::class, 'importMedicalAllowance'])->name('data-management.medical-allowance.import');
     Route::get('/data-management/medical-allowance/import/preview',[DataManagementController::class, 'medicalAllowanceImportPreview'])->name('data-management.medical-allowance.import.preview');
@@ -74,11 +75,13 @@ Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
     Route::get('/data-management/medical-allowance/report',[DataManagementController::class, 'medicalAllowanceReport'])->name('data-management.medical-allowance.report');
     Route::get('/data-management/medical-allowance/template',[DataManagementController::class, 'downloadMedicalAllowanceTemplate'])->name('data-management.medical-allowance.template');
     Route::patch('/data-management/medical-allowance/{medicalAllowance}/availment',[DataManagementController::class, 'updateAvailment'])->name('medical-allowance.update-availment');
-
+});
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::patch('/data-management/medical-allowance/reports/{report}/validate',[DataManagementController::class, 'validateMedicalAllowance'])->name('data-management.medical-allowance.validate');
 });
 
+// Data Management -> Enrollment Records
 Route::middleware(['auth', 'role:super_admin'])->group(function () {
-    // Data Management -> Enrollment Records
     Route::get('/data-management/enrollment',[DataManagementController::class, 'enrollment'])->name('data-management.enrollment');
     Route::post('/data-management/enrollment/import',[DataManagementController::class, 'importEnrollment'])->name('data-management.enrollment.import');
     Route::get('/data-management/enrollment/import/preview',[DataManagementController::class, 'enrollmentImportPreview'])->name('data-management.enrollment.import.preview');
@@ -87,6 +90,7 @@ Route::middleware(['auth', 'role:super_admin'])->group(function () {
 
 });
 
+
 // ============================================================
 // SUPER ADMIN ONLY - Change User Role, Status and Reset Password
 // ============================================================
@@ -94,6 +98,7 @@ Route::middleware(['auth', 'role:super_admin'])->group(function () {
 Route::middleware(['auth', 'role:super_admin'])->group(function () {
 
     Route::patch('/data-management/personnel/{person}/access',[DataManagementController::class, 'updateUserAccess'])->name('data-management.personnel.update.access');
+
 
 });
 
@@ -105,6 +110,25 @@ Route::middleware(['auth', 'role:super_admin'])->group(function () {
 Route::view('/hr-transactions/personnel-requests','errors.503',[],503)->name('hr-transactions.personnel-requests');
 Route::view('/hr-transactions/service-records','errors.503',[],503)->name('hr-transactions.service-records');
 Route::view('/hr-transactions/other-transactions','errors.503',[],503)->name('hr-transactions.other-transactions');
+
+
+// ============================================================
+// REPORT MANAGEMENT FEATURES
+// ============================================================
+
+Route::middleware(['auth', 'role:super_admin'])->prefix('data-management/reports')->group(function () {
+
+        // REPORT LIST
+        Route::get('/', [ReportController::class, 'index'])->name('data-management.reports');
+        Route::post('/', [ReportController::class, 'store'])->name('reports.store');
+        // SCHOOL SUBMISSIONS
+        Route::get('/submissions', [ReportController::class, 'submissions'])->name('data-management.reports.submissions');
+        Route::patch('/submissions/{submission}/submit', [ReportController::class, 'submit'])->name('reports.submit');
+        Route::patch('/submissions/{submission}/verify', [ReportController::class, 'verify'])->name('reports.verify');
+        // UPDATE OR CLOSE AN OVERALL REPORT
+        Route::put('/{report}', [ReportController::class, 'update'])->name('reports.update');
+        Route::patch('/{report}/close', [ReportController::class, 'close'])->name('reports.close');
+});
 
 
 require __DIR__.'/auth.php';
