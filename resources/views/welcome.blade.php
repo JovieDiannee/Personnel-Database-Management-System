@@ -194,7 +194,7 @@
                             rel="noopener noreferrer"
                             class="inline-flex items-center justify-center gap-2 rounded-lg bg-green-200 px-6 py-3 font-semibold text-green-950 shadow-sm transition hover:bg-green-100 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-200 focus:ring-offset-2 focus:ring-offset-green-900"
                             class="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold shadow-lg transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-white"
-                            style="background-color: #bbf7d0; color: #052e16; border: 1px solid #86efac;"
+                            style="background-color: #ffffff; color: #052e16; border: 1px solid #86efac;"
                         >
                             Feedback <span aria-hidden="true">↗</span>
                         </a>
