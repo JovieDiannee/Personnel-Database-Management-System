@@ -10,25 +10,16 @@
                             <img
                                 src="{{ asset('images/pdms-logo.png') }}"
                                 alt="Personnel Database Management System Logo"
-                                class="mx-auto mb-5 h-32 w-32 object-contain sm:h-40 sm:w-40"
+                                class="mx-auto h-32 w-32 object-contain sm:h-40 sm:w-40"
                             >
 
                             <div class="mb-10 text-center">
                                 {{-- OFFICE IDENTITY --}}
                                 <div class="mb-5">
 
-                                    <h3 class="mt-2 text-base font-bold text-green-800 sm:text-lg">
+                                    <h3 class="text-base font-bold text-green-800 sm:text-lg">
                                         Department of Education - Schools Division of Leyte
                                     </h3>
-
-
-                                    <span
-                                        class="mt-4 inline-flex rounded-full bg-green-50 px-4 py-1.5
-                                            text-s font-bold uppercase tracking-[0.20em] text-green-700
-                                            ring-1 ring-inset ring-green-200"
-                                    >
-                                        Personnel Unit
-                                    </span>
                                 </div>
 
                             <h1 class="text-3xl font-bold leading-tight text-gray-900 sm:text-4xl">
@@ -39,13 +30,22 @@
                                 Management System
                             </h2>
                         </div>
-                        <br>
 
-                        {{-- SESSION STATUS --}}
-                        <x-auth-session-status
-                            class="mb-5"
-                            :status="session('status')"
-                        />
+                        {{-- VISIBLE SESSION NOTIFICATION --}}
+                        @if (session('status'))
+                            <div role="alert" aria-live="polite" class="mb-6 rounded-xl border-2 border-amber-400 bg-amber-50 p-5 text-left shadow-md">
+                                <div class="flex items-start gap-3">
+                                    <svg class="mt-0.5 h-6 w-6 shrink-0 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="9" />
+                                        <path stroke-linecap="round" d="M12 7v6m0 4h.01" />
+                                    </svg>
+                                    <div>
+                                        <p class="font-bold text-amber-950">Password change required</p>
+                                        <p class="mt-1 text-sm leading-relaxed text-amber-900">{{ session('status') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
                         {{-- LOGIN FORM --}}
                         <form method="POST" action="{{ route('login') }}">
@@ -212,3 +212,4 @@
         }
     }
 </script>
+
