@@ -123,7 +123,7 @@
         </div>
 
 
-        <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:px-8 lg:py-28">
+        <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-6 py-10 lg:grid-cols-2 lg:px-8 lg:py-12">
 
             {{-- HERO CONTENT --}}
             <div class="text-white">
@@ -157,7 +157,7 @@
                 </p>
 
 
-                <div class="mt-8 flex flex-wrap gap-4">
+                <div class="mt-8 flex flex-wrap items-start gap-4">
 
                     @auth
 
@@ -181,10 +181,27 @@
 
                     <a
                         href="#about"
-                        class="rounded-lg border border-white/40 px-6 py-3 font-semibold text-white transition hover:bg-white/10"
+                            class="rounded-lg bg-white px-6 py-3 font-semibold text-green-800 shadow-lg transition hover:bg-green-50"
                     >
                         Learn More
                     </a>
+
+                    <div class="flex flex-col items-center gap-1">
+                        {{-- Replace the URL below with your Google Form link. --}}
+                        <a
+                            href="https://forms.gle/iqYKhJe7KdcvjwvN8"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-green-200 px-6 py-3 font-semibold text-green-950 shadow-sm transition hover:bg-green-100 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-200 focus:ring-offset-2 focus:ring-offset-green-900"
+                            class="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold shadow-lg transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-white"
+                            style="background-color: #bbf7d0; color: #052e16; border: 1px solid #86efac;"
+                        >
+                            Feedback <span aria-hidden="true">↗</span>
+                        </a>
+                        <p class="max-w-44 text-center text-xs leading-snug text-green-100/85">
+                            Help us improve the system
+                        </p>
+                    </div>
 
                 </div>
 

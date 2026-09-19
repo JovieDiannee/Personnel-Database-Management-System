@@ -498,6 +498,8 @@
 
 
             </div>
+        @endif
+        @if(auth()->user()->role === 'super_admin')
 
             {{-- =====================================================
                 TEACHER REQUIREMENT ANALYSIS SCHOOL YEAR 2026-2027 
