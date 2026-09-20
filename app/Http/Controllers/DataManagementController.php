@@ -4275,9 +4275,9 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if ((string) $loggedInEmployeeId === '1000001') {
-            abort(403, 'You are not authorized to access this page.');
-        }
+        // if ((string) $loggedInEmployeeId === '1000001') {
+        //     abort(403, 'You are not authorized to access this page.');
+        // }
 
         /*
         |--------------------------------------------------------------------------
