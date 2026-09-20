@@ -386,7 +386,7 @@
                                         ) === (string) $school->school_id
                                     )
                                 >
-                                    {{ $school->school_id }} - {{ $school->school_name }}
+                                    {{ $school->school_id }} - {{ $school->school_name }}- {{ $school->school_district }}
                                 </option>
                             @endforeach
                         </select>

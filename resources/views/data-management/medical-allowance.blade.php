@@ -1126,41 +1126,42 @@
 
                             </th>
 
+                            @if(auth()->user()->role === 'super_admin')
+                                {{-- DISBURSEMENT STATUS --}}
+                                <th class="min-w-[190px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
 
-                            {{-- DISBURSEMENT STATUS --}}
-                            <th class="min-w-[190px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-
-                                <a
-                                    href="{{ $sortUrl('disbursement_status') }}"
-                                    class="flex items-center justify-between gap-3 hover:text-green-700"
-                                >
-                                    <span>
-                                        Disbursement<br>
-                                        Status
-                                    </span>
-
-                                    <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                                        <span class="text-[11px] font-black
-                                            {{ $sort === 'disbursement_status' && $direction === 'asc'
-                                                ? 'text-green-700'
-                                                : 'text-gray-300'
-                                            }}">
-                                            ▲
+                                    <a
+                                        href="{{ $sortUrl('disbursement_status') }}"
+                                        class="flex items-center justify-between gap-3 hover:text-green-700"
+                                    >
+                                        <span>
+                                            Disbursement<br>
+                                            Status
                                         </span>
 
-                                        <span class="text-[11px] font-black
-                                            {{ $sort === 'disbursement_status' && $direction === 'desc'
-                                                ? 'text-green-700'
-                                                : 'text-gray-300'
-                                            }}">
-                                            ▼
+                                        <span class="flex shrink-0 flex-col items-center leading-[9px]">
+
+                                            <span class="text-[11px] font-black
+                                                {{ $sort === 'disbursement_status' && $direction === 'asc'
+                                                    ? 'text-green-700'
+                                                    : 'text-gray-300'
+                                                }}">
+                                                ▲
+                                            </span>
+
+                                            <span class="text-[11px] font-black
+                                                {{ $sort === 'disbursement_status' && $direction === 'desc'
+                                                    ? 'text-green-700'
+                                                    : 'text-gray-300'
+                                                }}">
+                                                ▼
+                                            </span>
+
                                         </span>
+                                    </a>
 
-                                    </span>
-                                </a>
-
-                            </th>
+                                </th>
+                            @endif
 
 
                             {{-- ACTION --}}
@@ -1245,26 +1246,30 @@
                                         {{ $record->mode_of_availment ?? '—' }}
                                     </td>
 
+
                                     {{-- DISBURSEMENT STATUS --}}
-                                    <td class="min-w-[180px] px-4 py-4">
-                                        @if ($record->disbursement_status)
-                                            @if ($disbursementStatus === 'paid')
-                                                <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                                                    {{ $record->disbursement_status }}
-                                                </span>
-                                            @elseif ($disbursementStatus === 'pending')
-                                                <span class="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
-                                                    {{ $record->disbursement_status }}
-                                                </span>
+
+                                    @if(auth()->user()->role === 'super_admin')
+                                        <td class="min-w-[180px] px-4 py-4">
+                                            @if ($record->disbursement_status)
+                                                @if ($disbursementStatus === 'paid')
+                                                    <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                                                        {{ $record->disbursement_status }}
+                                                    </span>
+                                                @elseif ($disbursementStatus === 'pending')
+                                                    <span class="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
+                                                        {{ $record->disbursement_status }}
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                                                        {{ $record->disbursement_status }}
+                                                    </span>
+                                                @endif
                                             @else
-                                                <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
-                                                    {{ $record->disbursement_status }}
-                                                </span>
+                                                <span class="text-sm text-gray-400">—</span>
                                             @endif
-                                        @else
-                                            <span class="text-sm text-gray-400">—</span>
-                                        @endif
-                                    </td>
+                                        </td>
+                                    @endif
 
                                     {{-- ACTION --}}
                                     <td class="whitespace-nowrap px-4 py-4 text-center">

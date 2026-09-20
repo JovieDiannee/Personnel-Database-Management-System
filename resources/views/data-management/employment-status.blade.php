@@ -421,425 +421,548 @@
             <br>
 
             {{-- RECORDS TABLE --}}
-            <div class="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+
+            {{-- Pass school-scoped $employmentStatuses to admins; super admins may receive all records. --}}
+                @php
+                    $user = auth()->user();
+                    $isSuperAdmin = $user && (method_exists($user, 'hasRole') ? $user->hasRole('super_admin') : $user->role === 'super_admin');
+                    $isAdmin = $user && (method_exists($user, 'hasRole') ? $user->hasRole('admin') : $user->role === 'admin');
+                    $search = request('search', '');
+                    $editRouteName = $editRouteName ?? 'data-management.employment-status.edit';
+                    $adminSchool = $school
+                        ?? data_get($user, 'school')
+                        ?? collect($employmentStatuses->items())->first()?->school;
+                    $schoolName = $schoolName ?? data_get($adminSchool, 'school_name') ?? 'School not assigned';
+                    $districtName = $districtName
+                        ?? data_get($adminSchool, 'school_district')
+                        ?? data_get($adminSchool, 'district.district_name')
+                        ?? 'District not assigned';
+                @endphp
+
+                @if($isSuperAdmin)
+                {{-- RECORDS TABLE --}}
+                            <div class="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 
 
-                {{-- TABLE HEADER --}}
-                <div class="flex items-center justify-between border-b border-gray-200 p-4 sm:p-6">
+                                {{-- TABLE HEADER --}}
+                                <div class="flex items-center justify-between border-b border-green-800 bg-green-800 p-4 text-white sm:px-2 sm:py-4" style="background-color: #166534;">
 
-                    <div>
+                                    <div>
 
-                        <h2 class="text-lg font-semibold text-gray-800">
-                            Employment Status Records
-                        </h2>
+                                        <h2 class="text-xl font-semibold text-white sm:text-2xl">
+                                            Employment Status Records
+                                        </h2>
 
-                        <p class="mt-1 text-sm text-gray-500 break-words">
-                            List of personnel employment status records
-                            maintained in the system.
-                        </p>
+                                        <p class="mt-2 text-sm text-green-100 sm:text-base">
+                                            List of personnel employment status records
+                                            maintained in the system. 
+                                        </p>
 
-                    </div>
-                </div>
+                                    </div>
+                                </div>
 
-
-                {{-- SEARCH --}}
-                <div class="border-b border-gray-200 p-4 sm:p-6">
-
-                    <form
-                        action="{{ route('data-management.employment-status') }}"
-                        method="GET"
-                    >
-
-                        <div class="flex flex-col gap-3 md:flex-row">
-
-                            {{-- SEARCH INPUT --}}
-                            <div class="min-w-0 flex-1">
-
-                                <label
-                                    for="search"
-                                    class="mb-2 block text-sm font-medium text-gray-700"
-                                >
-                                    Search Employment Records
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="search"
-                                    name="search"
-                                    value="{{ $search }}"
-                                    placeholder="Search name, school, item no., position, status..."
-                                    class="min-h-11 w-full min-w-0 rounded-md border-gray-300 text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
-                                >
-
-                            </div>
-
-
-                            {{-- BUTTONS --}}
-                            <div class="flex flex-wrap items-end gap-2 [&>*]:min-h-11 [&>*]:flex-1 [&>*]:text-center md:[&>*]:flex-none">
 
                                 {{-- SEARCH --}}
-                                <button
-                                    type="submit"
-                                    class="rounded-md bg-green-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800"
-                                >
-                                    Search
-                                </button>
-
-
-                                {{-- CLEAR --}}
-                                @if($search !== '')
-
-                                    <a
-                                        href="{{ route('data-management.employment-status') }}"
-                                        class="rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
-                                    >
-                                        Clear
-                                    </a>
-
-                                @endif
-
-                            </div>
-
-                        </div>
-
-                    </form>
-
-                </div>
-
-
-                {{-- TABLE --}}
-                <p class="border-b border-gray-100 px-4 py-2 text-xs text-gray-500 lg:hidden">
-                    Swipe left or right to view all columns and the Update button.
-                </p>
-                <div class="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain" tabindex="0" role="region" aria-label="Employment status records, horizontally scrollable">
-
-                    <table class="min-w-full divide-y divide-gray-200">
-
-                        <thead class="bg-gray-50">
-
-                            <tr>
-
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                    #
-                                </th>
-
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                    Name
-                                </th>
-
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                    School Name
-                                </th>
-
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                    Item From School Level
-                                </th>
-
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                    Plantilla Item No.
-                                </th>
-
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                    Position Title
-                                </th>
-
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                    Employment Status
-                                </th>
-
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                    Date of Original Appointment
-                                </th>
-
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                    Date of Last Promotion
-                                </th>
-
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                    Warm Body Status
-                                </th>
-
-                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                    Nature of Work
-                                </th>
-
-                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                    Action
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody class="divide-y divide-gray-200 bg-white">
-
-                            @forelse($employmentStatuses as $record)
-
-                                @php
-
-                                    $basic = $record->user?->basicInformation;
-
-                                    $plantilla = $record->plantilla;
-
-                                    $school = $record->school;
-
-                                    $name = trim(
-                                        ($basic?->first_name ?? '') . ' ' .
-                                        ($basic?->middle_name ?? '') . ' ' .
-                                        ($basic?->last_name ?? '') . ' ' .
-                                        ($basic?->extension_name ?? '')
-                                    );
-
-                                @endphp
-
-
-                                <tr class="hover:bg-gray-50">
-
-
-                                    {{-- # --}}
-                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500">
-
-                                        {{ $employmentStatuses->firstItem() + $loop->index }}
-
-                                    </td>
-
-
-                                    {{-- NAME --}}
-                                    <td class="min-w-[220px] px-4 py-4">
-
-                                        <div class="text-sm font-semibold text-gray-900">
-
-                                            {{ $name ?: '—' }}
-
-                                        </div>
-
-                                        <div class="mt-1 text-sm text-gray-500 break-words">
-
-                                            {{ $record->user?->email ?? '—' }}
-
-                                        </div>
-
-                                    </td>
-
-
-                                    {{-- SCHOOL NAME --}}
-                                    <td class="min-w-[220px] px-4 py-4 text-sm text-gray-700">
-
-                                        {{ $school?->school_name ?? '—' }}
-
-                                    </td>
-
-
-                                    {{-- ITEM FROM SCHOOL LEVEL --}}
-                                    <td class="min-w-[180px] px-4 py-4 text-sm text-gray-700">
-
-                                        {{ $plantilla?->item_from_school_level ?? '—' }}
-
-                                    </td>
-
-
-                                    {{-- PLANTILLA ITEM NUMBER --}}
-                                    <td class="min-w-[180px] px-4 py-4 text-sm text-gray-700">
-
-                                        {{ $plantilla?->item_number ?? '—' }}
-
-                                    </td>
-
-
-                                    {{-- POSITION TITLE --}}
-                                    <td class="min-w-[180px] px-4 py-4 text-sm font-medium text-gray-900">
-
-                                        {{ $plantilla?->position_title ?? '—' }}
-
-                                    </td>
-
-
-                                    {{-- EMPLOYMENT STATUS --}}
-                                    <td class="whitespace-nowrap px-4 py-4">
-
-                                        @if($record->employment_status)
-
-                                            <span
-                                                class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800"
-                                            >
-
-                                                {{ $record->employment_status }}
-
-                                            </span>
-
-                                        @else
-
-                                            <span class="text-sm text-gray-400">
-                                                —
-                                            </span>
-
-                                        @endif
-
-                                    </td>
-
-
-                                    {{-- DATE OF ORIGINAL APPOINTMENT --}}
-                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">
-
-                                        {{ $record->date_of_original_appointment
-                                            ? $record->date_of_original_appointment->format('M d, Y')
-                                            : '—'
-                                        }}
-
-                                    </td>
-
-
-                                    {{-- DATE OF LAST PROMOTION --}}
-                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">
-
-                                        {{ $record->date_of_last_promotion
-                                            ? $record->date_of_last_promotion->format('M d, Y')
-                                            : '—'
-                                        }}
-
-                                    </td>
-
-
-                                    {{-- WARM BODY STATUS --}}
-                                    <td class="whitespace-nowrap px-4 py-4">
-
-                                        @if($record->warm_body_status)
-
-                                            <span
-                                                class="inline-flex rounded-full px-3 py-1 text-xs font-semibold
-                                                    {{ $record->warm_body_status === 'Detailed'
-                                                        ? 'bg-red-100 text-red-700'
-                                                        : 'bg-blue-100 text-blue-800'
-                                                    }}"
-                                            >
-                                                {{ $record->warm_body_status }}
-                                            </span>
-
-                                        @else
-
-                                            <span class="text-sm text-gray-400">
-                                                —
-                                            </span>
-
-                                        @endif
-
-                                    </td>
-
-
-                                    {{-- NATURE OF WORK --}}
-                                    <td class="min-w-[160px] px-4 py-4 text-sm text-gray-700">
-
-                                        {{ $record->nature_of_work ?? '—' }}
-
-                                    </td>
-
-
-                                    {{-- ACTION --}}
-                                    <td class="whitespace-nowrap px-4 py-4 text-right">
-                                        <a
-                                            href="{{ route(
-                                                'data-management.employment-status.edit',
-                                                $record->id
-                                            ) }}"
-                                            class="inline-flex min-h-11 items-center rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                                        >
-                                            Update
-                                        </a>
-
-                                    </td>
-
-                                </tr>
-
-
-                            @empty
-
-                                <tr>
-
-                                    <td
-                                        colspan="12"
-                                        class="px-4 sm:px-6 py-12 text-center"
+                                <div class="border-b border-gray-200 p-4 sm:p-6">
+
+                                    <form
+                                        action="{{ route('data-management.employment-status') }}"
+                                        method="GET"
                                     >
 
-                                        <div class="text-sm font-medium text-gray-700">
+                                        <div class="flex flex-col gap-3 md:flex-row">
 
-                                            No employment records found.
+                                            {{-- SEARCH INPUT --}}
+                                            <div class="min-w-0 flex-1">
 
-                                        </div>
+                                                <label
+                                                    for="search"
+                                                    class="mb-2 block text-sm font-medium text-gray-700"
+                                                >
+                                                    Search Employment Records
+                                                </label>
 
-                                        @if($search !== '')
-
-                                            <div class="mt-1 text-sm text-gray-500 break-words">
-
-                                                No records matched your search for
-                                                <span class="font-semibold">
-                                                    "{{ $search }}"
-                                                </span>.
+                                                <input
+                                                    type="text"
+                                                    id="search"
+                                                    name="search"
+                                                    value="{{ $search }}"
+                                                    placeholder="Search name, school, item no., position, status..."
+                                                    class="min-h-11 w-full min-w-0 rounded-md border-gray-300 text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
+                                                >
 
                                             </div>
 
-                                        @endif
 
-                                    </td>
+                                            {{-- BUTTONS --}}
+                                            <div class="flex flex-wrap items-end gap-2 [&>*]:min-h-11 [&>*]:flex-1 [&>*]:text-center md:[&>*]:flex-none">
 
-                                </tr>
+                                                {{-- SEARCH --}}
+                                                <button
+                                                    type="submit"
+                                                    class="rounded-md bg-green-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800"
+                                                >
+                                                    Search
+                                                </button>
 
-                            @endforelse
 
-                        </tbody>
+                                                {{-- CLEAR --}}
+                                                @if($search !== '')
 
-                    </table>
+                                                    <a
+                                                        href="{{ route('data-management.employment-status') }}"
+                                                        class="rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                                                    >
+                                                        Clear
+                                                    </a>
 
-                </div>
+                                                @endif
 
-                {{-- PAGINATION --}}
-                    <div class="border-t border-gray-200 px-4 sm:px-6 py-4">
+                                            </div>
 
-                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                        </div>
 
-                            <div class="text-sm text-gray-500">
+                                    </form>
 
-                                @if($employmentStatuses->total() > 0)
+                                </div>
 
-                                    Showing
-                                    <span class="font-semibold text-gray-700">
-                                        {{ $employmentStatuses->firstItem() }}
-                                    </span>
 
-                                    to
+                                {{-- TABLE --}}
+                                <p class="border-b border-gray-100 px-4 py-2 text-xs text-gray-500 lg:hidden">
+                                    Swipe left or right to view all columns and the Update button.
+                                </p>
+                                <div class="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain" tabindex="0" role="region" aria-label="Employment status records, horizontally scrollable">
 
-                                    <span class="font-semibold text-gray-700">
-                                        {{ $employmentStatuses->lastItem() }}
-                                    </span>
+                                    <table class="min-w-full divide-y divide-gray-200">
 
-                                    of
+                                        <thead class="bg-white">
 
-                                    <span class="font-semibold text-gray-700">
-                                        {{ $employmentStatuses->total() }}
-                                    </span>
+                                            <tr>
 
-                                    records
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
+                                                    #
+                                                </th>
 
-                                @else
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
+                                                    Name
+                                                </th>
 
-                                    Showing 0 records
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
+                                                    School Name
+                                                </th>
 
-                                @endif
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
+                                                    Item From School Level
+                                                </th>
+
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
+                                                    Plantilla Item No.
+                                                </th>
+
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
+                                                    Position Title
+                                                </th>
+
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
+                                                    Employment Status
+                                                </th>
+
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
+                                                    Date of Original Appointment
+                                                </th>
+
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
+                                                    Date of Last Promotion
+                                                </th>
+
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
+                                                    Warm Body Status
+                                                </th>
+
+                                                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
+                                                    Nature of Work
+                                                </th>
+
+                                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-700">
+                                                    Action
+                                                </th>
+
+                                            </tr>
+
+                                        </thead>
+
+
+                                        <tbody class="divide-y divide-gray-200 bg-white">
+
+                                            @forelse($employmentStatuses as $record)
+
+                                                @php
+
+                                                    $basic = $record->user?->basicInformation;
+
+                                                    $plantilla = $record->plantilla;
+
+                                                    $school = $record->school;
+
+                                                    $name = trim(
+                                                        ($basic?->first_name ?? '') . ' ' .
+                                                        ($basic?->middle_name ?? '') . ' ' .
+                                                        ($basic?->last_name ?? '') . ' ' .
+                                                        ($basic?->extension_name ?? '')
+                                                    );
+
+                                                @endphp
+
+
+                                                <tr class="hover:bg-gray-50">
+
+
+                                                    {{-- # --}}
+                                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500">
+
+                                                        {{ $employmentStatuses->firstItem() + $loop->index }}
+
+                                                    </td>
+
+
+                                                    {{-- NAME --}}
+                                                    <td class="min-w-[220px] px-4 py-4">
+
+                                                        <div class="text-sm font-semibold text-gray-900">
+
+                                                            {{ $name ?: '—' }}
+
+                                                        </div>
+
+                                                        <div class="mt-1 text-sm text-gray-500 break-words">
+
+                                                            {{ $record->user?->email ?? '—' }}
+
+                                                        </div>
+
+                                                    </td>
+
+
+                                                    {{-- SCHOOL NAME --}}
+                                                    <td class="min-w-[220px] px-4 py-4 text-sm text-gray-700">
+
+                                                        {{ $school?->school_name ?? '—' }} <br> {{ $school?->school_district ?? '—' }}
+
+                                                    </td>
+
+
+                                                    {{-- ITEM FROM SCHOOL LEVEL --}}
+                                                    <td class="min-w-[180px] px-4 py-4 text-sm text-gray-700">
+
+                                                        {{ $plantilla?->item_from_school_level ?? '—' }}
+
+                                                    </td>
+
+
+                                                    {{-- PLANTILLA ITEM NUMBER --}}
+                                                    <td class="min-w-[180px] px-4 py-4 text-sm text-gray-700">
+
+                                                        {{ $plantilla?->item_number ?? '—' }}
+
+                                                    </td>
+
+
+                                                    {{-- POSITION TITLE --}}
+                                                    <td class="min-w-[180px] px-4 py-4 text-sm font-medium text-gray-900">
+
+                                                        {{ $plantilla?->position_title ?? '—' }}
+
+                                                    </td>
+
+
+                                                    {{-- EMPLOYMENT STATUS --}}
+                                                    <td class="whitespace-nowrap px-4 py-4">
+
+                                                        @if($record->employment_status)
+
+                                                            <span
+                                                                class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800"
+                                                            >
+
+                                                                {{ $record->employment_status }}
+
+                                                            </span>
+
+                                                        @else
+
+                                                            <span class="text-sm text-gray-400">
+                                                                —
+                                                            </span>
+
+                                                        @endif
+
+                                                    </td>
+
+
+                                                    {{-- DATE OF ORIGINAL APPOINTMENT --}}
+                                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">
+
+                                                        {{ $record->date_of_original_appointment
+                                                            ? $record->date_of_original_appointment->format('M d, Y')
+                                                            : '—'
+                                                        }}
+
+                                                    </td>
+
+
+                                                    {{-- DATE OF LAST PROMOTION --}}
+                                                    <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-700">
+
+                                                        {{ $record->date_of_last_promotion
+                                                            ? $record->date_of_last_promotion->format('M d, Y')
+                                                            : '—'
+                                                        }}
+
+                                                    </td>
+
+
+                                                    {{-- WARM BODY STATUS --}}
+                                                    <td class="whitespace-nowrap px-4 py-4">
+
+                                                        @if($record->warm_body_status)
+
+                                                            <span
+                                                                class="inline-flex rounded-full px-3 py-1 text-xs font-semibold
+                                                                    {{ $record->warm_body_status === 'Detailed'
+                                                                        ? 'bg-red-100 text-red-700'
+                                                                        : 'bg-blue-100 text-blue-800'
+                                                                    }}"
+                                                            >
+                                                                {{ $record->warm_body_status }}
+                                                            </span>
+
+                                                        @else
+
+                                                            <span class="text-sm text-gray-400">
+                                                                —
+                                                            </span>
+
+                                                        @endif
+
+                                                    </td>
+
+
+                                                    {{-- NATURE OF WORK --}}
+                                                    <td class="min-w-[160px] px-4 py-4 text-sm text-gray-700">
+
+                                                        {{ $record->nature_of_work ?? '—' }}
+
+                                                    </td>
+
+
+                                                    {{-- ACTION --}}
+                                                    <td class="whitespace-nowrap px-4 py-4 text-right">
+                                                        <a
+                                                            href="{{ route(
+                                                                'data-management.employment-status.edit',
+                                                                $record->id
+                                                            ) }}"
+                                                            class="inline-flex min-h-11 items-center rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                                                        >
+                                                            Update
+                                                        </a>
+
+                                                    </td>
+
+                                                </tr>
+
+
+                                            @empty
+
+                                                <tr>
+
+                                                    <td
+                                                        colspan="12"
+                                                        class="px-4 sm:px-6 py-12 text-center"
+                                                    >
+
+                                                        <div class="text-sm font-medium text-gray-700">
+
+                                                            No employment records found.
+
+                                                        </div>
+
+                                                        @if($search !== '')
+
+                                                            <div class="mt-1 text-sm text-gray-500 break-words">
+
+                                                                No records matched your search for
+                                                                <span class="font-semibold">
+                                                                    "{{ $search }}"
+                                                                </span>.
+
+                                                            </div>
+
+                                                        @endif
+
+                                                    </td>
+
+                                                </tr>
+
+                                            @endforelse
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                                {{-- PAGINATION --}}
+                                    <div class="border-t border-gray-200 px-4 sm:px-6 py-4">
+
+                                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+                                            <div class="text-sm text-gray-500">
+
+                                                @if($employmentStatuses->total() > 0)
+
+                                                    Showing
+                                                    <span class="font-semibold text-gray-700">
+                                                        {{ $employmentStatuses->firstItem() }}
+                                                    </span>
+
+                                                    to
+
+                                                    <span class="font-semibold text-gray-700">
+                                                        {{ $employmentStatuses->lastItem() }}
+                                                    </span>
+
+                                                    of
+
+                                                    <span class="font-semibold text-gray-700">
+                                                        {{ $employmentStatuses->total() }}
+                                                    </span>
+
+                                                    records
+
+                                                @else
+
+                                                    Showing 0 records
+
+                                                @endif
+
+                                            </div>
+
+
+                                            <div>
+
+                                                {{ $employmentStatuses->links() }}
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
 
                             </div>
-
-
-                            <div>
-
-                                {{ $employmentStatuses->links() }}
-
-                            </div>
-
-                        </div>
-
+                @elseif($isAdmin)
+                <div class="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                    <div class="border-b border-green-800 bg-green-800 p-4 text-white sm:px-2 sm:py-4" style="background-color: #166534;">
+                        <h3 class="text-xl font-semibold text-white sm:text-xl">
+                            Employment Status Records ({{ $schoolName }} - {{ $districtName }})
+                        </h3>
+                        <p class="mt-2 text-sm text-green-100 sm:text-base">
+                            List of personnel employment status records and related information.
+                        </p>
                     </div>
 
-            </div>
+                    <div class="border-b border-gray-200 p-4 sm:p-6">
+                        <form action="{{ url()->current() }}" method="GET">
+                            <label for="admin-employment-search" class="mb-2 block text-sm font-medium text-gray-700">Search employment records</label>
+                            <div class="flex flex-col gap-3 sm:flex-row">
+                                <input
+                                    type="search"
+                                    id="admin-employment-search"
+                                    name="search"
+                                    value="{{ $search }}"
+                                    placeholder="Search name, email, item no., position, or nature of work"
+                                    class="min-h-11 min-w-0 flex-1 rounded-md border-gray-300 text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
+                                >
+                                <div class="flex gap-2">
+                                    <button type="submit" class="min-h-11 rounded-md bg-green-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-800">Search</button>
+                                    @if($search !== '')
+                                        <a href="{{ url()->current() }}" class="inline-flex min-h-11 items-center rounded-md border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50">Clear</a>
+                                    @endif
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <p class="border-b border-gray-100 px-4 py-2 text-xs text-gray-500 lg:hidden">Swipe left or right to view all columns and the Update button.</p>
+                    <div class="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain" tabindex="0" role="region" aria-label="Admin employment status records, horizontally scrollable">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-white">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">#</th>
+                                    <th scope="col" class="min-w-[220px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Name &amp; Email Address</th>
+                                    <th scope="col" class="min-w-[160px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Plantilla Item No.</th>
+                                    <th scope="col" class="min-w-[180px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Position Title</th>
+                                    <th scope="col" class="min-w-[160px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Nature of Work</th>
+                                    <th scope="col" class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-700">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 bg-white">
+                                @forelse($employmentStatuses as $record)
+                                    @php
+                                        $basic = $record->user?->basicInformation;
+                                        $name = trim(implode(' ', array_filter([
+                                            $basic?->first_name,
+                                            $basic?->middle_name,
+                                            $basic?->last_name,
+                                            $basic?->extension_name,
+                                        ])));
+                                    @endphp
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500">{{ $employmentStatuses->firstItem() + $loop->index }}</td>
+                                        <td class="min-w-[220px] px-4 py-4">
+                                            <div class="text-sm font-semibold text-gray-900">{{ $name ?: '—' }}</div>
+                                            <div class="mt-1 break-words text-sm text-gray-500">{{ $record->user?->email ?? '—' }}</div>
+                                        </td>
+                                        <td class="min-w-[160px] px-4 py-4 text-sm text-gray-700">{{ $record->plantilla?->item_number ?? '—' }}</td>
+                                        <td class="min-w-[180px] px-4 py-4 text-sm font-medium text-gray-900">{{ $record->plantilla?->position_title ?? '—' }}</td>
+                                        <td class="min-w-[160px] px-4 py-4 text-sm text-gray-700">{{ $record->nature_of_work ?? '—' }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-right">
+                                            <a href="{{ route($editRouteName, $record->id) }}" class="inline-flex min-h-11 items-center rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">Update</a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="px-4 py-12 text-center text-sm text-gray-600">
+                                            @if($search !== '')
+                                                No records matched your search for "{{ $search }}".
+                                            @else
+                                                No employment records found.
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="border-t border-gray-200 px-4 py-4 sm:px-6">
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <p class="text-sm text-gray-500">
+                                @if($employmentStatuses->total() > 0)
+                                    Showing {{ $employmentStatuses->firstItem() }} to {{ $employmentStatuses->lastItem() }} of {{ $employmentStatuses->total() }} records
+                                @else
+                                    Showing 0 records
+                                @endif
+                            </p>
+                            {{ $employmentStatuses->withQueryString()->links() }}
+                        </div>
+                    </div>
+                </div>
+
+                @else
+                    @php(abort(403))
+                @endif
+
 
         </div>
 
