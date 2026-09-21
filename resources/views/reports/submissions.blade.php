@@ -1,3 +1,96 @@
+@push('styles')
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css"
+    >
+
+    <style>
+        .report-submissions .ts-wrapper {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .report-submissions .ts-control {
+            min-height: 44px;
+            padding: 10px 12px;
+            border: 1px solid #b8c5bd;
+            border-radius: 8px;
+            align-items: center;
+        }
+
+        .report-submissions .ts-control > .item,
+        .report-submissions .ts-dropdown .option {
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .report-submissions .ts-control > input {
+            min-width: 0 !important;
+            max-width: 100% !important;
+        }
+
+        .report-submissions .ts-wrapper.focus .ts-control {
+            border-color: #16a34a;
+            box-shadow: 0 0 0 1px #16a34a;
+        }
+
+        .report-submissions .ts-dropdown {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .report-submissions .ts-dropdown-content {
+            max-height: 240px;
+            overscroll-behavior: contain;
+        }
+
+        .report-submissions .ts-dropdown .active {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .report-submissions .ts-dropdown .selected {
+            background-color: #15803d;
+            color: #ffffff;
+        }
+    </style>
+@endpush
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
+
+    <script>
+        (() => {
+            function initializeSchoolDropdown() {
+                const select = document.getElementById('filter-school');
+
+                if (!select || select.tomselect) {
+                    return;
+                }
+
+                new TomSelect(select, {
+                    create: false,
+                    allowEmptyOption: true,
+                    maxOptions: null,
+                    searchField: ['text'],
+                    placeholder: select.dataset.placeholder,
+                    plugins: ['dropdown_input'],
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener(
+                    'DOMContentLoaded',
+                    initializeSchoolDropdown,
+                    { once: true }
+                );
+            } else {
+                initializeSchoolDropdown();
+            }
+        })();
+    </script>
+@endpush
+
 <x-app-layout>
     <style>
         .report-submissions { width: 100%; min-width: 0; max-width: 1500px; margin: auto; padding: 24px; color: #1f2937; }
@@ -13,7 +106,7 @@
         .report-submissions .button { display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; border: none; border-radius: 8px; background: #15803d; color: white; font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap; }
         .report-submissions .button:hover { background: #166534; }
         .report-submissions .link { color: #166534; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
-        .report-submissions :focus-visible { outline: 3px solid #4ade80; outline-offset: 3px; }
+        
         .report-submissions .notice { margin-top: 18px; border-radius: 8px; padding: 14px 18px; background: #dcfce7; color: #166534; }
         .report-submissions .errors { background: #fee2e2; color: #991b1b; }
         .report-submissions .errors ul { list-style: disc; padding-left: 20px; }
@@ -75,13 +168,27 @@
                             @endforeach
                         </select>
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <label for="filter-school">School</label>
-                        <select id="filter-school" name="school_id">
+
+                        <select
+                            id="filter-school"
+                            name="school_id"
+                            class="w-full min-w-0"
+                            data-placeholder="Search school ID, name, or district..."
+                        >
                             <option value="">All schools</option>
+
                             @foreach ($schools->unique('school_id') as $school)
-                                <option value="{{ $school->school_id }}" @selected((string) request('school_id') === (string) $school->school_id)>
-                                    {{ $school->school_id }} — {{ $school->school_name }}
+                                <option
+                                    value="{{ $school->school_id }}"
+                                    @selected(
+                                        (string) request('school_id') === (string) $school->school_id
+                                    )
+                                >
+                                    {{ $school->school_id }}
+                                    - {{ $school->school_name }}
+                                    - {{ $school->school_district }}
                                 </option>
                             @endforeach
                         </select>
@@ -98,7 +205,16 @@
                 </div>
                 <div class="actions">
                     <button class="button" type="submit">Apply filters</button>
-                    <a class="link" href="{{ route('data-management.reports.submissions') }}">Reset</a>
+                    <a
+                        href="{{ route('data-management.reports.submissions') }}"
+                        style="display: inline-flex; align-items: center; justify-content: center;
+                            background-color: #ffffff; color: #374151;
+                            border: 1px solid #d1d5db; border-radius: 8px;
+                            padding: 10px 16px; font-size: 14px;
+                            font-weight: 600; text-decoration: none;"
+                    >
+                        Reset
+                    </a>
                 </div>
             </form>
         </section>
@@ -124,7 +240,7 @@
                             <th scope="col">Status</th>
                             <th scope="col">Submitted by</th>
                             <th scope="col">Validated by</th>
-                            <th scope="col">Validated at (PH)</th>
+                            <th scope="col">Validated at</th>
                             <th scope="col">Action</th>
                         </tr>
                     </thead>

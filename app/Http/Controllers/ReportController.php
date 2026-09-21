@@ -296,7 +296,7 @@ class ReportController extends Controller implements HasMiddleware
         $submissions = $query->latest()->paginate(15)->withQueryString();
         $reports = Report::orderByDesc('id')->get(['id', 'name_of_report']);
         $schools = DB::table('school_db')->orderBy('school_name')
-            ->get(['school_id', 'school_name']);
+            ->get(['school_id', 'school_name', 'school_district']);
 
         return view('reports.submissions', compact('submissions', 'reports', 'schools'));
     }
