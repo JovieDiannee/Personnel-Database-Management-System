@@ -1938,9 +1938,9 @@ class DataManagementController extends Controller
             ?->issuedId
             ?->employee_id;
 
-        if ((string) $loggedInEmployeeId === '1000001') {
-            abort(403, 'You are not authorized to update personnel.');
-        }
+        // if ((string) $loggedInEmployeeId === '1000001') {
+        //     abort(403, 'You are not authorized to update personnel.');
+        // }
 
         $person = BasicInformation::with([
             'user',
