@@ -6,7 +6,7 @@
         .report-management h2 { margin: 0 0 18px; font-size: 19px; font-weight: 600; }
         .report-management .muted { color: #526277; }
         .report-management .card { min-width: 0; background: white; border: 1px solid #dce8df; border-radius: 12px; padding: 22px; margin-top: 22px; box-shadow: 0 1px 3px rgb(0 0 0 / 4%); }
-        .report-management .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .report-management .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
         .report-management label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
         .report-management input,
         .report-management select,
@@ -34,7 +34,7 @@
         .report-management .edit-panel { padding: 18px; background: #f8faf9; border-radius: 8px; margin-top: 10px; }
         .report-management .empty { text-align: center; padding: 30px; }
         .report-management .pagination { margin-top: 20px; }
-        @media (max-width: 650px) {
+        @media (max-width: 800px) {
             .report-management { padding: 16px 12px; }
             .report-management .grid { grid-template-columns: 1fr; }
             .report-management .card { padding: 16px; }
@@ -49,7 +49,56 @@
         .report-management .row-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
         .report-management .close-button { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
         .report-management .close-button:hover { background: #ffedd5; }
+        .report-management .closed-button { background: #601800; color: #faf7f6; border: 1px solid #6a0505; }
+        .report-management .closed-button:hover { background: #601800; }
         .report-management .help { font-size: 13px; margin-top: 6px; }
+    
+        /* Compact, uniform report row actions. */
+        .report-management .row-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
+            width: 140px;
+        }
+        .report-management .row-actions form {
+            width: 100%;
+            margin: 0;
+        }
+        .report-management .row-actions .link,
+        .report-management .row-actions button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            width: 100%;
+            min-height: 32px;
+            padding: 6px 10px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.4;
+            white-space: nowrap;
+            text-align: center;
+            text-decoration: none;
+        }
+        .report-management .row-actions .link {
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+        .report-management .row-actions .link:hover {
+            background-color: #dcfce7;
+        }
+        .report-management .row-actions .close-button {
+            background-color: #fff7ed;
+            border-color: #fed7aa;
+            color: #9a3412;
+        }
+        .report-management .row-actions .close-button:hover {
+            background-color: #ffedd5;
+        }
     </style>
 
     <div class="report-management">
@@ -93,6 +142,15 @@
                                    value="{{ $creating ? old('name_of_report') : '' }}" required>
                         </div>
                         <div>
+                            <label for="school_sector">School sector</label>
+                            <select id="school_sector" name="school_sector" required>
+                                <option value="" disabled @selected(!$creating || !old('school_sector'))>Select school sector</option>
+                                @foreach (['Public' => 'Public', 'Private' => 'Private', 'SUCsLUCs' => 'SUCs/LUCs', 'All' => 'All'] as $value => $label)
+                                    <option value="{{ $value }}" @selected($creating && old('school_sector') === $value)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
                             <label for="deadline">Deadline date and time</label>
                             <input type="datetime-local" id="deadline" name="deadline" step="60"
                                    value="{{ $creating ? old('deadline') : '' }}" required>
@@ -103,7 +161,7 @@
                         </div>
                     </div>
 
-                    <p class="muted help">New reports start as Ongoing. A Pending submission entry is created for every existing school.</p>
+                    <p class="muted help">New reports start as Ongoing. Pending submission entries are created for existing schools in the selected sector.</p>
                     <div class="actions">
                         <button type="submit">Create report</button>
                     </div>
@@ -142,7 +200,16 @@
                                 </td>
                                 <td class="remarks">{{ $report->remarks ?? '—' }}</td>
                                 <td>
-                                    <strong>{{ $report->submissions_count }} schools</strong>
+                                    @if ($report->public_school_count > 0)
+                                        <div><strong>{{ number_format($report->public_school_count) }} Public {{ $report->public_school_count == 1 ? 'school' : 'schools' }}</strong></div>
+                                    @endif
+                                    @if ($report->private_school_count > 0)
+                                        <div><strong>{{ number_format($report->private_school_count) }} Private {{ $report->private_school_count == 1 ? 'school' : 'schools' }}</strong></div>
+                                    @endif
+                                    @if ($report->sucs_lucs_school_count > 0)
+                                        <div><strong>{{ number_format($report->sucs_lucs_school_count) }} SUCs/LUCs {{ $report->sucs_lucs_school_count == 1 ? 'school' : 'schools' }}</strong></div>
+                                    @endif
+                                    <div class="muted">Total: {{ number_format($report->submissions_count) }} schools</div>
                                     <div class="counts">
                                         <span class="badge pending">Pending: {{ $report->pending_count }}</span>
                                         <span class="badge done">Done: {{ $report->done_count }}</span>
@@ -157,6 +224,20 @@
                                             View submissions
                                         </a>
                                         @if (auth()->user()?->role === 'super_admin' && $report->status === 'Ongoing')
+                                            <button
+                                                type="button"
+                                                aria-controls="edit-report-{{ $report->id }}"
+                                                aria-label="Edit report {{ $report->id }}"
+                                                onclick="
+                                                    const panel = document.getElementById('edit-report-{{ $report->id }}');
+                                                    panel.open = true;
+                                                    const input = document.getElementById('name-{{ $report->id }}');
+                                                    input.focus();
+                                                    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                "
+                                            >
+                                                Edit report
+                                            </button>
                                             <form method="POST" action="{{ route('reports.close', $report) }}"
                                                   onsubmit="return confirm('Close this report? Schools may still have pending submissions. Further submission and verification will be disabled.');">
                                                 @csrf
@@ -165,7 +246,7 @@
                                                         aria-label="Close report {{ $report->id }}">Close report</button>
                                             </form>
                                         @elseif ($report->status === 'Done')
-                                            <span class="muted">Closed</span>
+                                            <button type="submit" class="closed-button">Closed</button>
                                         @endif
                                     </div>
                                 </td>
@@ -175,7 +256,7 @@
                                 @php($editing = old('_form') === 'edit-'.$report->id)
                                 <tr>
                                     <td colspan="7">
-                                        <details @if($editing) open @endif>
+                                        <details id="edit-report-{{ $report->id }}" @if($editing) open @endif>
                                             <summary>Edit report #{{ $report->id }}</summary>
                                             <form class="edit-panel" method="POST" action="{{ route('reports.update', $report) }}">
                                                 @csrf
@@ -187,6 +268,16 @@
                                                         <label for="name-{{ $report->id }}">Name of report</label>
                                                         <input id="name-{{ $report->id }}" name="name_of_report" maxlength="255"
                                                                value="{{ $editing ? old('name_of_report') : $report->name_of_report }}" required>
+                                                    </div>
+                                                    <div>
+                                                        <label for="sector-{{ $report->id }}">School sector</label>
+                                                        <select id="sector-{{ $report->id }}" name="school_sector">
+                                                            <option value="" @selected(!$editing || !old('school_sector'))>Keep current school assignments</option>
+                                                            @foreach (['Public' => 'Public', 'Private' => 'Private', 'SUCsLUCs' => 'SUCs/LUCs', 'All' => 'All'] as $value => $label)
+                                                                <option value="{{ $value }}" @selected($editing && old('school_sector') === $value)>{{ $label }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <p class="muted help">Selecting a sector updates assigned schools. Submitted and verified records cannot be removed.</p>
                                                     </div>
                                                     <div>
                                                         <label for="deadline-{{ $report->id }}">Deadline date and time</label>
@@ -221,3 +312,7 @@
         </section>
     </div>
 </x-app-layout>
+
+
+
+

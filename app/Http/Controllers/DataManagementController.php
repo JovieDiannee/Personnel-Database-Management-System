@@ -8129,16 +8129,16 @@ class DataManagementController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            // Preserve the original validation details on repeated requests.
-            if ($submission?->status === 'Verified') {
-                return false;
-            }
+            // Only schools assigned when the report was created may submit.
+            abort_if(
+                !$submission,
+                403,
+                'Your school is not assigned to this report.'
+            );
 
-            if (!$submission) {
-                $submission = new ReportSubmission();
-                $submission->report_id = $lockedReport->id;
-                $submission->school_id = $schoolCode;
-                $submission->status = 'Pending';
+            // Preserve the original validation details on repeated requests.
+            if ($submission->status === 'Verified') {
+                return false;
             }
 
             abort_unless(

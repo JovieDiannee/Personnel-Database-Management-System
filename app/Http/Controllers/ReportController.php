@@ -22,32 +22,110 @@ class ReportController extends Controller implements HasMiddleware
         $reports = Report::query()
             ->withCount([
                 'submissions',
-                'submissions as pending_count' => fn ($query) => $query->where('status', 'Pending'),
-                'submissions as done_count' => fn ($query) => $query->where('status', 'Done'),
-                'submissions as verified_count' => fn ($query) => $query->where('status', 'Verified'),
+
+                'submissions as pending_count' => fn ($query) =>
+                    $query->where('status', 'Pending'),
+
+                'submissions as done_count' => fn ($query) =>
+                    $query->where('status', 'Done'),
+
+                'submissions as verified_count' => fn ($query) =>
+                    $query->where('status', 'Verified'),
             ])
             ->latest()
             ->paginate(15);
+
+        // Count assigned Public and Private schools for each report.
+        $schoolCounts = DB::table('report_submissions as submissions')
+            ->join(
+                'school_db as schools',
+                'schools.school_id',
+                '=',
+                'submissions.school_id'
+            )
+            ->whereIn(
+                'submissions.report_id',
+                $reports->getCollection()->modelKeys()
+            )
+            ->select('submissions.report_id')
+            ->selectRaw("
+                COUNT(DISTINCT CASE
+                    WHEN LOWER(TRIM(schools.school_sector)) = 'public'
+                    THEN submissions.school_id
+                END) AS public_count
+            ")
+            ->selectRaw("
+                COUNT(DISTINCT CASE
+                    WHEN LOWER(TRIM(schools.school_sector)) = 'private'
+                    THEN submissions.school_id
+                END) AS private_count
+            ")
+            ->selectRaw("
+                COUNT(DISTINCT CASE
+                    WHEN LOWER(TRIM(schools.school_sector)) = 'sucslucs'
+                    THEN submissions.school_id
+                END) AS sucs_lucs_count
+            ")
+            ->groupBy('submissions.report_id')
+            ->get()
+            ->keyBy('report_id');
+
+        foreach ($reports as $report) {
+            $counts = $schoolCounts->get($report->id);
+
+            $report->public_school_count = (int) (
+                $counts?->public_count ?? 0
+            );
+
+            $report->private_school_count = (int) (
+                $counts?->private_count ?? 0
+            );
+
+            $report->sucs_lucs_school_count = (int) (
+                $counts?->sucs_lucs_count ?? 0
+            );
+        }
 
         return view('reports.index', compact('reports'));
     }
 
     public function store(Request $request): RedirectResponse
     {
+        abort_unless($request->user()?->role === 'super_admin', 403);
+
         $data = $this->validateReport($request);
 
-        DB::transaction(function () use ($data) {
+        $sectorData = $request->validate([
+            'school_sector' => [
+                'required',
+                'in:Public,Private,SUCsLUCs,All',
+            ],
+        ]);
+
+        $sector = $sectorData['school_sector'];
+
+        DB::transaction(function () use ($data, $sector) {
+            $schoolQuery = DB::table('school_db')
+                ->whereNotNull('school_id')
+                ->where('school_id', '<>', '');
+
+            if ($sector !== 'All') {
+                $schoolQuery->where('school_sector', $sector);
+            }
+
+            $schoolIds = $schoolQuery
+                ->distinct()
+                ->pluck('school_id');
+
+            if ($schoolIds->isEmpty()) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'school_sector' => 'No schools were found for the selected sector.',
+                ]);
+            }
+
             $report = new Report($data);
             $report->status = 'Ongoing';
             $report->save();
-
-            // Each existing school receives one pending submission record.
-            // DISTINCT handles duplicate school identifiers in school_db.
-            $schoolIds = DB::table('school_db')
-                ->whereNotNull('school_id')
-                ->where('school_id', '<>', '')
-                ->distinct()
-                ->pluck('school_id');
 
             $now = now();
 
@@ -67,24 +145,135 @@ class ReportController extends Controller implements HasMiddleware
             }
         });
 
-        return redirect()->route('data-management.reports')
-            ->with('success', 'Report created with pending entries for existing schools.');
+        return redirect()
+            ->route('data-management.reports')
+            ->with(
+                'success',
+                "Report created for schools in the selected sector: {$sector}."
+            );
     }
 
-    public function update(Request $request, Report $report): RedirectResponse
+    public function update(Request $request, Report $report): RedirectResponse 
     {
+        abort_unless(
+            $request->user()?->role === 'super_admin',
+            403
+        );
+
         $data = $this->validateReport($request);
 
-        DB::transaction(function () use ($report, $data) {
-            $lockedReport = Report::query()->lockForUpdate()->findOrFail($report->id);
+        $sectorData = $request->validate([
+            'school_sector' => [
+                'nullable',
+                'in:Public,Private,SUCsLUCs,All',
+            ],
+        ]);
 
-            abort_unless($lockedReport->status === 'Ongoing', 409, 'Only ongoing reports can be edited.');
+        $sector = $sectorData['school_sector'] ?? null;
+
+        // Sector controls assignments; it is not a reports table column.
+        unset($data['school_sector']);
+
+        DB::transaction(function () use ($report, $data, $sector) {
+            $lockedReport = Report::query()
+                ->lockForUpdate()
+                ->findOrFail($report->id);
+
+            abort_unless(
+                $lockedReport->status === 'Ongoing',
+                409,
+                'Only ongoing reports can be edited.'
+            );
+
+            if ($sector !== null && $sector !== '') {
+                $schoolQuery = DB::table('school_db')
+                    ->whereNotNull('school_id')
+                    ->where('school_id', '<>', '');
+
+                if ($sector !== 'All') {
+                    $schoolQuery->where('school_sector', $sector);
+                }
+
+                $schoolIds = $schoolQuery
+                    ->distinct()
+                    ->pluck('school_id')
+                    ->map(fn ($id) => (string) $id);
+
+                if ($schoolIds->isEmpty()) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'school_sector' =>
+                            'No schools were found for the selected sector.',
+                    ]);
+                }
+
+                $existing = ReportSubmission::query()
+                    ->where('report_id', $lockedReport->id)
+                    ->lockForUpdate()
+                    ->get();
+
+                $targetSchoolIds = array_fill_keys(
+                    $schoolIds->all(),
+                    true
+                );
+
+                $excluded = $existing->filter(
+                    fn ($submission) =>
+                        !isset($targetSchoolIds[(string) $submission->school_id])
+                );
+
+                // Do not erase submitted or validated information.
+                $hasProtectedRecords = $excluded->contains(
+                    fn ($submission) =>
+                        $submission->status !== 'Pending'
+                        || $submission->user_id !== null
+                        || $submission->validated_by !== null
+                        || $submission->validated_at !== null
+                );
+
+                if ($hasProtectedRecords) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'school_sector' =>
+                            'This change would remove schools with submission or validation details. Their records must be retained.',
+                    ]);
+                }
+
+                // Remove only excluded, untouched Pending entries.
+                if ($excluded->isNotEmpty()) {
+                    ReportSubmission::query()
+                        ->where('report_id', $lockedReport->id)
+                        ->whereIn('id', $excluded->modelKeys())
+                        ->delete();
+                }
+
+                $existingSchoolIds = $existing
+                    ->pluck('school_id')
+                    ->map(fn ($id) => (string) $id);
+
+                $newSchoolIds = $schoolIds->diff($existingSchoolIds);
+                $now = now();
+
+                foreach ($newSchoolIds->chunk(500) as $chunk) {
+                    $rows = $chunk->map(fn ($schoolId) => [
+                        'report_id' => $lockedReport->id,
+                        'school_id' => $schoolId,
+                        'user_id' => null,
+                        'status' => 'Pending',
+                        'validated_by' => null,
+                        'validated_at' => null,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ])->values()->all();
+
+                    ReportSubmission::insert($rows);
+                }
+            }
 
             $lockedReport->fill($data);
             $lockedReport->save();
         });
 
-        return redirect()->route('data-management.reports')
+        return redirect()
+            ->route('data-management.reports')
             ->with('success', 'Report updated successfully.');
     }
 
@@ -179,5 +368,52 @@ class ReportController extends Controller implements HasMiddleware
             'deadline' => ['required', 'date_format:Y-m-d\TH:i'],
             'remarks' => ['nullable', 'string', 'max:10000'],
         ]);
+    }
+
+    public function revertValidation(Request $request,ReportSubmission $submission): RedirectResponse 
+    {
+        abort_unless(
+            $request->user()?->role === 'super_admin',
+            403
+        );
+
+        DB::transaction(function () use ($submission) {
+            $report = Report::query()
+                ->lockForUpdate()
+                ->findOrFail($submission->report_id);
+
+            $lockedSubmission = ReportSubmission::query()
+                ->where('report_id', $report->id)
+                ->lockForUpdate()
+                ->findOrFail($submission->id);
+
+            if ($report->status !== 'Ongoing') {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'submission' => 'Validation cannot be reverted while the report is closed.',
+                ]);
+            }
+
+            if ($lockedSubmission->status !== 'Verified') {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'submission' => 'Only verified submissions can be reverted.',
+                ]);
+            }
+
+            $lockedSubmission->status = 'Pending';
+            $lockedSubmission->user_id = null;
+            $lockedSubmission->validated_by = null;
+            $lockedSubmission->validated_at = null;
+            $lockedSubmission->save();
+        });
+
+        return redirect()
+            ->route('data-management.reports.submissions', [
+                'report_id' => $submission->report_id,
+                'school_id' => $submission->school_id,
+            ])
+            ->with(
+                'success',
+                'Validation reverted. The school can correct its information and resubmit the report.'
+            );
     }
 }

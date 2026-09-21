@@ -151,7 +151,20 @@
                                 <td>{{ $submission->validated_at?->copy()->timezone('Asia/Manila')->format('M j, Y • g:i A') ?? '—' }}</td>
                                 <td>
                                     @if ($submission->status === 'Verified')
-                                        <span class="muted">Validated</span>
+                                        @if (auth()->user()?->role === 'super_admin' && $submission->report?->status === 'Ongoing')
+                                            <form method="POST" action="{{ route('reports.revert-validation', $submission) }}"
+                                                  onsubmit="return confirm('Return this school’s submission to Pending? The submitter and validation details will be cleared so the school can correct and resubmit its report.');">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="button"
+                                                        style="padding: 6px 10px; font-size: 12px; background-color: #c2410c;"
+                                                        aria-label="Revert validation for submission {{ $submission->id }}">
+                                                    Revert validation
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="muted">Validated</span>
+                                        @endif
                                     @elseif ($submission->report?->status !== 'Ongoing')
                                         <span class="muted">Report closed or unavailable</span>
                                     @elseif (auth()->user()?->role === 'super_admin' && $submission->status === 'Pending')
@@ -186,3 +199,4 @@
         </section>
     </div>
 </x-app-layout>
+
