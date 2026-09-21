@@ -8071,12 +8071,6 @@ class DataManagementController extends Controller
 
     public function updateAvailment(Request $request, $record)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Validate
-        |--------------------------------------------------------------------------
-        */
-
         $validated = $request->validate([
             'mode_of_availment' => [
                 'required',
@@ -8084,72 +8078,13 @@ class DataManagementController extends Controller
             ],
         ]);
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Find Record
-        |--------------------------------------------------------------------------
-        */
-
         $medicalAllowance = \App\Models\MedicalAllowance::findOrFail($record);
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Prevent Group → Individual
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $medicalAllowance->mode_of_availment === 'Group Availment (HMO)' &&
-            $validated['mode_of_availment'] === 'Individual Availment (HMO)'
-        ) {
-            return back()->with(
-                'error',
-                'Update not allowed. Group Availment (HMO) cannot be changed to Individual Availment (HMO).'
-            );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Check If There Is No Change
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $medicalAllowance->mode_of_availment ===
-            $validated['mode_of_availment']
-        ) {
-            return back()->with(
-                'error',
-                'No changes were made. The selected mode of availment is already the current mode.'
-            );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Update
-        |--------------------------------------------------------------------------
-        */
-
         $medicalAllowance->update([
-            'mode_of_availment' =>
-                $validated['mode_of_availment'],
+            'mode_of_availment' => $validated['mode_of_availment'],
         ]);
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Success
-        |--------------------------------------------------------------------------
-        */
-
-        return back()->with(
-            'success',
-            'Mode of availment updated successfully from Individual Availment (HMO) to Group Availment (HMO).'
-        );
+        return back()->with('success', 'Mode of availment updated successfully.');
     }
 
     public function validateMedicalAllowance(Request $request, Report $report): RedirectResponse 

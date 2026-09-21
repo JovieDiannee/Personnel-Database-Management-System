@@ -1396,242 +1396,38 @@
                                                             {{-- =====================================================
                                                                 MODE OF AVAILMENT
                                                             ====================================================== --}}
-                                                            <div
-                                                                x-data="{
-                                                                    originalMode: @js($record->mode_of_availment),
-                                                                    selectedMode: @js($record->mode_of_availment),
-
-                                                                    /*
-                                                                    |--------------------------------------------------------------------------
-                                                                    | INVALID CHANGES
-                                                                    |--------------------------------------------------------------------------
-                                                                    |
-                                                                    | 1. Group Availment → Individual Availment = NOT ALLOWED
-                                                                    | 2. Not Eligible → Individual Availment = NOT ALLOWED
-                                                                    |
-                                                                    */
-                                                                    get isInvalid() {
-
-                                                                        return (
-                                                                            this.originalMode === 'Group Availment (HMO)' &&
-                                                                            this.selectedMode === 'Individual Availment (HMO)'
-                                                                        ) || (
-                                                                            this.originalMode === 'Not Eligible' &&
-                                                                            this.selectedMode === 'Individual Availment (HMO)'
-                                                                        );
-                                                                    },
-
-                                                                    /*
-                                                                    |--------------------------------------------------------------------------
-                                                                    | CHECK IF VALUE CHANGED
-                                                                    |--------------------------------------------------------------------------
-                                                                    */
-                                                                    get hasChanged() {
-                                                                        return this.originalMode !== this.selectedMode;
-                                                                    },
-
-                                                                    /*
-                                                                    |--------------------------------------------------------------------------
-                                                                    | VALIDATION MESSAGE
-                                                                    |--------------------------------------------------------------------------
-                                                                    */
-                                                                    get validationMessage() {
-
-                                                                        if (
-                                                                            this.originalMode === 'Group Availment (HMO)' &&
-                                                                            this.selectedMode === 'Individual Availment (HMO)'
-                                                                        ) {
-                                                                            return 'Group Availment (HMO) cannot be changed to Individual Availment (HMO).';
-                                                                        }
-
-                                                                        if (
-                                                                            this.originalMode === 'Not Eligible' &&
-                                                                            this.selectedMode === 'Individual Availment (HMO)'
-                                                                        ) {
-                                                                            return 'Not Eligible cannot be changed to Individual Availment (HMO).';
-                                                                        }
-
-                                                                        return '';
-                                                                    }
-                                                                }"
-
-                                                                class="rounded-lg border border-gray-200 bg-white"
-                                                                style="padding: 18px 20px;"
-                                                            >
-
-
-                                                                {{-- =====================================================
-                                                                    LABEL
-                                                                ====================================================== --}}
+                                                            <div class="rounded-lg border border-gray-200 bg-white" style="padding: 18px 20px;">
                                                                 <label
                                                                     for="mode_of_availment_{{ $record->id }}"
                                                                     class="mb-2 block text-sm font-semibold text-gray-700"
                                                                 >
                                                                     Mode of Availment
-                                                                    <span class="text-red-500">*</span>
                                                                 </label>
 
-
-                                                                {{-- =====================================================
-                                                                    SELECT
-                                                                ====================================================== --}}
                                                                 <select
                                                                     id="mode_of_availment_{{ $record->id }}"
                                                                     name="mode_of_availment"
-                                                                    x-model="selectedMode"
-                                                                    required
-
-                                                                    :class="isInvalid
-                                                                        ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
-                                                                        : 'border-gray-300 focus:border-green-600 focus:ring-green-200'"
-
-                                                                    class="w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2"
+                                                                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-600"
                                                                 >
-
-                                                                    <option value="Group Availment (HMO)">
+                                                                    <option value="Group Availment (HMO)" @selected($record->mode_of_availment === 'Group Availment (HMO)')>
                                                                         Group Availment (HMO)
                                                                     </option>
-
-                                                                    <option value="Individual Availment (HMO)">
+                                                                    <option value="Individual Availment (HMO)" @selected($record->mode_of_availment === 'Individual Availment (HMO)')>
                                                                         Individual Availment (HMO)
                                                                     </option>
-
-                                                                    <option value="Not Eligible">
+                                                                    <option value="Not Eligible" @selected($record->mode_of_availment === 'Not Eligible')>
                                                                         Not Eligible
                                                                     </option>
-
                                                                 </select>
 
-
-                                                                {{-- =====================================================
-                                                                    REAL-TIME ERROR MESSAGE
-                                                                ====================================================== --}}
-                                                                <div
-                                                                    x-cloak
-                                                                    x-show="isInvalid"
-                                                                    x-transition
-
-                                                                    class="mt-3 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3"
-                                                                >
-
-                                                                    {{-- WARNING ICON --}}
-                                                                    <svg
-                                                                        xmlns="http://www.w3.org/2000/svg"
-                                                                        class="mt-0.5 h-5 w-5 shrink-0 text-red-600"
-                                                                        fill="none"
-                                                                        viewBox="0 0 24 24"
-                                                                        stroke="currentColor"
-                                                                        stroke-width="2"
-                                                                    >
-                                                                        <path
-                                                                            stroke-linecap="round"
-                                                                            stroke-linejoin="round"
-                                                                            d="M12 9v3.75M12 16.5h.01"
-                                                                        />
-
-                                                                        <path
-                                                                            stroke-linecap="round"
-                                                                            stroke-linejoin="round"
-                                                                            d="M10.29 3.86L1.82 18a2 2 0
-                                                                            001.71 3h16.94a2 2 0
-                                                                            001.71-3L13.71 3.86a2 2
-                                                                            0 00-3.42 0z"
-                                                                        />
-                                                                    </svg>
-
-
-                                                                    <div>
-
-                                                                        <p class="text-sm font-semibold text-red-800">
-                                                                            Option Not Allowed
-                                                                        </p>
-
-                                                                        <p
-                                                                            class="mt-1 text-xs leading-5 text-red-700"
-                                                                            x-text="validationMessage"
-                                                                        ></p>
-
-                                                                    </div>
-
-                                                                </div>
-
-
-                                                                {{-- =====================================================
-                                                                    VALID CHANGE MESSAGE
-                                                                ====================================================== --}}
-                                                                <div
-                                                                    x-cloak
-                                                                    x-show="hasChanged && !isInvalid"
-                                                                    x-transition
-
-                                                                    class="mt-3 flex items-start gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3"
-                                                                >
-
-                                                                    {{-- CHECK ICON --}}
-                                                                    <svg
-                                                                        xmlns="http://www.w3.org/2000/svg"
-                                                                        class="mt-0.5 h-5 w-5 shrink-0 text-green-600"
-                                                                        fill="none"
-                                                                        viewBox="0 0 24 24"
-                                                                        stroke="currentColor"
-                                                                        stroke-width="2"
-                                                                    >
-                                                                        <path
-                                                                            stroke-linecap="round"
-                                                                            stroke-linejoin="round"
-                                                                            d="M5 13l4 4L19 7"
-                                                                        />
-                                                                    </svg>
-
-
-                                                                    <div>
-
-                                                                        <p class="text-sm font-semibold text-green-800">
-                                                                            Change Allowed
-                                                                        </p>
-
-                                                                        <p class="mt-1 text-xs leading-5 text-green-700">
-                                                                            This availment status can be updated.
-                                                                        </p>
-
-                                                                    </div>
-
-                                                                </div>
-
-
-                                                                {{-- =====================================================
-                                                                    LARAVEL VALIDATION ERROR
-                                                                ====================================================== --}}
-                                                                @error('mode_of_availment')
-
-                                                                    <p class="mt-2 text-sm text-red-600">
-                                                                        {{ $message }}
-                                                                    </p>
-
-                                                                @enderror
-
-
-                                                                {{-- =====================================================
-                                                                    SAVE BUTTON
-                                                                ====================================================== --}}
                                                                 <div class="mt-5 flex justify-end [&>button]:min-h-11 [&>button]:w-full sm:[&>button]:w-auto">
-
                                                                     <button
                                                                         type="submit"
-
-                                                                        :disabled="isInvalid"
-
-                                                                        :class="isInvalid
-                                                                            ? 'cursor-not-allowed bg-gray-300 text-gray-500'
-                                                                            : 'bg-green-700 text-white hover:bg-green-800'"
-
-                                                                        class="rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-green-300"
+                                                                        class="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-300"
                                                                     >
                                                                         Save Changes
                                                                     </button>
-
                                                                 </div>
-
                                                             </div>
 
                                                         </div>
