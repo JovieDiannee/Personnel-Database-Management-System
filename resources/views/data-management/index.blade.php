@@ -163,6 +163,31 @@
                                 </a>
                             </div>
                         </div>
+
+                        {{-- Reports Management --}}
+                        <div class="flex min-w-0 flex-col rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200 sm:p-6">
+                            <h3 class="break-words text-base font-semibold text-green-900">
+                                Reports Management
+                            </h3>
+
+                            <p class="mt-2 break-words text-sm leading-6 text-gray-500">
+                                Create reports, set deadlines, assign school sectors,
+                                and monitor school submissions and validation status.
+                            </p>
+
+                            <div class="mt-auto pt-5">
+                                <a
+                                    href="{{ route('data-management.reports') }}"
+                                    class="inline-flex min-h-11 w-full items-center justify-center
+                                        rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold
+                                        text-white transition hover:bg-green-800 sm:w-auto
+                                        focus:outline-none focus:ring-2 focus:ring-green-600
+                                        focus:ring-offset-2"
+                                >
+                                    Manage Reports
+                                </a>
+                            </div>
+                        </div>
                     @endif
 
                 </div>

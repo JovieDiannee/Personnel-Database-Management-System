@@ -132,12 +132,104 @@
     @endphp
 
     <div class="report-submissions">
-        <div class="heading">
-            <div>
-                <h1>Report Submissions</h1>
-                <p class="muted">Monitor school submissions and review validation details.</p>
-            </div>
-            <a class="link" href="{{ route('data-management.reports') }}">Back to report list</a>
+         {{-- BREADCRUMB TRAIL --}}
+        <div class="mb-4">
+
+            <nav
+                class="flex flex-wrap items-center gap-y-2 text-xs sm:text-sm"
+                aria-label="Breadcrumb"
+            >
+
+                {{-- Home --}}
+                <a
+                    href="{{ route('dashboard') }}"
+                    class="flex items-center font-medium text-gray-500 transition hover:text-green-700"
+                >
+                    <svg
+                        class="mr-1.5 h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 12l9-9 9 9M5 10v10h14V10M9 20v-6h6v6"
+                        />
+                    </svg>
+
+                    Dashboard
+                </a>
+
+                {{-- Separator --}}
+                <svg
+                    class="mx-2 h-4 w-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                    />
+                </svg>
+
+                {{-- Data Management --}}
+                <a
+                    href="{{ route('data-management') }}"
+                    class="font-medium text-gray-500 transition hover:text-green-700"
+                >
+                    Data Management
+                </a>
+
+                {{-- Separator --}}
+                <svg
+                    class="mx-2 h-4 w-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                    />
+                </svg>
+
+                {{-- Report Management --}}
+                <a
+                    href="{{ route('data-management.reports') }}"
+                    class="font-medium text-gray-500 transition hover:text-green-700"
+                >
+                    Report Management
+                </a>
+
+                {{-- Separator --}}
+                <svg
+                    class="mx-2 h-4 w-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                    />
+                </svg>
+
+                {{-- Current Page --}}
+                <span class="font-semibold text-green-800">
+                    Report Sumbission
+                </span>
+
+            </nav>
+
         </div>
 
         @if (session('success'))

@@ -102,14 +102,83 @@
     </style>
 
     <div class="report-management">
-        <div class="heading">
-            <div>
-                <h1>Report Management</h1>
-                <p class="muted">Create reports and monitor school submissions.</p>
-            </div>
-            <a class="link" href="{{ route('data-management.reports.submissions') }}">View all submissions</a>
+
+         {{-- BREADCRUMB TRAIL --}}
+        <div class="mb-4">
+
+            <nav
+                class="flex flex-wrap items-center gap-y-2 text-xs sm:text-sm"
+                aria-label="Breadcrumb"
+            >
+
+                {{-- Home --}}
+                <a
+                    href="{{ route('dashboard') }}"
+                    class="flex items-center font-medium text-gray-500 transition hover:text-green-700"
+                >
+                    <svg
+                        class="mr-1.5 h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 12l9-9 9 9M5 10v10h14V10M9 20v-6h6v6"
+                        />
+                    </svg>
+
+                    Dashboard
+                </a>
+
+                {{-- Separator --}}
+                <svg
+                    class="mx-2 h-4 w-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                    />
+                </svg>
+
+                {{-- Data Management --}}
+                <a
+                    href="{{ route('data-management') }}"
+                    class="font-medium text-gray-500 transition hover:text-green-700"
+                >
+                    Data Management
+                </a>
+
+                {{-- Separator --}}
+                <svg
+                    class="mx-2 h-4 w-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                    />
+                </svg>
+
+                {{-- Current Page --}}
+                <span class="font-semibold text-green-800">
+                    Report Management
+                </span>
+
+            </nav>
+
         </div>
-        <p class="muted help">Deadline timezone: {{ config('app.timezone') }}</p>
 
         @if (session('success'))
             <div class="notice" role="status">{{ session('success') }}</div>
@@ -129,7 +198,7 @@
         {{-- Routes and controller enforce super_admin access. --}}
         @if (auth()->user()?->role === 'super_admin')
             <section class="card" aria-labelledby="create-heading">
-                <h2 id="create-heading">New report</h2>
+                <h2 id="create-heading">Report Management</h2>
                 @php($creating = old('_form') === 'create')
                 <form method="POST" action="{{ route('reports.store') }}">
                     @csrf
@@ -170,9 +239,39 @@
         @endif
 
         <section class="card" aria-labelledby="list-heading">
-            <div class="heading">
-                <h2 id="list-heading">Report list</h2>
-                <span class="muted">{{ $reports->total() }} total reports</span>
+            <div
+                class="heading"
+                style="display: flex; align-items: center; justify-content: space-between;
+                    flex-wrap: wrap; gap: 16px; padding-bottom: 16px;
+                    border-bottom: 1px solid #e5e7eb; margin-bottom: 16px;"
+            >
+                <div>
+                    <h2 id="list-heading" style="margin: 0; color: #14532d;">
+                        Report Registry
+                    </h2>
+
+                    <p class="muted" style="margin-top: 4px; font-size: 13px;">
+                        Manage report requirements, deadlines, and school submissions.
+                    </p>
+                </div>
+
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                    <a
+                        href="{{ route('data-management.reports.submissions') }}"
+                        style="display: inline-flex; align-items: center; justify-content: center;
+                            padding: 8px 14px; border: 1px solid #bbf7d0;
+                            border-radius: 6px; background-color: #ffffff;
+                            color: #166534; font-size: 13px; font-weight: 600;
+                            text-decoration: none; white-space: nowrap;"
+                    >
+                        View All Submissions
+                    </a>
+
+                    <p class="muted" style="margin: 0; font-size: 13px;">
+                        {{ number_format($reports->total()) }}
+                        {{ $reports->total() === 1 ? 'report' : 'reports' }} registered
+                    </p>
+                </div>
             </div>
             <div class="table-wrap" role="region" aria-label="Report list" tabindex="0">
                 <table>

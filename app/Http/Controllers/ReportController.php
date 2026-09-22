@@ -86,7 +86,7 @@ class ReportController extends Controller implements HasMiddleware
             );
         }
 
-        return view('reports.index', compact('reports'));
+        return view('reports.reports', compact('reports'));
     }
 
     public function store(Request $request): RedirectResponse
