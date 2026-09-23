@@ -350,7 +350,7 @@
                        pl-4"
                 >
 
-                {{-- PERSONNEL INFORMATION --}}
+                {{-- USER ACCOUNTS --}}
                 <a
                     href="{{ route('data-management.personnel') }}"
                     class="block rounded-lg px-3 py-2.5
@@ -361,7 +361,7 @@
                                 : 'text-gray-500 hover:bg-green-50 hover:text-green-700'
                            }}"
                 >
-                    Personnel Information
+                    User Accounts
                 </a>
 
                

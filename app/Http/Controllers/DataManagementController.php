@@ -36,7 +36,7 @@ use App\Models\ReportSubmission;
 use Illuminate\Http\RedirectResponse;
 
 
-class DataManagementController extends Controller
+class DataManagementController extends Controller 
 {
     public function index()
     {
@@ -2200,282 +2200,91 @@ class DataManagementController extends Controller
 
     public function employmentStatus(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Search
-        |--------------------------------------------------------------------------
-        */
-
-        $search = trim($request->input('search', ''));
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Logged-in User
-        |--------------------------------------------------------------------------
-        */
-
+        $search = trim((string) $request->input('search', ''));
         $user = auth()->user();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Base Query
-        |--------------------------------------------------------------------------
-        */
-
+        // Exclude employee ID 1000001 for all roles.
         $query = \App\Models\EmploymentStatus::with([
             'user.basicInformation',
             'plantilla',
             'school',
-        ]);
+        ])
+            ->whereDoesntHave(
+                'user.basicInformation.issuedId',
+                function ($issuedIdQuery) {
+                    $issuedIdQuery->where('employee_id', '1000001');
+                }
+            );
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Role-Based Data Access
-        |--------------------------------------------------------------------------
-        |
-        | Super Admin = View ALL employment status records
-        | Admin       = View ONLY records from the same school
-        |
-        */
-
+        // Restrict admins to records from their assigned school.
         if ($user->role === 'admin') {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Get Admin's Employment Status / School
-            |--------------------------------------------------------------------------
-            */
-
-            $adminEmployment = $user->employmentStatus;
-
-            $adminSchool = $adminEmployment?->school;
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Admin Has No School Assignment
-            |--------------------------------------------------------------------------
-            */
+            $adminSchool = $user->employmentStatus?->school;
 
             if (! $adminSchool) {
-
                 $query->whereRaw('1 = 0');
-
             } else {
-
-                /*
-                |--------------------------------------------------------------------------
-                | Same School Only
-                |--------------------------------------------------------------------------
-                */
-
                 $query->whereHas(
                     'school',
                     function ($schoolQuery) use ($adminSchool) {
-
                         $schoolQuery->where(
                             'school_id',
                             $adminSchool->school_id
                         );
-
                     }
                 );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Exclude Employee No. 1000001
-                |--------------------------------------------------------------------------
-                */
-
-                $query->whereDoesntHave(
-                    'user.basicInformation.issuedId',
-                    function ($issuedIdQuery) {
-
-                        $issuedIdQuery->where(
-                            'employee_id',
-                            '1000001'
-                        );
-
-                    }
-                );
-
             }
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Search Employment Records
-        |--------------------------------------------------------------------------
-        */
-
+        // Keep search conditions grouped so they respect the exclusion
+        // and the admin's school restriction.
         if ($search !== '') {
-
             $query->where(function ($q) use ($search) {
-
-                /*
-                |--------------------------------------------------------------------------
-                | Search by Personnel Name
-                |--------------------------------------------------------------------------
-                */
-
                 $q->whereHas(
                     'user.basicInformation',
                     function ($basicQuery) use ($search) {
-
-                        $basicQuery
-                            ->where(
-                                'first_name',
-                                'like',
-                                "%{$search}%"
-                            )
-                            ->orWhere(
-                                'middle_name',
-                                'like',
-                                "%{$search}%"
-                            )
-                            ->orWhere(
-                                'last_name',
-                                'like',
-                                "%{$search}%"
-                            )
-                            ->orWhere(
-                                'extension_name',
-                                'like',
-                                "%{$search}%"
-                            );
-
+                        $basicQuery->where(function ($nameQuery) use ($search) {
+                            $nameQuery
+                                ->where('first_name', 'like', "%{$search}%")
+                                ->orWhere('middle_name', 'like', "%{$search}%")
+                                ->orWhere('last_name', 'like', "%{$search}%")
+                                ->orWhere('extension_name', 'like', "%{$search}%");
+                        });
                     }
-                );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Search by School Name / School ID
-                |--------------------------------------------------------------------------
-                */
-
-                $q->orWhereHas(
-                    'school',
-                    function ($schoolQuery) use ($search) {
-
-                        $schoolQuery
-                            ->where(
-                                'school_name',
-                                'like',
-                                "%{$search}%"
-                            )
-                            ->orWhere(
-                                'school_id',
-                                'like',
-                                "%{$search}%"
-                            );
-
-                    }
-                );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Search by Plantilla Information
-                |--------------------------------------------------------------------------
-                |
-                | Item From School Level
-                | Plantilla Item Number
-                | Position Title
-                |
-                */
-
-                $q->orWhereHas(
-                    'plantilla',
-                    function ($plantillaQuery) use ($search) {
-
-                        $plantillaQuery
-                            ->where(
-                                'item_from_school_level',
-                                'like',
-                                "%{$search}%"
-                            )
-                            ->orWhere(
-                                'item_number',
-                                'like',
-                                "%{$search}%"
-                            )
-                            ->orWhere(
-                                'position_title',
-                                'like',
-                                "%{$search}%"
-                            );
-
-                    }
-                );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Search by Employment Status
-                |--------------------------------------------------------------------------
-                */
-
-                $q->orWhere(
-                    'employment_status',
-                    'like',
-                    "%{$search}%"
-                );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Search by Date of Original Appointment
-                |--------------------------------------------------------------------------
-                */
-
-                $q->orWhere(
-                    'date_of_original_appointment',
-                    'like',
-                    "%{$search}%"
-                );
-
+                )
+                    ->orWhereHas(
+                        'school',
+                        function ($schoolQuery) use ($search) {
+                            $schoolQuery->where(function ($fields) use ($search) {
+                                $fields
+                                    ->where('school_name', 'like', "%{$search}%")
+                                    ->orWhere('school_id', 'like', "%{$search}%");
+                            });
+                        }
+                    )
+                    ->orWhereHas(
+                        'plantilla',
+                        function ($plantillaQuery) use ($search) {
+                            $plantillaQuery->where(function ($fields) use ($search) {
+                                $fields
+                                    ->where('item_from_school_level', 'like', "%{$search}%")
+                                    ->orWhere('item_number', 'like', "%{$search}%")
+                                    ->orWhere('position_title', 'like', "%{$search}%");
+                            });
+                        }
+                    )
+                    ->orWhere('employment_status', 'like', "%{$search}%")
+                    ->orWhere('date_of_original_appointment', 'like', "%{$search}%");
             });
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Sort
-        |--------------------------------------------------------------------------
-        */
-
-        $query->latest('updated_at');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Pagination
-        |--------------------------------------------------------------------------
-        */
-
         $employmentStatuses = $query
+            ->latest('updated_at')
             ->paginate(10)
             ->withQueryString();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Return View
-        |--------------------------------------------------------------------------
-        */
-
         return view(
             'data-management.employment-status',
-            compact(
-                'employmentStatuses',
-                'search'
-            )
+            compact('employmentStatuses', 'search')
         );
     }
 
@@ -7539,109 +7348,60 @@ class DataManagementController extends Controller
 
     public function medicalAllowanceReport(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Search and District Filters
-        |--------------------------------------------------------------------------
-        */
-
         $search = trim((string) $request->input('search', ''));
         $district = $request->input('district');
 
-        /*
-        |--------------------------------------------------------------------------
-        | Medical Allowance Summary Per School
-        |--------------------------------------------------------------------------
-        */
-
-        $query = DB::table('medical_allowance')
-            ->join(
-                'users',
-                'users.id',
-                '=',
-                'medical_allowance.users_id'
-            )
-            ->join(
-                'employment_status',
-                'employment_status.users_id',
-                '=',
-                'users.id'
-            )
+        // Only personnel with an assigned plantilla are included.
+        // Left join includes plantilla personnel without a medical allowance record.
+        $query = DB::table('employment_status')
+            ->join('users', 'users.id', '=', 'employment_status.users_id')
             ->join(
                 'school_db',
                 'school_db.id',
                 '=',
                 'employment_status.school_db_id'
             )
+            ->leftJoin(
+                'medical_allowance',
+                'medical_allowance.users_id',
+                '=',
+                'users.id'
+            )
+            ->whereNotNull('employment_status.plantilla_db_id')
             ->select(
                 'school_db.id as school_db_id',
                 'school_db.school_id',
                 'school_db.school_name',
                 'school_db.school_district',
-                'school_db.school_area',
-
-                DB::raw("
-                    SUM(
-                        CASE
-                            WHEN medical_allowance.mode_of_availment
-                                = 'Group Availment (HMO)'
-                            THEN 1
-                            ELSE 0
-                        END
-                    ) as group_hmo
-                "),
-
-                DB::raw("
-                    SUM(
-                        CASE
-                            WHEN medical_allowance.mode_of_availment
-                                = 'Individual Availment (HMO)'
-                            THEN 1
-                            ELSE 0
-                        END
-                    ) as individual_hmo
-                "),
-
-                DB::raw("
-                    SUM(
-                        CASE
-                            WHEN medical_allowance.mode_of_availment
-                                = 'Not Eligible'
-                            THEN 1
-                            ELSE 0
-                        END
-                    ) as not_eligible
-                "),
-
-                DB::raw("
-                    COUNT(DISTINCT medical_allowance.users_id)
-                    as total_eligible_employee
-                ")
+                'school_db.school_area'
             )
+            ->selectRaw("
+                COUNT(DISTINCT CASE
+                    WHEN medical_allowance.mode_of_availment = 'Group Availment (HMO)'
+                    THEN users.id
+                END) as group_hmo,
+
+                COUNT(DISTINCT CASE
+                    WHEN medical_allowance.mode_of_availment = 'Individual Availment (HMO)'
+                    THEN users.id
+                END) as individual_hmo,
+
+                COUNT(DISTINCT CASE
+                    WHEN medical_allowance.mode_of_availment = 'Not Eligible'
+                    THEN users.id
+                END) as not_eligible,
+
+                COUNT(DISTINCT users.id) as total_eligible_employee
+            ")
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where(
-                        'school_db.school_id',
-                        'like',
-                        "%{$search}%"
-                    )
-                        ->orWhere(
-                            'school_db.school_name',
-                            'like',
-                            "%{$search}%"
-                        )
-                        ->orWhere(
-                            'school_db.school_district',
-                            'like',
-                            "%{$search}%"
-                        );
+                    $q->where('school_db.school_id', 'like', "%{$search}%")
+                        ->orWhere('school_db.school_name', 'like', "%{$search}%")
+                        ->orWhere('school_db.school_district', 'like', "%{$search}%");
                 });
             })
             ->when($district, function ($query) use ($district) {
-                $query->where(
-                    'school_db.school_district',
-                    $district
-                );
+                $query->where('school_db.school_district', $district);
             })
             ->groupBy(
                 'school_db.id',
@@ -7651,59 +7411,36 @@ class DataManagementController extends Controller
                 'school_db.school_area'
             );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Summary Card Totals Across All Matching Schools
-        |--------------------------------------------------------------------------
-        */
-
+        // Summary across all matching schools, before pagination.
         $summary = DB::query()
             ->fromSub(clone $query, 'school_summary')
             ->selectRaw('
                 COUNT(*) as total_schools,
+                COALESCE(SUM(total_eligible_employee), 0) as total_plantilla_employee,
+                COALESCE(SUM(not_eligible), 0) as total_not_eligible,
                 COALESCE(SUM(group_hmo), 0) as total_group_availment,
                 COALESCE(SUM(individual_hmo), 0) as total_individual_availment
             ')
             ->first();
 
         $totalSchools = (int) $summary->total_schools;
-
+        $totalPlantillaEmployee = (int) $summary->total_plantilla_employee;
+        $totalNotEligible = (int) $summary->total_not_eligible;
         $totalGroupAvailment = (int) $summary->total_group_availment;
-
         $totalIndividualAvailment = (int) $summary->total_individual_availment;
-
         $totalEligible = $totalGroupAvailment + $totalIndividualAvailment;
-
-        /*
-        |--------------------------------------------------------------------------
-        | Sorting and Pagination
-        |--------------------------------------------------------------------------
-        */
 
         $reports = $query
             ->orderBy('school_db.school_name')
             ->paginate(15)
             ->withQueryString();
 
-        /*
-        |--------------------------------------------------------------------------
-        | District Dropdown
-        |--------------------------------------------------------------------------
-        */
-
         $districts = DB::table('school_db')
-            ->select('school_district')
             ->whereNotNull('school_district')
             ->where('school_district', '!=', '')
             ->distinct()
             ->orderBy('school_district')
             ->pluck('school_district');
-
-        /*
-        |--------------------------------------------------------------------------
-        | Return View
-        |--------------------------------------------------------------------------
-        */
 
         return view(
             'data-management.medical-allowance-report-per-school',
@@ -7713,6 +7450,8 @@ class DataManagementController extends Controller
                 'search',
                 'district',
                 'totalSchools',
+                'totalPlantillaEmployee',
+                'totalNotEligible',
                 'totalGroupAvailment',
                 'totalIndividualAvailment',
                 'totalEligible'

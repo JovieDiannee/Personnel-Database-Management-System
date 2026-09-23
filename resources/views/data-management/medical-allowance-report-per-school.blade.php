@@ -200,54 +200,59 @@
 
             <div>
 
-                {{-- SUMMARY CARDS --}}
-                <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {{-- COMPACT SUMMARY CARDS --}}
+                @php
+                    $summaryCards = [
+                        [
+                            'label' => 'Total Schools',
+                            'value' => $totalSchools,
+                            'color' => 'text-gray-800',
+                        ],
+                        [
+                            'label' => 'Total Plantilla Based Employee',
+                            'value' => $totalPlantillaEmployee,
+                            'color' => 'text-indigo-700',
+                        ],
+                        [
+                            'label' => 'Total Not Eligible',
+                            'value' => $totalNotEligible,
+                            'color' => 'text-red-700',
+                        ],
+                        [
+                            'label' => 'Total Group Availment',
+                            'value' => $totalGroupAvailment,
+                            'color' => 'text-blue-700',
+                        ],
+                        [
+                            'label' => 'Total Individual Availment',
+                            'value' => $totalIndividualAvailment,
+                            'color' => 'text-purple-700',
+                        ],
+                        [
+                            'label' => 'Total Eligible (Group + Individual)',
+                            'value' => $totalEligible,
+                            'color' => 'text-green-700',
+                        ],
+                    ];
+                @endphp
 
-                    {{-- TOTAL SCHOOLS --}}
-                    <div class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
-                        <p class="text-sm text-gray-500">
-                            Total Schools
-                        </p>
+                <dl class="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                    @foreach ($summaryCards as $card)
+                        <div @class([
+                            'flex min-w-0 flex-col justify-between rounded-lg border px-3 py-2.5 shadow-sm',
+                            'border-green-200 bg-green-50' => $loop->last,
+                            'border-gray-200 bg-white' => ! $loop->last,
+                        ])>
+                            <dt class="text-xs font-medium leading-4 text-gray-600">
+                                {{ $card['label'] }}
+                            </dt>
 
-                        <p class="mt-1 text-3xl font-bold text-green-700">
-                            {{ number_format($totalSchools) }}
-                        </p>
-                    </div>
-
-                    {{-- TOTAL GROUP AVAILMENT --}}
-                    <div class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
-                        <p class="text-sm text-gray-500">
-                            Total Group Availment
-                        </p>
-
-                        <p class="mt-1 text-3xl font-bold text-blue-700">
-                            {{ number_format($totalGroupAvailment) }}
-                        </p>
-                    </div>
-
-                    {{-- TOTAL INDIVIDUAL AVAILMENT --}}
-                    <div class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
-                        <p class="text-sm text-gray-500">
-                            Total Individual Availment
-                        </p>
-
-                        <p class="mt-1 text-3xl font-bold text-purple-700">
-                            {{ number_format($totalIndividualAvailment) }}
-                        </p>
-                    </div>
-
-                    {{-- TOTAL ELIGIBLE --}}
-                    <div class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
-                        <p class="text-sm text-gray-500">
-                            Total Eligible (Group + Individual)
-                        </p>
-
-                        <p class="mt-1 text-3xl font-bold text-orange-700">
-                            {{ number_format($totalEligible) }}
-                        </p>
-                    </div>
-
-                </div>
+                            <dd class="mt-1 text-xl font-bold tabular-nums {{ $card['color'] }}">
+                                {{ number_format($card['value']) }}
+                            </dd>
+                        </div>
+                    @endforeach
+                </dl>
 
 
                 {{-- ===================================================== --}}

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\EmploymentStatus;
-use App\Models\SchoolDb;
 use App\Models\MedicalAllowance;
 use App\Models\Report;
+use App\Models\SchoolDb;
 
 class DashboardController extends Controller
 {
@@ -19,15 +19,10 @@ class DashboardController extends Controller
 
         $user = auth()->user();
 
-
         /*
         |--------------------------------------------------------------------------
         | Admin School
         |--------------------------------------------------------------------------
-        |
-        | Super Admin = null because Super Admin can view all records.
-        | Admin       = school_db_id of the logged-in Admin.
-        |
         */
 
         $adminSchoolId = null;
@@ -35,7 +30,6 @@ class DashboardController extends Controller
         if ($user->role === 'admin') {
             $adminSchoolId = $user->employmentStatus?->school_db_id;
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -45,97 +39,81 @@ class DashboardController extends Controller
 
         $employmentQuery = EmploymentStatus::query();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Restrict Admin to Same School
-        |--------------------------------------------------------------------------
-        */
-
         if ($user->role === 'admin') {
-
             if ($adminSchoolId) {
-
                 $employmentQuery->where(
-                    'school_db_id',
+                    'employment_status.school_db_id',
                     $adminSchoolId
                 );
-
             } else {
-
-                /*
-                | Admin has no school assignment.
-                | Return no records.
-                */
-
+                // Admin has no assigned school.
                 $employmentQuery->whereRaw('1 = 0');
             }
         }
-
 
         /*
         |--------------------------------------------------------------------------
         | Plantilla-Based Employees
         |--------------------------------------------------------------------------
+        | Count distinct personnel with an assigned plantilla.
         */
 
         $plantillaEmployees = (clone $employmentQuery)
-            ->where(
-                'source_of_fund',
-                'Plantilla'
-            )
-            ->count();
-
+            ->whereNotNull('employment_status.plantilla_db_id')
+            ->distinct()
+            ->count('employment_status.users_id');
 
         /*
         |--------------------------------------------------------------------------
         | Other Funds Employees
         |--------------------------------------------------------------------------
+        | Count distinct personnel without an assigned plantilla.
+        | Exclude employee ID 1000001 through:
+        | employment_status.users_id -> basic_information.users_id
+        | basic_information.id -> issued_id.basic_information_id
         */
 
         $otherFundsEmployees = (clone $employmentQuery)
-            ->whereNotNull('source_of_fund')
-            ->where(
-                'source_of_fund',
-                '!=',
-                'Plantilla'
-            )
-            ->count();
-
+            ->whereNull('employment_status.plantilla_db_id')
+            ->whereNotExists(function ($query) {
+                $query->selectRaw('1')
+                    ->from('basic_information')
+                    ->join(
+                        'issued_id',
+                        'issued_id.basic_information_id',
+                        '=',
+                        'basic_information.id'
+                    )
+                    ->whereColumn(
+                        'basic_information.users_id',
+                        'employment_status.users_id'
+                    )
+                    ->where('issued_id.employee_id', '1000001');
+            })
+            ->distinct()
+            ->count('employment_status.users_id');
 
         /*
         |--------------------------------------------------------------------------
         | Number of Schools
         |--------------------------------------------------------------------------
-        |
-        | Super Admin = Count all schools
-        | Admin       = Count only Admin's assigned school
-        |
         */
 
         if ($user->role === 'admin') {
-
             $numberOfSchools = $adminSchoolId
                 ? SchoolDb::where('id', $adminSchoolId)->count()
                 : 0;
-
         } else {
-
             $numberOfSchools = SchoolDb::count();
         }
-
 
         /*
         |--------------------------------------------------------------------------
         | Medical Allowance Base Query
         |--------------------------------------------------------------------------
-        |
-        | MedicalAllowance -> User -> EmploymentStatus -> School
-        |
         */
 
         $medicalQuery = MedicalAllowance::query();
-
 
         /*
         |--------------------------------------------------------------------------
@@ -144,27 +122,17 @@ class DashboardController extends Controller
         */
 
         if ($user->role === 'admin') {
-
             if ($adminSchoolId) {
-
                 $medicalQuery->whereHas(
                     'user.employmentStatus',
                     function ($query) use ($adminSchoolId) {
-
-                        $query->where(
-                            'school_db_id',
-                            $adminSchoolId
-                        );
-
+                        $query->where('school_db_id', $adminSchoolId);
                     }
                 );
-
             } else {
-
                 $medicalQuery->whereRaw('1 = 0');
             }
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -173,12 +141,8 @@ class DashboardController extends Controller
         */
 
         $groupAvailment = (clone $medicalQuery)
-            ->where(
-                'mode_of_availment',
-                'Group Availment (HMO)'
-            )
+            ->where('mode_of_availment', 'Group Availment (HMO)')
             ->count();
-
 
         /*
         |--------------------------------------------------------------------------
@@ -187,12 +151,8 @@ class DashboardController extends Controller
         */
 
         $individualAvailment = (clone $medicalQuery)
-            ->where(
-                'mode_of_availment',
-                'Individual Availment (HMO)'
-            )
+            ->where('mode_of_availment', 'Individual Availment (HMO)')
             ->count();
-
 
         /*
         |--------------------------------------------------------------------------
@@ -201,20 +161,14 @@ class DashboardController extends Controller
         */
 
         $numberOfDisbursement = (clone $medicalQuery)
-            ->where(
-                'disbursement_status',
-                'Disbursed'
-            )
+            ->where('disbursement_status', 'Disbursed')
             ->count();
-
 
         /*
         |--------------------------------------------------------------------------
         | HR Transactions
         |--------------------------------------------------------------------------
-        |
-        | Temporary until HR Transactions model/table is connected.
-        |
+        | Temporary until the HR Transactions model/table is connected.
         */
 
         $hrTransactions = 0;
@@ -228,7 +182,9 @@ class DashboardController extends Controller
         $medicalReport = Report::where(
             'name_of_report',
             'Medical Allowance Report'
-        )->latest('id')->first();
+        )
+            ->latest('id')
+            ->first();
 
         /*
         |--------------------------------------------------------------------------
