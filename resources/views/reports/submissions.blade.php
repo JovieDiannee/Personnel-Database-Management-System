@@ -312,9 +312,34 @@
         </section>
 
         <section class="card" aria-labelledby="submissions-heading">
-            <div class="heading">
-                <h2 id="submissions-heading">School submissions</h2>
-                <span class="muted">{{ number_format($submissions->total()) }} matching records</span>
+            <div
+                class="heading"
+                style="display: flex; align-items: center; justify-content: space-between;
+                    flex-wrap: wrap; gap: 16px;"
+            >
+                <h2 id="submissions-heading" style="margin: 0;">
+                    School submissions
+                </h2>
+
+                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <span class="muted">
+                        {{ number_format($submissions->total()) }} matching records
+                    </span>
+
+                    <a
+                        href="{{ route(
+                            'reports.submissions.export',
+                            request()->only(['report_id', 'school_id', 'status'])
+                        ) }}"
+                        style="display: inline-flex; align-items: center; justify-content: center;
+                            background-color: #15803d; color: #ffffff;
+                            padding: 10px 16px; border-radius: 8px;
+                            font-size: 14px; font-weight: 600;
+                            text-decoration: none; white-space: nowrap;"
+                    >
+                        Download Report
+                    </a>
+                </div>
             </div>
             <p class="muted" style="margin-top: 8px; font-size: 13px;">
                 Pending: awaiting submission. Done: submitted for review. Verified: validated.

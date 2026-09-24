@@ -129,6 +129,8 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('data-management/reports
         Route::put('/{report}', [ReportController::class, 'update'])->name('reports.update');
         Route::patch('/{report}/close', [ReportController::class, 'close'])->name('reports.close');
         Route::patch('/submissions/{submission}/revert-validation',[ReportController::class, 'revertValidation'])->name('reports.revert-validation');
+        Route::get('/submissions/export',[ReportController::class, 'exportSubmissions'])->name('reports.submissions.export');
+        
 });
 
 

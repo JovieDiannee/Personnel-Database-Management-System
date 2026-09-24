@@ -9,6 +9,11 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller implements HasMiddleware
 {
@@ -416,4 +421,141 @@ class ReportController extends Controller implements HasMiddleware
                 'Validation reverted. The school can correct its information and resubmit the report.'
             );
     }
+
+    public function exportSubmissions(Request $request): StreamedResponse
+    {
+        abort_unless(
+            $request->user()?->role === 'super_admin',
+            403
+        );
+
+        $filters = $request->validate([
+            'report_id' => ['nullable', 'integer', 'exists:reports,id'],
+            'school_id' => [
+                'nullable',
+                'string',
+                'max:10',
+                'exists:school_db,school_id',
+            ],
+            'status' => ['nullable', 'in:Pending,Done,Verified'],
+        ]);
+
+        $query = ReportSubmission::with([
+            'report',
+            'submittedBy',
+            'validatedBy',
+        ]);
+
+        foreach (['report_id', 'school_id', 'status'] as $field) {
+            if (isset($filters[$field]) && $filters[$field] !== '') {
+                $query->where($field, $filters[$field]);
+            }
+        }
+
+        $schools = DB::table('school_db')
+            ->get([
+                'school_id',
+                'school_name',
+                'school_district',
+                'school_sector',
+            ])
+            ->keyBy('school_id');
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Report Submissions');
+
+        $sheet->fromArray([
+            'Submission ID',
+            'Report ID',
+            'Name of Report',
+            'Report Status',
+            'School ID',
+            'School Name',
+            'School District',
+            'School Sector',
+            'Deadline',
+            'Submission Status',
+            'Submitted By',
+            'Validated By',
+            'Validated At (Philippine Time)',
+        ], null, 'A1');
+
+        $rowNumber = 2;
+
+        foreach ($query->orderBy('id')->lazyById(500) as $submission) {
+            $school = $schools->get($submission->school_id);
+
+            $values = [
+                $submission->id,
+                $submission->report_id,
+                $submission->report?->name_of_report ?? '',
+                $submission->report?->status ?? '',
+                $submission->school_id,
+                $school?->school_name ?? '',
+                $school?->school_district ?? '',
+                $school?->school_sector ?? '',
+                $submission->report?->deadline?->format('Y-m-d H:i') ?? '',
+                $submission->status,
+                $submission->submittedBy?->name ?? '',
+                $submission->validatedBy?->name ?? '',
+                $submission->validated_at
+                    ?->copy()
+                    ->timezone('Asia/Manila')
+                    ->format('Y-m-d H:i') ?? '',
+            ];
+
+            foreach ($values as $index => $value) {
+                // Preserve school IDs and treat user-entered content as text.
+                $sheet->setCellValueExplicit(
+                    [$index + 1, $rowNumber],
+                    (string) $value,
+                    DataType::TYPE_STRING
+                );
+            }
+
+            $rowNumber++;
+        }
+
+        $sheet->getStyle('A1:M1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '15803D'],
+            ],
+        ]);
+
+        $sheet->getRowDimension(1)->setRowHeight(30);
+        $sheet->freezePane('A2');
+        $sheet->setAutoFilter('A1:M' . max(1, $rowNumber - 1));
+
+        foreach (range('A', 'M') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $filename = 'report-submissions-'
+            . now('Asia/Manila')->format('Y-m-d-His')
+            . '.xlsx';
+
+        return response()->streamDownload(
+            function () use ($spreadsheet) {
+                try {
+                    $writer = new Xlsx($spreadsheet);
+                    $writer->save('php://output');
+                } finally {
+                    $spreadsheet->disconnectWorksheets();
+                }
+            },
+            $filename,
+            [
+                'Content-Type' =>
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Cache-Control' => 'private, no-store',
+            ]
+        );
+    }
+
 }
