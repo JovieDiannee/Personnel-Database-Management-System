@@ -2757,616 +2757,373 @@ class DataManagementController extends Controller
         if (!$records || count($records) === 0) {
             return redirect()
                 ->route('data-management.employment-status')
-                ->with(
-                    'error',
-                    'No employment records available for import.'
-                );
+                ->with('error', 'No employment records available for import.');
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | VARIABLES
-        |--------------------------------------------------------------------------
-        */
 
         $imported = 0;
         $updated = 0;
         $skipped = 0;
-
         $errors = [];
-
 
         /*
         |--------------------------------------------------------------------------
-        | STEP 1
-        | CHECK DUPLICATE EMAIL / PLANTILLA IN EXCEL
+        | LOAD PLANTILLA ITEM NUMBERS FOR DISPLAY
         |--------------------------------------------------------------------------
-        |
+        */
+
+        $plantillaIds = collect($records)
+            ->map(function ($record) {
+                return trim((string) ($record['plantilla_db_id'] ?? ''));
+            })
+            ->filter(function ($id) {
+                return $id !== '';
+            })
+            ->unique()
+            ->values()
+            ->all();
+
+        $plantillaItemNumbers = DB::table('plantilla_db')
+            ->whereIn('id', $plantillaIds)
+            ->pluck('item_number', 'id');
+
+        $getPlantillaItemNumber = function ($id) use ($plantillaItemNumbers) {
+            $itemNumber = trim((string) ($plantillaItemNumbers[$id] ?? ''));
+
+            return $itemNumber !== ''
+                ? $itemNumber
+                : 'Unknown item number';
+        };
+
+        /*
+        |--------------------------------------------------------------------------
+        | STEP 1: CHECK DUPLICATE EMAIL / PLANTILLA IN EXCEL
+        |--------------------------------------------------------------------------
         | Blank Plantilla is allowed.
-        | Duplicate checking is only performed when Plantilla has a value.
-        |
         */
 
         $emailPlantillas = [];
         $plantillaEmails = [];
         $duplicateErrors = [];
 
-
         foreach ($records as $index => $record) {
+            $excelRow = $record['excel_row'] ?? ($index + 2);
 
-            $excelRow =
-                $record['excel_row'] ?? ($index + 2);
-
-
-            $email = strtolower(
-                trim(
-                    (string) ($record['email'] ?? '')
-                )
-            );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | PLANTILLA
-            |--------------------------------------------------------------------------
-            */
+            $email = strtolower(trim((string) ($record['email'] ?? '')));
 
             $plantillaValue = trim(
                 (string) ($record['plantilla_db_id'] ?? '')
             );
 
-            $plantillaDbId =
-                $plantillaValue !== ''
-                    ? $plantillaValue
-                    : null;
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | IGNORE EMPTY EMAIL OR EMPTY PLANTILLA FOR DUPLICATE CHECKING
-            |--------------------------------------------------------------------------
-            */
+            $plantillaDbId = $plantillaValue !== ''
+                ? $plantillaValue
+                : null;
 
             if ($email === '' || $plantillaDbId === null) {
                 continue;
             }
 
+            $plantillaItemNumber = $getPlantillaItemNumber($plantillaDbId);
 
-            /*
-            |--------------------------------------------------------------------------
-            | CHECK SAME EMAIL WITH DIFFERENT PLANTILLA
-            |--------------------------------------------------------------------------
-            */
-
+            // Check the same email with different plantilla IDs.
             if (isset($emailPlantillas[$email])) {
-
-                $previousPlantilla =
-                    $emailPlantillas[$email]['plantilla'];
-
-                $previousRow =
-                    $emailPlantillas[$email]['row'];
-
+                $previousPlantilla = $emailPlantillas[$email]['plantilla'];
+                $previousRow = $emailPlantillas[$email]['row'];
 
                 if ($previousPlantilla !== $plantillaDbId) {
+                    $previousItemNumber = $getPlantillaItemNumber(
+                        $previousPlantilla
+                    );
 
                     $duplicateErrors[] = [
-
                         'row' => $excelRow,
-
                         'email' => $email,
-
                         'plantilla' => $plantillaDbId,
-
                         'message' =>
-                            "Email {$email} is assigned to more "
-                            . "than one Plantilla. "
-                            . "Row {$previousRow} has Plantilla "
-                            . "{$previousPlantilla}, while row "
-                            . "{$excelRow} has Plantilla "
-                            . "{$plantillaDbId}."
-
+                            "Email {$email} is assigned to more than one Plantilla. "
+                            . "Row {$previousRow} has Plantilla {$previousItemNumber}, "
+                            . "while row {$excelRow} has Plantilla {$plantillaItemNumber}.",
                     ];
                 }
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | CHECK SAME PLANTILLA WITH DIFFERENT EMAIL
-            |--------------------------------------------------------------------------
-            */
-
+            // Check the same plantilla ID with different emails.
             if (isset($plantillaEmails[$plantillaDbId])) {
-
-                $previousEmail =
-                    $plantillaEmails[$plantillaDbId]['email'];
-
-                $previousRow =
-                    $plantillaEmails[$plantillaDbId]['row'];
-
+                $previousEmail = $plantillaEmails[$plantillaDbId]['email'];
+                $previousRow = $plantillaEmails[$plantillaDbId]['row'];
 
                 if ($previousEmail !== $email) {
-
                     $duplicateErrors[] = [
-
                         'row' => $excelRow,
-
                         'email' => $email,
-
                         'plantilla' => $plantillaDbId,
-
                         'message' =>
-                            "Duplicate Plantilla {$plantillaDbId}. "
+                            "Duplicate Plantilla {$plantillaItemNumber}. "
                             . "It is assigned to {$previousEmail} "
                             . "in Excel row {$previousRow}, "
-                            . "but row {$excelRow} is assigned to "
-                            . "{$email}."
-
+                            . "but row {$excelRow} is assigned to {$email}.",
                     ];
                 }
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | STORE FOR NEXT COMPARISON
-            |--------------------------------------------------------------------------
-            */
-
+            // Store IDs for subsequent comparisons.
             $emailPlantillas[$email] = [
-
                 'plantilla' => $plantillaDbId,
-
                 'row' => $excelRow,
-
             ];
 
-
             $plantillaEmails[$plantillaDbId] = [
-
                 'email' => $email,
-
                 'row' => $excelRow,
-
             ];
         }
 
-
         /*
         |--------------------------------------------------------------------------
-        | STEP 2
-        | CHECK DUPLICATE PLANTILLA ALREADY IN DATABASE
+        | STEP 2: CHECK DUPLICATE PLANTILLA ALREADY IN DATABASE
         |--------------------------------------------------------------------------
         */
 
         foreach ($records as $index => $record) {
+            $excelRow = $record['excel_row'] ?? ($index + 2);
 
-            $excelRow =
-                $record['excel_row'] ?? ($index + 2);
-
-
-            $email = strtolower(
-                trim(
-                    (string) ($record['email'] ?? '')
-                )
-            );
-
+            $email = strtolower(trim((string) ($record['email'] ?? '')));
 
             $plantillaValue = trim(
                 (string) ($record['plantilla_db_id'] ?? '')
             );
 
-            $plantillaDbId =
-                $plantillaValue !== ''
-                    ? $plantillaValue
-                    : null;
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | BLANK PLANTILLA IS ALLOWED
-            |--------------------------------------------------------------------------
-            */
+            $plantillaDbId = $plantillaValue !== ''
+                ? $plantillaValue
+                : null;
 
             if ($email === '' || $plantillaDbId === null) {
                 continue;
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | FIND USER
-            |--------------------------------------------------------------------------
-            */
+            $plantillaItemNumber = $getPlantillaItemNumber($plantillaDbId);
 
             $user = DB::table('users')
                 ->where('email', $email)
                 ->first();
 
-
             if (!$user) {
                 continue;
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | FIND ANOTHER EMPLOYEE USING SAME PLANTILLA
-            |--------------------------------------------------------------------------
-            */
-
-            $existingPlantilla =
-                DB::table('employment_status')
-                    ->join(
-                        'users',
-                        'users.id',
-                        '=',
-                        'employment_status.users_id'
-                    )
-                    ->where(
-                        'employment_status.plantilla_db_id',
-                        $plantillaDbId
-                    )
-                    ->where(
-                        'employment_status.users_id',
-                        '!=',
-                        $user->id
-                    )
-                    ->select(
-                        'users.email',
-                        'employment_status.plantilla_db_id'
-                    )
-                    ->first();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | DUPLICATE FOUND
-            |--------------------------------------------------------------------------
-            */
+            $existingPlantilla = DB::table('employment_status')
+                ->join(
+                    'users',
+                    'users.id',
+                    '=',
+                    'employment_status.users_id'
+                )
+                ->where(
+                    'employment_status.plantilla_db_id',
+                    $plantillaDbId
+                )
+                ->where(
+                    'employment_status.users_id',
+                    '!=',
+                    $user->id
+                )
+                ->select(
+                    'users.email',
+                    'employment_status.plantilla_db_id'
+                )
+                ->first();
 
             if ($existingPlantilla) {
-
                 $existingEmail = strtolower(
-                    trim(
-                        (string) $existingPlantilla->email
-                    )
+                    trim((string) $existingPlantilla->email)
                 );
 
-
                 $duplicateErrors[] = [
-
                     'row' => $excelRow,
-
                     'email' => $email,
-
                     'plantilla' => $plantillaDbId,
-
                     'message' =>
-                        "Duplicate Plantilla {$plantillaDbId}. "
+                        "Duplicate Plantilla {$plantillaItemNumber}. "
                         . "It is already assigned in the database "
                         . "to {$existingEmail}, but Excel row "
-                        . "{$excelRow} is assigned to {$email}."
-
+                        . "{$excelRow} is assigned to {$email}.",
                 ];
             }
         }
 
-
         /*
         |--------------------------------------------------------------------------
-        | STEP 3
-        | REMOVE DUPLICATE ERROR MESSAGES
+        | STEP 3: REMOVE DUPLICATE ERROR MESSAGES
         |--------------------------------------------------------------------------
         */
 
         $duplicateErrors = collect($duplicateErrors)
             ->unique(function ($error) {
-
-                return
-                    ($error['row'] ?? '') . '|' .
-                    ($error['email'] ?? '') . '|' .
-                    ($error['plantilla'] ?? '') . '|' .
-                    ($error['message'] ?? '');
-
+                return ($error['row'] ?? '') . '|'
+                    . ($error['email'] ?? '') . '|'
+                    . ($error['plantilla'] ?? '') . '|'
+                    . ($error['message'] ?? '');
             })
             ->values()
             ->toArray();
 
-
         /*
         |--------------------------------------------------------------------------
-        | STEP 4
-        | STOP IMPORT IF DUPLICATE PLANTILLA FOUND
+        | STEP 4: STOP IMPORT IF DUPLICATE PLANTILLA FOUND
         |--------------------------------------------------------------------------
         */
 
         if (count($duplicateErrors) > 0) {
-
             return redirect()
-                ->route(
-                    'data-management.employment-status'
-                )
-                ->with(
-                    'employment_import_result',
-                    [
-
-                        'imported' => 0,
-
-                        'updated' => 0,
-
-                        'skipped' => count($records),
-
-                        'errors' => $duplicateErrors,
-
-                        'duplicate_plantilla' => true,
-
-                    ]
-                )
+                ->route('data-management.employment-status')
+                ->with('employment_import_result', [
+                    'imported' => 0,
+                    'updated' => 0,
+                    'skipped' => count($records),
+                    'errors' => $duplicateErrors,
+                    'duplicate_plantilla' => true,
+                ])
                 ->with(
                     'error',
                     'Import stopped. Duplicate Plantilla assignment(s) were found. No records were imported or updated.'
                 );
         }
 
-
         /*
         |--------------------------------------------------------------------------
-        | STEP 5
-        | ACTUAL IMPORT / UPDATE
+        | STEP 5: ACTUAL IMPORT / UPDATE
         |--------------------------------------------------------------------------
         */
 
         DB::beginTransaction();
 
         try {
-
             foreach ($records as $index => $record) {
-
                 try {
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | EXCEL ROW
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $excelRow =
-                        $record['excel_row'] ?? ($index + 2);
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | EMAIL
-                    |--------------------------------------------------------------------------
-                    */
+                    $excelRow = $record['excel_row'] ?? ($index + 2);
 
                     $email = strtolower(
-                        trim(
-                            (string) ($record['email'] ?? '')
-                        )
+                        trim((string) ($record['email'] ?? ''))
                     );
 
-
                     if ($email === '') {
-
                         $skipped++;
 
                         $errors[] = [
-
                             'row' => $excelRow,
-
-                            'message' =>
-                                'Email address is missing.'
-
+                            'message' => 'Email address is missing.',
                         ];
 
                         continue;
                     }
 
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | PLANTILLA
-                    |--------------------------------------------------------------------------
-                    |
-                    | Blank = NULL
-                    |
-                    */
-
+                    // Blank plantilla = NULL.
                     $plantillaValue = trim(
                         (string) ($record['plantilla_db_id'] ?? '')
                     );
 
-                    $plantillaDbId =
-                        $plantillaValue !== ''
-                            ? $plantillaValue
-                            : null;
+                    $plantillaDbId = $plantillaValue !== ''
+                        ? $plantillaValue
+                        : null;
 
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | SCHOOL
-                    |--------------------------------------------------------------------------
-                    |
-                    | Blank = NULL
-                    |
-                    */
-
+                    // Blank school = NULL.
                     $schoolValue = trim(
                         (string) ($record['school_db_id'] ?? '')
                     );
 
-                    $schoolDbId =
-                        $schoolValue !== ''
-                            ? $schoolValue
-                            : null;
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | FIND USER
-                    |--------------------------------------------------------------------------
-                    */
+                    $schoolDbId = $schoolValue !== ''
+                        ? $schoolValue
+                        : null;
 
                     $user = DB::table('users')
-                        ->where(
-                            'email',
-                            $email
-                        )
+                        ->where('email', $email)
                         ->first();
 
-
                     if (!$user) {
-
                         $skipped++;
 
                         $errors[] = [
-
                             'row' => $excelRow,
-
                             'message' =>
-                                "Email {$email} does not exist in the users table."
-
+                                "Email {$email} does not exist in the users table.",
                         ];
 
                         continue;
                     }
 
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | CHECK EXISTING EMPLOYMENT RECORD
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $existing =
-                        DB::table('employment_status')
-                            ->where(
-                                'users_id',
-                                $user->id
-                            )
-                            ->first();
-
+                    $existing = DB::table('employment_status')
+                        ->where('users_id', $user->id)
+                        ->first();
 
                     /*
                     |--------------------------------------------------------------------------
                     | CLEAN OPTIONAL TEXT VALUES
                     |--------------------------------------------------------------------------
-                    |
-                    | Blank or "-" = NULL
-                    |
+                    | Blank or "-" = NULL.
                     */
 
                     $employmentStatus = trim(
                         (string) ($record['employment_status'] ?? '')
                     );
 
-                    $employmentStatus =
-                        ($employmentStatus === '' || $employmentStatus === '-')
-                            ? null
-                            : $employmentStatus;
-
+                    $employmentStatus = (
+                        $employmentStatus === '' || $employmentStatus === '-'
+                    ) ? null : $employmentStatus;
 
                     $warmBodyStatus = trim(
                         (string) ($record['warm_body_status'] ?? '')
                     );
 
-                    $warmBodyStatus =
-                        ($warmBodyStatus === '' || $warmBodyStatus === '-')
-                            ? null
-                            : $warmBodyStatus;
-
+                    $warmBodyStatus = (
+                        $warmBodyStatus === '' || $warmBodyStatus === '-'
+                    ) ? null : $warmBodyStatus;
 
                     $natureOfWork = trim(
                         (string) ($record['nature_of_work'] ?? '')
                     );
 
-                    $natureOfWork =
-                        ($natureOfWork === '' || $natureOfWork === '-')
-                            ? null
-                            : $natureOfWork;
-
+                    $natureOfWork = (
+                        $natureOfWork === '' || $natureOfWork === '-'
+                    ) ? null : $natureOfWork;
 
                     $sourceOfFund = trim(
                         (string) ($record['source_of_fund'] ?? '')
                     );
 
-                    $sourceOfFund =
-                        ($sourceOfFund === '' || $sourceOfFund === '-')
-                            ? null
-                            : $sourceOfFund;
-
+                    $sourceOfFund = (
+                        $sourceOfFund === '' || $sourceOfFund === '-'
+                    ) ? null : $sourceOfFund;
 
                     $contractDuration = trim(
                         (string) ($record['contract_duration'] ?? '')
                     );
 
-                    $contractDuration =
-                        ($contractDuration === '' || $contractDuration === '-')
-                            ? null
-                            : $contractDuration;
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | MONTHLY SALARY
-                    |--------------------------------------------------------------------------
-                    |
-                    | Blank or "-" = NULL
-                    |
-                    */
+                    $contractDuration = (
+                        $contractDuration === '' || $contractDuration === '-'
+                    ) ? null : $contractDuration;
 
                     $monthlySalary = trim(
                         (string) ($record['monthly_salary'] ?? '')
                     );
 
-                    $monthlySalary =
-                        ($monthlySalary === '' || $monthlySalary === '-')
-                            ? null
-                            : $monthlySalary;
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | ORIGINAL APPOINTMENT DATE
-                    |--------------------------------------------------------------------------
-                    */
+                    $monthlySalary = (
+                        $monthlySalary === '' || $monthlySalary === '-'
+                    ) ? null : $monthlySalary;
 
                     $originalAppointment = trim(
-                        (string) (
-                            $record['date_of_original_appointment']
-                            ?? ''
-                        )
+                        (string) ($record['date_of_original_appointment'] ?? '')
                     );
 
-                    $originalAppointment =
-                        ($originalAppointment === '' ||
-                        $originalAppointment === '-')
-                            ? null
-                            : $originalAppointment;
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | LAST PROMOTION DATE
-                    |--------------------------------------------------------------------------
-                    */
+                    $originalAppointment = (
+                        $originalAppointment === '' || $originalAppointment === '-'
+                    ) ? null : $originalAppointment;
 
                     $lastPromotion = trim(
-                        (string) (
-                            $record['date_of_last_promotion']
-                            ?? ''
-                        )
+                        (string) ($record['date_of_last_promotion'] ?? '')
                     );
 
-                    $lastPromotion =
-                        ($lastPromotion === '' ||
-                        $lastPromotion === '-')
-                            ? null
-                            : $lastPromotion;
-
+                    $lastPromotion = (
+                        $lastPromotion === '' || $lastPromotion === '-'
+                    ) ? null : $lastPromotion;
 
                     /*
                     |--------------------------------------------------------------------------
@@ -3375,179 +3132,68 @@ class DataManagementController extends Controller
                     */
 
                     $employmentData = [
-
-                        'plantilla_db_id' =>
-                            $plantillaDbId,
-
-                        'school_db_id' =>
-                            $schoolDbId,
-
-                        'date_of_original_appointment' =>
-                            $originalAppointment,
-
-                        'date_of_last_promotion' =>
-                            $lastPromotion,
-
-                        'employment_status' =>
-                            $employmentStatus,
-
-                        'warm_body_status' =>
-                            $warmBodyStatus,
-
-                        'nature_of_work' =>
-                            $natureOfWork,
-
-                        'source_of_fund' =>
-                            $sourceOfFund,
-
-                        'monthly_salary' =>
-                            $monthlySalary,
-
-                        'contract_duration' =>
-                            $contractDuration,
-
-                        'updated_at' =>
-                            now(),
-
+                        'plantilla_db_id' => $plantillaDbId,
+                        'school_db_id' => $schoolDbId,
+                        'date_of_original_appointment' => $originalAppointment,
+                        'date_of_last_promotion' => $lastPromotion,
+                        'employment_status' => $employmentStatus,
+                        'warm_body_status' => $warmBodyStatus,
+                        'nature_of_work' => $natureOfWork,
+                        'source_of_fund' => $sourceOfFund,
+                        'monthly_salary' => $monthlySalary,
+                        'contract_duration' => $contractDuration,
+                        'updated_at' => now(),
                     ];
 
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | UPDATE EXISTING RECORD
-                    |--------------------------------------------------------------------------
-                    */
-
                     if ($existing) {
-
                         DB::table('employment_status')
-                            ->where(
-                                'id',
-                                $existing->id
-                            )
-                            ->update(
-                                $employmentData
-                            );
+                            ->where('id', $existing->id)
+                            ->update($employmentData);
 
                         $updated++;
-                    }
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | CREATE NEW RECORD
-                    |--------------------------------------------------------------------------
-                    */
-
-                    else {
-
-                        $employmentData['users_id'] =
-                            $user->id;
-
-                        $employmentData['created_at'] =
-                            now();
-
+                    } else {
+                        $employmentData['users_id'] = $user->id;
+                        $employmentData['created_at'] = now();
 
                         DB::table('employment_status')
-                            ->insert(
-                                $employmentData
-                            );
+                            ->insert($employmentData);
 
                         $imported++;
                     }
-
-
                 } catch (\Throwable $e) {
-
                     $skipped++;
 
                     $errors[] = [
-
-                        'row' =>
-                            $record['excel_row']
-                            ?? ($index + 2),
-
-                        'message' =>
-                            $e->getMessage()
-
+                        'row' => $record['excel_row'] ?? ($index + 2),
+                        'message' => $e->getMessage(),
                     ];
                 }
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | COMMIT
-            |--------------------------------------------------------------------------
-            */
-
             DB::commit();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | REMOVE TEMPORARY SESSION DATA
-            |--------------------------------------------------------------------------
-            */
 
             session()->forget([
                 'employment_status_import_records',
                 'employment_status_import_errors',
             ]);
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | RETURN RESULT
-            |--------------------------------------------------------------------------
-            */
-
             return redirect()
-                ->route(
-                    'data-management.employment-status'
-                )
-                ->with(
-                    'employment_import_result',
-                    [
-
-                        'imported' =>
-                            $imported,
-
-                        'updated' =>
-                            $updated,
-
-                        'skipped' =>
-                            $skipped,
-
-                        'errors' =>
-                            $errors,
-
-                        'duplicate_plantilla' =>
-                            false,
-
-                    ]
-                );
-
-
+                ->route('data-management.employment-status')
+                ->with('employment_import_result', [
+                    'imported' => $imported,
+                    'updated' => $updated,
+                    'skipped' => $skipped,
+                    'errors' => $errors,
+                    'duplicate_plantilla' => false,
+                ]);
         } catch (\Throwable $e) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | ROLLBACK
-            |--------------------------------------------------------------------------
-            */
-
             DB::rollBack();
 
-
             return redirect()
-                ->route(
-                    'data-management.employment-status'
-                )
+                ->route('data-management.employment-status')
                 ->with(
                     'error',
-                    'Employment Status import failed: '
-                    . $e->getMessage()
+                    'Employment Status import failed: ' . $e->getMessage()
                 );
         }
     }
