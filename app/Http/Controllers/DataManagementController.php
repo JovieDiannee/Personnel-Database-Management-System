@@ -3545,36 +3545,29 @@ class DataManagementController extends Controller
     {
         \App\Models\EmploymentStatus::findOrFail($employmentStatus);
 
-        $request->merge([
-            'q' => strtoupper(trim((string) $request->input('q', ''))),
-        ]);
-
         $validated = $request->validate([
-            'q' => [
-                'required',
-                'string',
-                'max:100',
-                'regex:/^[A-Z]+\d*-\d{6}$/',
-            ],
-        ], [
-            'q.regex' => 'Enter an item code such as '
-                . 'MTCHR2-540126 or TCH1-540335.',
+            'q' => ['required', 'string', 'max:255'],
         ]);
 
-        $search = $validated['q'];
+        $input = trim($validated['q']);
+
+        if (!preg_match('/(?<!\d)(\d{6})(?!\d)/', $input, $matches)) {
+            return response()->json([]);
+        }
+
+        $number = $matches[1];
 
         $items = \App\Models\PlantillaDb::query()
             ->select(['id', 'item_number', 'position_title'])
-            ->where(function ($query) use ($search) {
+            ->where(function ($query) use ($number) {
                 $query
-                    // Example: MTCHR2-540126
-                    ->where('item_number', $search)
-
-                    // Example: MTCHR2-540126-2018
-                    ->orWhere('item_number', 'like', $search . '-%')
-
                     // Example: OSEC-DECSB-MTCHR2-540126-2018
-                    ->orWhere('item_number', 'like', '%-' . $search . '-%');
+                    ->where('item_number', 'like', '%-' . $number . '-%')
+
+                    // Also support records without a year or position prefix.
+                    ->orWhere('item_number', 'like', '%-' . $number)
+                    ->orWhere('item_number', 'like', $number . '-%')
+                    ->orWhere('item_number', $number);
             })
             ->orderBy('item_number')
             ->limit(40)

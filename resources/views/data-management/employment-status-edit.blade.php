@@ -338,7 +338,7 @@
                                 font-size: 16px; line-height: 1.5;
                                 white-space: nowrap; overflow-x: auto;"
                         >
-                            Enter the position code and 6-digit number, for example TCH1-123456 or MTCHR2-123456
+                            Enter the 6-digit item number, for example 540126. You can also paste the full item number.
                         </p>
 
                         <select
@@ -929,8 +929,8 @@
             }
 
             guide.textContent =
-                'Enter the position code and 6-digit number, '
-                + 'for example TCH1-123456 or MTCHR2-123456';
+                'Enter the 6-digit item number, for example 540126. '
+                + 'You can also paste the full item number.';
 
             guide.style.cssText = `
                 margin: 8px 0 0;
@@ -1116,10 +1116,10 @@
                 loadThrottle: 300,
                 searchField: [],
                 preload: false,
-                placeholder: 'Enter item code, e.g. TCH1-123456',
+                placeholder: 'Enter the 6-digit number, e.g. 540126',
 
                 shouldLoad(query) {
-                    return /^[A-Z]+\d*-\d{6}$/i.test(query.trim());
+                    return /(?:^|\D)(\d{6})(?!\d)/.test(query);
                 },
 
                 onType(query) {
@@ -1141,7 +1141,12 @@
 
                 load(query, callback) {
                     const version = searchVersion;
-                    const key = query.trim().toUpperCase();
+                    const match = query.match(/(?:^|\D)(\d{6})(?!\d)/);
+                    if (!match) {
+                        callback([]);
+                        return;
+                    }
+                    const key = match[1];
                     const cached = cacheGet(searchCache, key);
 
                     if (cached) {
