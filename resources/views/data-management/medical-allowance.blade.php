@@ -262,7 +262,7 @@
                                 </span>
 
                                 <p class="text-sm font-bold" style="color: #9a3412;">
-                                    Deadline for Personnel Updates and Report Submission
+                                    Deadline for Validation of Medical Report
 
                                     <span style="display: inline-block; margin-left: 8px;">
                                         @if ($medicalReport)

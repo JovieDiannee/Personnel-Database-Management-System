@@ -332,7 +332,7 @@
 
                         <div class="text-sm text-red-700">
                             <span class="font-medium">
-                                Deadline for Updating and Adding Personnel:
+                                Deadline for Validation of Medical Report:
                             </span>
 
                             <span class="ml-1 font-bold">

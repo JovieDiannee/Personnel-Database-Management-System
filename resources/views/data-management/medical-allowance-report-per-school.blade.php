@@ -269,7 +269,7 @@
                         <div
                             class="flex min-w-0 flex-col items-stretch gap-4 xl:flex-row xl:items-center xl:justify-between"
                             
-                        >
+                            >
 
                             {{-- ================================================= --}}
                             {{-- LEFT SIDE : TITLE --}}
@@ -340,10 +340,11 @@
                                             name="district"
                                             class="h-11 min-w-0 w-full rounded-md border-0 bg-white px-2.5 text-xs text-gray-700 shadow-sm focus:outline-none focus:ring-1 focus:ring-white"
                                         >
-
-                                            <option value="">
-                                                All Districts
-                                            </option>
+                                            @if (auth()->user()?->role === 'super_admin')
+                                                <option value="">
+                                                    All Districts
+                                                </option>
+                                            @endif
 
                                             @foreach($districts as $districtName)
 
@@ -378,6 +379,21 @@
                                         >
                                             Reset
                                         </a>
+
+                                        @if(auth()->user()->role === 'super_admin')
+                                        <button
+                                            type="submit"
+                                            formaction="{{ route('data-management.medical-allowance.report.export') }}"
+                                            style="background-color: #166534; color: #ffffff; border: 1px solid #86efac;"
+                                            class="h-11 whitespace-nowrap rounded-lg px-4
+                                                text-xs font-semibold shadow-sm
+                                                transition hover:opacity-90
+                                                focus:outline-none focus:ring-2 focus:ring-white/50"
+                                        >
+                                            Download Excel
+                                        </button>
+                                        @endif
+
                                     </div>
 
                                 </div>

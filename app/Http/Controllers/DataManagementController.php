@@ -34,6 +34,9 @@ use Illuminate\Validation\ValidationException;
 use App\Models\Report;
 use App\Models\ReportSubmission;
 use Illuminate\Http\RedirectResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+
 
 
 class DataManagementController extends Controller 
@@ -2746,233 +2749,52 @@ class DataManagementController extends Controller
 
     public function confirmEmploymentStatusImport(Request $request)
     {
-        $records = session('employment_status_import_records');
+        $records = session('employment_status_import_records', []);
 
-        /*
-        |--------------------------------------------------------------------------
-        | CHECK IMPORT RECORDS
-        |--------------------------------------------------------------------------
-        */
-
-        if (!$records || count($records) === 0) {
+        if (empty($records)) {
             return redirect()
                 ->route('data-management.employment-status')
                 ->with('error', 'No employment records available for import.');
         }
 
-        $imported = 0;
-        $updated = 0;
-        $skipped = 0;
-        $errors = [];
-
         /*
         |--------------------------------------------------------------------------
-        | LOAD PLANTILLA ITEM NUMBERS FOR DISPLAY
+        | Check duplicate employees in the uploaded records
         |--------------------------------------------------------------------------
+        | Different employees may share the same plantilla item.
+        | Each employee should appear only once in this upload.
         */
 
-        $plantillaIds = collect($records)
-            ->map(function ($record) {
-                return trim((string) ($record['plantilla_db_id'] ?? ''));
-            })
-            ->filter(function ($id) {
-                return $id !== '';
-            })
-            ->unique()
-            ->values()
-            ->all();
-
-        $plantillaItemNumbers = DB::table('plantilla_db')
-            ->whereIn('id', $plantillaIds)
-            ->pluck('item_number', 'id');
-
-        $getPlantillaItemNumber = function ($id) use ($plantillaItemNumbers) {
-            $itemNumber = trim((string) ($plantillaItemNumbers[$id] ?? ''));
-
-            return $itemNumber !== ''
-                ? $itemNumber
-                : 'Unknown item number';
-        };
-
-        /*
-        |--------------------------------------------------------------------------
-        | STEP 1: CHECK DUPLICATE EMAIL / PLANTILLA IN EXCEL
-        |--------------------------------------------------------------------------
-        | Blank Plantilla is allowed.
-        */
-
-        $emailPlantillas = [];
-        $plantillaEmails = [];
+        $seenEmails = [];
         $duplicateErrors = [];
 
         foreach ($records as $index => $record) {
             $excelRow = $record['excel_row'] ?? ($index + 2);
-
             $email = strtolower(trim((string) ($record['email'] ?? '')));
 
-            $plantillaValue = trim(
-                (string) ($record['plantilla_db_id'] ?? '')
-            );
-
-            $plantillaDbId = $plantillaValue !== ''
-                ? $plantillaValue
-                : null;
-
-            if ($email === '' || $plantillaDbId === null) {
+            if ($email === '') {
                 continue;
             }
 
-            $plantillaItemNumber = $getPlantillaItemNumber($plantillaDbId);
-
-            // Check the same email with different plantilla IDs.
-            if (isset($emailPlantillas[$email])) {
-                $previousPlantilla = $emailPlantillas[$email]['plantilla'];
-                $previousRow = $emailPlantillas[$email]['row'];
-
-                if ($previousPlantilla !== $plantillaDbId) {
-                    $previousItemNumber = $getPlantillaItemNumber(
-                        $previousPlantilla
-                    );
-
-                    $duplicateErrors[] = [
-                        'row' => $excelRow,
-                        'email' => $email,
-                        'plantilla' => $plantillaDbId,
-                        'message' =>
-                            "Email {$email} is assigned to more than one Plantilla. "
-                            . "Row {$previousRow} has Plantilla {$previousItemNumber}, "
-                            . "while row {$excelRow} has Plantilla {$plantillaItemNumber}.",
-                    ];
-                }
-            }
-
-            // Check the same plantilla ID with different emails.
-            if (isset($plantillaEmails[$plantillaDbId])) {
-                $previousEmail = $plantillaEmails[$plantillaDbId]['email'];
-                $previousRow = $plantillaEmails[$plantillaDbId]['row'];
-
-                if ($previousEmail !== $email) {
-                    $duplicateErrors[] = [
-                        'row' => $excelRow,
-                        'email' => $email,
-                        'plantilla' => $plantillaDbId,
-                        'message' =>
-                            "Duplicate Plantilla {$plantillaItemNumber}. "
-                            . "It is assigned to {$previousEmail} "
-                            . "in Excel row {$previousRow}, "
-                            . "but row {$excelRow} is assigned to {$email}.",
-                    ];
-                }
-            }
-
-            // Store IDs for subsequent comparisons.
-            $emailPlantillas[$email] = [
-                'plantilla' => $plantillaDbId,
-                'row' => $excelRow,
-            ];
-
-            $plantillaEmails[$plantillaDbId] = [
-                'email' => $email,
-                'row' => $excelRow,
-            ];
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | STEP 2: CHECK DUPLICATE PLANTILLA ALREADY IN DATABASE
-        |--------------------------------------------------------------------------
-        */
-
-        foreach ($records as $index => $record) {
-            $excelRow = $record['excel_row'] ?? ($index + 2);
-
-            $email = strtolower(trim((string) ($record['email'] ?? '')));
-
-            $plantillaValue = trim(
-                (string) ($record['plantilla_db_id'] ?? '')
-            );
-
-            $plantillaDbId = $plantillaValue !== ''
-                ? $plantillaValue
-                : null;
-
-            if ($email === '' || $plantillaDbId === null) {
-                continue;
-            }
-
-            $plantillaItemNumber = $getPlantillaItemNumber($plantillaDbId);
-
-            $user = DB::table('users')
-                ->where('email', $email)
-                ->first();
-
-            if (!$user) {
-                continue;
-            }
-
-            $existingPlantilla = DB::table('employment_status')
-                ->join(
-                    'users',
-                    'users.id',
-                    '=',
-                    'employment_status.users_id'
-                )
-                ->where(
-                    'employment_status.plantilla_db_id',
-                    $plantillaDbId
-                )
-                ->where(
-                    'employment_status.users_id',
-                    '!=',
-                    $user->id
-                )
-                ->select(
-                    'users.email',
-                    'employment_status.plantilla_db_id'
-                )
-                ->first();
-
-            if ($existingPlantilla) {
-                $existingEmail = strtolower(
-                    trim((string) $existingPlantilla->email)
-                );
+            if (isset($seenEmails[$email])) {
+                $previousRow = $seenEmails[$email];
 
                 $duplicateErrors[] = [
                     'row' => $excelRow,
                     'email' => $email,
-                    'plantilla' => $plantillaDbId,
                     'message' =>
-                        "Duplicate Plantilla {$plantillaItemNumber}. "
-                        . "It is already assigned in the database "
-                        . "to {$existingEmail}, but Excel row "
-                        . "{$excelRow} is assigned to {$email}.",
+                        "Email {$email} appears more than once. "
+                        . "Check rows {$previousRow} and {$excelRow}. "
+                        . 'Keep only one row per employee.',
                 ];
+
+                continue;
             }
+
+            $seenEmails[$email] = $excelRow;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | STEP 3: REMOVE DUPLICATE ERROR MESSAGES
-        |--------------------------------------------------------------------------
-        */
-
-        $duplicateErrors = collect($duplicateErrors)
-            ->unique(function ($error) {
-                return ($error['row'] ?? '') . '|'
-                    . ($error['email'] ?? '') . '|'
-                    . ($error['plantilla'] ?? '') . '|'
-                    . ($error['message'] ?? '');
-            })
-            ->values()
-            ->toArray();
-
-        /*
-        |--------------------------------------------------------------------------
-        | STEP 4: STOP IMPORT IF DUPLICATE PLANTILLA FOUND
-        |--------------------------------------------------------------------------
-        */
-
-        if (count($duplicateErrors) > 0) {
+        if (!empty($duplicateErrors)) {
             return redirect()
                 ->route('data-management.employment-status')
                 ->with('employment_import_result', [
@@ -2980,169 +2802,147 @@ class DataManagementController extends Controller
                     'updated' => 0,
                     'skipped' => count($records),
                     'errors' => $duplicateErrors,
-                    'duplicate_plantilla' => true,
+                    'duplicate_plantilla' => false,
                 ])
                 ->with(
                     'error',
-                    'Import stopped. Duplicate Plantilla assignment(s) were found. No records were imported or updated.'
+                    'Import stopped. Duplicate employee emails were found. '
+                    . 'No records were imported or updated.'
                 );
         }
 
         /*
         |--------------------------------------------------------------------------
-        | STEP 5: ACTUAL IMPORT / UPDATE
+        | Prepare counters and optional-value normalizer
         |--------------------------------------------------------------------------
+        | Preserve errors from rows rejected during preview.
         */
 
-        DB::beginTransaction();
+        $imported = 0;
+        $updated = 0;
+        $errors = session('employment_status_import_errors', []);
+        $skipped = count($errors);
 
-        try {
-            foreach ($records as $index => $record) {
-                try {
-                    $excelRow = $record['excel_row'] ?? ($index + 2);
+        $nullableValue = static function ($value) {
+            $value = trim((string) ($value ?? ''));
 
-                    $email = strtolower(
-                        trim((string) ($record['email'] ?? ''))
-                    );
+            return ($value === '' || $value === '-')
+                ? null
+                : $value;
+        };
 
-                    if ($email === '') {
-                        $skipped++;
+        /*
+        |--------------------------------------------------------------------------
+        | Import each employee
+        |--------------------------------------------------------------------------
+        | Each row has its own transaction: failed rows are skipped,
+        | while successful rows are retained.
+        */
 
-                        $errors[] = [
-                            'row' => $excelRow,
-                            'message' => 'Email address is missing.',
-                        ];
+        foreach ($records as $index => $record) {
+            $excelRow = $record['excel_row'] ?? ($index + 2);
+            $email = trim((string) ($record['email'] ?? ''));
 
-                        continue;
-                    }
+            try {
+                if ($email === '') {
+                    throw new \RuntimeException('Email address is missing.');
+                }
 
-                    // Blank plantilla = NULL.
-                    $plantillaValue = trim(
-                        (string) ($record['plantilla_db_id'] ?? '')
-                    );
-
-                    $plantillaDbId = $plantillaValue !== ''
-                        ? $plantillaValue
-                        : null;
-
-                    // Blank school = NULL.
-                    $schoolValue = trim(
-                        (string) ($record['school_db_id'] ?? '')
-                    );
-
-                    $schoolDbId = $schoolValue !== ''
-                        ? $schoolValue
-                        : null;
-
+                $result = DB::transaction(function () use (
+                    $record,
+                    $email,
+                    $nullableValue
+                ) {
+                    // Lock the employee while checking and saving their record.
                     $user = DB::table('users')
                         ->where('email', $email)
+                        ->lockForUpdate()
                         ->first();
 
                     if (!$user) {
-                        $skipped++;
-
-                        $errors[] = [
-                            'row' => $excelRow,
-                            'message' =>
-                                "Email {$email} does not exist in the users table.",
-                        ];
-
-                        continue;
+                        throw new \RuntimeException(
+                            "Email {$email} does not exist in the users table."
+                        );
                     }
 
-                    $existing = DB::table('employment_status')
+                    $plantillaDbId = $nullableValue(
+                        $record['plantilla_db_id'] ?? null
+                    );
+
+                    $schoolDbId = $nullableValue(
+                        $record['school_db_id'] ?? null
+                    );
+
+                    // Only check existence. Shared plantilla IDs are allowed.
+                    if (
+                        $plantillaDbId !== null
+                        && !DB::table('plantilla_db')
+                            ->where('id', $plantillaDbId)
+                            ->exists()
+                    ) {
+                        throw new \RuntimeException(
+                            'The selected plantilla item no longer exists. '
+                            . 'Please upload the file again.'
+                        );
+                    }
+
+                    if (
+                        $schoolDbId !== null
+                        && !DB::table('school_db')
+                            ->where('id', $schoolDbId)
+                            ->exists()
+                    ) {
+                        throw new \RuntimeException(
+                            'The selected school no longer exists. '
+                            . 'Please upload the file again.'
+                        );
+                    }
+
+                    // Find employment records by employee, not plantilla.
+                    $existingRecords = DB::table('employment_status')
                         ->where('users_id', $user->id)
-                        ->first();
+                        ->lockForUpdate()
+                        ->get(['id']);
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | CLEAN OPTIONAL TEXT VALUES
-                    |--------------------------------------------------------------------------
-                    | Blank or "-" = NULL.
-                    */
+                    if ($existingRecords->count() > 1) {
+                        throw new \RuntimeException(
+                            "Employee {$email} already has multiple employment "
+                            . 'status records. Resolve these before importing '
+                            . 'this employee.'
+                        );
+                    }
 
-                    $employmentStatus = trim(
-                        (string) ($record['employment_status'] ?? '')
-                    );
-
-                    $employmentStatus = (
-                        $employmentStatus === '' || $employmentStatus === '-'
-                    ) ? null : $employmentStatus;
-
-                    $warmBodyStatus = trim(
-                        (string) ($record['warm_body_status'] ?? '')
-                    );
-
-                    $warmBodyStatus = (
-                        $warmBodyStatus === '' || $warmBodyStatus === '-'
-                    ) ? null : $warmBodyStatus;
-
-                    $natureOfWork = trim(
-                        (string) ($record['nature_of_work'] ?? '')
-                    );
-
-                    $natureOfWork = (
-                        $natureOfWork === '' || $natureOfWork === '-'
-                    ) ? null : $natureOfWork;
-
-                    $sourceOfFund = trim(
-                        (string) ($record['source_of_fund'] ?? '')
-                    );
-
-                    $sourceOfFund = (
-                        $sourceOfFund === '' || $sourceOfFund === '-'
-                    ) ? null : $sourceOfFund;
-
-                    $contractDuration = trim(
-                        (string) ($record['contract_duration'] ?? '')
-                    );
-
-                    $contractDuration = (
-                        $contractDuration === '' || $contractDuration === '-'
-                    ) ? null : $contractDuration;
-
-                    $monthlySalary = trim(
-                        (string) ($record['monthly_salary'] ?? '')
-                    );
-
-                    $monthlySalary = (
-                        $monthlySalary === '' || $monthlySalary === '-'
-                    ) ? null : $monthlySalary;
-
-                    $originalAppointment = trim(
-                        (string) ($record['date_of_original_appointment'] ?? '')
-                    );
-
-                    $originalAppointment = (
-                        $originalAppointment === '' || $originalAppointment === '-'
-                    ) ? null : $originalAppointment;
-
-                    $lastPromotion = trim(
-                        (string) ($record['date_of_last_promotion'] ?? '')
-                    );
-
-                    $lastPromotion = (
-                        $lastPromotion === '' || $lastPromotion === '-'
-                    ) ? null : $lastPromotion;
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | EMPLOYMENT DATA
-                    |--------------------------------------------------------------------------
-                    */
+                    $existing = $existingRecords->first();
+                    $timestamp = now();
 
                     $employmentData = [
                         'plantilla_db_id' => $plantillaDbId,
                         'school_db_id' => $schoolDbId,
-                        'date_of_original_appointment' => $originalAppointment,
-                        'date_of_last_promotion' => $lastPromotion,
-                        'employment_status' => $employmentStatus,
-                        'warm_body_status' => $warmBodyStatus,
-                        'nature_of_work' => $natureOfWork,
-                        'source_of_fund' => $sourceOfFund,
-                        'monthly_salary' => $monthlySalary,
-                        'contract_duration' => $contractDuration,
-                        'updated_at' => now(),
+                        'date_of_original_appointment' => $nullableValue(
+                            $record['date_of_original_appointment'] ?? null
+                        ),
+                        'date_of_last_promotion' => $nullableValue(
+                            $record['date_of_last_promotion'] ?? null
+                        ),
+                        'employment_status' => $nullableValue(
+                            $record['employment_status'] ?? null
+                        ),
+                        'warm_body_status' => $nullableValue(
+                            $record['warm_body_status'] ?? null
+                        ),
+                        'nature_of_work' => $nullableValue(
+                            $record['nature_of_work'] ?? null
+                        ),
+                        'source_of_fund' => $nullableValue(
+                            $record['source_of_fund'] ?? null
+                        ),
+                        'monthly_salary' => $nullableValue(
+                            $record['monthly_salary'] ?? null
+                        ),
+                        'contract_duration' => $nullableValue(
+                            $record['contract_duration'] ?? null
+                        ),
+                        'updated_at' => $timestamp,
                     ];
 
                     if ($existing) {
@@ -3150,52 +2950,54 @@ class DataManagementController extends Controller
                             ->where('id', $existing->id)
                             ->update($employmentData);
 
-                        $updated++;
-                    } else {
-                        $employmentData['users_id'] = $user->id;
-                        $employmentData['created_at'] = now();
-
-                        DB::table('employment_status')
-                            ->insert($employmentData);
-
-                        $imported++;
+                        return 'updated';
                     }
-                } catch (\Throwable $e) {
-                    $skipped++;
 
-                    $errors[] = [
-                        'row' => $record['excel_row'] ?? ($index + 2),
-                        'message' => $e->getMessage(),
-                    ];
+                    $employmentData['users_id'] = $user->id;
+                    $employmentData['created_at'] = $timestamp;
+
+                    DB::table('employment_status')
+                        ->insert($employmentData);
+
+                    return 'imported';
+                });
+
+                if ($result === 'updated') {
+                    $updated++;
+                } else {
+                    $imported++;
                 }
+            } catch (\Throwable $e) {
+                $skipped++;
+
+                // Log technical details without exposing SQL in the interface.
+                report($e);
+
+                $errors[] = [
+                    'row' => $excelRow,
+                    'email' => $email,
+                    'message' => $e instanceof \Illuminate\Database\QueryException
+                        ? 'Unable to save this row because of a database error. '
+                            . 'Check the row values and application log.'
+                        : $e->getMessage(),
+                ];
             }
-
-            DB::commit();
-
-            session()->forget([
-                'employment_status_import_records',
-                'employment_status_import_errors',
-            ]);
-
-            return redirect()
-                ->route('data-management.employment-status')
-                ->with('employment_import_result', [
-                    'imported' => $imported,
-                    'updated' => $updated,
-                    'skipped' => $skipped,
-                    'errors' => $errors,
-                    'duplicate_plantilla' => false,
-                ]);
-        } catch (\Throwable $e) {
-            DB::rollBack();
-
-            return redirect()
-                ->route('data-management.employment-status')
-                ->with(
-                    'error',
-                    'Employment Status import failed: ' . $e->getMessage()
-                );
         }
+
+        session()->forget([
+            'employment_status_import_records',
+            'employment_status_import_errors',
+        ]);
+
+        return redirect()
+            ->route('data-management.employment-status')
+            ->with('employment_import_result', [
+                'imported' => $imported,
+                'updated' => $updated,
+                'skipped' => $skipped,
+                'errors' => $errors,
+                'duplicate_plantilla' => false,
+            ]);
     }
 
     public function downloadEmploymentStatusTemplate()
@@ -3709,102 +3511,27 @@ class DataManagementController extends Controller
 
     public function editEmploymentStatus($employmentStatus)
     {
-
-        /*
-        |--------------------------------------------------------------------------
-        | LOGGED-IN USER ACCESS CHECK
-        |--------------------------------------------------------------------------
-        */
-
-        $loggedInUser = auth()->user();
-
-        $loggedInEmployeeId = $loggedInUser
-            ?->basicInformation
-            ?->issuedId
-            ?->employee_id;
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | RESTRICT EMPLOYEE NO. 1000001
-        |--------------------------------------------------------------------------
-        */
-
-        // if ((string) $loggedInEmployeeId === '1000001') {
-        //     abort(403, 'You are not authorized to access this page.');
-        // }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Employment Status Record
-        |--------------------------------------------------------------------------
-        */
-
+        // Employee being edited.
         $record = \App\Models\EmploymentStatus::with([
             'user.basicInformation',
             'plantilla',
             'school',
         ])->findOrFail($employmentStatus);
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Plantilla Items
-        |--------------------------------------------------------------------------
-        |
-        | Show:
-        | 1. Plantilla items that are NOT assigned to any employee.
-        | 2. The current employee's existing plantilla item.
-        |
-        */
-
-        $plantillaItems = \App\Models\PlantillaDb::where(function ($query) use ($record) {
-
-            /*
-            |--------------------------------------------------------------
-            | Unassigned Plantilla Items
-            |--------------------------------------------------------------
-            */
-
-            $query->whereNotIn(
-                'id',
-                \App\Models\EmploymentStatus::whereNotNull('plantilla_db_id')
-                    ->where(
-                        'id',
-                        '!=',
-                        $record->id
-                    )
-                    ->select('plantilla_db_id')
-            );
-
-        })
-        ->orderBy('item_number')
-        ->get();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Schools
-        |--------------------------------------------------------------------------
-        */
-
-        $schools = \App\Models\SchoolDb::orderBy('school_name')
+        // All plantilla items, including their assigned employees.
+        $plantillaItems = \App\Models\PlantillaDb::with([
+            'employmentStatuses.user.basicInformation',
+        ])
+            ->orderBy('item_number')
             ->get();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Return View
-        |--------------------------------------------------------------------------
-        */
+        $schools = \App\Models\SchoolDb::query()
+            ->orderBy('school_name')
+            ->get();
 
         return view(
             'data-management.employment-status-edit',
-            compact(
-                'record',
-                'plantillaItems',
-                'schools'
-            )
+            compact('record', 'plantillaItems', 'schools')
         );
     }
 
@@ -6994,13 +6721,71 @@ class DataManagementController extends Controller
 
     public function medicalAllowanceReport(Request $request)
     {
-        $search = trim((string) $request->input('search', ''));
-        $district = $request->input('district');
+        $user = $request->user();
 
-        // Only personnel with an assigned plantilla are included.
-        // Left join includes plantilla personnel without a medical allowance record.
+        abort_unless(
+            $user && in_array($user->role, ['super_admin', 'admin'], true),
+            403
+        );
+
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'district' => ['nullable', 'string', 'max:150'],
+        ]);
+
+        $search = trim($filters['search'] ?? '');
+        $district = $filters['district'] ?? '';
+
+        $adminSchool = null;
+        $showOwnSchool = false;
+
+        /*
+        |--------------------------------------------------------------------------
+        | School admin scope
+        |--------------------------------------------------------------------------
+        | Initial visit: own school.
+        | Search submitted: schools within the assigned district.
+        */
+        if ($user->role === 'admin') {
+            $adminSchool = DB::table('school_db')
+                ->where('id', $user->employmentStatus?->school_db_id)
+                ->first();
+
+            abort_unless(
+                $adminSchool,
+                403,
+                'Your account has no assigned school.'
+            );
+
+            abort_if(
+                trim((string) $adminSchool->school_district) === '',
+                403,
+                'Your assigned school has no district configured.'
+            );
+
+            // Always enforce the assigned district on the server.
+            $district = $adminSchool->school_district;
+
+            // The existing search form sends "search", even when it is empty.
+            $showOwnSchool = !$request->query->has('search');
+
+            if ($showOwnSchool) {
+                $search = (string) $adminSchool->school_id;
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Personnel with an assigned plantilla
+        |--------------------------------------------------------------------------
+        */
         $query = DB::table('employment_status')
-            ->join('users', 'users.id', '=', 'employment_status.users_id')
+            ->join(
+                'users',
+                'users.id',
+                '=',
+                'employment_status.users_id'
+            )
             ->join(
                 'school_db',
                 'school_db.id',
@@ -7014,6 +6799,16 @@ class DataManagementController extends Controller
                 'users.id'
             )
             ->whereNotNull('employment_status.plantilla_db_id')
+            ->when(
+                $user->role === 'admin',
+                function ($query) use ($district, $showOwnSchool, $adminSchool) {
+                    $query->where('school_db.school_district', $district);
+
+                    if ($showOwnSchool) {
+                        $query->where('school_db.id', $adminSchool->id);
+                    }
+                }
+            )
             ->select(
                 'school_db.id as school_db_id',
                 'school_db.school_id',
@@ -7025,19 +6820,19 @@ class DataManagementController extends Controller
                 COUNT(DISTINCT CASE
                     WHEN medical_allowance.mode_of_availment = 'Group Availment (HMO)'
                     THEN users.id
-                END) as group_hmo,
+                END) AS group_hmo,
 
                 COUNT(DISTINCT CASE
                     WHEN medical_allowance.mode_of_availment = 'Individual Availment (HMO)'
                     THEN users.id
-                END) as individual_hmo,
+                END) AS individual_hmo,
 
                 COUNT(DISTINCT CASE
                     WHEN medical_allowance.mode_of_availment = 'Not Eligible'
                     THEN users.id
-                END) as not_eligible,
+                END) AS not_eligible,
 
-                COUNT(DISTINCT users.id) as total_eligible_employee
+                COUNT(DISTINCT users.id) AS total_eligible_employee
             ")
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
@@ -7046,9 +6841,12 @@ class DataManagementController extends Controller
                         ->orWhere('school_db.school_district', 'like', "%{$search}%");
                 });
             })
-            ->when($district, function ($query) use ($district) {
-                $query->where('school_db.school_district', $district);
-            })
+            ->when(
+                $user->role === 'super_admin' && $district !== '',
+                function ($query) use ($district) {
+                    $query->where('school_db.school_district', $district);
+                }
+            )
             ->groupBy(
                 'school_db.id',
                 'school_db.school_id',
@@ -7057,15 +6855,19 @@ class DataManagementController extends Controller
                 'school_db.school_area'
             );
 
-        // Summary across all matching schools, before pagination.
+        /*
+        |--------------------------------------------------------------------------
+        | Summary before pagination
+        |--------------------------------------------------------------------------
+        */
         $summary = DB::query()
             ->fromSub(clone $query, 'school_summary')
             ->selectRaw('
-                COUNT(*) as total_schools,
-                COALESCE(SUM(total_eligible_employee), 0) as total_plantilla_employee,
-                COALESCE(SUM(not_eligible), 0) as total_not_eligible,
-                COALESCE(SUM(group_hmo), 0) as total_group_availment,
-                COALESCE(SUM(individual_hmo), 0) as total_individual_availment
+                COUNT(*) AS total_schools,
+                COALESCE(SUM(total_eligible_employee), 0) AS total_plantilla_employee,
+                COALESCE(SUM(not_eligible), 0) AS total_not_eligible,
+                COALESCE(SUM(group_hmo), 0) AS total_group_availment,
+                COALESCE(SUM(individual_hmo), 0) AS total_individual_availment
             ')
             ->first();
 
@@ -7078,10 +6880,20 @@ class DataManagementController extends Controller
 
         $reports = $query
             ->orderBy('school_db.school_name')
+            ->orderBy('school_db.id')
             ->paginate(15)
             ->withQueryString();
 
+        /*
+        |--------------------------------------------------------------------------
+        | Available districts
+        |--------------------------------------------------------------------------
+        */
         $districts = DB::table('school_db')
+            ->when(
+                $user->role === 'admin',
+                fn ($query) => $query->where('school_district', $district)
+            )
             ->whereNotNull('school_district')
             ->where('school_district', '!=', '')
             ->distinct()
@@ -7553,6 +7365,217 @@ class DataManagementController extends Controller
                     ? 'Your school’s Medical Allowance Report was validated and submitted.'
                     : 'Your school’s Medical Allowance Report is already verified.'
             );
+    }
+
+    public function exportMedicalAllowanceReport(Request $request): StreamedResponse 
+    {
+        $user = $request->user();
+
+        abort_unless(
+            $user && in_array($user->role, ['super_admin', 'admin'], true),
+            403
+        );
+
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'district' => ['nullable', 'string', 'max:150'],
+        ]);
+
+        $search = trim($filters['search'] ?? '');
+        $district = $filters['district'] ?? '';
+
+        /*
+        |--------------------------------------------------------------------------
+        | Personnel and medical allowance records
+        |--------------------------------------------------------------------------
+        */
+        $query = DB::table('medical_allowance as medical')
+            ->join(
+                'users',
+                'users.id',
+                '=',
+                'medical.users_id'
+            )
+            ->leftJoin(
+                'basic_information as basic',
+                'basic.users_id',
+                '=',
+                'users.id'
+            )
+            ->join(
+                'employment_status as employment',
+                'employment.users_id',
+                '=',
+                'users.id'
+            )
+            ->leftJoin(
+                'plantilla_db as plantilla',
+                'plantilla.id',
+                '=',
+                'employment.plantilla_db_id'
+            )
+            ->join(
+                'school_db as school',
+                'school.id',
+                '=',
+                'employment.school_db_id'
+            )
+            ->where('employment.source_of_fund', 'Plantilla')
+            ->select([
+                'basic.first_name',
+                'basic.middle_name',
+                'basic.last_name',
+                'basic.extension_name',
+                'plantilla.item_number as plantilla_number',
+                'school.school_id',
+                'school.school_name',
+                'school.school_district',
+                'medical.mode_of_availment',
+            ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Restrict school admins to their assigned school
+        |--------------------------------------------------------------------------
+        */
+        if ($user->role === 'admin') {
+            $schoolId = $user->employmentStatus?->school_db_id;
+
+            abort_unless(
+                $schoolId,
+                403,
+                'Your account has no assigned school.'
+            );
+
+            $query->where('employment.school_db_id', $schoolId);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Apply search and district filters
+        |--------------------------------------------------------------------------
+        */
+        if ($search !== '') {
+            $query->where(function ($query) use ($search) {
+                $query->where(
+                    'school.school_id',
+                    'like',
+                    "%{$search}%"
+                )->orWhere(
+                    'school.school_name',
+                    'like',
+                    "%{$search}%"
+                );
+            });
+        }
+
+        if ($district !== '') {
+            $query->where('school.school_district', $district);
+        }
+
+        $query->orderBy('school.school_name')
+            ->orderBy('basic.last_name')
+            ->orderBy('basic.first_name')
+            ->orderBy('medical.id');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create Excel workbook
+        |--------------------------------------------------------------------------
+        */
+        $spreadsheet = new Spreadsheet();
+
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Medical Allowance');
+
+        $sheet->fromArray([
+            'First Name',
+            'Middle Name',
+            'Last Name',
+            'Extension Name',
+            'Plantilla Number',
+            'School ID',
+            'School Name',
+            'School District',
+            'Mode of Availment',
+        ], null, 'A1');
+
+        $rowNumber = 2;
+
+        foreach ($query->lazy(500) as $record) {
+            $values = [
+                $record->first_name,
+                $record->middle_name,
+                $record->last_name,
+                $record->extension_name,
+                $record->plantilla_number,
+                $record->school_id,
+                $record->school_name,
+                $record->school_district,
+                $record->mode_of_availment,
+            ];
+
+            foreach ($values as $column => $value) {
+                // Preserve identifiers and prevent text becoming formulas.
+                $sheet->setCellValueExplicit(
+                    [$column + 1, $rowNumber],
+                    (string) ($value ?? ''),
+                    DataType::TYPE_STRING
+                );
+            }
+
+            $rowNumber++;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Format Excel worksheet
+        |--------------------------------------------------------------------------
+        */
+        $sheet->getStyle('A1:I1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '15803D'],
+            ],
+        ]);
+
+        $sheet->getRowDimension(1)->setRowHeight(28);
+        $sheet->freezePane('A2');
+        $sheet->setAutoFilter('A1:I' . max(1, $rowNumber - 1));
+
+        foreach (range('A', 'I') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Download Excel file
+        |--------------------------------------------------------------------------
+        */
+        $filename = 'medical-allowance-report-'
+            . now('Asia/Manila')->format('Y-m-d-His')
+            . '.xlsx';
+
+        return response()->streamDownload(
+            function () use ($spreadsheet) {
+                try {
+                    $writer = new Xlsx($spreadsheet);
+                    $writer->save('php://output');
+                } finally {
+                    $spreadsheet->disconnectWorksheets();
+                }
+            },
+            $filename,
+            [
+                'Content-Type' =>
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Cache-Control' => 'private, no-store',
+            ]
+        );
     }
 
     /*   

@@ -56,7 +56,8 @@ class EmploymentStatus extends Model
     {
         return $this->belongsTo(
             PlantillaDb::class,
-            'plantilla_db_id'
+            'plantilla_db_id',
+            'id'
         );
     }
 

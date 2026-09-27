@@ -38,7 +38,8 @@ class PlantillaDb extends Model
     {
         return $this->hasMany(
             EmploymentStatus::class,
-            'plantilla_db_id'
+            'plantilla_db_id',
+            'id'
         );
     }
 }

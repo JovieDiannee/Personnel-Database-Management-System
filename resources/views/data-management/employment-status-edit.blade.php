@@ -332,13 +332,73 @@
                         <select
                             id="item_number"
                             name="item_number"
-                            class="searchable-dropdown w-full min-w-0"
+                            class="employment-search-select w-full min-w-0"
                             data-placeholder="Search by item number or position title..."
+                            aria-describedby="plantilla-assignment-remarks"
                         >
-                            
+                            <option
+                                value=""
+                                data-assignment-remark="No plantilla item selected."
+                                @selected(
+                                    (string) old(
+                                        'item_number',
+                                        $record->plantilla?->item_number
+                                    ) === ''
+                                )
+                            >
+                                Select a plantilla item
+                            </option>
+
                             @foreach ($plantillaItems as $item)
+                                @php
+                                    $assignedEmployees = $item->employmentStatuses
+                                        ->filter(fn ($assignment) =>
+                                            (string) $assignment->users_id !== (string) $record->users_id
+                                        )
+                                        ->unique('users_id')
+                                        ->map(function ($assignment) use ($record) {
+                                            $user = $assignment->user;
+                                            $basic = $user?->basicInformation;
+
+                                            $name = collect([
+                                                $basic?->first_name,
+                                                $basic?->middle_name,
+                                                $basic?->last_name,
+                                                $basic?->extension_name,
+                                            ])
+                                                ->map(fn ($part) => trim((string) $part))
+                                                ->filter(fn ($part) => $part !== '')
+                                                ->implode(' ');
+
+                                            if ($name === '') {
+                                                $name = trim((string) ($user?->name ?? ''));
+                                            }
+
+                                            if ($name === '') {
+                                                $name = 'Employee #' . $assignment->users_id;
+                                            }
+
+                                            if (
+                                                (string) $assignment->users_id
+                                                === (string) $record->users_id
+                                            ) {
+                                                $name .= ' (employee being edited)';
+                                            }
+
+                                            return $name;
+                                        })
+                                        ->sort()
+                                        ->values();
+
+                                    $assignmentRemark = $assignedEmployees->isEmpty()
+                                        ? 'This item is not currently assigned to another employee.'
+                                        : 'Warning: this item is already assigned to: '
+                                            . $assignedEmployees->implode('; ');
+                                @endphp
+
                                 <option
                                     value="{{ $item->item_number }}"
+                                    data-assignment-remark="{{ $assignmentRemark }}" data-assignment-warning="{{ $assignedEmployees->isNotEmpty() ? '1' : '0' }}"
                                     @selected(
                                         (string) old(
                                             'item_number',
@@ -350,6 +410,29 @@
                                 </option>
                             @endforeach
                         </select>
+
+                        {{-- Assignment remarks --}}
+                        <div
+                            id="plantilla-assignment-remarks"
+                            class="mt-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700"
+                            role="status"
+                            aria-live="polite"
+                            aria-atomic="true"
+                        >
+                            <p class="font-semibold">Remarks</p>
+
+                            <p
+                                id="plantilla-assignment-text"
+                                class="mt-1 break-words"
+                            >
+                                Loading assignment details…
+                            </p>
+
+                            <p class="mt-1 text-xs text-gray-500">
+                                Saved assignments as of page load. Multiple employees may
+                                share this item. Changes apply after saving.
+                            </p>
+                        </div>
 
                         @error('item_number')
                             <p class="mt-1 text-sm text-red-600">
@@ -372,7 +455,7 @@
                         <select
                             id="school_id"
                             name="school_id"
-                            class="searchable-dropdown w-full min-w-0"
+                            class="employment-search-select w-full min-w-0"
                             data-placeholder="Search by school ID or school name..."
                         >
 
@@ -833,26 +916,71 @@
 
     </div>
 
-</x-app-layout>
-
-@push('scripts')
+    {{-- Render directly inside the component; no scripts stack is required. --}}
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            new TomSelect('#item_number', {
-                create: false,
-                allowEmptyOption: true,
-                maxOptions: null,
-                placeholder: 'Search plantilla item...',
-            });
+        (function () {
+            const select = document.getElementById('item_number');
+            const box = document.getElementById('plantilla-assignment-remarks');
+            const text = document.getElementById('plantilla-assignment-text');
+            if (!select || !box || !text) return;
 
-            new TomSelect('#school_id', {
-                create: false,
-                allowEmptyOption: true,
-                maxOptions: null,
-                placeholder: 'Search school...',
-            });
-        });
+            // Capture all messages before a searchable dropdown changes options.
+            const initialPlantillaValue = select.value;
+            const schoolSelect = document.getElementById('school_id');
+            const initialSchoolValue = schoolSelect ? schoolSelect.value : '';
+            const assignments = new Map(Array.from(select.options, option => [
+                option.value,
+                {
+                    message: option.dataset.assignmentRemark || '',
+                    warning: option.dataset.assignmentWarning === '1'
+                }
+            ]));
+
+            function showAssignment(value) {
+                const entry = assignments.get(String(value ?? ''));
+                const warning = Boolean(entry && entry.warning);
+                text.textContent = !value
+                    ? 'No plantilla item selected.'
+                    : entry?.message || 'Assignment details are unavailable for this item.';
+                box.style.backgroundColor = warning ? '#fffbeb' : (value ? '#f0fdf4' : '#f9fafb');
+                box.style.borderColor = warning ? '#f59e0b' : (value ? '#86efac' : '#e5e7eb');
+                text.style.color = warning ? '#92400e' : (value ? '#166534' : '#374151');
+                text.style.fontWeight = warning ? '600' : '400';
+            }
+
+            showAssignment(select.value);
+            select.addEventListener('change', () => showAssignment(select.value));
+
+            function initializeDropdowns() {
+                if (typeof window.TomSelect === 'undefined') return;
+                const control = select.tomselect || new TomSelect(select, {
+                    create: false,
+                    allowEmptyOption: true,
+                    maxOptions: null,
+                    placeholder: 'Search plantilla item...'
+                });
+                control.setValue(initialPlantillaValue, true);
+                control.on('change', showAssignment);
+                showAssignment(control.getValue());
+
+                const school = document.getElementById('school_id');
+                if (school && !school.tomselect) {
+                    const schoolControl = new TomSelect(school, {
+                        create: false,
+                        allowEmptyOption: true,
+                        maxOptions: null,
+                        placeholder: 'Search school...'
+                    });
+                    schoolControl.setValue(initialSchoolValue, true);
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initializeDropdowns);
+            } else {
+                initializeDropdowns();
+            }
+        })();
     </script>
-@endpush
+</x-app-layout>
