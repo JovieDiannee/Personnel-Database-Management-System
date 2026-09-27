@@ -329,6 +329,18 @@
                             Plantilla Item Number
                         </label>
 
+                        <p
+                            id="plantilla-search-guide"
+                            hidden
+                            style="margin: 8px 0 0; padding: 12px 16px;
+                                background: #f0fdf4; border: 1px solid #bbf7d0;
+                                border-radius: 8px; color: #166534;
+                                font-size: 16px; line-height: 1.5;
+                                white-space: nowrap; overflow-x: auto;"
+                        >
+                            Enter the position code and 6-digit number, for example TCH1-123456 or MTCHR2-123456
+                        </p>
+
                         <select
                             id="item_number"
                             name="item_number"
@@ -346,66 +358,12 @@
                                     ) === ''
                                 )
                             >
-                                Select a plantilla item
+                                Search a plantilla item number
                             </option>
 
                             @foreach ($plantillaItems as $item)
-                                @php
-                                    $assignedEmployees = $item->employmentStatuses
-                                        ->filter(fn ($assignment) =>
-                                            (string) $assignment->users_id !== (string) $record->users_id
-                                        )
-                                        ->unique('users_id')
-                                        ->map(function ($assignment) use ($record) {
-                                            $user = $assignment->user;
-                                            $basic = $user?->basicInformation;
-
-                                            $name = collect([
-                                                $basic?->first_name,
-                                                $basic?->middle_name,
-                                                $basic?->last_name,
-                                                $basic?->extension_name,
-                                            ])
-                                                ->map(fn ($part) => trim((string) $part))
-                                                ->filter(fn ($part) => $part !== '')
-                                                ->implode(' ');
-
-                                            if ($name === '') {
-                                                $name = trim((string) ($user?->name ?? ''));
-                                            }
-
-                                            if ($name === '') {
-                                                $name = 'Employee #' . $assignment->users_id;
-                                            }
-
-                                            if (
-                                                (string) $assignment->users_id
-                                                === (string) $record->users_id
-                                            ) {
-                                                $name .= ' (employee being edited)';
-                                            }
-
-                                            return $name;
-                                        })
-                                        ->sort()
-                                        ->values();
-
-                                    $assignmentRemark = $assignedEmployees->isEmpty()
-                                        ? 'This item is not currently assigned to another employee.'
-                                        : 'Warning: this item is already assigned to: '
-                                            . $assignedEmployees->implode('; ');
-                                @endphp
-
-                                <option
-                                    value="{{ $item->item_number }}"
-                                    data-assignment-remark="{{ $assignmentRemark }}" data-assignment-warning="{{ $assignedEmployees->isNotEmpty() ? '1' : '0' }}"
-                                    @selected(
-                                        (string) old(
-                                            'item_number',
-                                            $record->plantilla?->item_number
-                                        ) === (string) $item->item_number
-                                    )
-                                >
+                                <option value="{{ $item->item_number }}"
+                                    @selected((string) old('item_number', $record->plantilla?->item_number) === (string) $item->item_number)>
                                     {{ $item->item_number }} - {{ $item->position_title }}
                                 </option>
                             @endforeach
@@ -429,7 +387,7 @@
                             </p>
 
                             <p class="mt-1 text-xs text-gray-500">
-                                Saved assignments as of page load. Multiple employees may
+                                Assignment results are cached for one minute. Multiple employees may
                                 share this item. Changes apply after saving.
                             </p>
                         </div>
@@ -916,71 +874,356 @@
 
     </div>
 
-    {{-- Render directly inside the component; no scripts stack is required. --}}
+    {{-- These controls are initialized only by this page. --}}
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
     <script>
-        (function () {
+    (() => {
+        function init() {
             const select = document.getElementById('item_number');
             const box = document.getElementById('plantilla-assignment-remarks');
-            const text = document.getElementById('plantilla-assignment-text');
-            if (!select || !box || !text) return;
+            const message = document.getElementById('plantilla-assignment-text');
 
-            // Capture all messages before a searchable dropdown changes options.
-            const initialPlantillaValue = select.value;
-            const schoolSelect = document.getElementById('school_id');
-            const initialSchoolValue = schoolSelect ? schoolSelect.value : '';
-            const assignments = new Map(Array.from(select.options, option => [
-                option.value,
-                {
-                    message: option.dataset.assignmentRemark || '',
-                    warning: option.dataset.assignmentWarning === '1'
-                }
-            ]));
+            if (!select || !box || !message) return;
 
-            function showAssignment(value) {
-                const entry = assignments.get(String(value ?? ''));
-                const warning = Boolean(entry && entry.warning);
-                text.textContent = !value
-                    ? 'No plantilla item selected.'
-                    : entry?.message || 'Assignment details are unavailable for this item.';
-                box.style.backgroundColor = warning ? '#fffbeb' : (value ? '#f0fdf4' : '#f9fafb');
-                box.style.borderColor = warning ? '#f59e0b' : (value ? '#86efac' : '#e5e7eb');
-                text.style.color = warning ? '#92400e' : (value ? '#166534' : '#374151');
-                text.style.fontWeight = warning ? '600' : '400';
+            // Prevent duplicate initialization.
+            if (select.dataset.plantillaInitialized === 'true') return;
+            select.dataset.plantillaInitialized = 'true';
+
+            const searchUrl = {{ Illuminate\Support\Js::from(
+                route('data-management.employment-status.plantilla-search', $record->id)
+            ) }};
+
+            const assignmentUrl = {{ Illuminate\Support\Js::from(
+                route('data-management.employment-status.plantilla-assignments', $record->id)
+            ) }};
+
+            const initialValue = select.value;
+
+            // Preserve the preloaded current item and search option.
+            let emptyOption = Array.from(select.options)
+                .find(option => option.value === '');
+
+            if (!emptyOption) {
+                emptyOption = new Option(
+                    'Search a plantilla item number',
+                    ''
+                );
+                select.insertBefore(emptyOption, select.firstChild);
             }
 
-            showAssignment(select.value);
-            select.addEventListener('change', () => showAssignment(select.value));
+            emptyOption.textContent = 'Search a plantilla item number';
+            select.value = initialValue;
 
-            function initializeDropdowns() {
-                if (typeof window.TomSelect === 'undefined') return;
-                const control = select.tomselect || new TomSelect(select, {
+            const initialOptions = Array.from(select.options).map(option => ({
+                value: option.value,
+                text: option.textContent.trim()
+            }));
+
+            // Reuse the guide if it already exists.
+            let guide = document.getElementById('plantilla-search-guide');
+
+            if (!guide) {
+                guide = document.createElement('p');
+                guide.id = 'plantilla-search-guide';
+                select.insertAdjacentElement('afterend', guide);
+            }
+
+            guide.textContent =
+                'Enter the position code and 6-digit number, '
+                + 'for example TCH1-123456 or MTCHR2-123456';
+
+            guide.style.cssText = `
+                margin: 8px 0 0;
+                padding: 12px 16px;
+                background: #f0fdf4;
+                border: 1px solid #bbf7d0;
+                border-radius: 8px;
+                color: #166534;
+                font-size: 16px;
+                line-height: 1.5;
+                white-space: nowrap;
+                overflow-x: auto;
+            `;
+
+            const describedBy = new Set(
+                (select.getAttribute('aria-describedby') || '')
+                    .split(/\s+/)
+                    .filter(Boolean)
+            );
+
+            describedBy.add(guide.id);
+            select.setAttribute(
+                'aria-describedby',
+                Array.from(describedBy).join(' ')
+            );
+
+            // Search errors are separate from assignment remarks.
+            const searchError = document.createElement('p');
+            searchError.setAttribute('role', 'status');
+            searchError.style.cssText =
+                'margin-top:8px;font-size:14px;color:#b91c1c;';
+            searchError.hidden = true;
+            guide.insertAdjacentElement('afterend', searchError);
+
+            const searchCache = new Map();
+            const assignmentCache = new Map();
+
+            let assignmentRequest;
+            let assignmentVersion = 0;
+            let searchRequest;
+            let searchVersion = 0;
+
+            function cachePut(cache, key, data) {
+                cache.delete(key);
+
+                if (cache.size >= 100) {
+                    cache.delete(cache.keys().next().value);
+                }
+
+                cache.set(key, {
+                    data,
+                    expires: Date.now() + 60000
+                });
+            }
+
+            function cacheGet(cache, key) {
+                const entry = cache.get(key);
+
+                if (entry && entry.expires > Date.now()) {
+                    return entry.data;
+                }
+
+                cache.delete(key);
+                return null;
+            }
+
+            function display(text, state = 'neutral') {
+                message.textContent = text;
+
+                const colors = state === 'warning'
+                    ? ['#fffbeb', '#f59e0b', '#92400e']
+                    : state === 'clear'
+                        ? ['#f0fdf4', '#86efac', '#166534']
+                        : ['#f9fafb', '#e5e7eb', '#374151'];
+
+                box.style.backgroundColor = colors[0];
+                box.style.borderColor = colors[1];
+                message.style.color = colors[2];
+            }
+
+            function updateGuide(value) {
+                const searching = String(value ?? '') === '';
+
+                guide.hidden = !searching;
+                box.hidden = searching;
+            }
+
+            async function getJson(url, signal) {
+                const response = await fetch(url, {
+                    signal,
+                    credentials: 'same-origin',
+                    headers: {
+                        Accept: 'application/json'
+                    },
+                    cache: 'no-store'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+
+                return response.json();
+            }
+
+            async function showAssignments(value) {
+                const version = ++assignmentVersion;
+                assignmentRequest?.abort();
+
+                updateGuide(value);
+
+                if (!value) {
+                    message.textContent = '';
+                    return;
+                }
+
+                display('Checking assigned employees...');
+
+                try {
+                    let data = cacheGet(assignmentCache, value);
+
+                    if (!data) {
+                        assignmentRequest = new AbortController();
+
+                        const url = new URL(
+                            assignmentUrl,
+                            window.location.origin
+                        );
+
+                        url.searchParams.set('item_number', value);
+
+                        data = await getJson(
+                            url,
+                            assignmentRequest.signal
+                        );
+
+                        cachePut(assignmentCache, value, data);
+                    }
+
+                    if (version !== assignmentVersion) return;
+
+                    display(
+                        data.names.length
+                            ? 'Warning: this item is already assigned to: '
+                                + data.names.join('; ')
+                            : 'This item is not currently assigned to another employee.',
+                        data.names.length ? 'warning' : 'clear'
+                    );
+                } catch (error) {
+                    if (
+                        error.name !== 'AbortError'
+                        && version === assignmentVersion
+                    ) {
+                        display(
+                            'Unable to check assignments. '
+                            + 'Select the item again to retry.'
+                        );
+                    }
+                }
+            }
+
+            updateGuide(initialValue);
+
+            if (typeof window.TomSelect === 'undefined') {
+                searchError.textContent =
+                    'Search could not load. Refresh the page to try again.';
+                searchError.hidden = false;
+                return;
+            }
+
+            // This page owns initialization of these controls.
+            if (select.tomselect) {
+                select.tomselect.destroy();
+            }
+
+            const control = new TomSelect(select, {
+                options: initialOptions,
+                items: [initialValue],
+                create: false,
+                maxItems: 1,
+                maxOptions: 40,
+                allowEmptyOption: true,
+                hideSelected: false,
+                loadThrottle: 300,
+                searchField: [],
+                preload: false,
+                placeholder: 'Enter item code, e.g. TCH1-123456',
+
+                shouldLoad(query) {
+                    return /^[A-Z]+\d*-\d{6}$/i.test(query.trim());
+                },
+
+                onType(query) {
+                    ++searchVersion;
+                    searchRequest?.abort();
+                    searchError.hidden = true;
+
+                    // Remove previous search results, retaining the selection.
+                    this.clearOptions();
+                    this.loadedSearches = {};
+
+                    // With no search text, show the original choices again.
+                    if (query.trim() === '') {
+                        this.addOptions(initialOptions);
+                    }
+
+                    this.refreshOptions(false);
+                },
+
+                load(query, callback) {
+                    const version = searchVersion;
+                    const key = query.trim().toUpperCase();
+                    const cached = cacheGet(searchCache, key);
+
+                    if (cached) {
+                        callback(cached);
+                        return;
+                    }
+
+                    searchRequest = new AbortController();
+
+                    const url = new URL(
+                        searchUrl,
+                        window.location.origin
+                    );
+
+                    url.searchParams.set('q', key);
+
+                    getJson(url, searchRequest.signal)
+                        .then(data => {
+                            cachePut(searchCache, key, data);
+                            callback(
+                                version === searchVersion ? data : []
+                            );
+                        })
+                        .catch(error => {
+                            callback();
+
+                            if (
+                                error.name !== 'AbortError'
+                                && version === searchVersion
+                            ) {
+                                searchError.textContent =
+                                    'Search failed. Check your connection '
+                                    + 'and type again.';
+                                searchError.hidden = false;
+                            }
+                        });
+                },
+
+                onChange(value) {
+                    searchError.hidden = true;
+                    showAssignments(value);
+
+                    if (value === '') {
+                        // Allow typing immediately after choosing Search.
+                        this.setTextboxValue('');
+                        this.focus();
+                    }
+                },
+
+                render: {
+                    // The guide is below the field, not inside the list.
+                    not_loading() {
+                        return '<div style="display:none"></div>';
+                    },
+
+                    no_results() {
+                        return '<div style="padding:12px 16px;font-size:16px;">'
+                            + 'No matching items found.'
+                            + '</div>';
+                    }
+                }
+            });
+
+            showAssignments(control.getValue());
+
+            const school = document.getElementById('school_id');
+
+            if (school && !school.tomselect) {
+                new TomSelect(school, {
                     create: false,
                     allowEmptyOption: true,
-                    maxOptions: null,
-                    placeholder: 'Search plantilla item...'
+                    maxOptions: 50,
+                    placeholder: 'Search school...'
                 });
-                control.setValue(initialPlantillaValue, true);
-                control.on('change', showAssignment);
-                showAssignment(control.getValue());
-
-                const school = document.getElementById('school_id');
-                if (school && !school.tomselect) {
-                    const schoolControl = new TomSelect(school, {
-                        create: false,
-                        allowEmptyOption: true,
-                        maxOptions: null,
-                        placeholder: 'Search school...'
-                    });
-                    schoolControl.setValue(initialSchoolValue, true);
-                }
             }
+        }
 
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initializeDropdowns);
-            } else {
-                initializeDropdowns();
-            }
-        })();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
     </script>
 </x-app-layout>

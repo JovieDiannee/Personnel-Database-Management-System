@@ -45,6 +45,8 @@ Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
     Route::get('/data-management/employment-status/download-template',[DataManagementController::class, 'downloadEmploymentStatusTemplate'])->name('data-management.employment-status.download-template');
     Route::get('/data-management/employment-status/{employmentStatus}/edit',[DataManagementController::class, 'editEmploymentStatus'])->name('data-management.employment-status.edit');
     Route::put('/data-management/employment-status/{employmentStatus}',[DataManagementController::class, 'updateEmploymentStatus'])->name('data-management.employment-status.update');
+    Route::get('/data-management/employment-status/{employmentStatus}/plantilla-search',[DataManagementController::class, 'searchEmploymentPlantilla'])->name('data-management.employment-status.plantilla-search');
+    Route::get('/data-management/employment-status/{employmentStatus}/plantilla-assignments',[DataManagementController::class, 'employmentPlantillaAssignments'])->name('data-management.employment-status.plantilla-assignments');
 
 });
 

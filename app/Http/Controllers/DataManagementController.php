@@ -3511,20 +3511,26 @@ class DataManagementController extends Controller
 
     public function editEmploymentStatus($employmentStatus)
     {
-        // Employee being edited.
         $record = \App\Models\EmploymentStatus::with([
             'user.basicInformation',
             'plantilla',
             'school',
         ])->findOrFail($employmentStatus);
 
-        // All plantilla items, including their assigned employees.
-        $plantillaItems = \App\Models\PlantillaDb::with([
-            'employmentStatuses.user.basicInformation',
-        ])
-            ->orderBy('item_number')
-            ->get();
+        // Preload only the selected item.
+        // Preserve the submitted value after validation errors.
+        $selectedItem = (string) old(
+            'item_number',
+            $record->plantilla?->item_number ?? ''
+        );
 
+        $plantillaItems = $selectedItem !== ''
+            ? \App\Models\PlantillaDb::query()
+                ->where('item_number', $selectedItem)
+                ->get(['id', 'item_number', 'position_title'])
+            : collect();
+
+        // Keep all schools available and preserve existing autofill.
         $schools = \App\Models\SchoolDb::query()
             ->orderBy('school_name')
             ->get();
@@ -3533,6 +3539,115 @@ class DataManagementController extends Controller
             'data-management.employment-status-edit',
             compact('record', 'plantillaItems', 'schools')
         );
+    }
+
+    public function searchEmploymentPlantilla(\Illuminate\Http\Request $request,$employmentStatus) 
+    {
+        \App\Models\EmploymentStatus::findOrFail($employmentStatus);
+
+        $request->merge([
+            'q' => strtoupper(trim((string) $request->input('q', ''))),
+        ]);
+
+        $validated = $request->validate([
+            'q' => [
+                'required',
+                'string',
+                'max:100',
+                'regex:/^[A-Z]+\d*-\d{6}$/',
+            ],
+        ], [
+            'q.regex' => 'Enter an item code such as '
+                . 'MTCHR2-540126 or TCH1-540335.',
+        ]);
+
+        $search = $validated['q'];
+
+        $items = \App\Models\PlantillaDb::query()
+            ->select(['id', 'item_number', 'position_title'])
+            ->where(function ($query) use ($search) {
+                $query
+                    // Example: MTCHR2-540126
+                    ->where('item_number', $search)
+
+                    // Example: MTCHR2-540126-2018
+                    ->orWhere('item_number', 'like', $search . '-%')
+
+                    // Example: OSEC-DECSB-MTCHR2-540126-2018
+                    ->orWhere('item_number', 'like', '%-' . $search . '-%');
+            })
+            ->orderBy('item_number')
+            ->limit(40)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'value' => (string) $item->item_number,
+                    'text' => $item->item_number
+                        . ' - '
+                        . $item->position_title,
+                ];
+            })
+            ->values();
+
+        return response()->json($items);
+    }
+
+    public function employmentPlantillaAssignments(\Illuminate\Http\Request $request,$employmentStatus) 
+    {
+        $record = \App\Models\EmploymentStatus::findOrFail(
+            $employmentStatus
+        );
+
+        $validated = $request->validate([
+            'item_number' => ['required', 'string', 'max:255'],
+        ]);
+
+        $plantilla = \App\Models\PlantillaDb::query()
+            ->where('item_number', $validated['item_number'])
+            ->firstOrFail(['id']);
+
+        // Get only employees assigned to this selected item.
+        // Exclude the employee currently being edited.
+        $assignments = \App\Models\EmploymentStatus::query()
+            ->select(['id', 'users_id', 'plantilla_db_id'])
+            ->where('plantilla_db_id', $plantilla->id)
+            ->where('users_id', '!=', $record->users_id)
+            ->with([
+                'user:id,name',
+                'user.basicInformation:id,users_id,first_name,middle_name,last_name,extension_name',
+            ])
+            ->get();
+
+        $names = $assignments
+            ->unique('users_id')
+            ->map(function ($assignment) {
+                $user = $assignment->user;
+                $basic = $user?->basicInformation;
+
+                $name = collect([
+                    $basic?->first_name,
+                    $basic?->middle_name,
+                    $basic?->last_name,
+                    $basic?->extension_name,
+                ])
+                    ->map(fn ($part) => trim((string) $part))
+                    ->filter(fn ($part) => $part !== '')
+                    ->implode(' ');
+
+                if ($name === '') {
+                    $name = trim((string) ($user?->name ?? ''));
+                }
+
+                return $name !== ''
+                    ? $name
+                    : 'Employee #' . $assignment->users_id;
+            })
+            ->sort()
+            ->values();
+
+        return response()->json([
+            'names' => $names,
+        ]);
     }
 
     public function updateEmploymentStatus(Request $request,$employmentStatus) 
