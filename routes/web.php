@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DataManagementController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\AddPersonnelRequestController;
+use App\Http\Controllers\EmployeeTrashController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -115,10 +117,20 @@ Route::middleware(['auth', 'role:super_admin'])->group(function () {
 // HR TRANSACRTIONS - PENDING FEATURES
 // ============================================================
 
-Route::view('/hr-transactions/personnel-requests','errors.503',[],503)->name('hr-transactions.personnel-requests');
 Route::view('/hr-transactions/service-records','errors.503',[],503)->name('hr-transactions.service-records');
 Route::view('/hr-transactions/other-transactions','errors.503',[],503)->name('hr-transactions.other-transactions');
 
+
+// ============================================================
+// PAYROLL SERVICES
+// ============================================================
+
+Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
+    Route::view(
+        '/payroll-services/payroll-inclusion',
+        'payroll-services.payroll-inclusion'
+    )->name('payroll-services.inclusion');
+});
 
 // ============================================================
 // REPORT MANAGEMENT FEATURES
@@ -139,6 +151,47 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('data-management/reports
         Route::patch('/submissions/{submission}/revert-validation',[ReportController::class, 'revertValidation'])->name('reports.revert-validation');
         Route::get('/submissions/export',[ReportController::class, 'exportSubmissions'])->name('reports.submissions.export');
         
+});
+
+// ============================================================
+// ADD PERSONNEL - REQUEST FEATURES
+// ============================================================
+
+Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
+    Route::get('/data-management/add-personnel-requests',[AddPersonnelRequestController::class, 'index'])->name('add-personnel-requests.index');
+    Route::get('/data-management/add-personnel-requests/create',[AddPersonnelRequestController::class, 'create'])->name('add-personnel-requests.create');
+    Route::post('/data-management/add-personnel-requests',[AddPersonnelRequestController::class, 'store'])->name('add-personnel-requests.store');
+
+});
+
+Route::middleware(['auth', 'role:super_admin'])->group(function () {
+
+    Route::get('/admin/personnel-requests',[AddPersonnelRequestController::class, 'adminIndex'])->name('admin.personnel-requests.index');
+    Route::get('/admin/personnel-requests/{personnelRequest}',[AddPersonnelRequestController::class, 'adminShow'])->name('admin.personnel-requests.show');
+    Route::post('/admin/personnel-requests/{personnelRequest}/approve',[AddPersonnelRequestController::class, 'approve'])->name('admin.personnel-requests.approve');
+    Route::post('/admin/personnel-requests/{personnelRequest}/disapprove',[AddPersonnelRequestController::class, 'disapprove'])->name('admin.personnel-requests.disapprove');
+
+});
+
+// ============================================================
+// DANGER ZONE — EMPLOYEE DELETION AND TRASH BIN
+// ============================================================
+
+Route::middleware(['auth', 'role:super_admin,admin'])->prefix('danger-zone')->group(function () {
+
+    // Both roles: view eligible employees and request history.
+    Route::get('/delete-employee',[EmployeeTrashController::class, 'index'])->name('danger-zone.delete-employee');
+
+    // Admin: request deletion.
+    // Super admin: move directly to Trash Bin.
+    Route::post('/employees/{employee}/deletion',[EmployeeTrashController::class, 'store'])->whereNumber('employee')->name('danger-zone.employees.delete');
+
+    // Super admin only: review requests and restore employees.
+    Route::middleware('role:super_admin')->group(function () {
+        Route::post('/requests/{deletionRequest}/review',[EmployeeTrashController::class, 'review'])->whereNumber('deletionRequest')->name('danger-zone.requests.review');
+        Route::post('/employees/{employee}/restore',[EmployeeTrashController::class, 'restore'])->whereNumber('employee')->name('danger-zone.employees.restore');
+
+    });
 });
 
 

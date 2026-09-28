@@ -610,70 +610,8 @@
                     </form>
 
                 </div>
-
-            {{-- =====================================================
-                ADMIN - MANUAL PERSONNEL ENTRY
-            ====================================================== --}}
-            @elseif(auth()->user()->role === 'admin')
-            
-                <div
-                    class="rounded-2xl border border-green-200 bg-white p-4 sm:p-6 shadow-sm"
-                    >
-
-                    <div
-                        class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between"
-                    >
-
-                        <div class="flex items-start gap-4">
-
-                            <div>
-
-                                <h2 class="text-lg font-bold text-gray-900">
-                                    Add Personnel Information
-                                </h2>
-
-                                <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
-                                    Excel import is available only to the Super Admin.
-                                    To add a personnel record, complete the personnel information form.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        <a
-                            href="https://forms.gle/zrz8AGM3bdvAWoJ67"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="inline-flex min-h-11 w-full shrink-0 md:w-auto items-center justify-center gap-2 rounded-lg bg-green-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                        >
-
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-4 w-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M12 4.5v15m7.5-7.5h-15"
-                                />
-                            </svg>
-
-                            Add Personnel
-
-                        </a>
-
-                    </div>
-
-                </div>
-                <br>
-
             @endif
+
 
             {{-- ========================================================= --}}
             {{-- MEDICAL ALLOWANCE RECORDS --}}

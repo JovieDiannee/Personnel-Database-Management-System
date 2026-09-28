@@ -80,7 +80,8 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $query = \App\Models\BasicInformation::with([
+        $query = \App\Models\BasicInformation::whereHas('user')
+        ->with([
             'user',
             'issuedId',
             'user.employmentStatus.school',
@@ -180,18 +181,15 @@ class DataManagementController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                $q->whereHas(
-                    'issuedId',
-                    function ($issuedIdQuery) use ($search) {
+                $q->whereHas('issuedId', function ($issuedIdQuery) use ($search) {
 
-                        $issuedIdQuery->where(
-                            'employee_id',
-                            'like',
-                            "%{$search}%"
-                        );
+                    $issuedIdQuery->where(
+                        'employee_id',
+                        'like',
+                        "%{$search}%"
+                    );
 
-                    }
-                )
+                })
 
 
                 /*
@@ -227,9 +225,9 @@ class DataManagementController extends Controller
                 ->orWhereRaw(
                     "CONCAT_WS(
                         ' ',
-                        last_name,
                         first_name,
                         middle_name,
+                        last_name,
                         extension_name
                     ) LIKE ?",
                     ["%{$search}%"]
@@ -251,42 +249,34 @@ class DataManagementController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | User Role
+                | Email / User Role / User Status
                 |--------------------------------------------------------------------------
                 */
 
-                ->orWhereHas(
-                    'user',
-                    function ($userQuery) use ($search) {
+                ->orWhereHas('user', function ($userQuery) use ($search) {
 
-                        $userQuery->where(
-                            'role',
-                            'like',
-                            "%{$search}%"
-                        );
+                    $userQuery->where(function ($userSearch) use ($search) {
 
-                    }
-                )
+                        $userSearch
+                            ->where(
+                                'email',
+                                'like',
+                                "%{$search}%"
+                            )
+                            ->orWhere(
+                                'role',
+                                'like',
+                                "%{$search}%"
+                            )
+                            ->orWhere(
+                                'status',
+                                'like',
+                                "%{$search}%"
+                            );
 
+                    });
 
-                /*
-                |--------------------------------------------------------------------------
-                | User Status
-                |--------------------------------------------------------------------------
-                */
-
-                ->orWhereHas(
-                    'user',
-                    function ($userQuery) use ($search) {
-
-                        $userQuery->where(
-                            'status',
-                            'like',
-                            "%{$search}%"
-                        );
-
-                    }
-                )
+                })
 
 
                 /*
@@ -715,7 +705,16 @@ class DataManagementController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                $user = User::where('email', $email)->first();
+                $user = User::withTrashed()
+                        ->where('email', $email)
+                        ->first();
+
+                    if ($user?->trashed()) {
+                        throw new \RuntimeException(
+                            'This email belongs to an employee in Trash Bin. '
+                            . 'Restore the employee before importing changes.'
+                        );
+                    }
 
 
                 /*
@@ -1796,7 +1795,7 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $personnel = \App\Models\BasicInformation::findOrFail($person);
+        $personnel = \App\Models\BasicInformation::whereHas('user')->findOrFail($person);
 
 
         /*
@@ -1912,7 +1911,7 @@ class DataManagementController extends Controller
         //     abort(403, 'You are not authorized to access this page.');
         // }
 
-        $person = BasicInformation::with([
+        $person = BasicInformation::whereHas('user')->with([
             'user',
             'issuedId',
             'employmentStatus',
@@ -1945,7 +1944,7 @@ class DataManagementController extends Controller
         //     abort(403, 'You are not authorized to update personnel.');
         // }
 
-        $person = BasicInformation::with([
+        $person = BasicInformation::whereHas('user')->with([
             'user',
             'issuedId',
         ])->findOrFail($id);
@@ -2207,7 +2206,7 @@ class DataManagementController extends Controller
         $user = auth()->user();
 
         // Exclude employee ID 1000001 for all roles.
-        $query = \App\Models\EmploymentStatus::with([
+        $query = \App\Models\EmploymentStatus::whereHas('user')->with([
             'user.basicInformation',
             'plantilla',
             'school',
@@ -2435,6 +2434,7 @@ class DataManagementController extends Controller
             */
 
             $user = DB::table('users')
+                ->whereNull('users.deleted_at')
                 ->where('email', $email)
                 ->first();
 
@@ -2855,6 +2855,7 @@ class DataManagementController extends Controller
                 ) {
                     // Lock the employee while checking and saving their record.
                     $user = DB::table('users')
+                        ->whereNull('users.deleted_at')
                         ->where('email', $email)
                         ->lockForUpdate()
                         ->first();
@@ -3511,7 +3512,7 @@ class DataManagementController extends Controller
 
     public function editEmploymentStatus($employmentStatus)
     {
-        $record = \App\Models\EmploymentStatus::with([
+        $record = \App\Models\EmploymentStatus::whereHas('user')->with([
             'user.basicInformation',
             'plantilla',
             'school',
@@ -3543,7 +3544,7 @@ class DataManagementController extends Controller
 
     public function searchEmploymentPlantilla(\Illuminate\Http\Request $request,$employmentStatus) 
     {
-        \App\Models\EmploymentStatus::findOrFail($employmentStatus);
+        \App\Models\EmploymentStatus::whereHas('user')->findOrFail($employmentStatus);
 
         $validated = $request->validate([
             'q' => ['required', 'string', 'max:255'],
@@ -3587,7 +3588,7 @@ class DataManagementController extends Controller
 
     public function employmentPlantillaAssignments(\Illuminate\Http\Request $request,$employmentStatus) 
     {
-        $record = \App\Models\EmploymentStatus::findOrFail(
+        $record = \App\Models\EmploymentStatus::whereHas('user')->findOrFail(
             $employmentStatus
         );
 
@@ -3645,7 +3646,7 @@ class DataManagementController extends Controller
 
     public function updateEmploymentStatus(Request $request,$employmentStatus) 
     {
-        $record = \App\Models\EmploymentStatus::findOrFail(
+        $record = \App\Models\EmploymentStatus::whereHas('user')->findOrFail(
             $employmentStatus
         );
 
@@ -5910,6 +5911,7 @@ class DataManagementController extends Controller
         */
 
         $query = MedicalAllowance::query()
+            ->whereNull('users.deleted_at')
             ->select('medical_allowance.*')
 
             ->leftJoin(
@@ -6888,6 +6890,7 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
         $query = DB::table('employment_status')
+            ->whereNull('users.deleted_at')
             ->join(
                 'users',
                 'users.id',
@@ -7383,7 +7386,8 @@ class DataManagementController extends Controller
             ],
         ]);
 
-        $medicalAllowance = \App\Models\MedicalAllowance::findOrFail($record);
+        $medicalAllowance = \App\Models\MedicalAllowance::whereHas('user')
+            ->findOrFail($record);
 
         $medicalAllowance->update([
             'mode_of_availment' => $validated['mode_of_availment'],
@@ -7498,6 +7502,7 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
         $query = DB::table('medical_allowance as medical')
+            ->whereNull('users.deleted_at')
             ->join(
                 'users',
                 'users.id',

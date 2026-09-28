@@ -462,31 +462,72 @@
                         </div>
 
 
-                        <a
-                            href="https://forms.gle/zrz8AGM3bdvAWoJ67"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="inline-flex min-h-11 w-full shrink-0 md:w-auto items-center justify-center gap-2 rounded-lg bg-green-700 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                        >
+                        <div class="flex w-full shrink-0 flex-col gap-2 sm:flex-row md:w-auto">
 
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="h-4 w-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="2"
+                            {{-- VIEW PERSONNEL REQUESTS --}}
+                            <a
+                                href="{{ route('add-personnel-requests.index') }}"
+                                class="inline-flex min-h-11 w-full items-center justify-center gap-2
+                                    rounded-lg border border-green-700 bg-white px-5
+                                    text-sm font-semibold text-green-700 shadow-sm
+                                    transition hover:bg-green-50
+                                    focus:outline-none focus:ring-2 focus:ring-green-500
+                                    focus:ring-offset-2 sm:w-auto"
                             >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M12 4.5v15m7.5-7.5h-15"
-                                />
-                            </svg>
 
-                            Add Personnel
+                                {{-- LIST ICON --}}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.008v.008H3.75V6.75Zm0 5.25h.008v.008H3.75V12Zm0 5.25h.008v.008H3.75v-.008Z"
+                                    />
+                                </svg>
 
-                        </a>
+                                View Pending Requests
+
+                            </a>
+
+
+                            {{-- ADD PERSONNEL --}}
+                            <a
+                                href="{{ route('add-personnel-requests.create') }}"
+                                class="inline-flex min-h-11 w-full items-center justify-center gap-2
+                                    rounded-lg bg-green-700 px-5
+                                    text-sm font-semibold text-white shadow-sm
+                                    transition hover:bg-green-800
+                                    focus:outline-none focus:ring-2 focus:ring-green-500
+                                    focus:ring-offset-2 sm:w-auto"
+                            >
+
+                                {{-- PLUS ICON --}}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M12 4.5v15m7.5-7.5h-15"
+                                    />
+                                </svg>
+
+                                Add Personnel
+
+                            </a>
+
+                        </div>
 
                     </div>
 
@@ -505,7 +546,7 @@
 
                     <div>
                         <h2 class="text-lg font-semibold text-gray-800">
-                            Personnel Records
+                            Personnel User Accounts
                         </h2>
 
                         <p class="mt-1 text-sm text-gray-500">
@@ -599,7 +640,7 @@
 
                                 {{-- Name --}}
                                 <th class="px-4 sm:px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                    COMPLETE Name
+                                    COMPLETE Name and EMAIL ADDRESS
                                 </th>
 
                                 {{-- Mobile Number --}}
@@ -628,9 +669,6 @@
                                         User Status
                                     </th>
                                 @endif
-                                <th class="px-4 sm:px-6 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
-                                    Profile
-                                </th>
 
                             </tr>
 
@@ -661,12 +699,12 @@
                                         <div class="text-sm font-semibold text-gray-900">
 
                                             {{ $person->first_name }} {{ $person->middle_name }} {{ $person->last_name }} {{ $person->extension_name }}
-
+                                            
 
                                         </div>
 
                                         <div class="text-xs text-gray-500">
-                                            {{ $person->users->email ?? '' }}
+                                            {{ $person->user->email ?? '' }}
                                         </div>
 
                                     </td>
@@ -763,17 +801,6 @@
                                         </td>
                                     @endif
                                     
-                                    {{-- Action --}}
-                                    <td class="whitespace-nowrap px-4 sm:px-6 py-4 text-center">
-
-                                        <a
-                                            href="{{ route('data-management.personnel.edit', $person->id) }}"
-                                            class="inline-flex min-h-11 items-center justify-center rounded-md bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800"
-                                        >
-                                            View
-                                        </a>
-
-                                    </td>
 
                                 </tr>
 
