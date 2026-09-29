@@ -171,6 +171,8 @@ Route::middleware(['auth', 'role:super_admin'])->group(function () {
     Route::get('/admin/personnel-requests/{personnelRequest}',[AddPersonnelRequestController::class, 'adminShow'])->name('admin.personnel-requests.show');
     Route::post('/admin/personnel-requests/{personnelRequest}/approve',[AddPersonnelRequestController::class, 'approve'])->name('admin.personnel-requests.approve');
     Route::post('/admin/personnel-requests/{personnelRequest}/disapprove',[AddPersonnelRequestController::class, 'disapprove'])->name('admin.personnel-requests.disapprove');
+    Route::get('/admin/personnel/create',[AddPersonnelRequestController::class, 'createPersonnel'])->name('admin.personnel.create');
+    Route::post('/admin/personnel',[AddPersonnelRequestController::class, 'storePersonnel'])->name('admin.personnel.store');
 
 });
 

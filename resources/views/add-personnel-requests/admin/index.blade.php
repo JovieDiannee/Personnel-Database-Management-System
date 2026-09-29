@@ -8,16 +8,55 @@
                 PAGE HEADER
             ============================================================ --}}
 
-            <div class="mb-6">
+            <div class="mb-6 flex items-center justify-between">
 
-                <h1 class="text-2xl font-bold text-gray-900">
-                    Personnel Request Approval
-                </h1>
+                <div>
 
-                <p class="mt-1 text-sm text-gray-500">
-                    Review and process personnel requests submitted by
-                    School Administrators and Administrative Officers.
-                </p>
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        Personnel Request Approval
+                    </h1>
+
+                    <p class="mt-1 text-sm text-gray-500">
+                        Review personnel requests or directly add a new personnel.
+                    </p>
+
+                </div>
+
+
+                {{-- ADD PERSONNEL --}}
+
+                <a
+                    href="{{ route('admin.personnel.create') }}"
+                    class="inline-flex items-center gap-2 rounded-lg
+                        bg-green-700 px-5 py-2.5
+                        text-sm font-semibold text-white
+                        shadow-sm transition
+                        hover:bg-green-800
+                        focus:outline-none focus:ring-2
+                        focus:ring-green-600 focus:ring-offset-2"
+                >
+
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.8"
+                        stroke="currentColor"
+                        class="h-5 w-5"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3
+                            M6.75 6.75a3 3 0 1 1 6 0
+                            3 3 0 0 1-6 0ZM3 20.25
+                            a6.75 6.75 0 0 1 13.5 0v.75H3v-.75Z"
+                        />
+                    </svg>
+
+                    Add Personnel
+
+                </a>
 
             </div>
 
@@ -168,27 +207,26 @@
                     class="border-b border-gray-200 p-5"
                 >
 
-                    <div
-                        class="grid grid-cols-1 gap-3
-                               md:grid-cols-[1fr_200px_auto]"
-                    >
+                    <div class="flex items-center gap-3">
 
+                        {{-- SEARCH --}}
                         <input
                             type="text"
                             name="search"
                             value="{{ $search }}"
                             placeholder="Search personnel, email, school, item or position..."
-                            class="rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="min-w-0 flex-1 rounded-lg border-gray-300
+                                focus:border-green-600
+                                focus:ring-green-600"
                         >
 
 
+                        {{-- STATUS --}}
                         <select
                             name="status"
-                            class="rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
+                            class="w-48 shrink-0 rounded-lg border-gray-300
+                                focus:border-green-600
+                                focus:ring-green-600"
                         >
 
                             <option value="">
@@ -219,11 +257,13 @@
                         </select>
 
 
+                        {{-- SEARCH BUTTON --}}
                         <button
                             type="submit"
-                            class="rounded-lg bg-green-700 px-6 py-2
-                                   text-sm font-semibold text-white
-                                   hover:bg-green-800"
+                            class="shrink-0 rounded-lg bg-green-700
+                                px-6 py-2.5
+                                text-sm font-semibold text-white
+                                transition hover:bg-green-800"
                         >
                             Search
                         </button>

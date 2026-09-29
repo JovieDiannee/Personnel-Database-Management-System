@@ -4,45 +4,73 @@
 
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-
             {{-- ============================================================
-                BREADCRUMB
+                PAGE HEADER
             ============================================================ --}}
 
             <div class="mb-6">
 
-                <div class="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                <a
+                    href="{{ route('admin.personnel-requests.index') }}"
+                    class="text-sm font-medium text-green-700 hover:text-green-800"
+                >
+                    ← Back to Personnel Requests
+                </a>
 
-                    <a
-                        href="{{ route('dashboard') }}"
-                        class="hover:text-green-700"
-                    >
-                        Dashboard
-                    </a>
+                <h1 class="mt-3 text-2xl font-bold text-gray-900">
+                    Add Personnel
+                </h1>
 
-                    <span>/</span>
-
-                    <span>Data Management</span>
-
-                    <span>/</span>
-
-                    <a
-                        href="{{ route('add-personnel-requests.index') }}"
-                        class="hover:text-green-700"
-                    >
-                        Personnel Requests
-                    </a>
-
-                    <span>/</span>
-
-                    <span class="font-medium text-green-700">
-                        Add Personnel
-                    </span>
-
-                </div>
+                <p class="mt-1 text-sm text-gray-500">
+                    Create a new personnel account directly. No approval is required.
+                </p>
 
             </div>
 
+
+            {{-- ============================================================
+                VALIDATION ERRORS
+            ============================================================ --}}
+
+            @if ($errors->any())
+
+                <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4">
+
+                    <p class="font-semibold text-red-800">
+                        Please correct the following:
+                    </p>
+
+                    <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-red-700">
+
+                        @foreach ($errors->all() as $error)
+
+                            <li>
+                                {{ $error }}
+                            </li>
+
+                        @endforeach
+
+                    </ul>
+
+                </div>
+
+            @endif
+
+
+            {{-- ============================================================
+                SESSION ERROR
+            ============================================================ --}}
+
+            @if (session('error'))
+
+                <div
+                    class="mb-6 rounded-xl border border-red-200
+                           bg-red-50 p-4 text-sm text-red-700"
+                >
+                    {{ session('error') }}
+                </div>
+
+            @endif
 
 
             {{-- ============================================================
@@ -54,68 +82,19 @@
                        border-gray-200 bg-white shadow-sm"
             >
 
-
-                {{-- HEADER --}}
+                {{-- CARD HEADER --}}
 
                 <div class="bg-green-800 px-6 py-5 text-white">
 
-                    <h1 class="text-xl font-bold">
-                        Add Personnel Request
-                    </h1>
+                    <h2 class="text-lg font-bold">
+                        Personnel Information
+                    </h2>
 
                     <p class="mt-1 text-sm text-green-100">
-                        Submit personnel information for review and approval
-                        by the Personnel Unit.
+                        Complete the personnel information below.
                     </p>
 
                 </div>
-
-
-
-                {{-- ========================================================
-                    VALIDATION ERRORS
-                ======================================================== --}}
-
-                @if ($errors->any())
-
-                    <div
-                        class="m-6 rounded-xl border border-red-200
-                               bg-red-50 p-4"
-                    >
-
-                        <p class="font-semibold text-red-800">
-                            Please correct the following:
-                        </p>
-
-                        <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-red-700">
-
-                            @foreach ($errors->all() as $error)
-
-                                <li>
-                                    {{ $error }}
-                                </li>
-
-                            @endforeach
-
-                        </ul>
-
-                    </div>
-
-                @endif
-
-
-
-                @if (session('error'))
-
-                    <div
-                        class="m-6 rounded-xl border border-red-200
-                               bg-red-50 p-4 text-sm text-red-700"
-                    >
-                        {{ session('error') }}
-                    </div>
-
-                @endif
-
 
 
                 {{-- ========================================================
@@ -124,58 +103,11 @@
 
                 <form
                     method="POST"
-                    action="{{ route('add-personnel-requests.store') }}"
+                    action="{{ route('admin.personnel.store') }}"
                     class="p-6"
                 >
 
                     @csrf
-
-
-
-                    {{-- ====================================================
-                        ASSIGNED SCHOOL
-                    ==================================================== --}}
-
-                    <div
-                        class="mb-8 rounded-xl border border-green-200
-                               bg-green-50 p-5"
-                    >
-
-                        <p
-                            class="text-xs font-semibold uppercase
-                                   tracking-wide text-green-700"
-                        >
-                            Assigned School
-                        </p>
-
-                        <p class="mt-1 text-lg font-bold text-gray-900">
-
-                            {{
-                                $school
-                                    ? $school->school_name . ' - ' . $school->school_district
-                                    : 'Not Assigned'
-                            }}
-
-                        </p>
-
-                        @if ($school)
-
-                            <p class="mt-1 text-sm text-gray-600">
-
-                                School ID:
-                                {{ $school->school_id }}
-
-                            </p>
-
-                        @endif
-
-                        <p class="mt-3 text-xs text-gray-500">
-                            The school is automatically determined from your
-                            PDMS account and cannot be changed.
-                        </p>
-
-                    </div>
-
 
 
                     {{-- ====================================================
@@ -202,7 +134,6 @@
                                    md:grid-cols-2 lg:grid-cols-4"
                         >
 
-
                             {{-- FIRST NAME --}}
 
                             <div>
@@ -227,13 +158,14 @@
                                 >
 
                                 @error('first_name')
+
                                     <p class="mt-1 text-sm text-red-600">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
-
 
 
                             {{-- MIDDLE NAME --}}
@@ -260,7 +192,6 @@
                             </div>
 
 
-
                             {{-- LAST NAME --}}
 
                             <div>
@@ -285,16 +216,17 @@
                                 >
 
                                 @error('last_name')
+
                                     <p class="mt-1 text-sm text-red-600">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
 
 
-
-                            {{-- EXTENSION --}}
+                            {{-- EXTENSION NAME --}}
 
                             <div>
 
@@ -317,7 +249,6 @@
                                 >
 
                             </div>
-
 
 
                             {{-- EMAIL --}}
@@ -345,13 +276,14 @@
                                 >
 
                                 @error('email')
+
                                     <p class="mt-1 text-sm text-red-600">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
-
 
 
                             {{-- SEX --}}
@@ -396,7 +328,6 @@
                             </div>
 
 
-
                             {{-- BIRTH DATE --}}
 
                             <div>
@@ -421,13 +352,14 @@
                                 >
 
                                 @error('birth_date')
+
                                     <p class="mt-1 text-sm text-red-600">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
-
 
 
                             {{-- BIRTH PLACE --}}
@@ -454,7 +386,6 @@
                             </div>
 
 
-
                             {{-- MOBILE NUMBER --}}
 
                             <div>
@@ -478,7 +409,6 @@
                                 >
 
                             </div>
-
 
 
                             {{-- SPECIALIZATION --}}
@@ -507,7 +437,9 @@
 
                                         <option
                                             value="{{ $specialization }}"
-                                            @selected(old('specialization') === $specialization)
+                                            @selected(
+                                                old('specialization') === $specialization
+                                            )
                                         >
                                             {{ $specialization }}
                                         </option>
@@ -517,9 +449,11 @@
                                 </select>
 
                                 @error('specialization')
+
                                     <p class="mt-1 text-sm text-red-600">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -527,7 +461,6 @@
                         </div>
 
                     </div>
-
 
 
                     {{-- ====================================================
@@ -554,7 +487,6 @@
                                    md:grid-cols-2 lg:grid-cols-3"
                         >
 
-
                             {{-- ORIGINAL APPOINTMENT --}}
 
                             <div>
@@ -576,8 +508,15 @@
                                            focus:ring-green-600"
                                 >
 
-                            </div>
+                                @error('date_of_original_appointment')
 
+                                    <p class="mt-1 text-sm text-red-600">
+                                        {{ $message }}
+                                    </p>
+
+                                @enderror
+
+                            </div>
 
 
                             {{-- LAST PROMOTION --}}
@@ -601,8 +540,15 @@
                                            focus:ring-green-600"
                                 >
 
-                            </div>
+                                @error('date_of_last_promotion')
 
+                                    <p class="mt-1 text-sm text-red-600">
+                                        {{ $message }}
+                                    </p>
+
+                                @enderror
+
+                            </div>
 
 
                             {{-- EMPLOYMENT STATUS --}}
@@ -632,7 +578,10 @@
 
                                         <option
                                             value="{{ $employmentStatus }}"
-                                            @selected(old('employment_status') === $employmentStatus)
+                                            @selected(
+                                                old('employment_status') ===
+                                                $employmentStatus
+                                            )
                                         >
                                             {{ $employmentStatus }}
                                         </option>
@@ -641,8 +590,15 @@
 
                                 </select>
 
-                            </div>
+                                @error('employment_status')
 
+                                    <p class="mt-1 text-sm text-red-600">
+                                        {{ $message }}
+                                    </p>
+
+                                @enderror
+
+                            </div>
 
 
                             {{-- WARM BODY STATUS --}}
@@ -672,7 +628,10 @@
 
                                         <option
                                             value="{{ $warmBodyStatus }}"
-                                            @selected(old('warm_body_status') === $warmBodyStatus)
+                                            @selected(
+                                                old('warm_body_status') ===
+                                                $warmBodyStatus
+                                            )
                                         >
                                             {{ $warmBodyStatus }}
                                         </option>
@@ -681,8 +640,15 @@
 
                                 </select>
 
-                            </div>
+                                @error('warm_body_status')
 
+                                    <p class="mt-1 text-sm text-red-600">
+                                        {{ $message }}
+                                    </p>
+
+                                @enderror
+
+                            </div>
 
 
                             {{-- NATURE OF WORK --}}
@@ -712,7 +678,10 @@
 
                                         <option
                                             value="{{ $natureOfWork }}"
-                                            @selected(old('nature_of_work') === $natureOfWork)
+                                            @selected(
+                                                old('nature_of_work') ===
+                                                $natureOfWork
+                                            )
                                         >
                                             {{ $natureOfWork }}
                                         </option>
@@ -721,8 +690,15 @@
 
                                 </select>
 
-                            </div>
+                                @error('nature_of_work')
 
+                                    <p class="mt-1 text-sm text-red-600">
+                                        {{ $message }}
+                                    </p>
+
+                                @enderror
+
+                            </div>
 
 
                             {{-- SOURCE OF FUND --}}
@@ -754,7 +730,10 @@
 
                                         <option
                                             value="{{ $sourceOfFund }}"
-                                            @selected(old('source_of_fund') === $sourceOfFund)
+                                            @selected(
+                                                old('source_of_fund') ===
+                                                $sourceOfFund
+                                            )
                                         >
                                             {{ $sourceOfFund }}
                                         </option>
@@ -774,18 +753,16 @@
                             </div>
 
 
-
                             {{-- ====================================================
-                                PLANTILLA ITEM
+                                PLANTILLA ITEM - 2 COLUMNS
                             ==================================================== --}}
 
-                            <div class="md:col-span-2 lg:col-span-3">
+                            <div class="md:col-span-2 lg:col-span-2">
 
                                 <label
                                     for="plantilla_db_id"
                                     class="mb-1 block text-sm font-medium text-gray-700"
                                 >
-
                                     Plantilla Item
 
                                     <span
@@ -832,8 +809,9 @@
                             </div>
 
 
-
-                            {{-- MONTHLY SALARY --}}
+                            {{-- ====================================================
+                                MONTHLY SALARY - 1 COLUMN
+                            ==================================================== --}}
 
                             <div>
 
@@ -857,11 +835,78 @@
                                            focus:ring-green-600"
                                 >
 
+                                @error('monthly_salary')
+
+                                    <p class="mt-1 text-sm text-red-600">
+                                        {{ $message }}
+                                    </p>
+
+                                @enderror
+
                             </div>
 
 
+                            {{-- ====================================================
+                                SCHOOL - 2 COLUMNS
+                            ==================================================== --}}
 
-                            {{-- CONTRACT DURATION --}}
+                            <div class="md:col-span-2 lg:col-span-2">
+
+                                <label
+                                    for="school_db_id"
+                                    class="mb-1 block text-sm font-medium text-gray-700"
+                                >
+                                    School
+                                    <span class="text-red-500">*</span>
+                                </label>
+
+
+                                <select
+                                    id="school_db_id"
+                                    name="school_db_id"
+                                    required
+                                    autocomplete="off"
+                                    class="w-full"
+                                >
+
+                                    <option value="">
+                                        Select School
+                                    </option>
+
+                                    @foreach ($schools as $school)
+
+                                        <option
+                                            value="{{ $school->id }}"
+                                            @selected(
+                                                old('school_db_id') == $school->id
+                                            )
+                                        >
+                                            {{ $school->school_id }}
+                                            -
+                                            {{ $school->school_name }}
+                                            -
+                                            {{ $school->school_district }}
+                                        </option>
+
+                                    @endforeach
+
+                                </select>
+
+
+                                @error('school_db_id')
+
+                                    <p class="mt-1 text-sm text-red-600">
+                                        {{ $message }}
+                                    </p>
+
+                                @enderror
+
+                            </div>
+
+
+                            {{-- ====================================================
+                                CONTRACT DURATION - 1 COLUMN
+                            ==================================================== --}}
 
                             <div>
 
@@ -883,6 +928,14 @@
                                            focus:ring-green-600"
                                 >
 
+                                @error('contract_duration')
+
+                                    <p class="mt-1 text-sm text-red-600">
+                                        {{ $message }}
+                                    </p>
+
+                                @enderror
+
                             </div>
 
                         </div>
@@ -890,49 +943,21 @@
                     </div>
 
 
-
                     {{-- ====================================================
-                        REMARKS
-                    ==================================================== --}}
-
-                    <div class="mb-8">
-
-                        <label
-                            for="request_remarks"
-                            class="mb-1 block text-sm font-medium text-gray-700"
-                        >
-                            Remarks
-                        </label>
-
-                        <textarea
-                            id="request_remarks"
-                            name="request_remarks"
-                            rows="4"
-                            placeholder="Optional remarks for the Personnel Unit..."
-                            class="w-full rounded-lg border-gray-300
-                                   focus:border-green-600
-                                   focus:ring-green-600"
-                        >{{ old('request_remarks') }}</textarea>
-
-                    </div>
-
-
-
-                    {{-- ====================================================
-                        BUTTONS
+                        ACTION BUTTONS
                     ==================================================== --}}
 
                     <div
-                        class="flex items-center justify-end gap-3
+                        class="flex justify-end gap-3
                                border-t border-gray-200 pt-6"
                     >
 
                         <a
-                            href="{{ route('add-personnel-requests.index') }}"
+                            href="{{ route('admin.personnel-requests.index') }}"
                             class="rounded-lg border border-gray-300
                                    bg-white px-5 py-2.5
                                    text-sm font-semibold text-gray-700
-                                   transition hover:bg-gray-50"
+                                   hover:bg-gray-50"
                         >
                             Cancel
                         </a>
@@ -943,10 +968,13 @@
                             class="rounded-lg bg-green-700
                                    px-6 py-2.5
                                    text-sm font-semibold text-white
-                                   shadow-sm transition
-                                   hover:bg-green-800"
+                                   hover:bg-green-800
+                                   focus:outline-none
+                                   focus:ring-2
+                                   focus:ring-green-600
+                                   focus:ring-offset-2"
                         >
-                            Submit for Approval
+                            Add Personnel
                         </button>
 
                     </div>
@@ -960,9 +988,8 @@
     </div>
 
 
-
     {{-- ============================================================
-        TOM SELECT
+        TOM SELECT CSS
     ============================================================ --}}
 
     <link
@@ -970,10 +997,14 @@
         href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css"
     >
 
+
+    {{-- ============================================================
+        TOM SELECT JS
+    ============================================================ --}}
+
     <script
         src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"
     ></script>
-
 
 
     {{-- ============================================================
@@ -986,52 +1017,108 @@
             width: 100%;
         }
 
+
         .ts-control {
+
             min-height: 42px !important;
+
             border: 1px solid #d1d5db !important;
+
             border-radius: 0.5rem !important;
+
             padding: 9px 12px !important;
+
             font-size: 0.875rem !important;
+
             background-color: #ffffff !important;
+
             box-shadow: none !important;
+
         }
+
 
         .ts-wrapper.focus .ts-control {
+
             border-color: #16a34a !important;
+
             box-shadow: 0 0 0 1px #16a34a !important;
+
         }
 
+
         .ts-dropdown {
+
             border: 1px solid #d1d5db !important;
+
             border-radius: 0.5rem !important;
+
             margin-top: 4px !important;
+
             overflow: hidden !important;
+
+            background: #ffffff !important;
+
             box-shadow:
                 0 10px 15px -3px rgb(0 0 0 / 0.1),
                 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+
         }
+
 
         .ts-dropdown .option {
+
             padding: 10px 12px !important;
+
             font-size: 0.875rem !important;
+
+            cursor: pointer;
+
         }
+
 
         .ts-dropdown .option.active {
+
             background-color: #f0fdf4 !important;
+
             color: #166534 !important;
+
         }
+
 
         .ts-dropdown .option.selected {
+
             background-color: #dcfce7 !important;
+
             color: #166534 !important;
+
         }
 
+
         .ts-dropdown-content {
-            max-height: 300px;
+
+            max-height: 300px !important;
+
+        }
+
+
+        .ts-control input {
+
+            font-size: 0.875rem !important;
+
+        }
+
+
+        .ts-wrapper.disabled .ts-control {
+
+            background-color: #f3f4f6 !important;
+
+            cursor: not-allowed;
+
+            opacity: 0.75;
+
         }
 
     </style>
-
 
 
     {{-- ============================================================
@@ -1040,455 +1127,460 @@
 
     <script>
 
-        document.addEventListener(
-            'DOMContentLoaded',
-            function () {
+        document.addEventListener('DOMContentLoaded', function () {
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Specialization Tom Select
-                |--------------------------------------------------------------------------
-                */
+            /*
+            |--------------------------------------------------------------------------
+            | School Tom Select
+            |--------------------------------------------------------------------------
+            */
 
-                const specializationElement =
-                    document.getElementById('specialization');
-
-
-                if (specializationElement) {
-
-                    new TomSelect(
-                        specializationElement,
-                        {
-
-                            create: false,
-
-                            allowEmptyOption: true,
-
-                            maxOptions: null,
-
-                            placeholder:
-                                'Select or search specialization...',
-
-                        }
-                    );
-
-                }
+            const schoolElement =
+                document.getElementById('school_db_id');
 
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Plantilla Tom Select
-                |--------------------------------------------------------------------------
-                */
-
-                const plantillaElement =
-                    document.getElementById('plantilla_db_id');
+            let schoolTomSelect = null;
 
 
-                let plantillaTomSelect = null;
+            if (schoolElement) {
+
+                schoolTomSelect = new TomSelect(
+                    schoolElement,
+                    {
+
+                        create: false,
+
+                        allowEmptyOption: true,
+
+                        maxOptions: 100,
+
+                        placeholder:
+                            'Search School ID or School Name...',
+
+                        searchField: [
+                            'text'
+                        ],
+
+                        sortField: {
+                            field: 'text',
+                            direction: 'asc'
+                        },
+
+                    }
+                );
+
+            }
 
 
-                if (plantillaElement) {
+            /*
+            |--------------------------------------------------------------------------
+            | Specialization Tom Select
+            |--------------------------------------------------------------------------
+            */
 
-                    plantillaTomSelect =
-                        new TomSelect(
-                            plantillaElement,
-                            {
-
-                                valueField:
-                                    'value',
-
-                                labelField:
-                                    'text',
-
-                                searchField: [
-                                    'text'
-                                ],
-
-                                create:
-                                    false,
-
-                                preload:
-                                    false,
-
-                                maxOptions:
-                                    30,
-
-                                loadThrottle:
-                                    400,
-
-                                placeholder:
-                                    'Search Plantilla Number or Position...',
+            const specializationElement =
+                document.getElementById('specialization');
 
 
-                                /*
-                                |--------------------------------------------------------------------------
-                                | Require At Least 2 Characters
-                                |--------------------------------------------------------------------------
-                                */
+            if (specializationElement) {
 
-                                shouldLoad: function (query) {
+                new TomSelect(
+                    specializationElement,
+                    {
 
-                                    return (
-                                        query.trim().length >= 2
+                        create: false,
+
+                        allowEmptyOption: true,
+
+                        maxOptions: null,
+
+                        placeholder:
+                            'Search or select specialization...',
+
+                    }
+                );
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Plantilla AJAX Tom Select
+            |--------------------------------------------------------------------------
+            |
+            | IMPORTANT:
+            |
+            | We do NOT load all 21,000+ Plantilla records into the page.
+            |
+            | Results are retrieved only when the user searches.
+            |
+            */
+
+            const plantillaElement =
+                document.getElementById('plantilla_db_id');
+
+
+            let plantillaTomSelect = null;
+
+
+            if (plantillaElement) {
+
+                plantillaTomSelect = new TomSelect(
+                    plantillaElement,
+                    {
+
+                        valueField: 'value',
+
+                        labelField: 'text',
+
+                        searchField: [
+                            'text'
+                        ],
+
+                        create: false,
+
+                        preload: false,
+
+                        maxOptions: 30,
+
+                        loadThrottle: 400,
+
+                        placeholder:
+                            'Search Plantilla Number or Position...',
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Search only after 2 characters
+                        |--------------------------------------------------------------------------
+                        */
+
+                        shouldLoad: function (query) {
+
+                            return query.trim().length >= 2;
+
+                        },
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | AJAX SEARCH
+                        |--------------------------------------------------------------------------
+                        */
+
+                        load: function (query, callback) {
+
+                            query = query.trim();
+
+
+                            if (query.length < 2) {
+
+                                callback();
+
+                                return;
+
+                            }
+
+
+                            const url =
+                                "{{ route('add-personnel-requests.search-plantilla') }}"
+                                + "?q="
+                                + encodeURIComponent(query);
+
+
+                            fetch(
+                                url,
+                                {
+
+                                    headers: {
+
+                                        'Accept':
+                                            'application/json',
+
+                                        'X-Requested-With':
+                                            'XMLHttpRequest',
+
+                                    },
+
+                                }
+                            )
+
+                            .then(function (response) {
+
+                                if (!response.ok) {
+
+                                    throw new Error(
+                                        'Unable to search plantilla.'
                                     );
-
-                                },
-
-
-                                /*
-                                |--------------------------------------------------------------------------
-                                | AJAX Search
-                                |--------------------------------------------------------------------------
-                                */
-
-                                load: function (
-                                    query,
-                                    callback
-                                ) {
-
-                                    query =
-                                        query.trim();
-
-
-                                    if (
-                                        query.length < 2
-                                    ) {
-
-                                        callback();
-
-                                        return;
-
-                                    }
-
-
-                                    const url =
-                                        "{{ route('add-personnel-requests.search-plantilla') }}"
-                                        + "?q="
-                                        + encodeURIComponent(
-                                            query
-                                        );
-
-
-                                    fetch(
-                                        url,
-                                        {
-
-                                            headers: {
-
-                                                'Accept':
-                                                    'application/json',
-
-                                                'X-Requested-With':
-                                                    'XMLHttpRequest',
-
-                                            },
-
-                                        }
-                                    )
-
-                                    .then(
-                                        function (response) {
-
-                                            if (
-                                                !response.ok
-                                            ) {
-
-                                                throw new Error(
-                                                    'Unable to search plantilla.'
-                                                );
-
-                                            }
-
-
-                                            return response.json();
-
-                                        }
-                                    )
-
-                                    .then(
-                                        function (data) {
-
-                                            callback(
-                                                data
-                                            );
-
-                                        }
-                                    )
-
-                                    .catch(
-                                        function (error) {
-
-                                            console.error(
-                                                'Plantilla search error:',
-                                                error
-                                            );
-
-
-                                            callback();
-
-                                        }
-                                    );
-
-                                },
-
-
-                                /*
-                                |--------------------------------------------------------------------------
-                                | Messages
-                                |--------------------------------------------------------------------------
-                                */
-
-                                render: {
-
-                                    no_results:
-                                        function (
-                                            data,
-                                            escape
-                                        ) {
-
-                                            return `
-                                                <div class="px-3 py-3 text-sm text-gray-500">
-
-                                                    No plantilla found for
-
-                                                    <strong>
-                                                        "${escape(data.input)}"
-                                                    </strong>
-
-                                                </div>
-                                            `;
-
-                                        },
-
-
-                                    not_loading:
-                                        function (
-                                            data,
-                                            escape
-                                        ) {
-
-                                            if (
-                                                data.input.trim().length < 2
-                                            ) {
-
-                                                return `
-                                                    <div class="px-3 py-3 text-sm text-gray-500">
-
-                                                        Type at least 2 characters
-                                                        to search plantilla items.
-
-                                                    </div>
-                                                `;
-
-                                            }
-
-
-                                            return '';
-
-                                        },
-
-
-                                    loading:
-                                        function () {
-
-                                            return `
-                                                <div class="px-3 py-3 text-sm text-gray-500">
-
-                                                    Searching plantilla...
-
-                                                </div>
-                                            `;
-
-                                        }
 
                                 }
 
-                            }
-                        );
+                                return response.json();
+
+                            })
+
+                            .then(function (data) {
+
+                                callback(data);
+
+                            })
+
+                            .catch(function (error) {
+
+                                console.error(
+                                    'Plantilla search error:',
+                                    error
+                                );
+
+                                callback();
+
+                            });
+
+                        },
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Dropdown Messages
+                        |--------------------------------------------------------------------------
+                        */
+
+                        render: {
+
+                            no_results:
+                                function (data, escape) {
+
+                                    return `
+                                        <div class="px-3 py-3 text-sm text-gray-500">
+
+                                            No plantilla found for
+
+                                            <strong>
+                                                "${escape(data.input)}"
+                                            </strong>
+
+                                        </div>
+                                    `;
+
+                                },
+
+
+                            not_loading:
+                                function (data) {
+
+                                    if (
+                                        data.input.trim().length < 2
+                                    ) {
+
+                                        return `
+                                            <div class="px-3 py-3 text-sm text-gray-500">
+
+                                                Type at least 2 characters
+                                                to search Plantilla Items.
+
+                                            </div>
+                                        `;
+
+                                    }
+
+                                    return '';
+
+                                },
+
+
+                            loading:
+                                function () {
+
+                                    return `
+                                        <div class="px-3 py-3 text-sm text-gray-500">
+
+                                            Searching Plantilla...
+
+                                        </div>
+                                    `;
+
+                                }
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Source of Fund
+            |--------------------------------------------------------------------------
+            */
+
+            const sourceOfFundElement =
+                document.getElementById('source_of_fund');
+
+
+            const plantillaRequiredMark =
+                document.getElementById(
+                    'plantilla-required-mark'
+                );
+
+
+            const plantillaHelp =
+                document.getElementById(
+                    'plantilla-help'
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Plantilla Requirement
+            |--------------------------------------------------------------------------
+            */
+
+            function updatePlantillaRequirement()
+            {
+
+                if (
+                    !sourceOfFundElement ||
+                    !plantillaElement
+                ) {
+
+                    return;
 
                 }
 
 
+                const isPlantilla =
+                    sourceOfFundElement.value ===
+                    'Plantilla';
+
 
                 /*
                 |--------------------------------------------------------------------------
-                | Source of Fund / Plantilla Requirement
+                | Source of Fund = Plantilla
                 |--------------------------------------------------------------------------
                 */
 
-                const sourceOfFundElement =
-                    document.getElementById(
-                        'source_of_fund'
+                if (isPlantilla) {
+
+                    plantillaElement.setAttribute(
+                        'required',
+                        'required'
                     );
 
 
-                const plantillaRequiredMark =
-                    document.getElementById(
-                        'plantilla-required-mark'
-                    );
+                    if (plantillaRequiredMark) {
 
-
-                const plantillaHelp =
-                    document.getElementById(
-                        'plantilla-help'
-                    );
-
-
-                function updatePlantillaRequirement()
-                {
-
-                    if (
-                        !sourceOfFundElement
-                        ||
-                        !plantillaElement
-                    ) {
-
-                        return;
+                        plantillaRequiredMark
+                            .classList
+                            .remove('hidden');
 
                     }
 
 
-                    const isPlantilla =
-                        sourceOfFundElement.value ===
-                        'Plantilla';
+                    if (plantillaHelp) {
+
+                        plantillaHelp.textContent =
+                            'Plantilla Item is required because Source of Fund is Plantilla.';
 
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Plantilla Selected
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if (isPlantilla) {
-
-                        plantillaElement.setAttribute(
-                            'required',
-                            'required'
-                        );
+                        plantillaHelp
+                            .classList
+                            .remove(
+                                'text-gray-500'
+                            );
 
 
-                        if (
-                            plantillaRequiredMark
-                        ) {
-
-                            plantillaRequiredMark
-                                .classList
-                                .remove('hidden');
-
-                        }
-
-
-                        if (plantillaHelp) {
-
-                            plantillaHelp.textContent =
-                                'Plantilla Item is required because the Source of Fund is Plantilla.';
-
-
-                            plantillaHelp
-                                .classList
-                                .remove(
-                                    'text-gray-500'
-                                );
-
-
-                            plantillaHelp
-                                .classList
-                                .add(
-                                    'text-green-700'
-                                );
-
-                        }
-
-                    }
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Other Source of Fund
-                    |--------------------------------------------------------------------------
-                    */
-
-                    else {
-
-                        plantillaElement.removeAttribute(
-                            'required'
-                        );
-
-
-                        if (
-                            plantillaRequiredMark
-                        ) {
-
-                            plantillaRequiredMark
-                                .classList
-                                .add('hidden');
-
-                        }
-
-
-                        if (plantillaHelp) {
-
-                            plantillaHelp.textContent =
-                                'Plantilla Item is optional for this Source of Fund.';
-
-
-                            plantillaHelp
-                                .classList
-                                .remove(
-                                    'text-green-700'
-                                );
-
-
-                            plantillaHelp
-                                .classList
-                                .add(
-                                    'text-gray-500'
-                                );
-
-                        }
+                        plantillaHelp
+                            .classList
+                            .add(
+                                'text-green-700'
+                            );
 
                     }
 
                 }
 
 
-
                 /*
                 |--------------------------------------------------------------------------
-                | Listen For Source of Fund Changes
+                | Other Source of Fund
                 |--------------------------------------------------------------------------
                 */
 
-                if (sourceOfFundElement) {
+                else {
 
-                    sourceOfFundElement
-                        .addEventListener(
-                            'change',
-                            updatePlantillaRequirement
-                        );
+                    plantillaElement.removeAttribute(
+                        'required'
+                    );
 
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Run When Page Loads
-                    |--------------------------------------------------------------------------
-                    |
-                    | This also handles old('source_of_fund') after a
-                    | validation error.
-                    |
-                    */
+                    if (plantillaRequiredMark) {
 
-                    updatePlantillaRequirement();
+                        plantillaRequiredMark
+                            .classList
+                            .add('hidden');
+
+                    }
+
+
+                    if (plantillaHelp) {
+
+                        plantillaHelp.textContent =
+                            'Plantilla Item is optional for this Source of Fund.';
+
+
+                        plantillaHelp
+                            .classList
+                            .remove(
+                                'text-green-700'
+                            );
+
+
+                        plantillaHelp
+                            .classList
+                            .add(
+                                'text-gray-500'
+                            );
+
+                    }
 
                 }
 
             }
-        );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Listen for Source of Fund Changes
+            |--------------------------------------------------------------------------
+            */
+
+            if (sourceOfFundElement) {
+
+                sourceOfFundElement.addEventListener(
+                    'change',
+                    updatePlantillaRequirement
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Run immediately on page load
+                |--------------------------------------------------------------------------
+                |
+                | This is important after Laravel validation redirects back
+                | to the form with old input.
+                |
+                */
+
+                updatePlantillaRequirement();
+
+            }
+
+        });
 
     </script>
-
 
 </x-app-layout>

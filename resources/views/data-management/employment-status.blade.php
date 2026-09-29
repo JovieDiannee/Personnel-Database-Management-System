@@ -287,8 +287,8 @@
                                         />
                                     </svg>
 
-                                    Upload & Preview
-
+                                    Upload & Preview   
+ 
                                 </button>
 
 
