@@ -84,23 +84,10 @@ class AddPersonnelRequestController extends Controller
 
     public function create()
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Logged-in User
-        |--------------------------------------------------------------------------
-        */
-
         $user = Auth::user();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Security Check
-        |--------------------------------------------------------------------------
-        */
-
         abort_unless(
-            in_array($user->role, ['admin', 'super_admin']),
+            $user && in_array($user->role, ['admin', 'super_admin']),
             403
         );
 
@@ -131,33 +118,17 @@ class AddPersonnelRequestController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Get ALL Plantilla Items
+        | Return Form
         |--------------------------------------------------------------------------
         |
-        | This will display ALL records from plantilla_db.
-        | No school filtering.
-        | No used-item filtering.
-        | No pending-request filtering.
+        | Plantilla records are NOT loaded here.
+        | They will be searched through AJAX.
         |
-        */
-
-        $plantillas = PlantillaDb::query()
-            ->orderBy('item_number', 'asc')
-            ->get();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Return View
-        |--------------------------------------------------------------------------
         */
 
         return view(
             'add-personnel-requests.create',
-            compact(
-                'school',
-                'plantillas'
-            )
+            compact('school')
         );
     }
 
@@ -1306,6 +1277,137 @@ class AddPersonnelRequestController extends Controller
                     $e->getMessage()
                 );
         }
+    }
+
+    public function searchPlantilla(Request $request)
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Security
+        |--------------------------------------------------------------------------
+        */
+
+        $user = Auth::user();
+
+        abort_unless(
+            $user && in_array($user->role, ['admin', 'super_admin']),
+            403
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search Keyword
+        |--------------------------------------------------------------------------
+        */
+
+        $search = trim(
+            $request->input('q', '')
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Require Search Input
+        |--------------------------------------------------------------------------
+        |
+        | Don't return 21,000 records when the dropdown is opened.
+        |
+        */
+
+        if (mb_strlen($search) < 2) {
+
+            return response()->json([]);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search Plantilla
+        |--------------------------------------------------------------------------
+        |
+        | Search by:
+        | - Item Number
+        | - Position Title
+        | - Salary Grade
+        |
+        | Only return the first 30 matches.
+        |
+        */
+
+        $plantillas = PlantillaDb::query()
+
+            ->select([
+                'id',
+                'item_number',
+                'position_title',
+                'salary_grade',
+            ])
+
+            ->where(function ($query) use ($search) {
+
+                $query
+                    ->where(
+                        'item_number',
+                        'like',
+                        "%{$search}%"
+                    )
+
+                    ->orWhere(
+                        'position_title',
+                        'like',
+                        "%{$search}%"
+                    )
+
+                    ->orWhere(
+                        'salary_grade',
+                        'like',
+                        "%{$search}%"
+                    );
+
+            })
+
+            ->orderBy('item_number')
+
+            ->limit(30)
+
+            ->get()
+
+            ->map(function ($plantilla) {
+
+                $text = $plantilla->item_number;
+
+                if ($plantilla->position_title) {
+
+                    $text .=
+                        ' — ' .
+                        $plantilla->position_title;
+                }
+
+                if ($plantilla->salary_grade) {
+
+                    $text .=
+                        ' — SG ' .
+                        $plantilla->salary_grade;
+                }
+
+
+                return [
+
+                    'value' =>
+                        $plantilla->id,
+
+                    'text' =>
+                        $text,
+
+                ];
+
+            });
+
+
+        return response()->json(
+            $plantillas
+        );
     }
 
 

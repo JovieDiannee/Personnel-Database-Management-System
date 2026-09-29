@@ -497,7 +497,7 @@
                         >
 
                             {{-- ====================================================
-                                PLANTILLA ITEM - TOM SELECT
+                                PLANTILLA ITEM
                             ==================================================== --}}
 
                             <div class="lg:col-span-3">
@@ -515,24 +515,16 @@
                                     autocomplete="off"
                                     class="w-full"
                                 >
-                                    <option value="">Select Plantilla Item</option>
-
-                                    @foreach ($plantillas as $plantilla)
-
-                                        <option
-                                            value="{{ $plantilla->id }}"
-                                            @selected(old('plantilla_db_id') == $plantilla->id)
-                                        >
-                                            {{ $plantilla->item_number }} — {{ $plantilla->position_title }}
-                                            
-                                        </option>
-
-                                    @endforeach
-
+                                    <option value="">
+                                        Search Plantilla Item
+                                    </option>
                                 </select>
 
 
-                                {{-- VALIDATION ERROR --}}
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Type at least 2 characters to search by plantilla number or position.
+                                </p>
+
 
                                 @error('plantilla_db_id')
 
@@ -951,52 +943,190 @@
 
 <script>
 
-    document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
 
-        const plantillaSelect =
-            document.getElementById('plantilla_db_id');
+    const plantillaElement =
+        document.getElementById('plantilla_db_id');
 
 
-        if (plantillaSelect) {
+    if (!plantillaElement) {
+        return;
+    }
 
-            new TomSelect(plantillaSelect, {
 
-                create: false,
+    new TomSelect(plantillaElement, {
 
-                allowEmptyOption: true,
+        valueField: 'value',
 
-                placeholder:
-                    'Search Plantilla Number or Position...',
+        labelField: 'text',
 
-                maxOptions: null,
+        searchField: 'text',
 
-                closeAfterSelect: true,
+        create: false,
 
-                selectOnTab: true,
+        preload: false,
 
-                searchField: [
-                    'text'
-                ],
+        maxOptions: 30,
 
-                render: {
+        placeholder:
+            'Search Plantilla Number or Position...',
 
-                    no_results: function(data, escape) {
+        /*
+        |--------------------------------------------------------------------------
+        | AJAX Search
+        |--------------------------------------------------------------------------
+        */
 
-                        return `
-                            <div class="py-3 px-3 text-sm text-gray-500">
-                                No plantilla item found for
-                                "<strong>${escape(data.input)}</strong>"
-                            </div>
-                        `;
-                    }
+        loadThrottle: 400,
+
+
+        shouldLoad: function (query) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Require At Least 2 Characters
+            |--------------------------------------------------------------------------
+            */
+
+            return query.length >= 2;
+        },
+
+
+        load: function (query, callback) {
+
+            if (query.length < 2) {
+
+                callback();
+
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Build Search URL
+            |--------------------------------------------------------------------------
+            */
+
+            const url =
+                "{{ route('add-personnel-requests.search-plantilla') }}"
+                + "?q="
+                + encodeURIComponent(query);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Request Results
+            |--------------------------------------------------------------------------
+            */
+
+            fetch(url, {
+
+                headers: {
+
+                    'Accept':
+                        'application/json',
+
+                    'X-Requested-With':
+                        'XMLHttpRequest'
 
                 }
 
+            })
+
+            .then(response => {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        'Unable to search plantilla.'
+                    );
+                }
+
+                return response.json();
+
+            })
+
+            .then(data => {
+
+                callback(data);
+
+            })
+
+            .catch(error => {
+
+                console.error(
+                    'Plantilla search error:',
+                    error
+                );
+
+                callback();
+
             });
+
+        },
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Custom Messages
+        |--------------------------------------------------------------------------
+        */
+
+        render: {
+
+            no_results: function(data, escape) {
+
+                return `
+                    <div class="py-3 px-3 text-sm text-gray-500">
+
+                        No plantilla found for
+
+                        <strong>
+                            "${escape(data.input)}"
+                        </strong>
+
+                    </div>
+                `;
+            },
+
+
+            not_loading: function(data, escape) {
+
+                if (data.input.length < 2) {
+
+                    return `
+                        <div class="py-3 px-3 text-sm text-gray-500">
+
+                            Type at least 2 characters
+                            to search plantilla items.
+
+                        </div>
+                    `;
+                }
+
+                return '';
+
+            },
+
+
+            loading: function() {
+
+                return `
+                    <div class="py-3 px-3 text-sm text-gray-500">
+
+                        Searching plantilla...
+
+                    </div>
+                `;
+
+            }
 
         }
 
     });
+
+});
 
 </script>
 

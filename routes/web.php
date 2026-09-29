@@ -161,6 +161,7 @@ Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
     Route::get('/data-management/add-personnel-requests',[AddPersonnelRequestController::class, 'index'])->name('add-personnel-requests.index');
     Route::get('/data-management/add-personnel-requests/create',[AddPersonnelRequestController::class, 'create'])->name('add-personnel-requests.create');
     Route::post('/data-management/add-personnel-requests',[AddPersonnelRequestController::class, 'store'])->name('add-personnel-requests.store');
+    Route::get('/data-management/add-personnel-requests/search-plantilla',[AddPersonnelRequestController::class, 'searchPlantilla'])->middleware('auth')->name('add-personnel-requests.search-plantilla');
 
 });
 
