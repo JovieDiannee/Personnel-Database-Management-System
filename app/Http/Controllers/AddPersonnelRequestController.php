@@ -84,12 +84,26 @@ class AddPersonnelRequestController extends Controller
 
     public function create()
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Logged-in User
+        |--------------------------------------------------------------------------
+        */
+
         $user = Auth::user();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Security Check
+        |--------------------------------------------------------------------------
+        */
 
         abort_unless(
             in_array($user->role, ['admin', 'super_admin']),
             403
         );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -104,6 +118,7 @@ class AddPersonnelRequestController extends Controller
             $school = $user->employmentStatus?->school;
 
             if (!$school) {
+
                 return redirect()
                     ->route('add-personnel-requests.index')
                     ->with(
@@ -113,62 +128,40 @@ class AddPersonnelRequestController extends Controller
             }
         }
 
+
         /*
         |--------------------------------------------------------------------------
-        | Available Plantilla Items
+        | Get ALL Plantilla Items
         |--------------------------------------------------------------------------
         |
-        | Remove items already assigned to existing personnel.
-        | Remove items currently involved in a pending request.
+        | This will display ALL records from plantilla_db.
+        | No school filtering.
+        | No used-item filtering.
+        | No pending-request filtering.
         |
         */
-
-        $usedPlantillaIds = EmploymentStatus::query()
-            ->whereNotNull('plantilla_db_id')
-            ->pluck('plantilla_db_id');
-
-        $pendingPlantillaIds = AddPersonnelRequest::query()
-            ->where('status', 'pending')
-            ->whereNotNull('plantilla_db_id')
-            ->pluck('plantilla_db_id');
 
         $plantillas = PlantillaDb::query()
-            ->whereNotIn('id', $usedPlantillaIds)
-            ->whereNotIn('id', $pendingPlantillaIds);
+            ->orderBy('item_number', 'asc')
+            ->get();
+
 
         /*
         |--------------------------------------------------------------------------
-        | Restrict Admin to Plantilla Assigned to Their School
+        | Return View
         |--------------------------------------------------------------------------
-        |
-        | Your plantilla_db uses area_code.
-        | Your school_db uses school_id.
-        |
-        | If area_code contains the School ID for school-level plantilla,
-        | this prevents Admin from selecting another school's item.
-        |
         */
-
-        if ($user->role === 'admin' && $school) {
-
-            $plantillas->where(function ($query) use ($school) {
-
-                $query->where('area_code', $school->school_id);
-            });
-        }
-
-        $plantillas = $plantillas
-            ->orderBy('position_title')
-            ->orderBy('item_number')
-            ->get();
 
         return view(
             'add-personnel-requests.create',
-            compact('school', 'plantillas')
+            compact(
+                'school',
+                'plantillas'
+            )
         );
     }
 
-
+  
     /*
     |--------------------------------------------------------------------------
     | Admin - Submit Personnel Request
@@ -177,12 +170,19 @@ class AddPersonnelRequestController extends Controller
 
     public function store(Request $request)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Logged-in User
+        |--------------------------------------------------------------------------
+        */
+
         $user = Auth::user();
 
         abort_unless(
-            in_array($user->role, ['admin', 'super_admin']),
+            $user && in_array($user->role, ['admin', 'super_admin']),
             403
         );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -235,7 +235,7 @@ class AddPersonnelRequestController extends Controller
             ],
 
             'birth_date' => [
-                'nullable',
+                'required',
                 'date',
                 'before:today',
             ],
@@ -252,7 +252,8 @@ class AddPersonnelRequestController extends Controller
                 'max:150',
             ],
 
-            // Employment
+
+            // Employment Information
             'plantilla_db_id' => [
                 'nullable',
                 'integer',
@@ -305,11 +306,14 @@ class AddPersonnelRequestController extends Controller
                 'max:100',
             ],
 
+
+            // Request
             'request_remarks' => [
                 'nullable',
                 'string',
                 'max:2000',
             ],
+
         ]);
 
 
@@ -318,47 +322,33 @@ class AddPersonnelRequestController extends Controller
         | Determine School
         |--------------------------------------------------------------------------
         |
-        | IMPORTANT:
-        | Never trust school_db_id submitted by an Admin.
+        | School is automatically based on the logged-in Admin.
         |
         */
 
-        if ($user->role === 'admin') {
+        $schoolId = $user->employmentStatus?->school_db_id;
 
-            $schoolId = $user->employmentStatus?->school_db_id;
 
-            if (!$schoolId) {
-                return back()
-                    ->withInput()
-                    ->with(
-                        'error',
-                        'Your account is not assigned to a school.'
-                    );
-            }
+        if (!$schoolId) {
 
-        } else {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Temporary Super Admin Behavior
-            |--------------------------------------------------------------------------
-            |
-            | For now, this module is primarily for Admin submissions.
-            | We can add Super Admin school selection later.
-            |
-            */
-
-            $schoolId = $user->employmentStatus?->school_db_id;
-
-            if (!$schoolId) {
-                return back()
-                    ->withInput()
-                    ->with(
-                        'error',
-                        'No school is assigned to this account.'
-                    );
-            }
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Your account is not assigned to a school.'
+                );
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Normalize Email
+        |--------------------------------------------------------------------------
+        */
+
+        $email = strtolower(
+            trim($validated['email'])
+        );
 
 
         /*
@@ -368,10 +358,12 @@ class AddPersonnelRequestController extends Controller
         */
 
         $existingUser = User::withTrashed()
-            ->whereRaw('LOWER(email) = ?', [
-                strtolower(trim($validated['email']))
-            ])
+            ->whereRaw(
+                'LOWER(email) = ?',
+                [$email]
+            )
             ->exists();
+
 
         if ($existingUser) {
 
@@ -391,11 +383,13 @@ class AddPersonnelRequestController extends Controller
         */
 
         $pendingEmail = AddPersonnelRequest::query()
-            ->whereRaw('LOWER(email) = ?', [
-                strtolower(trim($validated['email']))
-            ])
+            ->whereRaw(
+                'LOWER(email) = ?',
+                [$email]
+            )
             ->where('status', 'pending')
             ->exists();
+
 
         if ($pendingEmail) {
 
@@ -412,155 +406,179 @@ class AddPersonnelRequestController extends Controller
         |--------------------------------------------------------------------------
         | Validate Plantilla
         |--------------------------------------------------------------------------
+        |
+        | The plantilla only needs to exist.
+        |
+        | IMPORTANT:
+        | The same plantilla item CAN be assigned to multiple personnel.
+        |
         */
 
         if (!empty($validated['plantilla_db_id'])) {
 
-            $plantilla = PlantillaDb::findOrFail(
+            PlantillaDb::findOrFail(
                 $validated['plantilla_db_id']
             );
-
-            /*
-            |--------------------------------------------------------------------------
-            | Admin Cannot Use Another School's Plantilla
-            |--------------------------------------------------------------------------
-            */
-
-            if ($user->role === 'admin') {
-
-                $school = $user->employmentStatus?->school;
-
-                if (
-                    !$school ||
-                    (string) $plantilla->area_code !== (string) $school->school_id
-                ) {
-
-                    abort(
-                        403,
-                        'You cannot assign a plantilla item from another school.'
-                    );
-                }
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Check Existing Assignment
-            |--------------------------------------------------------------------------
-            */
-
-            $alreadyUsed = EmploymentStatus::query()
-                ->where(
-                    'plantilla_db_id',
-                    $plantilla->id
-                )
-                ->exists();
-
-            if ($alreadyUsed) {
-
-                return back()
-                    ->withInput()
-                    ->withErrors([
-                        'plantilla_db_id' =>
-                            'This plantilla item is already assigned to another personnel.'
-                    ]);
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Check Pending Request
-            |--------------------------------------------------------------------------
-            */
-
-            $alreadyPending = AddPersonnelRequest::query()
-                ->where(
-                    'plantilla_db_id',
-                    $plantilla->id
-                )
-                ->where('status', 'pending')
-                ->exists();
-
-            if ($alreadyPending) {
-
-                return back()
-                    ->withInput()
-                    ->withErrors([
-                        'plantilla_db_id' =>
-                            'This plantilla item already has a pending personnel request.'
-                    ]);
-            }
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | Save Request
+        | Save Personnel Request
         |--------------------------------------------------------------------------
         */
 
-        AddPersonnelRequest::create([
+        try {
 
-            'requested_by' => $user->id,
+            AddPersonnelRequest::create([
 
-            // Personal
-            'first_name' => trim($validated['first_name']),
-            'middle_name' => $validated['middle_name'] ?? null,
-            'last_name' => trim($validated['last_name']),
-            'extension_name' => $validated['extension_name'] ?? null,
+                /*
+                |--------------------------------------------------------------------------
+                | Request Information
+                |--------------------------------------------------------------------------
+                */
 
-            'email' => strtolower(
-                trim($validated['email'])
-            ),
-
-            'sex' => $validated['sex'] ?? null,
-            'birth_place' => $validated['birth_place'] ?? null,
-            'birth_date' => $validated['birth_date'] ?? null,
-            'mobile_number' => $validated['mobile_number'] ?? null,
-            'specialization' => $validated['specialization'] ?? null,
-
-            // Employment
-            'school_db_id' => $schoolId,
-            'plantilla_db_id' => $validated['plantilla_db_id'] ?? null,
-
-            'date_of_original_appointment' =>
-                $validated['date_of_original_appointment'] ?? null,
-
-            'date_of_last_promotion' =>
-                $validated['date_of_last_promotion'] ?? null,
-
-            'employment_status' =>
-                $validated['employment_status'] ?? null,
-
-            'warm_body_status' =>
-                $validated['warm_body_status'] ?? null,
-
-            'nature_of_work' =>
-                $validated['nature_of_work'] ?? null,
-
-            'source_of_fund' =>
-                $validated['source_of_fund'] ?? null,
-
-            'monthly_salary' =>
-                $validated['monthly_salary'] ?? null,
-
-            'contract_duration' =>
-                $validated['contract_duration'] ?? null,
-
-            // Request
-            'request_remarks' =>
-                $validated['request_remarks'] ?? null,
-
-            'status' => 'pending',
-        ]);
+                'requested_by' =>
+                    $user->id,
 
 
-        return redirect()
-            ->route('add-personnel-requests.index')
-            ->with(
-                'success',
-                'Personnel request submitted successfully. It is now pending Personnel Unit approval.'
-            );
+                /*
+                |--------------------------------------------------------------------------
+                | Personal Information
+                |--------------------------------------------------------------------------
+                */
+
+                'first_name' =>
+                    trim($validated['first_name']),
+
+                'middle_name' =>
+                    !empty($validated['middle_name'])
+                        ? trim($validated['middle_name'])
+                        : null,
+
+                'last_name' =>
+                    trim($validated['last_name']),
+
+                'extension_name' =>
+                    !empty($validated['extension_name'])
+                        ? trim($validated['extension_name'])
+                        : null,
+
+                'email' =>
+                    $email,
+
+                'sex' =>
+                    $validated['sex'] ?? null,
+
+                'birth_place' =>
+                    !empty($validated['birth_place'])
+                        ? trim($validated['birth_place'])
+                        : null,
+
+                'birth_date' =>
+                    $validated['birth_date'] ?? null,
+
+                'mobile_number' =>
+                    !empty($validated['mobile_number'])
+                        ? trim($validated['mobile_number'])
+                        : null,
+
+                'specialization' =>
+                    !empty($validated['specialization'])
+                        ? trim($validated['specialization'])
+                        : null,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Employment Information
+                |--------------------------------------------------------------------------
+                */
+
+                'school_db_id' =>
+                    $schoolId,
+
+                'plantilla_db_id' =>
+                    $validated['plantilla_db_id'] ?? null,
+
+                'date_of_original_appointment' =>
+                    $validated['date_of_original_appointment'] ?? null,
+
+                'date_of_last_promotion' =>
+                    $validated['date_of_last_promotion'] ?? null,
+
+                'employment_status' =>
+                    $validated['employment_status'] ?? null,
+
+                'warm_body_status' =>
+                    $validated['warm_body_status'] ?? null,
+
+                'nature_of_work' =>
+                    $validated['nature_of_work'] ?? null,
+
+                'source_of_fund' =>
+                    $validated['source_of_fund'] ?? null,
+
+                'monthly_salary' =>
+                    $validated['monthly_salary'] ?? null,
+
+                'contract_duration' =>
+                    $validated['contract_duration'] ?? null,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Remarks / Status
+                |--------------------------------------------------------------------------
+                */
+
+                'request_remarks' =>
+                    $validated['request_remarks'] ?? null,
+
+                'status' =>
+                    'pending',
+
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Success
+            |--------------------------------------------------------------------------
+            */
+
+            return redirect()
+                ->route('add-personnel-requests.index')
+                ->with(
+                    'success',
+                    'Personnel request submitted successfully. It is now pending Personnel Unit approval.'
+                );
+
+
+        } catch (\Throwable $e) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Log Error
+            |--------------------------------------------------------------------------
+            */
+
+            report($e);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Return Error
+            |--------------------------------------------------------------------------
+            */
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Unable to submit the personnel request. Please try again.'
+                );
+        }
     }
 
     /*
@@ -750,8 +768,10 @@ class AddPersonnelRequestController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function approve( Request $request, AddPersonnelRequest $personnelRequest) 
-    {
+    public function approve(
+        Request $request,
+        AddPersonnelRequest $personnelRequest
+    ) {
         /*
         |--------------------------------------------------------------------------
         | Logged-in Super Admin
@@ -808,6 +828,10 @@ class AddPersonnelRequestController extends Controller
                 |--------------------------------------------------------------------------
                 | Lock Request
                 |--------------------------------------------------------------------------
+                |
+                | Prevent two Super Admins from approving the same request
+                | at the same time.
+                |
                 */
 
                 $lockedRequest = AddPersonnelRequest::query()
@@ -835,7 +859,10 @@ class AddPersonnelRequestController extends Controller
                 | Birth Date Is Required
                 |--------------------------------------------------------------------------
                 |
-                | The birth date will be used as the initial password.
+                | Birth date is used as the initial password.
+                |
+                | Format:
+                | MMDDYYYY
                 |
                 | Example:
                 | April 3, 1995 = 04031995
@@ -854,6 +881,10 @@ class AddPersonnelRequestController extends Controller
                 |--------------------------------------------------------------------------
                 | Recheck Email
                 |--------------------------------------------------------------------------
+                |
+                | The email must remain unique because every personnel
+                | receives their own PDMS user account.
+                |
                 */
 
                 $emailExists = User::withTrashed()
@@ -878,27 +909,14 @@ class AddPersonnelRequestController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | Recheck Plantilla
+                | Plantilla Assignment
                 |--------------------------------------------------------------------------
+                |
+                | No duplicate plantilla restriction.
+                |
+                | One plantilla_db_id may be assigned to multiple employees.
+                |
                 */
-
-                if ($lockedRequest->plantilla_db_id) {
-
-                    $plantillaUsed = EmploymentStatus::query()
-                        ->where(
-                            'plantilla_db_id',
-                            $lockedRequest->plantilla_db_id
-                        )
-                        ->exists();
-
-
-                    if ($plantillaUsed) {
-
-                        throw new \Exception(
-                            'The selected plantilla item is already assigned to another personnel.'
-                        );
-                    }
-                }
 
 
                 /*
@@ -930,10 +948,6 @@ class AddPersonnelRequestController extends Controller
                 | Format:
                 | MMDDYYYY
                 |
-                | Example:
-                | Birth Date: April 3, 1995
-                | Password:   04031995
-                |
                 */
 
                 $defaultPassword =
@@ -948,19 +962,25 @@ class AddPersonnelRequestController extends Controller
 
                 $user = User::create([
 
-                    'name' => $fullName,
+                    'name' =>
+                        $fullName,
 
-                    'email' => strtolower(
-                        trim($lockedRequest->email)
-                    ),
+                    'email' =>
+                        strtolower(
+                            trim($lockedRequest->email)
+                        ),
 
-                    'password' => Hash::make(
-                        $defaultPassword
-                    ),
+                    'password' =>
+                        Hash::make(
+                            $defaultPassword
+                        ),
 
-                    'role' => 'user',
+                    'role' =>
+                        'user',
 
-                    'status' => 'active',
+                    'status' =>
+                        'active',
+
                 ]);
 
 
@@ -1001,6 +1021,7 @@ class AddPersonnelRequestController extends Controller
 
                     'specialization' =>
                         $lockedRequest->specialization,
+
                 ]);
 
 
@@ -1008,6 +1029,9 @@ class AddPersonnelRequestController extends Controller
                 |--------------------------------------------------------------------------
                 | Create Employment Status
                 |--------------------------------------------------------------------------
+                |
+                | Multiple employees may now have the same plantilla_db_id.
+                |
                 */
 
                 EmploymentStatus::create([
@@ -1044,6 +1068,7 @@ class AddPersonnelRequestController extends Controller
 
                     'contract_duration' =>
                         $lockedRequest->contract_duration,
+
                 ]);
 
 
@@ -1069,7 +1094,9 @@ class AddPersonnelRequestController extends Controller
 
                     'created_user_id' =>
                         $user->id,
+
                 ]);
+
             });
 
 
@@ -1089,8 +1116,20 @@ class AddPersonnelRequestController extends Controller
 
         } catch (\Throwable $e) {
 
+            /*
+            |--------------------------------------------------------------------------
+            | Log Error
+            |--------------------------------------------------------------------------
+            */
+
             report($e);
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Return Error
+            |--------------------------------------------------------------------------
+            */
 
             return back()
                 ->with(

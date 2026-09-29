@@ -496,14 +496,15 @@
                                    md:grid-cols-2 lg:grid-cols-3"
                         >
 
-                            {{-- PLANTILLA --}}
+                            {{-- ====================================================
+                                PLANTILLA ITEM - TOM SELECT
+                            ==================================================== --}}
 
                             <div class="lg:col-span-3">
 
                                 <label
                                     for="plantilla_db_id"
-                                    class="mb-1 block text-sm font-medium
-                                           text-gray-700"
+                                    class="mb-1 block text-sm font-medium text-gray-700"
                                 >
                                     Plantilla Item
                                 </label>
@@ -511,35 +512,35 @@
                                 <select
                                     id="plantilla_db_id"
                                     name="plantilla_db_id"
-                                    class="w-full rounded-lg border-gray-300
-                                           focus:border-green-600
-                                           focus:ring-green-600"
+                                    autocomplete="off"
+                                    class="w-full"
                                 >
-
-                                    <option value="">
-                                        Select Plantilla Item
-                                    </option>
+                                    <option value="">Select Plantilla Item</option>
 
                                     @foreach ($plantillas as $plantilla)
 
                                         <option
                                             value="{{ $plantilla->id }}"
-                                            @selected(
-                                                old('plantilla_db_id') ==
-                                                $plantilla->id
-                                            )
+                                            @selected(old('plantilla_db_id') == $plantilla->id)
                                         >
-                                            {{ $plantilla->item_number }}
-                                            —
-                                            {{ $plantilla->position_title }}
-                                            @if ($plantilla->salary_grade)
-                                                — SG {{ $plantilla->salary_grade }}
-                                            @endif
+                                            {{ $plantilla->item_number }} — {{ $plantilla->position_title }}
+                                            
                                         </option>
 
                                     @endforeach
 
                                 </select>
+
+
+                                {{-- VALIDATION ERROR --}}
+
+                                @error('plantilla_db_id')
+
+                                    <p class="mt-1 text-sm text-red-600">
+                                        {{ $message }}
+                                    </p>
+
+                                @enderror
 
                             </div>
 
@@ -865,5 +866,138 @@
         </div>
 
     </div>
+
+
+{{-- ============================================================
+    TOM SELECT
+============================================================ --}}
+
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css"
+>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js">
+</script>
+
+
+<style>
+
+    /* =========================================================
+       TOM SELECT - PDMS DESIGN
+    ========================================================= */
+
+    .ts-wrapper {
+        width: 100%;
+    }
+
+    .ts-control {
+        min-height: 42px !important;
+
+        border: 1px solid #d1d5db !important;
+        border-radius: 0.5rem !important;
+
+        padding: 9px 12px !important;
+
+        font-size: 0.875rem !important;
+
+        background-color: #ffffff !important;
+
+        box-shadow: none !important;
+    }
+
+    .ts-wrapper.focus .ts-control {
+        border-color: #16a34a !important;
+
+        box-shadow:
+            0 0 0 1px #16a34a !important;
+    }
+
+    .ts-dropdown {
+        border: 1px solid #d1d5db !important;
+
+        border-radius: 0.5rem !important;
+
+        margin-top: 4px !important;
+
+        overflow: hidden !important;
+
+        box-shadow:
+            0 10px 15px -3px rgb(0 0 0 / 0.1),
+            0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+    }
+
+    .ts-dropdown .option {
+        padding: 10px 12px !important;
+
+        font-size: 0.875rem !important;
+    }
+
+    .ts-dropdown .option.active {
+        background-color: #f0fdf4 !important;
+
+        color: #166534 !important;
+    }
+
+    .ts-dropdown .option.selected {
+        background-color: #dcfce7 !important;
+
+        color: #166534 !important;
+    }
+
+</style>
+
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const plantillaSelect =
+            document.getElementById('plantilla_db_id');
+
+
+        if (plantillaSelect) {
+
+            new TomSelect(plantillaSelect, {
+
+                create: false,
+
+                allowEmptyOption: true,
+
+                placeholder:
+                    'Search Plantilla Number or Position...',
+
+                maxOptions: null,
+
+                closeAfterSelect: true,
+
+                selectOnTab: true,
+
+                searchField: [
+                    'text'
+                ],
+
+                render: {
+
+                    no_results: function(data, escape) {
+
+                        return `
+                            <div class="py-3 px-3 text-sm text-gray-500">
+                                No plantilla item found for
+                                "<strong>${escape(data.input)}</strong>"
+                            </div>
+                        `;
+                    }
+
+                }
+
+            });
+
+        }
+
+    });
+
+</script>
 
 </x-app-layout>
