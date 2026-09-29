@@ -269,15 +269,25 @@
                                     name="email"
                                     value="{{ old('email') }}"
                                     required
+                                    autocomplete="email"
                                     placeholder="name@deped.gov.ph"
+
+                                    pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$"
+
+                                    title="Please enter a valid email address. Example: juan.delaña@deped.gov.ph"
+
                                     class="w-full rounded-lg border-gray-300
-                                           focus:border-green-600
-                                           focus:ring-green-600"
+                                        focus:border-green-600
+                                        focus:ring-green-600"
                                 >
+
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Example: juan.delaña@deped.gov.ph
+                                </p>
 
                                 @error('email')
 
-                                    <p class="mt-1 text-sm text-red-600">
+                                    <p class="mt-1 text-sm font-medium text-red-600">
                                         {{ $message }}
                                     </p>
 
