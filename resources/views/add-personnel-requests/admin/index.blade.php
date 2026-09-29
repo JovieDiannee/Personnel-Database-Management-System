@@ -437,7 +437,7 @@
                                         </p>
 
                                         <p class="mt-1 text-xs text-gray-400">
-                                            {{ $requestItem->created_at->format('M d, Y h:i A') }}
+                                            {{ $requestItem->created_at->timezone('Asia/Manila')->format('F d, Y h:i A') }}
                                         </p>
 
                                     </td>
