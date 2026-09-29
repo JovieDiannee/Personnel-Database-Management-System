@@ -1384,13 +1384,6 @@ class AddPersonnelRequestController extends Controller
                         $plantilla->position_title;
                 }
 
-                if ($plantilla->salary_grade) {
-
-                    $text .=
-                        ' — SG ' .
-                        $plantilla->salary_grade;
-                }
-
 
                 return [
 
