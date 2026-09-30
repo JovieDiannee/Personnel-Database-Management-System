@@ -26,7 +26,6 @@ use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use App\Exports\EnrollmentTemplateExport;
 use App\Models\BasicInformation;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
@@ -36,6 +35,8 @@ use App\Models\ReportSubmission;
 use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use App\Models\OfficeGroup;
+use App\Models\OfficeUnit;
 
 
 
@@ -2202,91 +2203,335 @@ class DataManagementController extends Controller
 
     public function employmentStatus(Request $request)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Search
+        |--------------------------------------------------------------------------
+        */
+
         $search = trim((string) $request->input('search', ''));
+
         $user = auth()->user();
 
-        // Exclude employee ID 1000001 for all roles.
-        $query = \App\Models\EmploymentStatus::whereHas('user')->with([
-            'user.basicInformation',
-            'plantilla',
-            'school',
-        ])
+
+        /*
+        |--------------------------------------------------------------------------
+        | Base Query
+        |--------------------------------------------------------------------------
+        */
+
+        $query = \App\Models\EmploymentStatus::query()
+            ->whereHas('user')
+            ->with([
+
+                'user.basicInformation',
+
+                'plantilla',
+
+                'school',
+
+                /*
+                |--------------------------------------------------------------------------
+                | Division Office Assignment
+                |--------------------------------------------------------------------------
+                */
+
+                'officeUnit.officeGroup',
+
+                'officeUnit.parent',
+
+            ])
             ->whereDoesntHave(
                 'user.basicInformation.issuedId',
                 function ($issuedIdQuery) {
-                    $issuedIdQuery->where('employee_id', '1000001');
+
+                    $issuedIdQuery->where(
+                        'employee_id',
+                        '1000001'
+                    );
+
                 }
             );
 
-        // Restrict admins to records from their assigned school.
+
+        /*
+        |--------------------------------------------------------------------------
+        | Admin Access Restriction
+        |--------------------------------------------------------------------------
+        |
+        | School Admins can only view personnel assigned to their school.
+        |
+        */
+
         if ($user->role === 'admin') {
-            $adminSchool = $user->employmentStatus?->school;
+
+            $adminSchool =
+                $user->employmentStatus?->school;
+
 
             if (! $adminSchool) {
+
                 $query->whereRaw('1 = 0');
+
             } else {
+
                 $query->whereHas(
                     'school',
                     function ($schoolQuery) use ($adminSchool) {
+
                         $schoolQuery->where(
                             'school_id',
                             $adminSchool->school_id
                         );
+
                     }
                 );
+
             }
         }
 
-        // Keep search conditions grouped so they respect the exclusion
-        // and the admin's school restriction.
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search
+        |--------------------------------------------------------------------------
+        */
+
         if ($search !== '') {
+
             $query->where(function ($q) use ($search) {
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Personnel Name
+                |--------------------------------------------------------------------------
+                */
+
                 $q->whereHas(
                     'user.basicInformation',
                     function ($basicQuery) use ($search) {
-                        $basicQuery->where(function ($nameQuery) use ($search) {
-                            $nameQuery
-                                ->where('first_name', 'like', "%{$search}%")
-                                ->orWhere('middle_name', 'like', "%{$search}%")
-                                ->orWhere('last_name', 'like', "%{$search}%")
-                                ->orWhere('extension_name', 'like', "%{$search}%");
-                        });
+
+                        $basicQuery->where(
+                            function ($nameQuery) use ($search) {
+
+                                $nameQuery
+                                    ->where(
+                                        'first_name',
+                                        'like',
+                                        "%{$search}%"
+                                    )
+                                    ->orWhere(
+                                        'middle_name',
+                                        'like',
+                                        "%{$search}%"
+                                    )
+                                    ->orWhere(
+                                        'last_name',
+                                        'like',
+                                        "%{$search}%"
+                                    )
+                                    ->orWhere(
+                                        'extension_name',
+                                        'like',
+                                        "%{$search}%"
+                                    );
+
+                            }
+                        );
+
                     }
                 )
-                    ->orWhereHas(
-                        'school',
-                        function ($schoolQuery) use ($search) {
-                            $schoolQuery->where(function ($fields) use ($search) {
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | School
+                |--------------------------------------------------------------------------
+                */
+
+                ->orWhereHas(
+                    'school',
+                    function ($schoolQuery) use ($search) {
+
+                        $schoolQuery->where(
+                            function ($fields) use ($search) {
+
                                 $fields
-                                    ->where('school_name', 'like', "%{$search}%")
-                                    ->orWhere('school_id', 'like', "%{$search}%");
-                            });
-                        }
-                    )
-                    ->orWhereHas(
-                        'plantilla',
-                        function ($plantillaQuery) use ($search) {
-                            $plantillaQuery->where(function ($fields) use ($search) {
+                                    ->where(
+                                        'school_name',
+                                        'like',
+                                        "%{$search}%"
+                                    )
+                                    ->orWhere(
+                                        'school_id',
+                                        'like',
+                                        "%{$search}%"
+                                    )
+                                    ->orWhere(
+                                        'school_district',
+                                        'like',
+                                        "%{$search}%"
+                                    );
+
+                            }
+                        );
+
+                    }
+                )
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Division Office Unit
+                |--------------------------------------------------------------------------
+                */
+
+                ->orWhereHas(
+                    'officeUnit',
+                    function ($officeQuery) use ($search) {
+
+                        $officeQuery->where(
+                            function ($fields) use ($search) {
+
                                 $fields
-                                    ->where('item_from_school_level', 'like', "%{$search}%")
-                                    ->orWhere('item_number', 'like', "%{$search}%")
-                                    ->orWhere('position_title', 'like', "%{$search}%");
-                            });
-                        }
-                    )
-                    ->orWhere('employment_status', 'like', "%{$search}%")
-                    ->orWhere('date_of_original_appointment', 'like', "%{$search}%");
+                                    ->where(
+                                        'name',
+                                        'like',
+                                        "%{$search}%"
+                                    )
+                                    ->orWhere(
+                                        'code',
+                                        'like',
+                                        "%{$search}%"
+                                    )
+                                    ->orWhere(
+                                        'short_name',
+                                        'like',
+                                        "%{$search}%"
+                                    )
+                                    ->orWhere(
+                                        'unit_type',
+                                        'like',
+                                        "%{$search}%"
+                                    );
+
+                            }
+                        );
+
+                    }
+                )
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Office Group
+                |--------------------------------------------------------------------------
+                */
+
+                ->orWhereHas(
+                    'officeUnit.officeGroup',
+                    function ($groupQuery) use ($search) {
+
+                        $groupQuery
+                            ->where(
+                                'name',
+                                'like',
+                                "%{$search}%"
+                            )
+                            ->orWhere(
+                                'code',
+                                'like',
+                                "%{$search}%"
+                            );
+
+                    }
+                )
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Plantilla
+                |--------------------------------------------------------------------------
+                */
+
+                ->orWhereHas(
+                    'plantilla',
+                    function ($plantillaQuery) use ($search) {
+
+                        $plantillaQuery->where(
+                            function ($fields) use ($search) {
+
+                                $fields
+                                    ->where(
+                                        'item_from_school_level',
+                                        'like',
+                                        "%{$search}%"
+                                    )
+                                    ->orWhere(
+                                        'item_number',
+                                        'like',
+                                        "%{$search}%"
+                                    )
+                                    ->orWhere(
+                                        'position_title',
+                                        'like',
+                                        "%{$search}%"
+                                    );
+
+                            }
+                        );
+
+                    }
+                )
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Employment Information
+                |--------------------------------------------------------------------------
+                */
+
+                ->orWhere(
+                    'employment_status',
+                    'like',
+                    "%{$search}%"
+                )
+
+                ->orWhere(
+                    'date_of_original_appointment',
+                    'like',
+                    "%{$search}%"
+                );
+
             });
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Pagination
+        |--------------------------------------------------------------------------
+        */
 
         $employmentStatuses = $query
             ->latest('updated_at')
             ->paginate(10)
             ->withQueryString();
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Return View
+        |--------------------------------------------------------------------------
+        */
+
         return view(
             'data-management.employment-status',
-            compact('employmentStatuses', 'search')
+            compact(
+                'employmentStatuses',
+                'search'
+            )
         );
     }
 
@@ -8465,11 +8710,385 @@ class DataManagementController extends Controller
     }
 
 
-
     /*   
     |   END  OF  ENROLLMENT RECORDS FUNCTIONS
     |
     |--------------------------------------------------------------------------
-   
+    |  
+    |   START OF OFFICE UNITS DATABASE
     */
+
+    public function officeUnits(Request $request)
+    {
+        $search = trim($request->input('search', ''));
+        $group = $request->input('group');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Office Groups
+        |--------------------------------------------------------------------------
+        */
+
+        $officeGroups = OfficeGroup::query()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Office Units
+        |--------------------------------------------------------------------------
+        */
+
+        $query = OfficeUnit::with([
+            'officeGroup',
+            'parent',
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search
+        |--------------------------------------------------------------------------
+        */
+
+        if ($search !== '') {
+
+            $query->where(function ($q) use ($search) {
+
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('short_name', 'like', "%{$search}%")
+                    ->orWhere('unit_type', 'like', "%{$search}%")
+
+                    ->orWhereHas('officeGroup', function ($groupQuery) use ($search) {
+
+                        $groupQuery
+                            ->where('name', 'like', "%{$search}%")
+                            ->orWhere('code', 'like', "%{$search}%");
+                    })
+
+                    ->orWhereHas('parent', function ($parentQuery) use ($search) {
+
+                        $parentQuery
+                            ->where('name', 'like', "%{$search}%")
+                            ->orWhere('code', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Office Group Filter
+        |--------------------------------------------------------------------------
+        */
+
+        if ($group !== null && $group !== '') {
+
+            $query->where('office_group_id', $group);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Results
+        |--------------------------------------------------------------------------
+        */
+
+        $officeUnits = $query
+            ->orderBy('office_group_id')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->paginate(20)
+            ->withQueryString();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Parent Unit Options
+        |--------------------------------------------------------------------------
+        */
+
+        $parentUnits = OfficeUnit::with('officeGroup')
+            ->where('is_active', true)
+            ->orderBy('office_group_id')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
+
+        return view(
+            'data-management.office-units',
+            compact(
+                'officeGroups',
+                'officeUnits',
+                'parentUnits',
+                'search',
+                'group'
+            )
+        );
+    }
+
+    public function toggleOfficeUnitStatus(
+        OfficeUnit $officeUnit
+    ) {
+
+        $officeUnit->update([
+            'is_active' => !$officeUnit->is_active,
+        ]);
+
+
+        return back()->with(
+            'success',
+            $officeUnit->is_active
+                ? 'Office unit activated successfully.'
+                : 'Office unit deactivated successfully.'
+        );
+    }
+
+    public function destroyOfficeUnit(
+        OfficeUnit $officeUnit
+    ) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Child Units
+        |--------------------------------------------------------------------------
+        */
+
+        if ($officeUnit->children()->exists()) {
+
+            return back()->with(
+                'error',
+                'This office unit cannot be deleted because it has sub-units.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Personnel Assignment
+        |--------------------------------------------------------------------------
+        */
+
+        if ($officeUnit->employmentStatuses()->exists()) {
+
+            return back()->with(
+                'error',
+                'This office unit cannot be deleted because personnel are assigned to it. Deactivate the unit instead.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Delete
+        |--------------------------------------------------------------------------
+        */
+
+        $officeUnit->delete();
+
+
+        return back()->with(
+            'success',
+            'Office unit deleted successfully.'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update Office Unit
+    |--------------------------------------------------------------------------
+    */
+
+    public function updateOfficeUnit(
+        Request $request,
+        \App\Models\OfficeUnit $officeUnit
+    )
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Validate
+        |--------------------------------------------------------------------------
+        */
+
+        $validated = $request->validate([
+
+            'office_group_id' => [
+                'required',
+                'exists:office_groups,id',
+            ],
+
+            'parent_id' => [
+                'nullable',
+                'exists:office_units,id',
+            ],
+
+            'code' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+
+            'name' => [
+                'required',
+                'string',
+                'max:150',
+            ],
+
+            'short_name' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'unit_type' => [
+                'required',
+                'string',
+                'max:50',
+            ],
+
+            'sort_order' => [
+                'nullable',
+                'integer',
+                'min:0',
+            ],
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prevent Unit From Being Its Own Parent
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !empty($validated['parent_id']) &&
+            (int) $validated['parent_id'] === (int) $officeUnit->id
+        ) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'parent_id' => 'An office unit cannot be its own parent.',
+                ]);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Parent Office Group
+        |--------------------------------------------------------------------------
+        */
+
+        if (!empty($validated['parent_id'])) {
+
+            $parent = \App\Models\OfficeUnit::findOrFail(
+                $validated['parent_id']
+            );
+
+            if (
+                (int) $parent->office_group_id !==
+                (int) $validated['office_group_id']
+            ) {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'parent_id' =>
+                            'The parent unit must belong to the same office group.',
+                    ]);
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prevent Circular Parent Relationship
+        |--------------------------------------------------------------------------
+        */
+
+        if (!empty($validated['parent_id'])) {
+
+            $parentId = $validated['parent_id'];
+
+            while ($parentId) {
+
+                $parent = \App\Models\OfficeUnit::find($parentId);
+
+                if (!$parent) {
+                    break;
+                }
+
+                if ((int) $parent->id === (int) $officeUnit->id) {
+
+                    return back()
+                        ->withInput()
+                        ->withErrors([
+                            'parent_id' =>
+                                'Invalid parent unit. This would create a circular office hierarchy.',
+                        ]);
+                }
+
+                $parentId = $parent->parent_id;
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update Office Unit
+        |--------------------------------------------------------------------------
+        */
+
+        $officeUnit->update([
+
+            'office_group_id' =>
+                $validated['office_group_id'],
+
+            'parent_id' =>
+                $validated['parent_id'] ?? null,
+
+            'code' =>
+                !empty($validated['code'])
+                    ? strtoupper(trim($validated['code']))
+                    : null,
+
+            'name' =>
+                trim($validated['name']),
+
+            'short_name' =>
+                !empty($validated['short_name'])
+                    ? trim($validated['short_name'])
+                    : null,
+
+            'unit_type' =>
+                $validated['unit_type'],
+
+            'sort_order' =>
+                $validated['sort_order'] ?? 0,
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect
+        |--------------------------------------------------------------------------
+        */
+
+        return redirect()
+            ->route('data-management.office-units')
+            ->with(
+                'success',
+                'Office unit updated successfully.'
+            );
+    }
+
+    /*   
+    |   END  OF OFFICE UNITS DATABASE
+    |
+    |--------------------------------------------------------------------------
+    */
+
+    
 }

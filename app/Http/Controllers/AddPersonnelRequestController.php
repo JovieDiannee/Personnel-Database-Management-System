@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use App\Models\SchoolDb;
 use Carbon\Carbon;
+use App\Models\OfficeUnit;
 
 class AddPersonnelRequestController extends Controller
 {
@@ -1851,6 +1852,28 @@ class AddPersonnelRequestController extends Controller
             ->orderBy('school_name')
             ->get();
 
+        /*
+        |--------------------------------------------------------------------------
+        | Office Units
+        |--------------------------------------------------------------------------
+        |
+        | Load active Division Office units.
+        | The office group and parent unit are included so the Super Admin
+        | can easily identify the correct office assignment.
+        |
+        */
+
+        $officeUnits = OfficeUnit::query()
+            ->with([
+                'officeGroup:id,code,name',
+                'parent:id,name',
+            ])
+            ->where('is_active', true)
+            ->orderBy('office_group_id')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
 
         /*
         |--------------------------------------------------------------------------
@@ -2044,6 +2067,7 @@ class AddPersonnelRequestController extends Controller
             'add-personnel-requests.admin.create',
             compact(
                 'schools',
+                'officeUnits',
                 'specializations',
                 'employmentStatuses',
                 'warmBodyStatuses',
@@ -2052,7 +2076,7 @@ class AddPersonnelRequestController extends Controller
             )
         );
     }
-
+ 
     /*
     |--------------------------------------------------------------------------
     | Super Admin - Store Personnel
@@ -2348,14 +2372,51 @@ class AddPersonnelRequestController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | School
+                | Personnel Assignment
                 |--------------------------------------------------------------------------
+                |
+                | assignment_type = school
+                |     school_db_id required
+                |     office_unit_id must be NULL
+                |
+                | assignment_type = office
+                |     office_unit_id required
+                |     school_db_id must be NULL
+                |
                 */
 
-                'school_db_id' => [
+                'assignment_type' => [
                     'required',
+                    Rule::in([
+                        'school',
+                        'office',
+                    ]),
+                ],
+
+
+                'school_db_id' => [
+
+                    Rule::requiredIf(
+                        fn () =>
+                            $request->input('assignment_type') === 'school'
+                    ),
+
+                    'nullable',
                     'integer',
                     'exists:school_db,id',
+                ],
+
+
+                'office_unit_id' => [
+
+                    Rule::requiredIf(
+                        fn () =>
+                            $request->input('assignment_type') === 'office'
+                    ),
+
+                    'nullable',
+                    'integer',
+                    'exists:office_units,id',
                 ],
 
 
@@ -2467,11 +2528,25 @@ class AddPersonnelRequestController extends Controller
                 'birth_date.required' =>
                     'Birth Date is required.',
 
+                'assignment_type.required' =>
+                    'Please select an assignment type.',
+
+                'assignment_type.in' =>
+                    'The selected assignment type is invalid.',
+
+
                 'school_db_id.required' =>
-                    'Please select a school.',
+                    'Please select a school for school-based personnel.',
 
                 'school_db_id.exists' =>
                     'The selected school is invalid.',
+
+
+                'office_unit_id.required' =>
+                    'Please select an Office Unit for Division Office personnel.',
+
+                'office_unit_id.exists' =>
+                    'The selected Office Unit is invalid.',
 
                 'source_of_fund.required' =>
                     'Please select the Source of Fund.',
@@ -2488,6 +2563,21 @@ class AddPersonnelRequestController extends Controller
             ]
 
         );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Normalize Assignment
+        |--------------------------------------------------------------------------
+        */
+
+        if ($validated['assignment_type'] === 'school') {
+
+            $validated['office_unit_id'] = null;
+
+        } else {
+
+            $validated['school_db_id'] = null;
+        }
 
 
         /*
@@ -2691,42 +2781,63 @@ class AddPersonnelRequestController extends Controller
 
                 EmploymentStatus::create([
 
-                    'users_id' =>
-                        $personnelUser->id,
+                'users_id' =>
+                    $personnelUser->id,
 
-                    'plantilla_db_id' =>
-                        $validated['plantilla_db_id'] ?? null,
+                'plantilla_db_id' =>
+                    $validated['plantilla_db_id'] ?? null,
 
-                    'school_db_id' =>
-                        $validated['school_db_id'],
 
-                    'date_of_original_appointment' =>
-                        $validated['date_of_original_appointment'] ?? null,
+                /*
+                |--------------------------------------------------------------------------
+                | Assignment
+                |--------------------------------------------------------------------------
+                */
 
-                    'date_of_last_promotion' =>
-                        $validated['date_of_last_promotion'] ?? null,
+                'school_db_id' =>
+                    $validated['assignment_type'] === 'school'
+                        ? ($validated['school_db_id'] ?? null)
+                        : null,
 
-                    'employment_status' =>
-                        $validated['employment_status'] ?? null,
+                'office_unit_id' =>
+                    $validated['assignment_type'] === 'office'
+                        ? ($validated['office_unit_id'] ?? null)
+                        : null,
 
-                    'warm_body_status' =>
-                        $validated['warm_body_status'] ?? null,
 
-                    'nature_of_work' =>
-                        $validated['nature_of_work'] ?? null,
+                /*
+                |--------------------------------------------------------------------------
+                | Employment Information
+                |--------------------------------------------------------------------------
+                */
 
-                    'source_of_fund' =>
-                        $validated['source_of_fund'],
+                'date_of_original_appointment' =>
+                    $validated['date_of_original_appointment'] ?? null,
 
-                    'monthly_salary' =>
-                        $validated['monthly_salary'] ?? null,
+                'date_of_last_promotion' =>
+                    $validated['date_of_last_promotion'] ?? null,
 
-                    'contract_duration' =>
-                        !empty($validated['contract_duration'])
-                            ? trim($validated['contract_duration'])
-                            : null,
+                'employment_status' =>
+                    $validated['employment_status'] ?? null,
 
-                ]);
+                'warm_body_status' =>
+                    $validated['warm_body_status'] ?? null,
+
+                'nature_of_work' =>
+                    $validated['nature_of_work'] ?? null,
+
+                'source_of_fund' =>
+                    $validated['source_of_fund'],
+
+                'monthly_salary' =>
+                    $validated['monthly_salary'] ?? null,
+
+                'contract_duration' =>
+                    !empty($validated['contract_duration'])
+                        ? trim($validated['contract_duration'])
+                        : null,
+
+            ]);
 
 
                 /*

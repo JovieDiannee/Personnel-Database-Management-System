@@ -857,59 +857,249 @@
 
 
                             {{-- ====================================================
-                                SCHOOL - 2 COLUMNS
+                                PERSONNEL ASSIGNMENT
                             ==================================================== --}}
 
-                            <div class="md:col-span-2 lg:col-span-2">
+                            <div class="md:col-span-2 lg:col-span-3">
 
-                                <label
-                                    for="school_db_id"
-                                    class="mb-1 block text-sm font-medium text-gray-700"
-                                >
-                                    School
-                                    <span class="text-red-500">*</span>
-                                </label>
+                                <div class="rounded-xl border border-green-200 bg-green-50/50 p-5">
+
+                                    <div class="mb-4">
+
+                                        <h3 class="text-sm font-bold text-gray-900">
+                                            Personnel Assignment
+                                        </h3>
+
+                                        <p class="mt-1 text-xs text-gray-500">
+                                            Select whether the personnel is assigned to a school
+                                            or to a Division Office unit.
+                                        </p>
+
+                                    </div>
 
 
-                                <select
-                                    id="school_db_id"
-                                    name="school_db_id"
-                                    required
-                                    autocomplete="off"
-                                    class="w-full"
-                                >
+                                    <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
 
-                                    <option value="">
-                                        Select School
-                                    </option>
 
-                                    @foreach ($schools as $school)
+                                        {{-- ============================================
+                                            ASSIGNMENT TYPE
+                                        ============================================= --}}
 
-                                        <option
-                                            value="{{ $school->id }}"
-                                            @selected(
-                                                old('school_db_id') == $school->id
-                                            )
+                                        <div>
+
+                                            <label
+                                                for="assignment_type"
+                                                class="mb-1 block text-sm font-medium text-gray-700"
+                                            >
+                                                Assignment Type
+                                                <span class="text-red-500">*</span>
+                                            </label>
+
+                                            <select
+                                                id="assignment_type"
+                                                name="assignment_type"
+                                                required
+                                                class="w-full rounded-lg border-gray-300
+                                                    focus:border-green-600
+                                                    focus:ring-green-600"
+                                            >
+
+                                                <option value="">
+                                                    Select Assignment Type
+                                                </option>
+
+                                                <option
+                                                    value="school"
+                                                    @selected(old('assignment_type') === 'school')
+                                                >
+                                                    School
+                                                </option>
+
+                                                <option
+                                                    value="office"
+                                                    @selected(old('assignment_type') === 'office')
+                                                >
+                                                    Division Office
+                                                </option>
+
+                                            </select>
+
+                                            @error('assignment_type')
+
+                                                <p class="mt-1 text-sm text-red-600">
+                                                    {{ $message }}
+                                                </p>
+
+                                            @enderror
+
+                                        </div>
+
+
+                                        {{-- ============================================
+                                            SCHOOL
+                                        ============================================= --}}
+
+                                        <div
+                                            id="school-assignment-container"
+                                            class="md:col-span-2"
                                         >
-                                            {{ $school->school_id }}
-                                            -
-                                            {{ $school->school_name }}
-                                            -
-                                            {{ $school->school_district }}
-                                        </option>
 
-                                    @endforeach
+                                            <label
+                                                for="school_db_id"
+                                                class="mb-1 block text-sm font-medium text-gray-700"
+                                            >
+                                                School
 
-                                </select>
+                                                <span
+                                                    id="school-required-mark"
+                                                    class="hidden text-red-500"
+                                                >
+                                                    *
+                                                </span>
+
+                                            </label>
 
 
-                                @error('school_db_id')
+                                            <select
+                                                id="school_db_id"
+                                                name="school_db_id"
+                                                autocomplete="off"
+                                                class="w-full"
+                                            >
 
-                                    <p class="mt-1 text-sm text-red-600">
-                                        {{ $message }}
-                                    </p>
+                                                <option value="">
+                                                    Select School
+                                                </option>
 
-                                @enderror
+                                                @foreach ($schools as $school)
+
+                                                    <option
+                                                        value="{{ $school->id }}"
+                                                        @selected(
+                                                            old('school_db_id') == $school->id
+                                                        )
+                                                    >
+                                                        {{ $school->school_id }}
+                                                        -
+                                                        {{ $school->school_name }}
+                                                        -
+                                                        {{ $school->school_district }}
+                                                    </option>
+
+                                                @endforeach
+
+                                            </select>
+
+
+                                            <p
+                                                id="school-help"
+                                                class="mt-1 text-xs text-gray-500"
+                                            >
+                                                Select the school where the personnel is assigned.
+                                            </p>
+
+
+                                            @error('school_db_id')
+
+                                                <p class="mt-1 text-sm text-red-600">
+                                                    {{ $message }}
+                                                </p>
+
+                                            @enderror
+
+                                        </div>
+
+
+                                        {{-- ============================================
+                                            OFFICE UNIT
+                                        ============================================= --}}
+
+                                        <div
+                                            id="office-assignment-container"
+                                            class="hidden md:col-span-2"
+                                        >
+
+                                            <label
+                                                for="office_unit_id"
+                                                class="mb-1 block text-sm font-medium text-gray-700"
+                                            >
+                                                Office Unit
+
+                                                <span class="text-red-500">
+                                                    *
+                                                </span>
+
+                                            </label>
+
+
+                                            <select
+                                                id="office_unit_id"
+                                                name="office_unit_id"
+                                                autocomplete="off"
+                                                class="w-full"
+                                            >
+
+                                                <option value="">
+                                                    Select Office Unit
+                                                </option>
+
+
+                                                @foreach ($officeUnits->groupBy('office_group_id') as $units)
+
+                                                    @php
+                                                        $officeGroup = $units->first()?->officeGroup;
+                                                    @endphp
+
+
+                                                    <optgroup
+                                                        label="{{ $officeGroup?->code }} — {{ $officeGroup?->name }}"
+                                                    >
+
+                                                        @foreach ($units as $officeUnit)
+
+                                                            <option
+                                                                value="{{ $officeUnit->id }}"
+                                                                @selected(
+                                                                    old('office_unit_id') == $officeUnit->id
+                                                                )
+                                                            >
+
+                                                                {{ $officeUnit->name }}
+
+                                                                @if ($officeUnit->parent)
+                                                                    — {{ $officeUnit->parent->name }}
+                                                                @endif
+
+                                                            </option>
+
+                                                        @endforeach
+
+                                                    </optgroup>
+
+                                                @endforeach
+
+                                            </select>
+
+
+                                            <p class="mt-1 text-xs text-gray-500">
+                                                Select the Division Office unit where the personnel
+                                                is assigned.
+                                            </p>
+
+
+                                            @error('office_unit_id')
+
+                                                <p class="mt-1 text-sm text-red-600">
+                                                    {{ $message }}
+                                                </p>
+
+                                            @enderror
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
 
                             </div>
 
@@ -1151,6 +1341,230 @@
 
 
             let schoolTomSelect = null;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Personnel Assignment
+            |--------------------------------------------------------------------------
+            */
+
+            const assignmentTypeElement =
+                document.getElementById('assignment_type');
+
+            const schoolContainer =
+                document.getElementById('school-assignment-container');
+
+            const officeContainer =
+                document.getElementById('office-assignment-container');
+
+            const schoolRequiredMark =
+                document.getElementById('school-required-mark');
+
+            const officeElement =
+                document.getElementById('office_unit_id');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Office Unit Tom Select
+            |--------------------------------------------------------------------------
+            */
+
+            let officeTomSelect = null;
+
+            if (officeElement) {
+
+                officeTomSelect = new TomSelect(
+                    officeElement,
+                    {
+                        create: false,
+
+                        allowEmptyOption: true,
+
+                        placeholder:
+                            'Search Office Unit...',
+
+                        searchField: [
+                            'text'
+                        ],
+
+                        maxOptions: 500,
+
+                        closeAfterSelect: true,
+                    }
+                );
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Assignment Fields
+            |--------------------------------------------------------------------------
+            */
+
+            function updateAssignmentFields() {
+
+                if (!assignmentTypeElement) {
+                    return;
+                }
+
+                const assignmentType =
+                    assignmentTypeElement.value;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | School Assignment
+                |--------------------------------------------------------------------------
+                */
+
+                if (assignmentType === 'school') {
+
+                    schoolContainer?.classList.remove('hidden');
+
+                    officeContainer?.classList.add('hidden');
+
+                    schoolRequiredMark?.classList.remove('hidden');
+
+
+                    /*
+                    | Required School
+                    */
+
+                    if (schoolElement) {
+                        schoolElement.required = true;
+                    }
+
+
+                    /*
+                    | Office is not required
+                    */
+
+                    if (officeElement) {
+                        officeElement.required = false;
+                    }
+
+
+                    /*
+                    | Clear Office Unit
+                    */
+
+                    if (officeTomSelect) {
+
+                        officeTomSelect.clear(
+                            true
+                        );
+
+                    } else if (officeElement) {
+
+                        officeElement.value = '';
+
+                    }
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Division Office Assignment
+                |--------------------------------------------------------------------------
+                */
+
+                else if (assignmentType === 'office') {
+
+                    schoolContainer?.classList.add('hidden');
+
+                    officeContainer?.classList.remove('hidden');
+
+                    schoolRequiredMark?.classList.add('hidden');
+
+
+                    /*
+                    | School is not required
+                    */
+
+                    if (schoolElement) {
+                        schoolElement.required = false;
+                    }
+
+
+                    /*
+                    | Office Unit Required
+                    */
+
+                    if (officeElement) {
+                        officeElement.required = true;
+                    }
+
+
+                    /*
+                    | Clear School
+                    */
+
+                    if (schoolTomSelect) {
+
+                        schoolTomSelect.clear(
+                            true
+                        );
+
+                    } else if (schoolElement) {
+
+                        schoolElement.value = '';
+
+                    }
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | No Assignment Selected
+                |--------------------------------------------------------------------------
+                */
+
+                else {
+
+                    schoolContainer?.classList.add('hidden');
+
+                    officeContainer?.classList.add('hidden');
+
+                    schoolRequiredMark?.classList.add('hidden');
+
+                    if (schoolElement) {
+                        schoolElement.required = false;
+                    }
+
+                    if (officeElement) {
+                        officeElement.required = false;
+                    }
+
+                }
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Assignment Change
+            |--------------------------------------------------------------------------
+            */
+
+            if (assignmentTypeElement) {
+
+                assignmentTypeElement.addEventListener(
+                    'change',
+                    updateAssignmentFields
+                );
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Initial State
+            |--------------------------------------------------------------------------
+            */
+
+            updateAssignmentFields();
 
 
             if (schoolElement) {

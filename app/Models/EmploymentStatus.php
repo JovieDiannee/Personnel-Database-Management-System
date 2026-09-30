@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\OfficeUnit;
 
 class EmploymentStatus extends Model
 {
@@ -16,6 +17,7 @@ class EmploymentStatus extends Model
         'users_id',
         'plantilla_db_id',
         'school_db_id',
+        'office_unit_id',
         'date_of_original_appointment',
         'date_of_last_promotion',
         'employment_status',
@@ -74,4 +76,19 @@ class EmploymentStatus extends Model
             'school_db_id'
         );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Office
+    |--------------------------------------------------------------------------
+    */
+
+    public function officeUnit()
+    {
+        return $this->belongsTo(
+            OfficeUnit::class,
+            'office_unit_id'
+        );
+    }
+
 }

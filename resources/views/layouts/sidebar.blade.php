@@ -663,6 +663,8 @@
                     'data-management',
                     'data-management.plantilla*',
                     'data-management.schools*',
+                    'data-management.enrollment*',
+                    'data-management.office-units*',
                     'data-management.enrollment*'
                 );
             @endphp
@@ -785,6 +787,20 @@
                             : 'color: #6b7280;' }}"
                     >
                         School Database
+                    </a>
+
+                    {{-- OFFICE UNIT DATABASE --}}
+                    <a
+                        href="{{ route('data-management.office-units') }}"
+                        @if(request()->routeIs('data-management.office-units*'))
+                            aria-current="page"
+                        @endif
+                        class="block rounded-lg px-3 py-1.5 text-sm transition hover:bg-green-50"
+                        style="{{ request()->routeIs('data-management.office-units*')
+                            ? 'background-color: #f0fdf4; color: #166534; font-weight: 600;'
+                            : 'color: #6b7280;' }}"
+                    >
+                        Office Unit Database
                     </a>
 
                     {{-- ENROLLMENT RECORDS --}}

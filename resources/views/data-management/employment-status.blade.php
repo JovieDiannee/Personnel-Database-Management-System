@@ -4,9 +4,11 @@
 
         <div class="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6">
 
+
             {{-- =====================================================
-                BREADCRUMB TRAIL
+                BREADCRUMB
             ====================================================== --}}
+
             <div class="mb-4">
 
                 <nav
@@ -14,7 +16,6 @@
                     aria-label="Breadcrumb"
                 >
 
-                    {{-- Home --}}
                     <a
                         href="{{ route('dashboard') }}"
                         class="flex items-center font-medium text-gray-500 transition hover:text-green-700"
@@ -36,7 +37,7 @@
                         Dashboard
                     </a>
 
-                    {{-- Separator --}}
+
                     <svg
                         class="mx-2 h-4 w-4 text-gray-400"
                         fill="none"
@@ -51,7 +52,7 @@
                         />
                     </svg>
 
-                    {{-- Data Management --}}
+
                     <a
                         href="{{ route('data-management') }}"
                         class="font-medium text-gray-500 transition hover:text-green-700"
@@ -59,7 +60,7 @@
                         Data Management
                     </a>
 
-                    {{-- Separator --}}
+
                     <svg
                         class="mx-2 h-4 w-4 text-gray-400"
                         fill="none"
@@ -74,7 +75,7 @@
                         />
                     </svg>
 
-                    {{-- Current Page --}}
+
                     <span class="font-semibold text-green-800">
                         Employment Status
                     </span>
@@ -87,6 +88,7 @@
             {{-- =====================================================
                 ERROR MESSAGE
             ====================================================== --}}
+
             @if(session('error'))
 
                 <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 sm:p-5">
@@ -103,6 +105,7 @@
             {{-- =====================================================
                 IMPORT RESULT
             ====================================================== --}}
+
             @if(session('employment_import_result'))
 
                 <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 sm:p-5">
@@ -111,9 +114,11 @@
                         Employment Import Completed
                     </h3>
 
+
                     <div class="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
 
                         <div>
+
                             <p class="text-sm text-gray-500">
                                 New Records
                             </p>
@@ -121,9 +126,12 @@
                             <p class="text-2xl font-bold text-green-700">
                                 {{ session('employment_import_result.imported') }}
                             </p>
+
                         </div>
 
+
                         <div>
+
                             <p class="text-sm text-gray-500">
                                 Updated Records
                             </p>
@@ -131,9 +139,12 @@
                             <p class="text-2xl font-bold text-blue-700">
                                 {{ session('employment_import_result.updated') }}
                             </p>
+
                         </div>
 
+
                         <div>
+
                             <p class="text-sm text-gray-500">
                                 Skipped
                             </p>
@@ -141,9 +152,12 @@
                             <p class="text-2xl font-bold text-yellow-600">
                                 {{ session('employment_import_result.skipped') }}
                             </p>
+
                         </div>
 
+
                         <div>
+
                             <p class="text-sm text-gray-500">
                                 Errors
                             </p>
@@ -151,12 +165,12 @@
                             <p class="text-2xl font-bold text-red-600">
                                 {{ count(session('employment_import_result.errors', [])) }}
                             </p>
+
                         </div>
 
                     </div>
 
 
-                    {{-- ERROR DETAILS --}}
                     @if(count(session('employment_import_result.errors', [])) > 0)
 
                         <div class="mt-5 rounded-lg border border-red-200 bg-red-50 p-4">
@@ -164,6 +178,7 @@
                             <h4 class="font-semibold text-red-800">
                                 Import Errors
                             </h4>
+
 
                             <ul class="mt-2 list-disc break-words pl-5 text-sm text-red-700">
 
@@ -190,17 +205,20 @@
             {{-- =====================================================
                 SUPER ADMIN - IMPORT PERSONNEL
             ====================================================== --}}
+
             @if(auth()->user()->role === 'super_admin')
 
-                <div class="rounded-xl border bg-white p-4 shadow-sm sm:p-6">
+                <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
 
                     <h2 class="text-lg font-bold text-gray-800">
                         Import Employment Status
                     </h2>
 
-                    <p class="mt-1 break-words text-sm text-gray-500">
+
+                    <p class="mt-1 text-sm text-gray-500">
                         Upload the official Employment Status Excel file.
                     </p>
+
 
                     <form
                         action="{{ route('data-management.employment-status.import') }}"
@@ -211,9 +229,12 @@
 
                         @csrf
 
+
                         <div class="flex flex-col gap-3 xl:flex-row xl:items-center">
 
+
                             {{-- EXCEL FILE LABEL --}}
+
                             <label
                                 for="file"
                                 class="shrink-0 text-sm font-semibold text-gray-700"
@@ -221,10 +242,11 @@
                                 EXCEL FILE
                             </label>
 
-                            {{-- CUSTOM FILE INPUT --}}
-                            <div class="relative flex h-11 min-w-0 w-full shrink-0 xl:flex-1">
 
-                                {{-- REAL FILE INPUT --}}
+                            {{-- CUSTOM FILE INPUT --}}
+
+                            <div class="relative flex h-11 min-w-0 w-full xl:flex-1">
+
                                 <input
                                     type="file"
                                     id="file"
@@ -232,20 +254,29 @@
                                     accept=".xlsx,.xls"
                                     required
                                     class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-                                    onchange="document.getElementById('file-name').textContent =
-                                        this.files.length ? this.files[0].name : 'No file selected'"
+                                    onchange="
+                                        document.getElementById('file-name').textContent =
+                                        this.files.length
+                                            ? this.files[0].name
+                                            : 'No file selected'
+                                    "
                                 >
 
-                                {{-- CUSTOM FILE DISPLAY --}}
+
                                 <div
-                                    class="flex h-full w-full items-center overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm"
+                                    class="flex h-full w-full items-center overflow-hidden
+                                           rounded-lg border border-gray-300 bg-white shadow-sm"
                                 >
 
                                     <span
-                                        class="flex h-full shrink-0 items-center border-r border-green-200 bg-green-50 px-4 text-sm font-semibold text-green-700"
+                                        class="flex h-full shrink-0 items-center
+                                               border-r border-green-200
+                                               bg-green-50 px-4
+                                               text-sm font-semibold text-green-700"
                                     >
                                         Browse...
                                     </span>
+
 
                                     <span
                                         id="file-name"
@@ -260,11 +291,15 @@
 
 
                             {{-- ACTION BUTTONS --}}
-                            <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+
+                            <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
 
                                 <button
                                     type="submit"
-                                    class="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-green-700 px-5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:w-auto"
+                                    class="inline-flex min-h-11 items-center justify-center gap-2
+                                           rounded-lg bg-green-700 px-5
+                                           text-sm font-semibold text-white
+                                           shadow-sm transition hover:bg-green-800"
                                 >
 
                                     <svg
@@ -280,6 +315,7 @@
                                             stroke-linejoin="round"
                                             d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
                                         />
+
                                         <path
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
@@ -287,14 +323,17 @@
                                         />
                                     </svg>
 
-                                    Upload & Preview   
- 
+                                    Upload & Preview
+
                                 </button>
 
 
                                 <a
                                     href="{{ route('data-management.employment-status.download-template') }}"
-                                    class="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-green-700 bg-white px-4 text-sm font-semibold text-green-700 shadow-sm transition duration-200 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:w-auto"
+                                    class="inline-flex min-h-11 items-center justify-center gap-2
+                                           rounded-lg border border-green-700 bg-white px-4
+                                           text-sm font-semibold text-green-700
+                                           shadow-sm transition hover:bg-green-50"
                                 >
 
                                     <svg
@@ -326,6 +365,7 @@
 
                         </div>
 
+
                         <p class="mt-1.5 text-xs text-gray-500">
                             Accepted formats:
                             <span class="font-medium">.xlsx</span>
@@ -343,75 +383,54 @@
             {{-- =====================================================
                 ADMIN - MANUAL PERSONNEL ENTRY
             ====================================================== --}}
+
             @elseif(auth()->user()->role === 'admin')
 
-                <div class="rounded-2xl border border-green-200 bg-white p-4 shadow-sm sm:p-6">
+                <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
 
-                    <div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+                    <div
+                        class="flex flex-col gap-5
+                               md:flex-row md:items-center md:justify-between"
+                    >
 
-                        <div class="flex items-start gap-4">
+                        <div>
 
-                            <div>
+                            <h2 class="text-lg font-bold text-gray-900">
+                                Add Personnel Information
+                            </h2>
 
-                                <h2 class="text-lg font-bold text-gray-900">
-                                    Add Personnel Information
-                                </h2>
-
-                                <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
-                                    Excel import is available only to the Super Admin.
-                                    To add a personnel record, complete the personnel information form.
-                                </p>
-
-                            </div>
+                            <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
+                                Excel import is available only to the Super Admin.
+                                To add a personnel record, complete the personnel information form.
+                            </p>
 
                         </div>
 
-                        <div class="flex w-full shrink-0 flex-col gap-2 sm:flex-row md:w-auto">
 
-                            {{-- VIEW PERSONNEL REQUESTS --}}
+                        <div
+                            class="flex w-full shrink-0 flex-col gap-2
+                                   sm:flex-row md:w-auto"
+                        >
+
                             <a
                                 href="{{ route('add-personnel-requests.index') }}"
-                                class="inline-flex min-h-11 w-full items-center justify-center gap-2
-                                    rounded-lg border border-green-700 bg-white px-5
-                                    text-sm font-semibold text-green-700 shadow-sm
-                                    transition hover:bg-green-50
-                                    focus:outline-none focus:ring-2 focus:ring-green-500
-                                    focus:ring-offset-2 sm:w-auto"
+                                class="inline-flex min-h-11 items-center justify-center gap-2
+                                       rounded-lg border border-green-700 bg-white px-5
+                                       text-sm font-semibold text-green-700
+                                       shadow-sm transition hover:bg-green-50"
                             >
-
-                                {{-- LIST ICON --}}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.008v.008H3.75V6.75Zm0 5.25h.008v.008H3.75V12Zm0 5.25h.008v.008H3.75v-.008Z"
-                                    />
-                                </svg>
-
                                 View Pending Requests
-
                             </a>
 
 
-                            {{-- ADD PERSONNEL --}}
                             <a
                                 href="{{ route('add-personnel-requests.create') }}"
-                                class="inline-flex min-h-11 w-full items-center justify-center gap-2
-                                    rounded-lg bg-green-700 px-5
-                                    text-sm font-semibold text-white shadow-sm
-                                    transition hover:bg-green-800
-                                    focus:outline-none focus:ring-2 focus:ring-green-500
-                                    focus:ring-offset-2 sm:w-auto"
+                                class="inline-flex min-h-11 items-center justify-center gap-2
+                                       rounded-lg bg-green-700 px-5
+                                       text-sm font-semibold text-white
+                                       shadow-sm transition hover:bg-green-800"
                             >
 
-                                {{-- PLUS ICON --}}
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     class="h-4 w-4"
@@ -444,20 +463,26 @@
 
 
             {{-- =====================================================
-                RECORDS TABLE VARIABLES
+                RECORD VARIABLES
             ====================================================== --}}
+
             @php
+
                 $user = auth()->user();
 
                 $isSuperAdmin = $user &&
-                    (method_exists($user, 'hasRole')
-                        ? $user->hasRole('super_admin')
-                        : $user->role === 'super_admin');
+                    (
+                        method_exists($user, 'hasRole')
+                            ? $user->hasRole('super_admin')
+                            : $user->role === 'super_admin'
+                    );
 
                 $isAdmin = $user &&
-                    (method_exists($user, 'hasRole')
-                        ? $user->hasRole('admin')
-                        : $user->role === 'admin');
+                    (
+                        method_exists($user, 'hasRole')
+                            ? $user->hasRole('admin')
+                            : $user->role === 'admin'
+                    );
 
                 $search = request('search', '');
 
@@ -476,90 +501,100 @@
                     ?? data_get($adminSchool, 'school_district')
                     ?? data_get($adminSchool, 'district.district_name')
                     ?? 'District not assigned';
+
             @endphp
 
 
             {{-- =====================================================
                 SUPER ADMIN RECORDS
             ====================================================== --}}
+
             @if($isSuperAdmin)
 
-                <div class="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div
+                    class="min-w-0 overflow-hidden rounded-xl
+                           border border-gray-200 bg-white shadow-sm"
+                >
+
 
                     {{-- TABLE HEADER --}}
+
                     <div
-                        class="flex items-center justify-between border-b border-green-800 bg-green-800 p-4 text-white sm:px-2 sm:py-4"
+                        class="border-b border-green-800
+                               bg-green-800 px-5 py-4 text-white"
                         style="background-color: #166534;"
-                        >
+                    >
 
-                        <div>
+                        <h2 class="text-xl font-semibold text-white">
+                            Employment Profile Records
+                        </h2>
 
-                            <h2 class="text-xl font-semibold text-white sm:text-2xl">
-                                Employment Profile Records
-                            </h2>
-
-                            <p class="mt-2 text-sm text-green-100 sm:text-base">
-                                List of personnel employment status records
-                                maintained in the system.
-                            </p>
-
-                        </div>
+                        <p class="mt-1 text-sm text-green-100">
+                            List of personnel employment status records maintained in the system.
+                        </p>
 
                     </div>
 
 
-                    {{-- SEARCH --}}
-                    <div class="border-b border-gray-200 p-4 sm:p-6">
+                    {{-- =====================================================
+                        SEARCH
+                    ====================================================== --}}
+
+                    <div class="border-b border-gray-200 p-4">
 
                         <form
                             action="{{ route('data-management.employment-status') }}"
                             method="GET"
                         >
 
-                            <div class="flex flex-col gap-3 md:flex-row">
+                            <label
+                                for="search"
+                                class="mb-2 block text-sm font-semibold text-gray-700"
+                            >
+                                Search Employment Records
+                            </label>
 
-                                <div class="min-w-0 flex-1">
 
-                                    <label
-                                        for="search"
-                                        class="mb-2 block text-sm font-medium text-gray-700"
+                            <div class="flex flex-col gap-2 sm:flex-row">
+
+                                <input
+                                    type="text"
+                                    id="search"
+                                    name="search"
+                                    value="{{ $search }}"
+                                    placeholder="Search name, school, office unit, item no., position, status..."
+                                    class="min-h-10 min-w-0 flex-1 rounded-lg
+                                           border-gray-300 text-sm shadow-sm
+                                           focus:border-green-600
+                                           focus:ring-green-600"
+                                >
+
+
+                                <button
+                                    type="submit"
+                                    class="inline-flex min-h-10 items-center justify-center
+                                           rounded-lg bg-green-700 px-5
+                                           text-sm font-semibold text-white
+                                           transition hover:bg-green-800"
+                                >
+                                    Search
+                                </button>
+
+
+                                @if($search !== '')
+
+                                    <a
+                                        href="{{ route('data-management.employment-status') }}"
+                                        class="inline-flex min-h-10 items-center justify-center
+                                               rounded-lg border border-gray-300
+                                               bg-white px-4
+                                               text-sm font-semibold text-gray-700
+                                               transition hover:bg-gray-50"
                                     >
-                                        Search Employment Records
-                                    </label>
+                                        Clear
+                                    </a>
 
-                                    <input
-                                        type="text"
-                                        id="search"
-                                        name="search"
-                                        value="{{ $search }}"
-                                        placeholder="Search name, school, item no., position, status..."
-                                        class="min-h-11 w-full min-w-0 rounded-md border-gray-300 text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
-                                    >
-
-                                </div>
-
-
-                                <div class="flex flex-wrap items-end gap-2 [&>*]:min-h-11 [&>*]:flex-1 [&>*]:text-center md:[&>*]:flex-none">
-
-                                    <button
-                                        type="submit"
-                                        class="rounded-md bg-green-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800"
-                                    >
-                                        Search
-                                    </button>
-
-                                    @if($search !== '')
-
-                                        <a
-                                            href="{{ route('data-management.employment-status') }}"
-                                            class="rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
-                                        >
-                                            Clear
-                                        </a>
-
-                                    @endif
-
-                                </div>
+                                @endif
 
                             </div>
 
@@ -568,55 +603,123 @@
                     </div>
 
 
-                    <p class="border-b border-gray-100 px-4 py-2 text-xs text-gray-500 lg:hidden">
-                        Swipe left or right to view all columns and the Update button.
+                    <p
+                        class="border-b border-gray-100
+                               px-4 py-2 text-xs text-gray-500 lg:hidden"
+                    >
+                        Swipe left or right to view all columns.
                     </p>
 
 
-                    {{-- TABLE --}}
+                    {{-- =====================================================
+                        SUPER ADMIN TABLE
+                    ====================================================== --}}
+
                     <div
-                        class="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain"
+                        class="w-full overflow-x-auto overscroll-x-contain"
                         tabindex="0"
                         role="region"
-                        aria-label="Employment status records, horizontally scrollable"
+                        aria-label="Employment status records"
                     >
 
-                        <table class="min-w-full divide-y divide-gray-200">
+                        <table
+                            class="w-full min-w-[1180px]
+                                   table-auto divide-y divide-gray-200"
+                        >
 
-                            <thead class="bg-white">
+                            {{-- =====================================================
+                                TABLE HEADER
+                            ====================================================== --}}
+
+                            <thead class="bg-gray-50">
 
                                 <tr>
 
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
+
+                                    {{-- NUMBER --}}
+
+                                    <th
+                                        class="w-[45px] px-3 py-3.5
+                                               text-left text-[13px] font-bold
+                                               uppercase tracking-wide text-gray-700"
+                                    >
                                         #
                                     </th>
 
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
+
+                                    {{-- NAME --}}
+
+                                    <th
+                                        class="w-[220px] px-3 py-3.5
+                                               text-left text-[13px] font-bold
+                                               uppercase tracking-wide text-gray-700"
+                                    >
                                         Name
                                     </th>
 
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
-                                        School Name
+
+                                    {{-- PERSONNEL ASSIGNMENT --}}
+
+                                    <th
+                                        class="w-[390px] min-w-[390px] px-4 py-3.5
+                                               text-left text-[13px] font-bold
+                                               uppercase tracking-wide text-gray-700"
+                                    >
+
+                                        Personnel Assignment
+
+                                        <span
+                                            class="mt-1 block text-[11px]
+                                                   font-semibold normal-case
+                                                   tracking-normal text-gray-500"
+                                        >
+                                            Division Office / School Based
+                                        </span>
+
                                     </th>
 
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
-                                        Plantilla Item No.
+
+                                    {{-- PLANTILLA ITEM + POSITION --}}
+
+                                    <th
+                                        class="w-[245px] min-w-[245px] px-3 py-3.5
+                                               text-left text-[13px] font-bold
+                                               uppercase tracking-wide text-gray-700"
+                                    >
+                                        Plantilla Item / Position
                                     </th>
 
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
-                                        Position Title
-                                    </th>
 
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">
+                                    {{-- NATURE OF WORK --}}
+
+                                    <th
+                                        class="w-[135px] px-3 py-3.5
+                                               text-left text-[13px] font-bold
+                                               uppercase tracking-wide text-gray-700"
+                                    >
                                         Nature of Work
                                     </th>
 
-                                    <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-700">
-                                        Profile Information
+
+                                    {{-- PROFILE --}}
+
+                                    <th
+                                        class="w-[80px] px-2 py-3.5
+                                               text-center text-[12px] font-bold
+                                               uppercase tracking-wide text-gray-700"
+                                    >
+                                        Profile
                                     </th>
 
-                                    <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-700">
-                                        Employment& Deployment Status
+
+                                    {{-- EMPLOYMENT --}}
+
+                                    <th
+                                        class="w-[95px] px-2 py-3.5
+                                               text-center text-[12px] font-bold
+                                               uppercase tracking-wide text-gray-700"
+                                    >
+                                        Employment
                                     </th>
 
                                 </tr>
@@ -624,94 +727,377 @@
                             </thead>
 
 
-                            <tbody class="divide-y divide-gray-200 bg-white">
+                            {{-- =====================================================
+                                TABLE BODY
+                            ====================================================== --}}
+
+                            <tbody class="divide-y divide-gray-100 bg-white">
 
                                 @forelse($employmentStatuses as $record)
 
                                     @php
-                                        $basic = $record->user?->basicInformation;
-                                        $plantilla = $record->plantilla;
-                                        $recordSchool = $record->school;
+
+                                        $basic =
+                                            $record->user?->basicInformation;
+
+                                        $plantilla =
+                                            $record->plantilla;
+
+                                        $recordSchool =
+                                            $record->school;
+
+                                        $officeUnit =
+                                            $record->officeUnit;
 
                                         $name = trim(
-                                            ($basic?->first_name ?? '') . ' ' .
-                                            ($basic?->middle_name ?? '') . ' ' .
-                                            ($basic?->last_name ?? '') . ' ' .
-                                            ($basic?->extension_name ?? '')
+                                            implode(
+                                                ' ',
+                                                array_filter([
+                                                    $basic?->first_name,
+                                                    $basic?->middle_name,
+                                                    $basic?->last_name,
+                                                    $basic?->extension_name,
+                                                ])
+                                            )
                                         );
+
                                     @endphp
 
 
-                                    <tr class="hover:bg-gray-50">
+                                    <tr
+                                        class="transition-colors
+                                               hover:bg-green-50/30"
+                                    >
 
-                                        {{-- # --}}
-                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500">
+
+                                        {{-- =====================================================
+                                            NUMBER
+                                        ====================================================== --}}
+
+                                        <td
+                                            class="w-[45px] whitespace-nowrap
+                                                   px-3 py-4 align-middle
+                                                   text-sm text-gray-500"
+                                        >
                                             {{ $employmentStatuses->firstItem() + $loop->index }}
                                         </td>
 
 
-                                        {{-- NAME --}}
-                                        <td class="min-w-[220px] px-4 py-4">
+                                        {{-- =====================================================
+                                            NAME
+                                        ====================================================== --}}
 
-                                            <div class="text-sm font-semibold text-gray-900">
+                                        <td
+                                            class="w-[220px] min-w-[220px]
+                                                   px-3 py-4 align-top"
+                                        >
+
+                                            <div
+                                                class="text-sm font-semibold
+                                                       leading-5 text-gray-900"
+                                            >
                                                 {{ $name ?: '—' }}
                                             </div>
 
-                                            <div class="mt-1 break-words text-sm text-gray-500">
+
+                                            <div
+                                                class="mt-1 break-all
+                                                       text-xs text-gray-500"
+                                            >
                                                 {{ $record->user?->email ?? '—' }}
                                             </div>
 
                                         </td>
 
 
-                                        {{-- SCHOOL NAME --}}
-                                        <td class="min-w-[220px] px-4 py-4 text-sm text-gray-700">
+                                        {{-- =====================================================
+                                            PERSONNEL ASSIGNMENT
+                                        ====================================================== --}}
 
-                                            {{ $recordSchool?->school_name ?? '—' }}
+                                        <td
+                                            class="w-[390px] min-w-[390px]
+                                                   px-4 py-4 align-top"
+                                        >
 
-                                            <br>
 
-                                            {{ $recordSchool?->school_district ?? '—' }}
+                                            {{-- =================================================
+                                                DIVISION OFFICE
+                                            ================================================== --}}
+
+                                            @if(
+                                                $record->office_unit_id &&
+                                                $officeUnit
+                                            )
+
+                                                <div>
+
+
+                                                    {{-- DIVISION OFFICE BADGE --}}
+                                                    <span
+                                                        class="inline-flex items-center
+                                                            rounded-md border px-2 py-0.5
+                                                            text-[10px] font-semibold
+                                                            uppercase tracking-wide"
+                                                        style="
+                                                            background-color: rgb(179, 227, 255);
+                                                            border-color: rgba(37, 99, 235, 0.18);
+                                                            color: #2563eb;
+                                                        "
+                                                    >
+                                                        Division Office
+                                                    </span>
+
+
+                                                    {{-- OFFICE UNIT --}}
+
+                                                    <div
+                                                        class="mt-2 text-sm
+                                                               font-bold leading-5
+                                                               text-gray-900"
+                                                    >
+                                                        {{ $officeUnit->name }}
+                                                    </div>
+
+
+                                                    {{-- PARENT UNIT --}}
+
+                                                    @if($officeUnit->parent)
+
+                                                        <div
+                                                            class="mt-0.5 text-xs
+                                                                   font-medium leading-5
+                                                                   text-gray-500"
+                                                        >
+                                                            {{ $officeUnit->parent->name }}
+                                                        </div>
+
+                                                    @endif
+
+
+                                                    {{-- OFFICE GROUP / CODE --}}
+
+                                                    @if(
+                                                        $officeUnit->officeGroup ||
+                                                        $officeUnit->code
+                                                    )
+
+                                                        <div
+                                                            class="mt-1 text-[11px]
+                                                                   font-medium text-gray-400"
+                                                        >
+
+                                                            @if($officeUnit->officeGroup)
+
+                                                                {{ $officeUnit->officeGroup->code }}
+
+                                                            @endif
+
+
+                                                            @if(
+                                                                $officeUnit->officeGroup &&
+                                                                $officeUnit->code
+                                                            )
+
+                                                                <span class="mx-1">
+                                                                    •
+                                                                </span>
+
+                                                            @endif
+
+
+                                                            @if($officeUnit->code)
+
+                                                                {{ $officeUnit->code }}
+
+                                                            @endif
+
+                                                        </div>
+
+                                                    @endif
+
+                                                </div>
+
+
+                                            {{-- =================================================
+                                                SCHOOL BASED
+                                            ================================================== --}}
+
+                                            @elseif(
+                                                $record->school_db_id &&
+                                                $recordSchool
+                                            )
+
+                                                <div>
+
+
+                                                    {{-- SCHOOL BASED BADGE --}}
+                                                    <span
+                                                        class="inline-flex items-center
+                                                            rounded-md border px-2 py-0.5
+                                                            text-[10px] font-semibold
+                                                            uppercase tracking-wide"
+                                                        style="
+                                                            background-color: rgba(2, 251, 93, 0.08);
+                                                            border-color: rgba(21, 128, 61, 0.18);
+                                                            color: #15803d;
+                                                        "
+                                                    >
+                                                        School Based
+                                                    </span>
+
+
+                                                    {{-- SCHOOL NAME --}}
+
+                                                    <div
+                                                        class="mt-2 text-sm
+                                                               font-bold leading-5
+                                                               text-gray-900"
+                                                    >
+                                                        {{ $recordSchool->school_name }}
+                                                    </div>
+
+
+                                                    {{-- DISTRICT --}}
+
+                                                    @if($recordSchool->school_district)
+
+                                                        <div
+                                                            class="mt-0.5 text-xs
+                                                                   font-medium leading-5
+                                                                   text-gray-500"
+                                                        >
+                                                            {{ $recordSchool->school_district }}
+                                                        </div>
+
+                                                    @endif
+
+
+                                                    {{-- SCHOOL ID --}}
+
+                                                    @if($recordSchool->school_id)
+
+                                                        <div
+                                                            class="mt-1 text-[11px]
+                                                                   font-medium text-gray-400"
+                                                        >
+                                                            School ID:
+                                                            {{ $recordSchool->school_id }}
+                                                        </div>
+
+                                                    @endif
+
+                                                </div>
+
+
+                                            {{-- =================================================
+                                                NO ASSIGNMENT
+                                            ================================================== --}}
+
+                                            @else
+
+                                                <span class="text-sm text-gray-400">
+                                                    —
+                                                </span>
+
+                                            @endif
 
                                         </td>
 
 
-                                        {{-- PLANTILLA ITEM NUMBER --}}
-                                        <td class="min-w-[180px] px-4 py-4 text-sm text-gray-700">
-                                            {{ $plantilla?->item_number ?? '—' }}
+                                        {{-- =====================================================
+                                            PLANTILLA ITEM / POSITION
+                                        ====================================================== --}}
+
+                                        <td
+                                            class="w-[245px] min-w-[245px]
+                                                   px-3 py-4 align-top"
+                                        >
+
+                                            {{-- POSITION TITLE --}}
+
+                                            <div
+                                                class="text-sm font-semibold
+                                                       leading-5 text-gray-900"
+                                            >
+                                                {{ $plantilla?->position_title ?? '—' }}
+                                            </div>
+
+
+                                            {{-- ITEM NUMBER --}}
+
+                                            @if($plantilla?->item_number)
+
+                                                <div
+                                                    class="mt-1 text-xs
+                                                           leading-5 text-gray-500"
+                                                >
+                                                    {{ $plantilla->item_number }}
+                                                </div>
+
+                                            @else
+
+                                                <div
+                                                    class="mt-1 text-xs
+                                                           text-gray-400"
+                                                >
+                                                    No Plantilla Item
+                                                </div>
+
+                                            @endif
+
                                         </td>
 
 
-                                        {{-- POSITION TITLE --}}
-                                        <td class="min-w-[180px] px-4 py-4 text-sm font-medium text-gray-900">
-                                            {{ $plantilla?->position_title ?? '—' }}
-                                        </td>
+                                        {{-- =====================================================
+                                            NATURE OF WORK
+                                        ====================================================== --}}
 
-
-                                        {{-- NATURE OF WORK --}}
-                                        <td class="min-w-[160px] px-4 py-4 text-sm text-gray-700">
+                                        <td
+                                            class="w-[135px] min-w-[135px]
+                                                   px-3 py-4 align-top
+                                                   text-sm leading-5 text-gray-700"
+                                        >
                                             {{ $record->nature_of_work ?? '—' }}
                                         </td>
 
 
-                                        {{-- =====================================
-                                            PROFILE INFORMATION UPDATE
-                                            FIXED: $person->id -> $basic->id
-                                        ====================================== --}}
-                                        <td class="whitespace-nowrap px-4 py-4 text-center">
+                                        {{-- =====================================================
+                                            PROFILE ACTION
+                                        ====================================================== --}}
+
+                                        <td
+                                            class="w-[80px] whitespace-nowrap
+                                                   px-2 py-4 text-center
+                                                   align-middle"
+                                        >
 
                                             @if($basic)
 
                                                 <a
-                                                    href="{{ route('data-management.personnel.edit', $basic->id) }}"
-                                                    class="inline-flex min-h-11 items-center rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                                                    href="{{ route(
+                                                        'data-management.personnel.edit',
+                                                        $basic->id
+                                                    ) }}"
+                                                    title="Update Profile Information"
+                                                    class="inline-flex h-8 items-center
+                                                           justify-center rounded-md
+                                                           bg-green-700 px-2.5
+                                                           text-xs font-semibold
+                                                           text-white shadow-sm
+                                                           transition hover:bg-green-800
+                                                           focus:outline-none
+                                                           focus:ring-2
+                                                           focus:ring-green-500"
                                                 >
                                                     Update
                                                 </a>
 
                                             @else
 
-                                                <span class="text-sm text-gray-400">
+                                                <span
+                                                    class="text-[11px]
+                                                           text-gray-400"
+                                                >
                                                     No Profile
                                                 </span>
 
@@ -720,15 +1106,31 @@
                                         </td>
 
 
-                                        {{-- EMPLOYMENT STATUS UPDATE --}}
-                                        <td class="whitespace-nowrap px-4 py-4 text-center">
+                                        {{-- =====================================================
+                                            EMPLOYMENT ACTION
+                                        ====================================================== --}}
+
+                                        <td
+                                            class="w-[95px] whitespace-nowrap
+                                                   px-2 py-4 text-center
+                                                   align-middle"
+                                        >
 
                                             <a
                                                 href="{{ route(
                                                     'data-management.employment-status.edit',
                                                     $record->id
                                                 ) }}"
-                                                class="inline-flex min-h-11 items-center rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                                                title="Update Employment & Deployment Status"
+                                                class="inline-flex h-8 items-center
+                                                       justify-center rounded-md
+                                                       bg-green-700 px-2.5
+                                                       text-xs font-semibold
+                                                       text-white shadow-sm
+                                                       transition hover:bg-green-800
+                                                       focus:outline-none
+                                                       focus:ring-2
+                                                       focus:ring-green-500"
                                             >
                                                 Update
                                             </a>
@@ -743,18 +1145,24 @@
                                     <tr>
 
                                         <td
-                                            colspan="8"
-                                            class="px-4 py-12 text-center sm:px-6"
+                                            colspan="7"
+                                            class="px-6 py-14 text-center"
                                         >
 
-                                            <div class="text-sm font-medium text-gray-700">
+                                            <div
+                                                class="text-sm font-medium
+                                                       text-gray-700"
+                                            >
                                                 No employment records found.
                                             </div>
 
+
                                             @if($search !== '')
 
-                                                <div class="mt-1 break-words text-sm text-gray-500">
-
+                                                <div
+                                                    class="mt-1 text-sm
+                                                           text-gray-500"
+                                                >
                                                     No records matched your search for
 
                                                     <span class="font-semibold">
@@ -778,10 +1186,20 @@
                     </div>
 
 
-                    {{-- PAGINATION --}}
-                    <div class="border-t border-gray-200 px-4 py-4 sm:px-6">
+                    {{-- =====================================================
+                        PAGINATION
+                    ====================================================== --}}
 
-                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div
+                        class="border-t border-gray-200
+                               bg-gray-50/50 px-4 py-4 sm:px-5"
+                    >
+
+                        <div
+                            class="flex flex-col gap-4
+                                   sm:flex-row sm:items-center
+                                   sm:justify-between"
+                        >
 
                             <div class="text-sm text-gray-500">
 
@@ -815,6 +1233,7 @@
 
                             </div>
 
+
                             <div>
                                 {{ $employmentStatuses->withQueryString()->links() }}
                             </div>
@@ -829,12 +1248,20 @@
             {{-- =====================================================
                 ADMIN RECORDS
             ====================================================== --}}
+
             @elseif($isAdmin)
 
-                <div class="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div
+                    class="min-w-0 overflow-hidden rounded-xl
+                           border border-gray-200 bg-white shadow-sm"
+                >
+
+
+                    {{-- HEADER --}}
 
                     <div
-                        class="border-b border-green-800 bg-green-800 p-4 text-white sm:px-2 sm:py-4"
+                        class="border-b border-green-800
+                               bg-green-800 px-5 py-4 text-white"
                         style="background-color: #166534;"
                     >
 
@@ -843,15 +1270,19 @@
                             ({{ $schoolName }} - {{ $districtName }})
                         </h3>
 
-                        <p class="mt-2 text-sm text-green-100 sm:text-base">
+
+                        <p class="mt-1 text-sm text-green-100">
                             List of personnel employment status records and related information.
                         </p>
 
                     </div>
 
 
-                    {{-- SEARCH --}}
-                    <div class="border-b border-gray-200 p-4 sm:p-6">
+                    {{-- =====================================================
+                        SEARCH
+                    ====================================================== --}}
+
+                    <div class="border-b border-gray-200 p-4">
 
                         <form
                             action="{{ url()->current() }}"
@@ -860,43 +1291,54 @@
 
                             <label
                                 for="admin-employment-search"
-                                class="mb-2 block text-sm font-medium text-gray-700"
+                                class="mb-2 block text-sm font-semibold text-gray-700"
                             >
-                                Search employment records
+                                Search Employment Records
                             </label>
 
-                            <div class="flex flex-col gap-3 sm:flex-row">
+
+                            <div class="flex flex-col gap-2 sm:flex-row">
 
                                 <input
                                     type="search"
                                     id="admin-employment-search"
                                     name="search"
                                     value="{{ $search }}"
-                                    placeholder="Search name, email, item no., position, or nature of work"
-                                    class="min-h-11 min-w-0 flex-1 rounded-md border-gray-300 text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
+                                    placeholder="Search name, item no., position, or nature of work..."
+                                    class="min-h-10 min-w-0 flex-1 rounded-lg
+                                           border-gray-300 text-sm shadow-sm
+                                           focus:border-green-600
+                                           focus:ring-green-600"
                                 >
 
-                                <div class="flex gap-2">
 
-                                    <button
-                                        type="submit"
-                                        class="min-h-11 rounded-md bg-green-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-800"
+                                <button
+                                    type="submit"
+                                    class="inline-flex min-h-10 items-center
+                                           justify-center rounded-lg
+                                           bg-green-700 px-5
+                                           text-sm font-semibold text-white
+                                           hover:bg-green-800"
+                                >
+                                    Search
+                                </button>
+
+
+                                @if($search !== '')
+
+                                    <a
+                                        href="{{ url()->current() }}"
+                                        class="inline-flex min-h-10 items-center
+                                               justify-center rounded-lg
+                                               border border-gray-300
+                                               bg-white px-4
+                                               text-sm font-semibold text-gray-700
+                                               hover:bg-gray-50"
                                     >
-                                        Search
-                                    </button>
+                                        Clear
+                                    </a>
 
-                                    @if($search !== '')
-
-                                        <a
-                                            href="{{ url()->current() }}"
-                                            class="inline-flex min-h-11 items-center rounded-md border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                                        >
-                                            Clear
-                                        </a>
-
-                                    @endif
-
-                                </div>
+                                @endif
 
                             </div>
 
@@ -905,72 +1347,99 @@
                     </div>
 
 
-                    <p class="border-b border-gray-100 px-4 py-2 text-xs text-gray-500 lg:hidden">
-                        Swipe left or right to view all columns and the Update button.
+                    <p
+                        class="border-b border-gray-100
+                               px-4 py-2 text-xs text-gray-500 lg:hidden"
+                    >
+                        Swipe left or right to view all columns.
                     </p>
 
 
-                    {{-- TABLE --}}
+                    {{-- =====================================================
+                        ADMIN TABLE
+                    ====================================================== --}}
+
                     <div
-                        class="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain"
+                        class="w-full overflow-x-auto overscroll-x-contain"
                         tabindex="0"
                         role="region"
-                        aria-label="Admin employment status records, horizontally scrollable"
+                        aria-label="Admin employment status records"
                     >
 
-                        <table class="min-w-full divide-y divide-gray-200">
+                        <table
+                            class="w-full min-w-[900px]
+                                   table-auto divide-y divide-gray-200"
+                        >
 
-                            <thead class="bg-white">
+                            <thead class="bg-gray-50">
 
                                 <tr>
 
+
+                                    {{-- NUMBER --}}
+
                                     <th
-                                        scope="col"
-                                        class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700"
+                                        class="w-[45px] px-3 py-3.5
+                                               text-left text-[13px] font-bold
+                                               uppercase tracking-wide text-gray-700"
                                     >
                                         #
                                     </th>
 
-                                    <th
-                                        scope="col"
-                                        class="min-w-[220px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700"
-                                    >
-                                        Name & Email Address
-                                    </th>
+
+                                    {{-- NAME --}}
 
                                     <th
-                                        scope="col"
-                                        class="min-w-[160px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700"
+                                        class="w-[260px] px-3 py-3.5
+                                               text-left text-[13px] font-bold
+                                               uppercase tracking-wide text-gray-700"
                                     >
-                                        Plantilla Item No.
+                                        Name & Email
                                     </th>
 
-                                    <th
-                                        scope="col"
-                                        class="min-w-[180px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700"
-                                    >
-                                        Position Title
-                                    </th>
+
+                                    {{-- PLANTILLA / POSITION --}}
 
                                     <th
-                                        scope="col"
-                                        class="min-w-[160px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700"
+                                        class="w-[280px] min-w-[280px]
+                                               px-3 py-3.5 text-left
+                                               text-[13px] font-bold uppercase
+                                               tracking-wide text-gray-700"
+                                    >
+                                        Plantilla Item / Position
+                                    </th>
+
+
+                                    {{-- NATURE OF WORK --}}
+
+                                    <th
+                                        class="w-[160px] px-3 py-3.5
+                                               text-left text-[13px] font-bold
+                                               uppercase tracking-wide text-gray-700"
                                     >
                                         Nature of Work
                                     </th>
 
-                                    <th
-                                        scope="col"
-                                        class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-700"
-                                    >
-                                        Profile Information
-                                    </th>
+
+                                    {{-- PROFILE --}}
 
                                     <th
-                                        scope="col"
-                                        class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-700"
+                                        class="w-[80px] px-2 py-3.5
+                                               text-center text-[12px] font-bold
+                                               uppercase tracking-wide text-gray-700"
                                     >
-                                        Employment & Deployment Status
+                                        Profile
+                                    </th>
+
+
+                                    {{-- EMPLOYMENT --}}
+
+                                    <th
+                                        class="w-[95px] px-2 py-3.5
+                                               text-center text-[12px] font-bold
+                                               uppercase tracking-wide text-gray-700"
+                                    >
+                                        Employment
                                     </th>
 
                                 </tr>
@@ -978,82 +1447,156 @@
                             </thead>
 
 
-                            <tbody class="divide-y divide-gray-200 bg-white">
+                            <tbody class="divide-y divide-gray-100 bg-white">
 
                                 @forelse($employmentStatuses as $record)
 
                                     @php
-                                        $basic = $record->user?->basicInformation;
+
+                                        $basic =
+                                            $record->user?->basicInformation;
+
+                                        $plantilla =
+                                            $record->plantilla;
 
                                         $name = trim(
-                                            implode(' ', array_filter([
-                                                $basic?->first_name,
-                                                $basic?->middle_name,
-                                                $basic?->last_name,
-                                                $basic?->extension_name,
-                                            ]))
+                                            implode(
+                                                ' ',
+                                                array_filter([
+                                                    $basic?->first_name,
+                                                    $basic?->middle_name,
+                                                    $basic?->last_name,
+                                                    $basic?->extension_name,
+                                                ])
+                                            )
                                         );
+
                                     @endphp
 
 
-                                    <tr class="hover:bg-gray-50">
+                                    <tr
+                                        class="transition-colors
+                                               hover:bg-green-50/30"
+                                    >
 
-                                        {{-- # --}}
-                                        <td class="whitespace-nowrap px-4 py-4 text-sm text-gray-500">
+
+                                        {{-- NUMBER --}}
+
+                                        <td
+                                            class="w-[45px] whitespace-nowrap
+                                                   px-3 py-4 text-sm text-gray-500"
+                                        >
                                             {{ $employmentStatuses->firstItem() + $loop->index }}
                                         </td>
 
 
-                                        {{-- NAME AND EMAIL --}}
-                                        <td class="min-w-[220px] px-4 py-4">
+                                        {{-- NAME --}}
 
-                                            <div class="text-sm font-semibold text-gray-900">
+                                        <td
+                                            class="w-[260px] min-w-[260px]
+                                                   px-3 py-4 align-top"
+                                        >
+
+                                            <div
+                                                class="text-sm font-semibold
+                                                       text-gray-900"
+                                            >
                                                 {{ $name ?: '—' }}
                                             </div>
 
-                                            <div class="mt-1 break-words text-sm text-gray-500">
+
+                                            <div
+                                                class="mt-1 break-all
+                                                       text-xs text-gray-500"
+                                            >
                                                 {{ $record->user?->email ?? '—' }}
                                             </div>
 
                                         </td>
 
 
-                                        {{-- ITEM NUMBER --}}
-                                        <td class="min-w-[160px] px-4 py-4 text-sm text-gray-700">
-                                            {{ $record->plantilla?->item_number ?? '—' }}
-                                        </td>
+                                        {{-- =====================================================
+                                            PLANTILLA / POSITION
+                                        ====================================================== --}}
+
+                                        <td
+                                            class="w-[280px] min-w-[280px]
+                                                   px-3 py-4 align-top"
+                                        >
+
+                                            <div
+                                                class="text-sm font-semibold
+                                                       leading-5 text-gray-900"
+                                            >
+                                                {{ $plantilla?->position_title ?? '—' }}
+                                            </div>
 
 
-                                        {{-- POSITION --}}
-                                        <td class="min-w-[180px] px-4 py-4 text-sm font-medium text-gray-900">
-                                            {{ $record->plantilla?->position_title ?? '—' }}
+                                            @if($plantilla?->item_number)
+
+                                                <div
+                                                    class="mt-1 text-xs
+                                                           leading-5 text-gray-500"
+                                                >
+                                                    {{ $plantilla->item_number }}
+                                                </div>
+
+                                            @else
+
+                                                <div
+                                                    class="mt-1 text-xs
+                                                           text-gray-400"
+                                                >
+                                                    No Plantilla Item
+                                                </div>
+
+                                            @endif
+
                                         </td>
 
 
                                         {{-- NATURE OF WORK --}}
-                                        <td class="min-w-[160px] px-4 py-4 text-sm text-gray-700">
+
+                                        <td
+                                            class="w-[160px] min-w-[160px]
+                                                   px-3 py-4 align-top
+                                                   text-sm text-gray-700"
+                                        >
                                             {{ $record->nature_of_work ?? '—' }}
                                         </td>
 
 
-                                        {{-- =====================================
-                                            PROFILE INFORMATION UPDATE
-                                            FIXED: $person->id -> $basic->id
-                                        ====================================== --}}
-                                        <td class="whitespace-nowrap px-4 py-4 text-center">
+                                        {{-- PROFILE --}}
+
+                                        <td
+                                            class="w-[80px] whitespace-nowrap
+                                                   px-2 py-4 text-center
+                                                   align-middle"
+                                        >
 
                                             @if($basic)
 
                                                 <a
-                                                    href="{{ route('data-management.personnel.edit', $basic->id) }}"
-                                                    class="inline-flex min-h-11 items-center rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                                                    href="{{ route(
+                                                        'data-management.personnel.edit',
+                                                        $basic->id
+                                                    ) }}"
+                                                    class="inline-flex h-8 items-center
+                                                           justify-center rounded-md
+                                                           bg-green-700 px-2.5
+                                                           text-xs font-semibold
+                                                           text-white shadow-sm
+                                                           transition hover:bg-green-800"
                                                 >
                                                     Update
                                                 </a>
 
                                             @else
 
-                                                <span class="text-sm text-gray-400">
+                                                <span
+                                                    class="text-[11px]
+                                                           text-gray-400"
+                                                >
                                                     No Profile
                                                 </span>
 
@@ -1062,12 +1605,25 @@
                                         </td>
 
 
-                                        {{-- EMPLOYMENT STATUS UPDATE --}}
-                                        <td class="whitespace-nowrap px-4 py-4 text-center">
+                                        {{-- EMPLOYMENT --}}
+
+                                        <td
+                                            class="w-[95px] whitespace-nowrap
+                                                   px-2 py-4 text-center
+                                                   align-middle"
+                                        >
 
                                             <a
-                                                href="{{ route($editRouteName, $record->id) }}"
-                                                class="inline-flex min-h-11 items-center rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                                                href="{{ route(
+                                                    $editRouteName,
+                                                    $record->id
+                                                ) }}"
+                                                class="inline-flex h-8 items-center
+                                                       justify-center rounded-md
+                                                       bg-green-700 px-2.5
+                                                       text-xs font-semibold
+                                                       text-white shadow-sm
+                                                       transition hover:bg-green-800"
                                             >
                                                 Update
                                             </a>
@@ -1082,14 +1638,18 @@
                                     <tr>
 
                                         <td
-                                            colspan="7"
-                                            class="px-4 py-12 text-center text-sm text-gray-600"
+                                            colspan="6"
+                                            class="px-6 py-14 text-center
+                                                   text-sm text-gray-600"
                                         >
 
                                             @if($search !== '')
 
                                                 No records matched your search for
-                                                "{{ $search }}".
+
+                                                <span class="font-semibold">
+                                                    "{{ $search }}"
+                                                </span>.
 
                                             @else
 
@@ -1110,21 +1670,43 @@
                     </div>
 
 
-                    {{-- PAGINATION --}}
-                    <div class="border-t border-gray-200 px-4 py-4 sm:px-6">
+                    {{-- =====================================================
+                        PAGINATION
+                    ====================================================== --}}
 
-                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div
+                        class="border-t border-gray-200
+                               bg-gray-50/50 px-4 py-4 sm:px-5"
+                    >
+
+                        <div
+                            class="flex flex-col gap-4
+                                   sm:flex-row sm:items-center
+                                   sm:justify-between"
+                        >
 
                             <p class="text-sm text-gray-500">
 
                                 @if($employmentStatuses->total() > 0)
 
                                     Showing
-                                    {{ $employmentStatuses->firstItem() }}
+
+                                    <span class="font-semibold text-gray-700">
+                                        {{ $employmentStatuses->firstItem() }}
+                                    </span>
+
                                     to
-                                    {{ $employmentStatuses->lastItem() }}
+
+                                    <span class="font-semibold text-gray-700">
+                                        {{ $employmentStatuses->lastItem() }}
+                                    </span>
+
                                     of
-                                    {{ $employmentStatuses->total() }}
+
+                                    <span class="font-semibold text-gray-700">
+                                        {{ $employmentStatuses->total() }}
+                                    </span>
+
                                     records
 
                                 @else
@@ -1135,7 +1717,10 @@
 
                             </p>
 
-                            {{ $employmentStatuses->withQueryString()->links() }}
+
+                            <div>
+                                {{ $employmentStatuses->withQueryString()->links() }}
+                            </div>
 
                         </div>
 
@@ -1149,6 +1734,7 @@
                 @php(abort(403))
 
             @endif
+
 
         </div>
 

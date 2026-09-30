@@ -68,6 +68,16 @@ Route::middleware(['auth', 'role:super_admin'])->group(function () {
     Route::post('/data-management/schools/import/confirm',[DataManagementController::class, 'confirmSchoolImport'])->name('data-management.schools.import.confirm');
     Route::get('/data-management/school-database/download-template',[DataManagementController::class, 'downloadSchoolDatabaseTemplate'])->name('data-management.school-database.download-template');
 
+
+    // Data Management -> Office Units Database Records
+
+    Route::get('/data-management/office-units',[DataManagementController::class, 'officeUnits'])->name('data-management.office-units');
+    Route::post('/data-management/office-units',[DataManagementController::class, 'storeOfficeUnit'])->name('data-management.office-units.store');
+    Route::put('/data-management/office-units/{officeUnit}',[DataManagementController::class, 'updateOfficeUnit'])->name('data-management.office-units.update');
+    Route::patch('/data-management/office-units/{officeUnit}/status',[DataManagementController::class, 'toggleOfficeUnitStatus'])->name('data-management.office-units.status');
+    Route::delete('/data-management/office-units/{officeUnit}',[DataManagementController::class, 'destroyOfficeUnit'])->name('data-management.office-units.destroy');
+
+
 });
 
 // Data Management -> Medical Allowance Records
