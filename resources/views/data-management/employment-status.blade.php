@@ -410,16 +410,38 @@
                         <div
                             class="flex w-full shrink-0 flex-col gap-2
                                    sm:flex-row md:w-auto"
-                        >
+                            >
 
                             <a
                                 href="{{ route('add-personnel-requests.index') }}"
                                 class="inline-flex min-h-11 items-center justify-center gap-2
-                                       rounded-lg border border-green-700 bg-white px-5
-                                       text-sm font-semibold text-green-700
-                                       shadow-sm transition hover:bg-green-50"
+                                    rounded-lg border border-green-700 bg-white px-5
+                                    text-sm font-semibold text-green-700
+                                    shadow-sm transition hover:bg-green-50"
                             >
-                                View Pending Requests
+                                {{-- LIST ICON --}}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4 shrink-0"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M8.25 6.75h12
+                                        M8.25 12h12
+                                        M8.25 17.25h12
+                                        M3.75 6.75h.008v.008H3.75V6.75z
+                                        M3.75 12h.008v.008H3.75V12z
+                                        M3.75 17.25h.008v.008H3.75v-.008z"
+                                    />
+                                </svg>
+
+                                View Request Status
                             </a>
 
 
@@ -486,6 +508,14 @@
 
                 $search = request('search', '');
 
+                /*
+                |--------------------------------------------------------------------------
+                | Active / Inactive Employee Tab
+                |--------------------------------------------------------------------------
+                */
+
+                $employeeTab = $employeeTab ?? request('status', 'active');
+
                 $editRouteName = $editRouteName
                     ?? 'data-management.employment-status.edit';
 
@@ -537,6 +567,99 @@
 
 
                     {{-- =====================================================
+                        ACTIVE / INACTIVE EMPLOYEE TABS
+                    ====================================================== --}}
+
+                    <div class="border-b border-gray-200 bg-white px-4 py-3 sm:px-5">
+
+                        <div
+                            class="inline-flex rounded-lg border border-gray-200
+                                bg-gray-100 p-1"
+                        >
+
+                            {{-- ACTIVE EMPLOYEES --}}
+                            <a
+                                href="{{ route(
+                                    'data-management.employment-status',
+                                    array_filter([
+                                        'status' => 'active',
+                                        'search' => $search ?: null,
+                                    ])
+                                ) }}"
+                                class="inline-flex min-h-9 items-center justify-center
+                                    gap-2 rounded-md px-4 py-2
+                                    text-sm font-semibold transition-all
+                                    {{ $employeeTab === 'active'
+                                            ? 'bg-white text-green-700 shadow-sm ring-1 ring-black/5'
+                                            : 'text-gray-500 hover:bg-white/60 hover:text-gray-700'
+                                    }}"
+                            >
+
+                                {{-- ACTIVE ICON --}}
+                                <svg
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M9 12.75 11.25 15 15 9.75
+                                        M21 12a9 9 0 1 1-18 0
+                                        9 9 0 0 1 18 0Z"
+                                    />
+                                </svg>
+
+                                Active Employees
+
+                            </a>
+
+
+                            {{-- INACTIVE EMPLOYEES --}}
+                            <a
+                                href="{{ route(
+                                    'data-management.employment-status',
+                                    array_filter([
+                                        'status' => 'inactive',
+                                        'search' => $search ?: null,
+                                    ])
+                                ) }}"
+                                class="inline-flex min-h-9 items-center justify-center
+                                    gap-2 rounded-md px-4 py-2
+                                    text-sm font-semibold transition-all
+                                    {{ $employeeTab === 'inactive'
+                                            ? 'bg-white text-red-600 shadow-sm ring-1 ring-black/5'
+                                            : 'text-gray-500 hover:bg-white/60 hover:text-gray-700'
+                                    }}"
+                            >
+
+                                {{-- INACTIVE ICON --}}
+                                <svg
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M6 18 18 6M6 6l12 12"
+                                    />
+                                </svg>
+
+                                Inactive Employees
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- =====================================================
                         SEARCH
                     ====================================================== --}}
 
@@ -547,11 +670,23 @@
                             method="GET"
                         >
 
+                            {{-- PRESERVE ACTIVE / INACTIVE TAB --}}
+                            <input
+                                type="hidden"
+                                name="status"
+                                value="{{ $employeeTab }}"
+                            >
+
+
                             <label
                                 for="search"
                                 class="mb-2 block text-sm font-semibold text-gray-700"
                             >
-                                Search Employment Records
+                                Search
+                                {{ $employeeTab === 'active'
+                                    ? 'Active Employees'
+                                    : 'Inactive Employees'
+                                }}
                             </label>
 
 
@@ -564,18 +699,18 @@
                                     value="{{ $search }}"
                                     placeholder="Search name, school, office unit, item no., position, status..."
                                     class="min-h-10 min-w-0 flex-1 rounded-lg
-                                           border-gray-300 text-sm shadow-sm
-                                           focus:border-green-600
-                                           focus:ring-green-600"
+                                        border-gray-300 text-sm shadow-sm
+                                        focus:border-green-600
+                                        focus:ring-green-600"
                                 >
 
 
                                 <button
                                     type="submit"
                                     class="inline-flex min-h-10 items-center justify-center
-                                           rounded-lg bg-green-700 px-5
-                                           text-sm font-semibold text-white
-                                           transition hover:bg-green-800"
+                                        rounded-lg bg-green-700 px-5
+                                        text-sm font-semibold text-white
+                                        transition hover:bg-green-800"
                                 >
                                     Search
                                 </button>
@@ -584,12 +719,15 @@
                                 @if($search !== '')
 
                                     <a
-                                        href="{{ route('data-management.employment-status') }}"
+                                        href="{{ route(
+                                            'data-management.employment-status',
+                                            ['status' => $employeeTab]
+                                        ) }}"
                                         class="inline-flex min-h-10 items-center justify-center
-                                               rounded-lg border border-gray-300
-                                               bg-white px-4
-                                               text-sm font-semibold text-gray-700
-                                               transition hover:bg-gray-50"
+                                            rounded-lg border border-gray-300
+                                            bg-white px-4
+                                            text-sm font-semibold text-gray-700
+                                            transition hover:bg-gray-50"
                                     >
                                         Clear
                                     </a>
@@ -690,14 +828,18 @@
                                     </th>
 
 
-                                    {{-- NATURE OF WORK --}}
+                                    {{-- NATURE OF WORK / WARM BODY STATUS--}}
 
                                     <th
-                                        class="w-[135px] px-3 py-3.5
-                                               text-left text-[13px] font-bold
-                                               uppercase tracking-wide text-gray-700"
+                                        class="w-[150px] px-3 py-3.5
+                                            text-left text-[13px] font-bold
+                                            uppercase tracking-wide text-gray-700"
                                     >
-                                        Nature of Work
+                                        @if($employeeTab === 'inactive')
+                                            Inactive Status
+                                        @else
+                                            Nature of Work
+                                        @endif
                                     </th>
 
 
@@ -1049,15 +1191,48 @@
 
 
                                         {{-- =====================================================
-                                            NATURE OF WORK
+                                            NATURE OF WORK / WARM BODY STATUS
                                         ====================================================== --}}
 
                                         <td
-                                            class="w-[135px] min-w-[135px]
-                                                   px-3 py-4 align-top
-                                                   text-sm leading-5 text-gray-700"
+                                            class="w-[150px] min-w-[150px]
+                                                px-3 py-4 align-top"
                                         >
-                                            {{ $record->nature_of_work ?? '—' }}
+
+                                            @if($employeeTab === 'inactive')
+
+                                                @php
+                                                    $inactiveStyle = match($record->warm_body_status) {
+                                                        'Vacant (Retired)' =>
+                                                            'background-color:#fef3c7; color:#92400e;',
+
+                                                        'Vacant (Resigned)' =>
+                                                            'background-color:#fee2e2; color:#991b1b;',
+
+                                                        'Vacant (Others)' =>
+                                                            'background-color:#f3f4f6; color:#4b5563;',
+
+                                                        default =>
+                                                            'background-color:#f3f4f6; color:#4b5563;',
+                                                    };
+                                                @endphp
+
+                                                <span
+                                                    class="inline-flex rounded-md px-2.5 py-1
+                                                        text-xs font-semibold"
+                                                    style="{{ $inactiveStyle }}"
+                                                >
+                                                    {{ $record->warm_body_status ?? '—' }}
+                                                </span>
+
+                                            @else
+
+                                                <span class="text-sm leading-5 text-gray-700">
+                                                    {{ $record->nature_of_work ?? '—' }}
+                                                </span>
+
+                                            @endif
+
                                         </td>
 
 
@@ -1142,42 +1317,47 @@
 
                                 @empty
 
-                                    <tr>
+                                <tr>
 
-                                        <td
-                                            colspan="7"
-                                            class="px-6 py-14 text-center"
-                                        >
+                                    <td
+                                        colspan="7"
+                                        class="px-6 py-14 text-center"
+                                    >
 
-                                            <div
-                                                class="text-sm font-medium
-                                                       text-gray-700"
-                                            >
-                                                No employment records found.
-                                            </div>
+                                        <div class="text-sm font-medium text-gray-700">
 
+                                            @if($employeeTab === 'active')
 
-                                            @if($search !== '')
+                                                No active employee records found.
 
-                                                <div
-                                                    class="mt-1 text-sm
-                                                           text-gray-500"
-                                                >
-                                                    No records matched your search for
+                                            @else
 
-                                                    <span class="font-semibold">
-                                                        "{{ $search }}"
-                                                    </span>.
-
-                                                </div>
+                                                No inactive employee records found.
 
                                             @endif
 
-                                        </td>
+                                        </div>
 
-                                    </tr>
 
-                                @endforelse
+                                        @if($search !== '')
+
+                                            <div class="mt-1 text-sm text-gray-500">
+
+                                                No records matched your search for
+
+                                                <span class="font-semibold">
+                                                    "{{ $search }}"
+                                                </span>.
+
+                                            </div>
+
+                                        @endif
+
+                                    </td>
+
+                                </tr>
+
+                            @endforelse
 
                             </tbody>
 
@@ -1277,6 +1457,98 @@
 
                     </div>
 
+                    {{-- =====================================================
+                        ACTIVE / INACTIVE EMPLOYEE TABS
+                    ====================================================== --}}
+
+                    <div class="border-b border-gray-200 bg-white px-4 py-3 sm:px-5">
+
+                        <div
+                            class="inline-flex rounded-lg border border-gray-200
+                                bg-gray-100 p-1"
+                        >
+
+                            {{-- ACTIVE EMPLOYEES --}}
+                            <a
+                                href="{{ route(
+                                    'data-management.employment-status',
+                                    array_filter([
+                                        'status' => 'active',
+                                        'search' => $search ?: null,
+                                    ])
+                                ) }}"
+                                class="inline-flex min-h-9 items-center justify-center
+                                    gap-2 rounded-md px-4 py-2
+                                    text-sm font-semibold transition-all
+                                    {{ $employeeTab === 'active'
+                                            ? 'bg-white text-green-700 shadow-sm ring-1 ring-black/5'
+                                            : 'text-gray-500 hover:bg-white/60 hover:text-gray-700'
+                                    }}"
+                            >
+
+                                {{-- ACTIVE ICON --}}
+                                <svg
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M9 12.75 11.25 15 15 9.75
+                                        M21 12a9 9 0 1 1-18 0
+                                        9 9 0 0 1 18 0Z"
+                                    />
+                                </svg>
+
+                                Active Employees
+
+                            </a>
+
+
+                            {{-- INACTIVE EMPLOYEES --}}
+                            <a
+                                href="{{ route(
+                                    'data-management.employment-status',
+                                    array_filter([
+                                        'status' => 'inactive',
+                                        'search' => $search ?: null,
+                                    ])
+                                ) }}"
+                                class="inline-flex min-h-9 items-center justify-center
+                                    gap-2 rounded-md px-4 py-2
+                                    text-sm font-semibold transition-all
+                                    {{ $employeeTab === 'inactive'
+                                            ? 'bg-white text-red-600 shadow-sm ring-1 ring-black/5'
+                                            : 'text-gray-500 hover:bg-white/60 hover:text-gray-700'
+                                    }}"
+                            >
+
+                                {{-- INACTIVE ICON --}}
+                                <svg
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M6 18 18 6M6 6l12 12"
+                                    />
+                                </svg>
+
+                                Inactive Employees
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
 
                     {{-- =====================================================
                         SEARCH
@@ -1285,40 +1557,51 @@
                     <div class="border-b border-gray-200 p-4">
 
                         <form
-                            action="{{ url()->current() }}"
+                            action="{{ route('data-management.employment-status') }}"
                             method="GET"
                         >
 
+                            {{-- PRESERVE ACTIVE / INACTIVE TAB --}}
+                            <input
+                                type="hidden"
+                                name="status"
+                                value="{{ $employeeTab }}"
+                            >
+
+
                             <label
-                                for="admin-employment-search"
+                                for="search"
                                 class="mb-2 block text-sm font-semibold text-gray-700"
                             >
-                                Search Employment Records
+                                Search
+                                {{ $employeeTab === 'active'
+                                    ? 'Active Employees'
+                                    : 'Inactive Employees'
+                                }}
                             </label>
 
 
                             <div class="flex flex-col gap-2 sm:flex-row">
 
                                 <input
-                                    type="search"
-                                    id="admin-employment-search"
+                                    type="text"
+                                    id="search"
                                     name="search"
                                     value="{{ $search }}"
-                                    placeholder="Search name, item no., position, or nature of work..."
+                                    placeholder="Search name, school, office unit, item no., position, status..."
                                     class="min-h-10 min-w-0 flex-1 rounded-lg
-                                           border-gray-300 text-sm shadow-sm
-                                           focus:border-green-600
-                                           focus:ring-green-600"
+                                        border-gray-300 text-sm shadow-sm
+                                        focus:border-green-600
+                                        focus:ring-green-600"
                                 >
 
 
                                 <button
                                     type="submit"
-                                    class="inline-flex min-h-10 items-center
-                                           justify-center rounded-lg
-                                           bg-green-700 px-5
-                                           text-sm font-semibold text-white
-                                           hover:bg-green-800"
+                                    class="inline-flex min-h-10 items-center justify-center
+                                        rounded-lg bg-green-700 px-5
+                                        text-sm font-semibold text-white
+                                        transition hover:bg-green-800"
                                 >
                                     Search
                                 </button>
@@ -1327,13 +1610,15 @@
                                 @if($search !== '')
 
                                     <a
-                                        href="{{ url()->current() }}"
-                                        class="inline-flex min-h-10 items-center
-                                               justify-center rounded-lg
-                                               border border-gray-300
-                                               bg-white px-4
-                                               text-sm font-semibold text-gray-700
-                                               hover:bg-gray-50"
+                                        href="{{ route(
+                                            'data-management.employment-status',
+                                            ['status' => $employeeTab]
+                                        ) }}"
+                                        class="inline-flex min-h-10 items-center justify-center
+                                            rounded-lg border border-gray-300
+                                            bg-white px-4
+                                            text-sm font-semibold text-gray-700
+                                            transition hover:bg-gray-50"
                                     >
                                         Clear
                                     </a>
@@ -1410,14 +1695,18 @@
                                     </th>
 
 
-                                    {{-- NATURE OF WORK --}}
+                                    {{-- NATURE OF WORK / WARD BODY STATUS --}}
 
                                     <th
-                                        class="w-[160px] px-3 py-3.5
-                                               text-left text-[13px] font-bold
-                                               uppercase tracking-wide text-gray-700"
+                                        class="w-[150px] px-3 py-3.5
+                                            text-left text-[13px] font-bold
+                                            uppercase tracking-wide text-gray-700"
                                     >
-                                        Nature of Work
+                                        @if($employeeTab === 'inactive')
+                                            Inactive Status
+                                        @else
+                                            Nature of Work
+                                        @endif
                                     </th>
 
 
@@ -1555,14 +1844,47 @@
                                         </td>
 
 
-                                        {{-- NATURE OF WORK --}}
+                                        {{-- NATURE OF WORK / WARM BODY STATUS--}}
 
                                         <td
-                                            class="w-[160px] min-w-[160px]
-                                                   px-3 py-4 align-top
-                                                   text-sm text-gray-700"
+                                            class="w-[150px] min-w-[150px]
+                                                px-3 py-4 align-top"
                                         >
-                                            {{ $record->nature_of_work ?? '—' }}
+
+                                            @if($employeeTab === 'inactive')
+
+                                                @php
+                                                    $inactiveStyle = match($record->warm_body_status) {
+                                                        'Vacant (Retired)' =>
+                                                            'background-color:#fef3c7; color:#92400e;',
+
+                                                        'Vacant (Resigned)' =>
+                                                            'background-color:#fee2e2; color:#991b1b;',
+
+                                                        'Vacant (Others)' =>
+                                                            'background-color:#f3f4f6; color:#4b5563;',
+
+                                                        default =>
+                                                            'background-color:#f3f4f6; color:#4b5563;',
+                                                    };
+                                                @endphp
+
+                                                <span
+                                                    class="inline-flex rounded-md px-2.5 py-1
+                                                        text-xs font-semibold"
+                                                    style="{{ $inactiveStyle }}"
+                                                >
+                                                    {{ $record->warm_body_status ?? '—' }}
+                                                </span>
+
+                                            @else
+
+                                                <span class="text-sm leading-5 text-gray-700">
+                                                    {{ $record->nature_of_work ?? '—' }}
+                                                </span>
+
+                                            @endif
+
                                         </td>
 
 
@@ -1635,15 +1957,31 @@
 
                                 @empty
 
-                                    <tr>
+                                <tr>
 
-                                        <td
-                                            colspan="6"
-                                            class="px-6 py-14 text-center
-                                                   text-sm text-gray-600"
-                                        >
+                                    <td
+                                        colspan="7"
+                                        class="px-6 py-14 text-center"
+                                    >
 
-                                            @if($search !== '')
+                                        <div class="text-sm font-medium text-gray-700">
+
+                                            @if($employeeTab === 'active')
+
+                                                No active employee records found.
+
+                                            @else
+
+                                                No inactive employee records found.
+
+                                            @endif
+
+                                        </div>
+
+
+                                        @if($search !== '')
+
+                                            <div class="mt-1 text-sm text-gray-500">
 
                                                 No records matched your search for
 
@@ -1651,17 +1989,15 @@
                                                     "{{ $search }}"
                                                 </span>.
 
-                                            @else
+                                            </div>
 
-                                                No employment records found.
+                                        @endif
 
-                                            @endif
+                                    </td>
 
-                                        </td>
+                                </tr>
 
-                                    </tr>
-
-                                @endforelse
+                            @endforelse
 
                             </tbody>
 

@@ -399,45 +399,367 @@
                         @enderror
                     </div>
 
-                    {{-- =================================================
-                        SCHOOL — FULL WIDTH
-                    ================================================== --}}
-                    <div class="min-w-0 md:col-span-2 xl:col-span-4">
-                        <label
-                            for="school_id"
-                            class="mb-1 block text-sm font-medium text-gray-700"
-                        >
-                            School
-                        </label>
+                    {{-- =====================================================
+                        PERSONNEL ASSIGNMENT
+                    ====================================================== --}}
 
-                        <select
-                            id="school_id"
-                            name="school_id"
-                            class="employment-search-select w-full min-w-0"
-                            data-placeholder="Search by school ID or school name..."
-                        >
+                    @if(in_array(auth()->user()?->role, ['super_admin', 'admin']))
 
-                            @foreach ($schools as $school)
-                                <option
-                                    value="{{ $school->school_id }}"
-                                    @selected(
-                                        (string) old(
-                                            'school_id',
-                                            $record->school?->school_id
-                                        ) === (string) $school->school_id
-                                    )
-                                >
-                                    {{ $school->school_id }} - {{ $school->school_name }}- {{ $school->school_district }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <div class="min-w-0 md:col-span-2 xl:col-span-4">
 
-                        @error('school_id')
-                            <p class="mt-1 text-sm text-red-600">
-                                {{ $message }}
-                            </p>
-                        @enderror
-                    </div>
+                            <div class="rounded-xl border border-green-200 bg-green-50/30 p-4">
+
+                                {{-- =====================================================
+                                    HEADER
+                                ====================================================== --}}
+
+                                <div class="mb-4 flex items-start gap-3 border-b border-green-100 pb-3">
+
+                                    <div
+                                        class="flex h-9 w-9 shrink-0 items-center justify-center
+                                            rounded-lg bg-green-100 text-green-700"
+                                    >
+                                        <svg
+                                            class="h-5 w-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M17 20h5v-2a3 3 0 00-5.356-1.857
+                                                M17 20H7
+                                                M17 20v-2c0-.656-.126-1.283-.356-1.857
+                                                M7 20H2v-2a3 3 0 015.356-1.857
+                                                M7 20v-2c0-.656.126-1.283.356-1.857
+                                                m0 0a5.002 5.002 0 019.288 0
+                                                M15 7a3 3 0 11-6 0
+                                                3 3 0 016 0z"
+                                            />
+                                        </svg>
+                                    </div>
+
+
+                                    <div class="min-w-0">
+
+                                        <h3 class="text-sm font-bold text-gray-900">
+                                            Personnel Assignment
+                                        </h3>
+
+                                        <p class="mt-0.5 text-xs leading-5 text-gray-500">
+
+                                            @if(auth()->user()?->role === 'super_admin')
+
+                                                Select whether the personnel is assigned to a
+                                                school or to a Division Office unit.
+
+                                            @else
+
+                                                Select the school where the personnel is currently assigned.
+
+                                            @endif
+
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                {{-- =====================================================
+                                    SUPER ADMIN
+                                ====================================================== --}}
+
+                                @if(auth()->user()?->role === 'super_admin')
+
+                                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+                                        {{-- =============================================
+                                            ASSIGNMENT TYPE
+                                        ============================================== --}}
+
+                                        <div class="min-w-0">
+
+                                            <label
+                                                for="personnel_assignment"
+                                                class="mb-1.5 block text-sm font-medium text-gray-700"
+                                            >
+                                                Assignment Type
+                                                <span class="text-red-500">*</span>
+                                            </label>
+
+                                            <select
+                                                id="personnel_assignment"
+                                                name="personnel_assignment"
+                                                class="block h-11 w-full rounded-lg
+                                                    border-gray-300 bg-white
+                                                    px-3 text-sm text-gray-900
+                                                    shadow-sm
+                                                    focus:border-green-600
+                                                    focus:ring-green-600"
+                                            >
+
+                                                <option value="">
+                                                    Select Assignment Type
+                                                </option>
+
+                                                <option
+                                                    value="school_based"
+                                                    @selected(
+                                                        old(
+                                                            'personnel_assignment',
+                                                            $personnelAssignment
+                                                        ) === 'school_based'
+                                                    )
+                                                >
+                                                    School Based
+                                                </option>
+
+                                                <option
+                                                    value="division_office"
+                                                    @selected(
+                                                        old(
+                                                            'personnel_assignment',
+                                                            $personnelAssignment
+                                                        ) === 'division_office'
+                                                    )
+                                                >
+                                                    Division Office
+                                                </option>
+
+                                            </select>
+
+                                            @error('personnel_assignment')
+                                                <p class="mt-1 text-xs text-red-600">
+                                                    {{ $message }}
+                                                </p>
+                                            @enderror
+
+                                        </div>
+
+
+                                        {{-- =============================================
+                                            SCHOOL
+                                        ============================================== --}}
+
+                                        <div
+                                            id="school-assignment-container"
+                                            class="min-w-0"
+                                        >
+
+                                            <label
+                                                for="school_id"
+                                                class="mb-1.5 block text-sm font-medium text-gray-700"
+                                            >
+                                                School
+                                                <span class="text-red-500">*</span>
+                                            </label>
+
+                                            <select
+                                                id="school_id"
+                                                name="school_id"
+                                                class="employment-search-select w-full min-w-0"
+                                                data-placeholder="Search or select school..."
+                                            >
+
+                                                <option value="">
+                                                    Select School
+                                                </option>
+
+                                                @foreach($schools as $school)
+
+                                                    <option
+                                                        value="{{ $school->school_id }}"
+                                                        @selected(
+                                                            (string) old(
+                                                                'school_id',
+                                                                $record->school?->school_id
+                                                            ) === (string) $school->school_id
+                                                        )
+                                                    >
+
+                                                        {{ $school->school_id }}
+                                                        — {{ $school->school_name }}
+
+                                                        @if($school->school_district)
+                                                            — {{ $school->school_district }}
+                                                        @endif
+
+                                                    </option>
+
+                                                @endforeach
+
+                                            </select>
+
+                                            @error('school_id')
+                                                <p class="mt-1 text-xs text-red-600">
+                                                    {{ $message }}
+                                                </p>
+                                            @enderror
+
+                                        </div>
+
+
+                                        {{-- =============================================
+                                            DIVISION OFFICE
+                                        ============================================== --}}
+
+                                        <div
+                                            id="office-assignment-container"
+                                            class="hidden min-w-0"
+                                        >
+
+                                            <label
+                                                for="office_unit_id"
+                                                class="mb-1.5 block text-sm font-medium text-gray-700"
+                                            >
+                                                Office Unit
+                                                <span class="text-red-500">*</span>
+                                            </label>
+
+                                            <select
+                                                id="office_unit_id"
+                                                name="office_unit_id"
+                                                class="employment-search-select w-full min-w-0"
+                                                data-placeholder="Search or select office unit..."
+                                            >
+
+                                                <option value="">
+                                                    Select Office Unit
+                                                </option>
+
+                                                @foreach(
+                                                    $officeUnits->groupBy('office_group_id')
+                                                    as $units
+                                                )
+
+                                                    @php
+                                                        $officeGroup =
+                                                            $units->first()?->officeGroup;
+                                                    @endphp
+
+                                                    <optgroup
+                                                        label="{{ $officeGroup?->code }} — {{ $officeGroup?->name }}"
+                                                    >
+
+                                                        @foreach($units as $officeUnit)
+
+                                                            <option
+                                                                value="{{ $officeUnit->id }}"
+                                                                @selected(
+                                                                    (string) old(
+                                                                        'office_unit_id',
+                                                                        $record->office_unit_id
+                                                                    ) === (string) $officeUnit->id
+                                                                )
+                                                            >
+                                                                {{ $officeUnit->name }}
+
+                                                                @if($officeUnit->parent)
+                                                                    — {{ $officeUnit->parent->name }}
+                                                                @endif
+                                                            </option>
+
+                                                        @endforeach
+
+                                                    </optgroup>
+
+                                                @endforeach
+
+                                            </select>
+
+                                            @error('office_unit_id')
+                                                <p class="mt-1 text-xs text-red-600">
+                                                    {{ $message }}
+                                                </p>
+                                            @enderror
+
+                                        </div>
+
+                                    </div>
+
+
+                                {{-- =====================================================
+                                    ADMIN
+                                    SCHOOL ASSIGNMENT ONLY
+                                ====================================================== --}}
+
+                                @elseif(auth()->user()?->role === 'admin')
+
+                                    <div class="grid grid-cols-1">
+
+                                        <div class="min-w-0">
+
+                                            <label
+                                                for="school_id"
+                                                class="mb-1.5 block text-sm font-medium text-gray-700"
+                                            >
+                                                School Assignment
+                                                <span class="text-red-500">*</span>
+                                            </label>
+
+                                            <select
+                                                id="school_id"
+                                                name="school_id"
+                                                class="employment-search-select w-full min-w-0"
+                                                data-placeholder="Search or select school..."
+                                                required
+                                            >
+
+                                                <option value="">
+                                                    Search or select school
+                                                </option>
+
+                                                @foreach($schools as $school)
+
+                                                    <option
+                                                        value="{{ $school->school_id }}"
+                                                        @selected(
+                                                            (string) old(
+                                                                'school_id',
+                                                                $record->school?->school_id
+                                                            ) === (string) $school->school_id
+                                                        )
+                                                    >
+
+                                                        {{ $school->school_id }}
+                                                        — {{ $school->school_name }}
+
+                                                        @if($school->school_district)
+                                                            — {{ $school->school_district }}
+                                                        @endif
+
+                                                    </option>
+
+                                                @endforeach
+
+                                            </select>
+
+
+                                            <p class="mt-2 text-xs text-gray-500">
+                                                Select the new school assignment of this employee.
+                                            </p>
+
+
+                                            @error('school_id')
+                                                <p class="mt-1 text-xs text-red-600">
+                                                    {{ $message }}
+                                                </p>
+                                            @enderror
+
+                                        </div>
+
+                                    </div>
+
+                                @endif
+
+                            </div>
+
+                        </div>
+
+                    @endif
 
                     {{-- =================================================
                         DATE OF ORIGINAL APPOINTMENT — 25%
@@ -1091,7 +1413,15 @@
                 }
             }
 
+            // =====================================================
+            // LOAD CURRENT PLANTILLA ASSIGNMENT REMARKS ON PAGE LOAD
+            // =====================================================
+
             updateGuide(initialValue);
+
+            if (initialValue) {
+                showAssignments(initialValue);
+            }
 
             if (typeof window.TomSelect === 'undefined') {
                 searchError.textContent =
@@ -1210,17 +1540,31 @@
                 }
             });
 
-            showAssignments(control.getValue());
-
             const school = document.getElementById('school_id');
 
             if (school && !school.tomselect) {
+
                 new TomSelect(school, {
                     create: false,
                     allowEmptyOption: true,
                     maxOptions: 50,
-                    placeholder: 'Search school...'
+                    placeholder: 'Search or select school...'
                 });
+
+            }
+
+
+            const officeUnit = document.getElementById('office_unit_id');
+
+            if (officeUnit && !officeUnit.tomselect) {
+
+                new TomSelect(officeUnit, {
+                    create: false,
+                    allowEmptyOption: true,
+                    maxOptions: 50,
+                    placeholder: 'Search or select office unit...'
+                });
+
             }
         }
 
@@ -1230,5 +1574,144 @@
             init();
         }
     })();
+
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUPER ADMIN PERSONNEL ASSIGNMENT SWITCHER
+        |--------------------------------------------------------------------------
+        |
+        | Admin users do not have an Assignment Type selector.
+        | Therefore this script only runs when the selector exists.
+        |
+        */
+
+        const assignmentType =
+            document.getElementById('personnel_assignment');
+
+        if (!assignmentType) {
+            return;
+        }
+
+
+        const schoolContainer =
+            document.getElementById('school-assignment-container');
+
+        const officeContainer =
+            document.getElementById('office-assignment-container');
+
+        const schoolSelect =
+            document.getElementById('school_id');
+
+        const officeSelect =
+            document.getElementById('office_unit_id');
+
+
+        if (!schoolContainer || !officeContainer) {
+            return;
+        }
+
+
+        function updatePersonnelAssignment() {
+
+            const type = assignmentType.value;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SCHOOL BASED
+            |--------------------------------------------------------------------------
+            */
+
+            if (type === 'school_based') {
+
+                schoolContainer.classList.remove('hidden');
+                officeContainer.classList.add('hidden');
+
+                if (schoolSelect) {
+                    schoolSelect.disabled = false;
+                    schoolSelect.required = true;
+                }
+
+                if (officeSelect) {
+                    officeSelect.disabled = true;
+                    officeSelect.required = false;
+                }
+
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | DIVISION OFFICE
+            |--------------------------------------------------------------------------
+            */
+
+            if (type === 'division_office') {
+
+                schoolContainer.classList.add('hidden');
+                officeContainer.classList.remove('hidden');
+
+                if (schoolSelect) {
+                    schoolSelect.disabled = true;
+                    schoolSelect.required = false;
+                }
+
+                if (officeSelect) {
+                    officeSelect.disabled = false;
+                    officeSelect.required = true;
+                }
+
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | NO ASSIGNMENT
+            |--------------------------------------------------------------------------
+            */
+
+            schoolContainer.classList.add('hidden');
+            officeContainer.classList.add('hidden');
+
+            if (schoolSelect) {
+                schoolSelect.disabled = true;
+                schoolSelect.required = false;
+            }
+
+            if (officeSelect) {
+                officeSelect.disabled = true;
+                officeSelect.required = false;
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | INITIAL LOAD
+        |--------------------------------------------------------------------------
+        */
+
+        updatePersonnelAssignment();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ASSIGNMENT TYPE CHANGED
+        |--------------------------------------------------------------------------
+        */
+
+        assignmentType.addEventListener(
+            'change',
+            updatePersonnelAssignment
+        );
+
+    });
     </script>
 </x-app-layout>
