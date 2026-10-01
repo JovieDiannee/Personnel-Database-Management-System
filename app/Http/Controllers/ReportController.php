@@ -14,6 +14,7 @@ use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Models\MedicalAllowance;
 
 class ReportController extends Controller implements HasMiddleware
 {
@@ -284,70 +285,605 @@ class ReportController extends Controller implements HasMiddleware
 
     public function submissions(Request $request): View
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Filters
+        |--------------------------------------------------------------------------
+        */
+
         $filters = $request->validate([
-            'report_id' => ['nullable', 'integer', 'exists:reports,id'],
-            'school_id' => ['nullable', 'string', 'max:10', 'exists:school_db,school_id'],
-            'status' => ['nullable', 'in:Pending,Done,Verified'],
+
+            'report_id' => [
+                'nullable',
+                'integer',
+                'exists:reports,id',
+            ],
+
+            'school_id' => [
+                'nullable',
+                'string',
+                'max:10',
+                'exists:school_db,school_id',
+            ],
+
+            'status' => [
+                'nullable',
+                'in:Pending,Done,Verified',
+            ],
+
+            'search' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
         ]);
 
-        $query = ReportSubmission::with(['report', 'submittedBy', 'validatedBy']);
 
-        foreach (['report_id', 'school_id', 'status'] as $field) {
-            if (isset($filters[$field]) && $filters[$field] !== '') {
-                $query->where($field, $filters[$field]);
-            }
+        /*
+        |--------------------------------------------------------------------------
+        | Base Query
+        |--------------------------------------------------------------------------
+        */
+
+        $query = ReportSubmission::query()
+            ->with([
+                'report',
+                'submittedBy',
+                'validatedBy',
+            ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Report Filter
+        |--------------------------------------------------------------------------
+        */
+
+        if (!empty($filters['report_id'])) {
+
+            $query->where(
+                'report_id',
+                $filters['report_id']
+            );
+
         }
 
-        $submissions = $query->latest()->paginate(15)->withQueryString();
-        $reports = Report::orderByDesc('id')->get(['id', 'name_of_report']);
-        $schools = DB::table('school_db')->orderBy('school_name')
-            ->get(['school_id', 'school_name', 'school_district']);
 
-        return view('reports.submissions', compact('submissions', 'reports', 'schools'));
+        /*
+        |--------------------------------------------------------------------------
+        | School Filter
+        |--------------------------------------------------------------------------
+        */
+
+        if (!empty($filters['school_id'])) {
+
+            $query->where(
+                'school_id',
+                $filters['school_id']
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Status Filter
+        |--------------------------------------------------------------------------
+        */
+
+        if (!empty($filters['status'])) {
+
+            $query->where(
+                'status',
+                $filters['status']
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search School
+        |--------------------------------------------------------------------------
+        */
+
+        $search = trim(
+            $filters['search'] ?? ''
+        );
+
+
+        if ($search !== '') {
+
+            $schoolCodes = DB::table('school_db')
+
+                ->where(function ($schoolQuery) use ($search) {
+
+                    $schoolQuery
+                        ->where(
+                            'school_name',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'school_id',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'school_district',
+                            'like',
+                            "%{$search}%"
+                        );
+
+                })
+
+                ->pluck('school_id');
+
+
+            $query->whereIn(
+                'school_id',
+                $schoolCodes
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Submissions
+        |--------------------------------------------------------------------------
+        */
+
+        $submissions = $query
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reports
+        |--------------------------------------------------------------------------
+        */
+
+        $reports = Report::query()
+            ->orderByDesc('id')
+            ->get([
+                'id',
+                'name_of_report',
+            ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Schools
+        |--------------------------------------------------------------------------
+        */
+
+        $schools = DB::table('school_db')
+            ->orderBy('school_name')
+            ->get([
+                'school_id',
+                'school_name',
+                'school_district',
+            ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | View
+        |--------------------------------------------------------------------------
+        */
+
+        return view(
+            'reports.submissions',
+            compact(
+                'submissions',
+                'reports',
+                'schools',
+                'search'
+            )
+        );
     }
 
-    public function submit(Request $request, ReportSubmission $submission): RedirectResponse
+    public function submit(Request $request,ReportSubmission $submission): RedirectResponse
     {
-        DB::transaction(function () use ($request, $submission) {
-            // Lock the parent first, consistently with close() and verify().
-            $report = Report::query()->lockForUpdate()->findOrFail($submission->report_id);
-            $lockedSubmission = ReportSubmission::query()
-                ->where('report_id', $report->id)
-                ->lockForUpdate()->findOrFail($submission->id);
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin Only
+        |--------------------------------------------------------------------------
+        */
 
-            abort_unless($report->status === 'Ongoing', 409, 'This report is closed.');
-            abort_unless($lockedSubmission->status === 'Pending', 409, 'Only pending submissions can be submitted.');
+        $user = $request->user();
+
+        abort_unless(
+            $user && $user->role === 'super_admin',
+            403
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Submit Report
+        |--------------------------------------------------------------------------
+        */
+
+        DB::transaction(function () use (
+            $user,
+            $submission
+        ) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lock Parent Report
+            |--------------------------------------------------------------------------
+            */
+
+            $report = Report::query()
+                ->lockForUpdate()
+                ->findOrFail(
+                    $submission->report_id
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lock Submission
+            |--------------------------------------------------------------------------
+            */
+
+            $lockedSubmission = ReportSubmission::query()
+
+                ->where(
+                    'report_id',
+                    $report->id
+                )
+
+                ->lockForUpdate()
+
+                ->findOrFail(
+                    $submission->id
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Report Must Be Ongoing
+            |--------------------------------------------------------------------------
+            */
+
+            abort_unless(
+                $report->status === 'Ongoing',
+                409,
+                'This report is closed.'
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Only Pending Can Be Submitted
+            |--------------------------------------------------------------------------
+            */
+
+            abort_unless(
+                $lockedSubmission->status === 'Pending',
+                409,
+                'Only pending submissions can be submitted.'
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Mark As Submitted
+            |--------------------------------------------------------------------------
+            */
 
             $lockedSubmission->status = 'Done';
-            $lockedSubmission->user_id = $request->user()->id;
+
+            $lockedSubmission->user_id = $user->id;
+
             $lockedSubmission->save();
+
         });
 
-        return redirect()->route('data-management.reports.submissions', [
-            'report_id' => $submission->report_id,
-        ])->with('success', 'School report submitted successfully.');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect
+        |--------------------------------------------------------------------------
+        */
+
+        return redirect()
+
+            ->route(
+                'data-management.reports.submissions',
+                [
+                    'report_id' =>
+                        $submission->report_id,
+                ]
+            )
+
+            ->with(
+                'success',
+                'School report submitted successfully.'
+            );
     }
 
-    public function verify(Request $request, ReportSubmission $submission): RedirectResponse
+    public function verify(Request $request,ReportSubmission $submission): RedirectResponse
     {
-        DB::transaction(function () use ($request, $submission) {
-            $report = Report::query()->lockForUpdate()->findOrFail($submission->report_id);
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin Only
+        |--------------------------------------------------------------------------
+        */
+
+        $user = $request->user();
+
+        abort_unless(
+            $user && $user->role === 'super_admin',
+            403
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Years
+        |--------------------------------------------------------------------------
+        */
+
+        $currentYear = now()->year;
+        $previousYear = $currentYear - 1;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Verify Submission
+        |--------------------------------------------------------------------------
+        */
+
+        DB::transaction(function () use (
+            $user,
+            $submission,
+            $currentYear,
+            $previousYear
+        ) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lock Parent Report
+            |--------------------------------------------------------------------------
+            */
+
+            $report = Report::query()
+                ->lockForUpdate()
+                ->findOrFail(
+                    $submission->report_id
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lock School Submission
+            |--------------------------------------------------------------------------
+            */
+
             $lockedSubmission = ReportSubmission::query()
-                ->where('report_id', $report->id)
-                ->lockForUpdate()->findOrFail($submission->id);
 
-            abort_unless($report->status === 'Ongoing', 409, 'This report is closed.');
-            abort_unless($lockedSubmission->status === 'Done', 409, 'Only submitted reports can be verified.');
+                ->where(
+                    'report_id',
+                    $report->id
+                )
 
-            $lockedSubmission->status = 'Verified';
-            $lockedSubmission->validated_by = $request->user()->id;
-            $lockedSubmission->validated_at = now();
+                ->lockForUpdate()
+
+                ->findOrFail(
+                    $submission->id
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Report Must Be Ongoing
+            |--------------------------------------------------------------------------
+            */
+
+            abort_unless(
+                $report->status === 'Ongoing',
+                409,
+                'This report is closed.'
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Only Submitted Reports Can Be Verified
+            |--------------------------------------------------------------------------
+            */
+
+            abort_unless(
+                $lockedSubmission->status === 'Done',
+                409,
+                'Only submitted reports can be verified.'
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Special Processing:
+            | Medical Allowance Report
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $report->name_of_report
+                === 'Medical Allowance Report'
+            ) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Get School Database ID
+                |--------------------------------------------------------------------------
+                |
+                | ReportSubmission stores school_id using the school's code.
+                |
+                */
+
+                $schoolDbId = DB::table('school_db')
+
+                    ->where(
+                        'school_id',
+                        $lockedSubmission->school_id
+                    )
+
+                    ->value('id');
+
+
+                abort_if(
+                    !$schoolDbId,
+                    422,
+                    'The school assigned to this submission could not be found.'
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Get Personnel From The School
+                |--------------------------------------------------------------------------
+                */
+
+                $employeeUserIds = DB::table('employment_status')
+
+                    ->where(
+                        'school_db_id',
+                        $schoolDbId
+                    )
+
+                    ->pluck('users_id');
+
+
+                abort_if(
+                    $employeeUserIds->isEmpty(),
+                    422,
+                    'No personnel records were found for this school.'
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Check Current-Year Medical Allowance Records
+                |--------------------------------------------------------------------------
+                */
+
+                $currentYearEmployeeIds = MedicalAllowance::query()
+
+                    ->whereIn(
+                        'users_id',
+                        $employeeUserIds
+                    )
+
+                    ->where(
+                        'year',
+                        $currentYear
+                    )
+
+                    ->pluck('users_id');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Find Missing Current-Year Records
+                |--------------------------------------------------------------------------
+                */
+
+                $missingCurrentYear = $employeeUserIds
+                    ->diff(
+                        $currentYearEmployeeIds
+                    );
+
+
+                abort_if(
+                    $missingCurrentYear->isNotEmpty(),
+                    422,
+                    "This school has personnel without a {$currentYear} Medical Allowance record. Complete the records before verification."
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Validate Medical Allowance Records
+                |--------------------------------------------------------------------------
+                |
+                | Validate available previous-year and current-year records.
+                |
+                | An employee is allowed to have no previous-year record because
+                | the employee may legitimately be newly included this year.
+                |
+                */
+
+                MedicalAllowance::query()
+
+                    ->whereIn(
+                        'users_id',
+                        $employeeUserIds
+                    )
+
+                    ->whereIn(
+                        'year',
+                        [
+                            $previousYear,
+                            $currentYear,
+                        ]
+                    )
+
+                    ->update([
+                        'validation_status' =>
+                            'Validated',
+                    ]);
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Mark School Submission As Verified
+            |--------------------------------------------------------------------------
+            */
+
+            $lockedSubmission->status =
+                'Verified';
+
+            $lockedSubmission->validated_by =
+                $user->id;
+
+            $lockedSubmission->validated_at =
+                now();
+
             $lockedSubmission->save();
+
         });
 
-        return redirect()->route('data-management.reports.submissions', [
-            'report_id' => $submission->report_id,
-        ])->with('success', 'School submission verified successfully.');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect
+        |--------------------------------------------------------------------------
+        */
+
+        return redirect()
+
+            ->route(
+                'data-management.reports.submissions',
+                [
+                    'report_id' =>
+                        $submission->report_id,
+                ]
+            )
+
+            ->with(
+                'success',
+                'School submission verified successfully.'
+            );
     }
 
     public function close(Report $report): RedirectResponse
@@ -375,50 +911,234 @@ class ReportController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function revertValidation(Request $request,ReportSubmission $submission): RedirectResponse 
+    public function revertValidation(
+        Request $request,
+        ReportSubmission $submission
+    ): RedirectResponse
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin Only
+        |--------------------------------------------------------------------------
+        */
+
+        $user = $request->user();
+
         abort_unless(
-            $request->user()?->role === 'super_admin',
+            $user && $user->role === 'super_admin',
             403
         );
 
-        DB::transaction(function () use ($submission) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Years
+        |--------------------------------------------------------------------------
+        */
+
+        $currentYear = now()->year;
+        $previousYear = $currentYear - 1;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Revert Validation
+        |--------------------------------------------------------------------------
+        */
+
+        DB::transaction(function () use (
+            $submission,
+            $currentYear,
+            $previousYear
+        ) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lock Parent Report
+            |--------------------------------------------------------------------------
+            */
+
             $report = Report::query()
                 ->lockForUpdate()
-                ->findOrFail($submission->report_id);
+                ->findOrFail(
+                    $submission->report_id
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lock Submission
+            |--------------------------------------------------------------------------
+            */
 
             $lockedSubmission = ReportSubmission::query()
-                ->where('report_id', $report->id)
+                ->where(
+                    'report_id',
+                    $report->id
+                )
                 ->lockForUpdate()
-                ->findOrFail($submission->id);
+                ->findOrFail(
+                    $submission->id
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Report Must Be Ongoing
+            |--------------------------------------------------------------------------
+            */
 
             if ($report->status !== 'Ongoing') {
+
                 throw \Illuminate\Validation\ValidationException::withMessages([
-                    'submission' => 'Validation cannot be reverted while the report is closed.',
+                    'submission' =>
+                        'Validation cannot be reverted while the report is closed.',
                 ]);
             }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Submission Must Be Verified
+            |--------------------------------------------------------------------------
+            */
 
             if ($lockedSubmission->status !== 'Verified') {
+
                 throw \Illuminate\Validation\ValidationException::withMessages([
-                    'submission' => 'Only verified submissions can be reverted.',
+                    'submission' =>
+                        'Only verified submissions can be reverted.',
                 ]);
             }
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Medical Allowance Report
+            |--------------------------------------------------------------------------
+            |
+            | If this is the Medical Allowance Report, revert the validation
+            | status of the school's 2025 and 2026 employee records.
+            |
+            */
+
+            if (
+                $report->name_of_report ===
+                'Medical Allowance Report'
+            ) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Get School Database ID
+                |--------------------------------------------------------------------------
+                |
+                | ReportSubmission.school_id contains the school code.
+                | employment_status uses school_db.id.
+                |
+                */
+
+                $schoolDbId = DB::table('school_db')
+                    ->where(
+                        'school_id',
+                        $lockedSubmission->school_id
+                    )
+                    ->value('id');
+
+
+                if (!$schoolDbId) {
+
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'submission' =>
+                            'The school assigned to this submission could not be found.',
+                    ]);
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Get Personnel Assigned To School
+                |--------------------------------------------------------------------------
+                */
+
+                $employeeUserIds = DB::table('employment_status')
+                    ->where(
+                        'school_db_id',
+                        $schoolDbId
+                    )
+                    ->pluck('users_id');
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Revert Medical Allowance Validation
+                |--------------------------------------------------------------------------
+                |
+                | Only records belonging to this school and only the previous
+                | and current year are returned to Pending.
+                |
+                */
+
+                if ($employeeUserIds->isNotEmpty()) {
+
+                    MedicalAllowance::query()
+                        ->whereIn(
+                            'users_id',
+                            $employeeUserIds
+                        )
+                        ->whereIn(
+                            'year',
+                            [
+                                $previousYear,
+                                $currentYear,
+                            ]
+                        )
+                        ->update([
+                            'validation_status' => 'Pending',
+                        ]);
+
+                }
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Revert Report Submission
+            |--------------------------------------------------------------------------
+            */
+
             $lockedSubmission->status = 'Pending';
+
             $lockedSubmission->user_id = null;
+
             $lockedSubmission->validated_by = null;
+
             $lockedSubmission->validated_at = null;
+
             $lockedSubmission->save();
+
         });
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect
+        |--------------------------------------------------------------------------
+        */
+
         return redirect()
-            ->route('data-management.reports.submissions', [
-                'report_id' => $submission->report_id,
-                'school_id' => $submission->school_id,
-            ])
+            ->route(
+                'data-management.reports.submissions',
+                [
+                    'report_id' =>
+                        $submission->report_id,
+
+                    'school_id' =>
+                        $submission->school_id,
+                ]
+            )
             ->with(
                 'success',
-                'Validation reverted. The school can correct its information and resubmit the report.'
+                'Validation reverted successfully. The school can now correct its Medical Allowance information and resubmit the report.'
             );
     }
 

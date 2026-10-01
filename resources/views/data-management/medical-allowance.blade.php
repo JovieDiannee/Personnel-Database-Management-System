@@ -1,43 +1,27 @@
 <x-app-layout>
 
-    <div class="min-h-screen min-w-0 bg-gray-50 py-4 sm:py-8">
+<div class="min-h-screen bg-gray-50 py-6">
 
-        <div class="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6">
+    <div class="mx-auto w-full max-w-7xl px-4 sm:px-6">
 
 
-            {{-- BREADCRUMB TRAIL --}}
-            <div class="mb-4">
+        {{-- =========================================================
+            BREADCRUMB
+        ========================================================== --}}
 
-                <nav
-                    class="flex flex-wrap items-center gap-y-2 text-xs sm:text-sm"
-                    aria-label="Breadcrumb"
+        <div class="mb-5">
+
+            <nav
+                class="flex flex-wrap items-center gap-2 text-sm"
+                aria-label="Breadcrumb"
+            >
+
+                <a
+                    href="{{ route('dashboard') }}"
+                    class="flex items-center font-medium text-gray-500 transition hover:text-green-700"
                 >
-
-                    {{-- Home --}}
-                    <a
-                        href="{{ route('dashboard') }}"
-                        class="flex items-center font-medium text-gray-500 transition hover:text-green-700"
-                    >
-                        <svg
-                            class="mr-1.5 h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M3 12l9-9 9 9M5 10v10h14V10M9 20v-6h6v6"
-                            />
-                        </svg>
-
-                        Dashboard
-                    </a>
-
-                    {{-- Separator --}}
                     <svg
-                        class="mx-2 h-4 w-4 text-gray-400"
+                        class="mr-1.5 h-4 w-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -46,21 +30,80 @@
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M9 5l7 7-7 7"
+                            d="M3 12l9-9 9 9M5 10v10h14V10M9 20v-6h6v6"
                         />
                     </svg>
 
-                    {{-- Data Management --}}
-                    <a
-                        href="{{ route('data-management') }}"
-                        class="font-medium text-gray-500 transition hover:text-green-700"
-                    >
-                        Data Management
-                    </a>
+                    Dashboard
+                </a>
 
-                    {{-- Separator --}}
+
+                <svg
+                    class="h-4 w-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                    />
+                </svg>
+
+
+                <a
+                    href="{{ route('data-management') }}"
+                    class="font-medium text-gray-500 transition hover:text-green-700"
+                >
+                    Data Management
+                </a>
+
+
+                <svg
+                    class="h-4 w-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                    />
+                </svg>
+
+
+                <span class="font-semibold text-green-700">
+                    Medical Allowance
+                </span>
+
+            </nav>
+
+        </div>
+
+
+        {{-- =========================================================
+            TAB NAVIGATION
+        ========================================================== --}}
+
+        <div
+            class="mb-5 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
+        >
+
+            <div class="grid grid-cols-2">
+
+                <a
+                    href="{{ route('data-management.medical-allowance') }}"
+                    class="flex items-center justify-center gap-3
+                           border-b-2 border-green-700 bg-green-50
+                           px-4 py-3.5 text-green-800"
+                >
+
                     <svg
-                        class="mx-2 h-4 w-4 text-gray-400"
+                        class="h-5 w-5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -69,338 +112,324 @@
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M9 5l7 7-7 7"
+                            d="M17 20h5v-2a4 4 0 00-4-4h-1
+                               M9 20H4v-2a4 4 0 014-4h1
+                               M12 12a4 4 0 100-8 4 4 0 000 8z"
                         />
                     </svg>
 
-                    {{-- Current Page --}}
-                    <span class="font-semibold text-green-800">
-                        Medical Allowance
-                    </span>
+                    <div>
+                        <p class="text-sm font-semibold">
+                            Personnel Records
+                        </p>
 
-                </nav>
+                        <p class="text-xs font-normal text-gray-500">
+                            Review and validate individual records
+                        </p>
+                    </div>
 
-            </div>
-           
-            {{-- TAB NAVIGATION --}}
-            <div class="mb-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                </a>
 
-                <div class="grid w-full min-w-0 grid-cols-1 sm:grid-cols-2">
 
-                    {{-- TAB 1: RECORDS --}}
-                    <a
-                        href="{{ route('data-management.medical-allowance') }}"
-                        class="flex flex-1 items-center justify-center gap-2 border-b-2 border-green-700 bg-green-50 px-5 py-4 text-center text-sm font-semibold text-green-800 transition duration-200 hover:bg-green-100"
+                <a
+                    href="{{ route('data-management.medical-allowance.report') }}"
+                    class="flex items-center justify-center gap-3
+                           border-b-2 border-transparent px-4 py-3.5
+                           text-gray-700 transition
+                           hover:bg-gray-50 hover:text-green-700"
+                >
+
+                    <svg
+                        class="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                     >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 17v-2a4 4 0 014-4h4a4 4 0 014 4v2
+                               M9 17H5a2 2 0 01-2-2V7a2 2 0 012-2h10
+                               a2 2 0 012 2v2 M7 9h6 M7 13h2"
+                        />
+                    </svg>
 
-                        {{-- ICON --}}
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M17 20h5v-2a4 4 0 00-4-4h-1
-                                M9 20H4v-2a4 4 0 014-4h1
-                                M12 12a4 4 0 100-8
-                                4 4 0 000 8z"
-                            />
-                        </svg>
+                    <div>
+                        <p class="text-sm font-semibold">
+                            Medical Allowance Report
+                        </p>
 
-                        <div>
-                            <span class="block">
-                                Personnel Records
-                            </span>
+                        <p class="text-xs font-normal text-gray-500">
+                            School-level summary
+                        </p>
+                    </div>
 
-                            <span class="mt-0.5 block text-xs font-normal text-gray-500">
-                                Individual records
-                            </span>
-                        </div>
-
-                    </a>
-
-
-                    {{-- TAB 2: REPORT --}}
-                    <a
-                        href="{{ route('data-management.medical-allowance.report') }}"
-                        class="flex flex-1 items-center justify-center gap-2 border-b-2 border-transparent bg-white px-5 py-4 text-center text-sm font-semibold text-gray-700 transition duration-200 hover:bg-green-50 hover:text-green-800"
-                    >
-
-                        {{-- ICON --}}
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 17v-2a4 4 0 014-4h4
-                                a4 4 0 014 4v2
-                                M9 17H5a2 2 0 01-2-2V7
-                                a2 2 0 012-2h10
-                                a2 2 0 012 2v2
-                                M7 9h6
-                                M7 13h2"
-                            />
-                        </svg>
-
-                        <div>
-                            <span class="block">
-                                Medical Allowance Report
-                            </span>
-
-                            <span class="mt-0.5 block text-xs font-normal text-gray-500">
-                                School-level summary
-                            </span>
-                        </div>
-
-                    </a>
-                </div>
+                </a>
 
             </div>
 
-            {{-- DEADLINE AND SUBMISSION --}}
-            @if (auth()->user()?->role === 'admin' && $medicalSubmission?->status === 'Verified')
+        </div>
 
-                {{-- VERIFIED: SHOW VALIDATION DETAILS ONLY --}}
-                <div
-                    class="mt-3 rounded-xl border px-5 py-4 shadow-sm"
-                    style="background-color: #f0fdf4; border-color: #86efac; color: #166534;"
-                    role="status"
-                >
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
 
-                        {{-- CHECK ICON --}}
-                        <span
-                            style="display: inline-flex; align-items: center; justify-content: center;
-                                width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%;
-                                background-color: #dcfce7;"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="20"
-                                height="20"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                aria-hidden="true"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M5 12l4 4L19 6"
-                                />
-                            </svg>
-                        </span>
+        {{-- =========================================================
+            SUCCESS / ERROR
+        ========================================================== --}}
 
-                        <div class="text-center">
-                            <p class="font-semibold">
-                                Medical Allowance Report — Validated and Submitted
-                            </p>
+        @if(session('success'))
 
-                            <p class="mt-1 text-sm">
-                                <strong>Validated by:</strong>
-                                {{ $medicalSubmission->validatedBy?->name ?? 'Unavailable' }}
+            <div
+                x-data="{ show: true }"
+                x-show="show"
+                x-init="setTimeout(() => show = false, 5000)"
+                x-transition
+                class="mb-5 flex items-center justify-between
+                       rounded-lg border border-green-200
+                       bg-green-50 px-4 py-3"
+            >
 
-                                <span class="mx-2">&bull;</span>
+                <div class="flex items-center gap-3">
 
-                                <strong>Date:</strong>
-                                {{ $medicalSubmission->validated_at
-                                    ?->copy()
-                                    ->timezone('Asia/Manila')
-                                    ->format('F j, Y • g:i A') ?? 'Unavailable' }}
-                            </p>
-                        </div>
+                    <div
+                        class="flex h-8 w-8 items-center justify-center
+                               rounded-full bg-green-100 text-green-700"
+                    >
+                        ✓
                     </div>
-                </div>
 
-            @else
-
-                {{-- NOT VERIFIED: SHOW DEADLINE AND BUTTON --}}
-                <div
-                    class="mt-3 rounded-xl border px-5 py-4 shadow-sm"
-                    style="background-color: #fef2f2; border-color: #fecaca;"
-                >
-                    <div style="display: flex; align-items: center; gap: 24px; width: 100%;">
-
-                        <div style="flex: 1; min-width: 0; text-align: center;">
-                            <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
-
-                                {{-- CLOCK ICON --}}
-                                <span
-                                    style="display: inline-flex; align-items: center; justify-content: center;
-                                        width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%;
-                                        background-color: #fee2e2; color: #dc2626;"
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="20"
-                                        height="20"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        aria-hidden="true"
-                                    >
-                                        <circle cx="12" cy="12" r="9" />
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M12 7v5l3 2"
-                                        />
-                                    </svg>
-                                </span>
-
-                                <p class="text-sm font-bold" style="color: #9a3412;">
-                                    Deadline for Validation of Medical Report
-
-                                    <span style="display: inline-block; margin-left: 8px;">
-                                        @if ($medicalReport)
-                                            {{ $medicalReport->deadline->format('F j, Y • g:i A') }}
-                                        @else
-                                            Not yet configured
-                                        @endif
-                                    </span>
-                                </p>
-                            </div>
-
-                            @if (auth()->user()?->role === 'admin' && $medicalReport)
-                                <p class="mt-1 text-sm text-gray-600">
-                                    Please ensure that your school’s personnel information is complete,
-                                    accurate, and verified before submitting the report.
-                                </p>
-                            @endif
-                        </div>
-
-                        @if (auth()->user()?->role === 'admin' && $medicalReport)
-                            <div style="flex-shrink: 0;">
-                                @if ($medicalReport->status !== 'Ongoing')
-                                    <p class="text-sm font-semibold text-gray-600">
-                                        This report is closed.
-                                    </p>
-                                @elseif ($schoolCode === null || $schoolCode === '')
-                                    <p class="text-sm font-semibold text-red-700">
-                                        Your account has no assigned school.
-                                    </p>
-                                @else
-                                    <form
-                                        method="POST"
-                                        style="margin: 0;"
-                                        action="{{ route('data-management.medical-allowance.validate', [
-                                            'report' => $medicalReport->id,
-                                        ]) }}"
-                                        onsubmit="return confirm('Confirm that your school’s personnel information is complete, accurate, and verified. Submit this report?');"
-                                    >
-                                        @csrf
-                                        @method('PATCH')
-
-                                        <button
-                                            type="submit"
-                                            style="background-color: #c2410c; color: #ffffff; white-space: nowrap;"
-                                            class="rounded-lg px-5 py-3 text-sm font-semibold
-                                                transition hover:opacity-90
-                                                focus-visible:outline focus-visible:outline-2
-                                                focus-visible:outline-offset-2"
-                                        >
-                                            Validated &amp; Submit Report
-                                        </button>
-                                    </form>
-                                @endif
-                            </div>
-                        @endif
-
-                    </div>
-                </div>
-
-            @endif
-
-            
-            {{-- GENERAL ERROR --}}
-            @if(session('error'))
-
-                <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-5">
-
-                    <p class="font-semibold text-red-800">
-                        {{ session('error') }}
+                    <p class="text-sm font-medium text-green-800">
+                        {{ session('success') }}
                     </p>
 
                 </div>
 
-            @endif
+
+                <button
+                    type="button"
+                    @click="show = false"
+                    class="text-green-700"
+                >
+                    ✕
+                </button>
+
+            </div>
+
+        @endif
 
 
-            {{-- MEDICAL ALLOWANCE IMPORT RESULT --}}
-            @if(session('medical_allowance_import_result'))
+        @if(session('error'))
 
-                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-5">
+            <div
+                class="mb-5 rounded-lg border border-red-200
+                       bg-red-50 px-4 py-3 text-sm
+                       font-medium text-red-800"
+            >
+                {{ session('error') }}
+            </div>
 
-                    <h3 class="text-lg font-bold text-green-900">
-                        Medical Allowance Import Completed
-                    </h3>
+        @endif
 
-                    <div class="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
 
-                        {{-- NEW RECORDS --}}
-                        <div>
+        {{-- =========================================================
+            VALIDATION / DEADLINE BAR
+        ========================================================== --}}
 
-                            <p class="text-sm text-gray-500">
-                                New Records
-                            </p>
+        @if(
+            auth()->user()?->role === 'admin'
+            && $medicalSubmission?->status === 'Verified'
+        )
 
-                            <p class="text-2xl font-bold text-green-700">
-                                {{ session('medical_allowance_import_result.imported') }}
-                            </p>
+            {{-- =====================================================
+                VERIFIED / LOCKED
+            ====================================================== --}}
 
+            <div
+                class="mb-5 flex w-full items-center justify-between
+                    gap-4 rounded-xl border border-green-200
+                    bg-green-50 px-5 py-4"
+            >
+
+                {{-- LEFT SIDE --}}
+                <div class="flex min-w-0 flex-1 items-center gap-3">
+
+                    {{-- ICON --}}
+                    <div
+                        class="flex h-10 w-10 shrink-0 items-center
+                            justify-center rounded-full
+                            bg-green-100 text-green-700"
+                    >
+                        <svg
+                            class="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 12l4 4L19 6"
+                            />
+                        </svg>
+                    </div>
+
+
+                    {{-- INFORMATION --}}
+                    <div class="min-w-0">
+
+                        <p class="text-sm font-semibold text-green-900">
+                            Medical Allowance Report Validated
+                        </p>
+
+                        <p class="mt-0.5 text-xs text-green-700">
+
+                            Validated by
+
+                            <span class="font-semibold">
+                                {{ $medicalSubmission->validatedBy?->name ?? 'Unavailable' }}
+                            </span>
+
+                            @if($medicalSubmission->validated_at)
+
+                                on
+
+                                {{ $medicalSubmission->validated_at
+                                    ->copy()
+                                    ->timezone('Asia/Manila')
+                                    ->format('F j, Y • g:i A') }}
+
+                            @endif
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                {{-- RIGHT SIDE --}}
+                <div class="ml-auto shrink-0">
+
+                    <span
+                        class="inline-flex items-center gap-1.5
+                            whitespace-nowrap rounded-full
+                            bg-green-100 px-3 py-1.5
+                            text-xs font-semibold text-green-700"
+                    >
+
+                        <svg
+                            class="h-3.5 w-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6
+                                a2 2 0 00-2-2h-1V7a5 5 0 00-10 0v4H6
+                                a2 2 0 00-2 2v6a2 2 0 002 2zm3-10V7
+                                a3 3 0 016 0v4H9z"
+                            />
+                        </svg>
+
+                        Editing Locked
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+        @elseif($medicalReport)
+
+            {{-- =====================================================
+                ONGOING VALIDATION
+            ====================================================== --}}
+
+            <div
+                class="mb-5 w-full rounded-xl border
+                    border-orange-200 bg-orange-50
+                    px-5 py-4"
+            >
+
+                {{-- =================================================
+                    SINGLE ROW
+                ================================================== --}}
+
+                <div class="flex w-full items-center gap-5">
+
+                    {{-- =================================================
+                        LEFT SIDE
+                    ================================================== --}}
+
+                    <div class="flex min-w-0 flex-1 items-start gap-3">
+
+                        {{-- CLOCK ICON --}}
+                        <div
+                            class="flex h-10 w-10 shrink-0 items-center
+                                justify-center rounded-full
+                                bg-orange-100 text-orange-700"
+                        >
+                            <svg
+                                class="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="9"
+                                    stroke-width="2"
+                                />
+
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 7v5l3 2"
+                                />
+                            </svg>
                         </div>
 
 
-                        {{-- UPDATED RECORDS --}}
-                        <div>
+                        {{-- DEADLINE INFORMATION --}}
+                        <div class="min-w-0 flex-1">
 
-                            <p class="text-sm text-gray-500">
-                                Updated Records
+                            <p class="text-sm font-semibold text-red-700">
+
+                                Medical Allowance Validation Deadline:
+
+                                <strong>
+                                    {{ $medicalReport->deadline
+                                        ?->copy()
+                                        ->timezone('Asia/Manila')
+                                        ->format('F j, Y • g:i A')
+                                        ?? 'Not configured' }}
+                                </strong>
+
                             </p>
 
-                            <p class="text-2xl font-bold text-blue-700">
-                                {{ session('medical_allowance_import_result.updated') }}
-                            </p>
 
-                        </div>
+                            <p class="mt-1 text-sm text-gray-600">
 
+                                Review and validate both
 
-                        {{-- SKIPPED --}}
-                        <div>
+                                <strong class="font-semibold text-gray-700">
+                                    {{ $previousYear }}
+                                </strong>
 
-                            <p class="text-sm text-gray-500">
-                                Skipped
-                            </p>
+                                and
 
-                            <p class="text-2xl font-bold text-yellow-600">
-                                {{ session('medical_allowance_import_result.skipped') }}
-                            </p>
+                                <strong class="font-semibold text-gray-700">
+                                    {{ $currentYear }}
+                                </strong>
 
-                        </div>
+                                medical allowance records before submission.
 
-
-                        {{-- ERRORS --}}
-                        <div>
-
-                            <p class="text-sm text-gray-500">
-                                Errors
-                            </p>
-
-                            <p class="text-2xl font-bold text-red-600">
-                                {{ count(session('medical_allowance_import_result.errors', [])) }}
                             </p>
 
                         </div>
@@ -408,29 +437,95 @@
                     </div>
 
 
-                    {{-- ERROR DETAILS --}}
-                    @if(count(session('medical_allowance_import_result.errors', [])) > 0)
+                    {{-- =================================================
+                        RIGHT SIDE
+                    ================================================== --}}
 
-                        <div class="mt-5 rounded-lg border border-red-200 bg-red-50 p-4">
+                    @if(auth()->user()?->role === 'admin')
 
-                            <h4 class="font-semibold text-red-800">
-                                Import Errors
-                            </h4>
+                        <div class="ml-auto shrink-0">
 
-                            <ul class="mt-2 list-disc pl-5 text-sm text-red-700">
+                            {{-- REPORT CLOSED --}}
+                            @if($medicalReport->status !== 'Ongoing')
 
-                                @foreach(session('medical_allowance_import_result.errors', []) as $error)
+                                <span
+                                    class="inline-flex min-h-11 items-center
+                                        justify-center whitespace-nowrap
+                                        rounded-lg bg-gray-200
+                                        px-5 text-sm font-semibold
+                                        text-gray-600"
+                                >
+                                    Report Closed
+                                </span>
 
-                                    <li>
 
-                                        Row {{ $error['row'] ?? 'N/A' }}:
-                                        {{ $error['message'] ?? 'Unknown error' }}
+                            {{-- NO SCHOOL --}}
+                            @elseif(!$schoolCode)
 
-                                    </li>
+                                <span
+                                    class="inline-flex min-h-11 items-center
+                                        whitespace-nowrap rounded-lg
+                                        bg-red-50 px-4 text-sm
+                                        font-semibold text-red-700"
+                                >
+                                    No assigned school.
+                                </span>
 
-                                @endforeach
 
-                            </ul>
+                            {{-- VALIDATE BUTTON --}}
+                            @else
+
+                                <form
+                                    method="POST"
+                                    action="{{ route(
+                                        'data-management.medical-allowance.validate',
+                                        ['report' => $medicalReport->id]
+                                    ) }}"
+                                    onsubmit="return confirm(
+                                        'Confirm that the {{ $previousYear }} and {{ $currentYear }} medical allowance records have been reviewed and are correct. Submit this report?'
+                                    );"
+                                    class="m-0"
+                                >
+
+                                    @csrf
+                                    @method('PATCH')
+
+
+                                    <button
+                                        type="submit"
+                                        class="inline-flex min-h-11 items-center
+                                            justify-center gap-2 whitespace-nowrap
+                                            rounded-lg bg-green-700 px-5
+                                            text-sm font-semibold text-white
+                                            shadow-sm transition
+                                            hover:bg-green-800
+                                            focus:outline-none
+                                            focus:ring-2
+                                            focus:ring-green-600
+                                            focus:ring-offset-2"
+                                    >
+
+                                        <svg
+                                            class="h-4 w-4 shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M5 13l4 4L19 7"
+                                            />
+                                        </svg>
+
+                                        Validate & Submit
+
+                                    </button>
+
+                                </form>
+
+                            @endif
 
                         </div>
 
@@ -438,1031 +533,1544 @@
 
                 </div>
 
-            @endif
+            </div>
+
+        @endif
+
+
+        {{-- =========================================================
+            VALIDATION SUMMARY
+        ========================================================== --}}
+
+        <div class="mb-4">
+
+            <div class="mb-2 flex items-center gap-2">
+
+                <h2 class="text-base font-bold text-gray-900">
+                    Validation Summary
+                </h2>
+
+                <span class="text-gray-300">|</span>
+
+                <p class="text-xs text-gray-500">
+                    {{ $previousYear }} vs. {{ $currentYear }} Medical Allowance
+                </p>
+
+            </div>
+
+
+            {{-- 6 CARDS IN ONE ROW --}}
+
+            <div
+                class="grid gap-2"
+                style="grid-template-columns: repeat(6, minmax(0, 1fr));"
+            >
+
+                {{-- TOTAL --}}
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                        'filter' => 'all',
+                        'page' => 1
+                    ]) }}#medical-allowance-table"
+                    class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                        {{ $filter === 'all'
+                            ? 'border-green-300 bg-green-50 shadow-sm'
+                            : 'border-gray-200 bg-white hover:border-green-300' }}"
+                >
+                    <p class="truncate text-[10px] font-semibold uppercase text-gray-500">
+                        Total
+                    </p>
+
+                    <p class="mt-1 text-lg font-bold text-gray-900">
+                        {{ number_format($summary['total']) }}
+                    </p>
+                </a>
+
+
+                {{-- CHANGED --}}
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                        'filter' => 'changed',
+                        'page' => 1
+                    ]) }}#medical-allowance-table"
+                    class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                        {{ $filter === 'changed'
+                            ? 'border-blue-300 bg-blue-50 shadow-sm'
+                            : 'border-gray-200 bg-white hover:border-blue-300' }}"
+                >
+                    <p class="truncate text-[10px] font-semibold uppercase text-blue-600">
+                        Changed
+                    </p>
+
+                    <p class="mt-1 text-lg font-bold text-blue-700">
+                        {{ number_format($summary['changed']) }}
+                    </p>
+                </a>
+
+
+                {{-- NO CHANGES --}}
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                        'filter' => 'no_change',
+                        'page' => 1
+                    ]) }}#medical-allowance-table"
+                    class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                        {{ $filter === 'no_change'
+                            ? 'border-gray-400 bg-gray-100 shadow-sm'
+                            : 'border-gray-200 bg-white hover:border-gray-300' }}"
+                >
+                    <p class="truncate text-[10px] font-semibold uppercase text-gray-500">
+                        No Changes
+                    </p>
+
+                    <p class="mt-1 text-lg font-bold text-gray-700">
+                        {{ number_format($summary['no_change']) }}
+                    </p>
+                </a>
+
+
+                {{-- NO PREVIOUS RECORD --}}
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                        'filter' => 'new',
+                        'page' => 1
+                    ]) }}#medical-allowance-table"
+                    class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                        {{ $filter === 'new'
+                            ? 'border-purple-300 bg-purple-50 shadow-sm'
+                            : 'border-gray-200 bg-white hover:border-purple-300' }}"
+                >
+                    <p class="truncate text-[10px] font-semibold uppercase text-purple-600">
+                        No {{ $previousYear }} Record
+                    </p>
+
+                    <p class="mt-1 text-lg font-bold text-purple-700">
+                        {{ number_format($summary['new']) }}
+                    </p>
+                </a>
+
+
+                {{-- PENDING --}}
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                        'filter' => 'pending',
+                        'page' => 1
+                    ]) }}#medical-allowance-table"
+                    class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                        {{ $filter === 'pending'
+                            ? 'border-amber-300 bg-amber-50 shadow-sm'
+                            : 'border-gray-200 bg-white hover:border-amber-300' }}"
+                >
+                    <p class="truncate text-[10px] font-semibold uppercase text-amber-600">
+                        Pending
+                    </p>
+
+                    <p class="mt-1 text-lg font-bold text-amber-700">
+                        {{ number_format($summary['pending']) }}
+                    </p>
+                </a>
+
+
+                {{-- VALIDATED --}}
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                        'filter' => 'validated',
+                        'page' => 1
+                    ]) }}#medical-allowance-table"
+                    class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                        {{ $filter === 'validated'
+                            ? 'border-green-300 bg-green-50 shadow-sm'
+                            : 'border-gray-200 bg-white hover:border-green-300' }}"
+                >
+                    <p class="truncate text-[10px] font-semibold uppercase text-green-600">
+                        Validated
+                    </p>
+
+                    <p class="mt-1 text-lg font-bold text-green-700">
+                        {{ number_format($summary['validated']) }}
+                    </p>
+                </a>
+
+            </div>
+
+        </div>
+
+
+        {{-- =========================================================
+            RECORDS CARD
+        ========================================================== --}}
+
+        <div
+            id="medical-allowance-table"
+            class="overflow-hidden rounded-xl
+                   border border-gray-200 bg-white shadow-sm"
+        >
+
+
+            {{-- HEADER --}}
+
+            <div
+                class="flex flex-col gap-3 bg-green-800
+                       px-5 py-4 sm:flex-row
+                       sm:items-center sm:justify-between"
+            >
+
+                <div>
+
+                    <h2 class="text-base font-semibold text-white">
+
+                        Medical Allowance Records
+
+                        @if(auth()->user()->role === 'admin')
+
+                            <span class="font-normal text-green-100">
+                                —
+                                @php
+                                    $school = auth()->user()->employmentStatus?->school;
+                                @endphp
+
+                                {{ $school
+                                    ? $school->school_name . ' - ' . $school->school_district
+                                    : 'No assigned school'
+                                }}
+                            </span>
+
+                        @else
+
+                            <span class="font-normal text-green-100">
+                                — All Schools
+                            </span>
+
+                        @endif
+
+                    </h2>
+
+
+                    <p class="mt-1 text-xs text-green-100">
+                        Review and correct both year records before validation.
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="inline-flex w-fit rounded-lg
+                           bg-green-900/40 px-3 py-2
+                           text-xs font-medium text-green-100"
+                >
+                    {{ $previousYear }} → {{ $currentYear }}
+                </div>
+
+            </div>
 
 
             {{-- =====================================================
-                SUPER ADMIN - IMPORT PERSONNEL
+                SEARCH
             ====================================================== --}}
-            @if(auth()->user()->role === 'super_admin')
 
-                <div id="import" class="mb-6 rounded-xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
+            <div class="border-b border-gray-200 p-4">
 
-                    <div class="mb-5">
+                <form
+                    action="{{ route(
+                        'data-management.medical-allowance'
+                    ) }}"
+                    method="GET"
+                >
 
-                        <h2 class="text-lg font-semibold text-gray-800">
-                            Import Medical Allowance Records
-                        </h2>
-
-                        <p class="mt-1 text-sm text-gray-500">
-                            Upload an Excel file containing personnel medical
-                            allowance records.
-                        </p>
-
-                    </div>
-
-
-                    <form
-                        action="{{ route('data-management.medical-allowance.import') }}"
-                        method="POST"
-                        enctype="multipart/form-data"
-                        >
-
-                        @csrf
-
-                        <div class="flex flex-col gap-3 md:flex-row md:items-center">
-
-                            {{-- EXCEL FILE LABEL --}}
-                            <label
-                                for="file"
-                                class="shrink-0 text-sm font-semibold text-gray-700"
-                            >
-                                EXCEL FILE
-                            </label>
-
-
-                            {{-- CUSTOM FILE INPUT --}}
-                            <div class="relative flex h-11 min-w-0 w-full shrink-0 md:flex-1">
-
-                                {{-- REAL FILE INPUT --}}
-                                <input
-                                    type="file"
-                                    id="file"
-                                    name="file"
-                                    accept=".xlsx,.xls"
-                                    required
-                                    class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-                                    onchange="document.getElementById('file-name').textContent =
-                                        this.files.length ? this.files[0].name : 'No file selected'"
-                                >
-
-
-                                {{-- CUSTOM FILE DISPLAY --}}
-                                <div
-                                    class="flex h-full w-full items-center overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm"
-                                >
-
-                                    {{-- BROWSE BUTTON --}}
-                                    <span
-                                        class="flex h-full shrink-0 items-center border-r border-green-200 bg-green-50 px-4 text-sm font-semibold text-green-700"
-                                    >
-                                        Browse...
-                                    </span>
-
-
-                                    {{-- FILE NAME --}}
-                                    <span
-                                        id="file-name"
-                                        class="truncate px-4 text-sm text-gray-500"
-                                    >
-                                        No file selected
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-
-                            {{-- ACTION BUTTONS --}}
-                            <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-
-                                {{-- UPLOAD BUTTON --}}
-                                <button
-                                    type="submit"
-                                    class="flex min-h-11 w-full items-center justify-center gap-2 sm:w-auto rounded-lg bg-green-700 px-5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                                    >
-
-                                    {{-- UPLOAD ICON --}}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="h-4 w-4"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
-                                        />
-
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M12 3v10m0-10L8 7m4-4l4 4"
-                                        />
-
-                                    </svg>
-
-                                    Upload & Preview
-
-                                </button>
-
-                                {{-- DOWNLOAD TEMPLATE --}}
-                                <a
-                                    href="{{ route('data-management.medical-allowance.template') }}"
-                                    class="flex min-h-11 w-full items-center justify-center gap-2 sm:w-auto rounded-lg border border-green-700 bg-white px-4 text-sm font-semibold text-green-700 shadow-sm transition duration-200 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                                    >
-
-                                    {{-- DOWNLOAD ICON --}}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="h-4 w-4"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M12 3v12m0 0l-4-4m4 4l4-4"
-                                        />
-
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M5 21h14"
-                                        />
-                                    </svg>
-
-                                    Download Template
-
-                                </a>
-
-                            </div>
-
-                        </div>
-
-                        {{-- HELP TEXT --}}
-                        <p class="mt-1.5 text-xs text-gray-500">
-
-                            Accepted formats:
-                            <span class="font-medium">.xlsx</span>
-                            and
-                            <span class="font-medium">.xls</span>.
-                            Maximum file size:
-                            <span class="font-medium">10 MB</span>.
-
-                        </p>
-
-                    </form>
-
-                </div>
-            @endif
-
-
-            {{-- ========================================================= --}}
-            {{-- MEDICAL ALLOWANCE RECORDS --}}
-            {{-- ========================================================= --}}
-
-            <div class="min-w-0 rounded-xl border border-gray-200 bg-white shadow-sm">
-
-                {{-- UPDATE NOTIFICATION --}}
-                @if (session('success'))
-                    <div
-                        id="update-notification"
-                        tabindex="-1"
-                        x-data="{ show: true }"
-                        x-init="
-                            $nextTick(() => {
-                                setTimeout(() => {
-                                    $el.scrollIntoView({
-                                        behavior: 'smooth',
-                                        block: 'center'
-                                    });
-
-                                    $el.focus({ preventScroll: true });
-                                }, 200);
-                            });
-
-                            setTimeout(() => show = false, 6000);
-                        "
-                        x-show="show"
-                        x-transition
-                        class="mb-4 flex items-start justify-between rounded-lg border border-green-200 bg-green-50 text-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                        style="padding: 14px 18px;"
-                        role="alert"
+                    <input
+                        type="hidden"
+                        name="filter"
+                        value="{{ $filter }}"
                     >
-                        <div class="flex items-center gap-3">
+
+
+                    <div class="flex flex-col gap-2 sm:flex-row">
+
+                        <div class="relative flex-1">
+
                             <div
-                                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-100"
+                                class="pointer-events-none absolute
+                                       inset-y-0 left-0 flex items-center pl-3"
                             >
                                 <svg
-                                    class="h-5 w-5 text-green-700"
+                                    class="h-4 w-4 text-gray-400"
                                     fill="none"
-                                    viewBox="0 0 24 24"
                                     stroke="currentColor"
+                                    viewBox="0 0 24 24"
                                 >
+                                    <circle cx="11" cy="11" r="7"/>
+
                                     <path
                                         stroke-linecap="round"
-                                        stroke-linejoin="round"
                                         stroke-width="2"
-                                        d="M5 13l4 4L19 7"
+                                        d="m20 20-3.5-3.5"
                                     />
                                 </svg>
                             </div>
 
-                            <div>
-                                <p class="text-sm font-semibold">
-                                    Update successful
-                                </p>
 
-                                <p class="mt-0.5 text-sm text-green-700">
-                                    {{ session('success') }}
-                                </p>
-                            </div>
+                            <input
+                                type="text"
+                                name="search"
+                                value="{{ $search }}"
+                                placeholder="Search employee name, email, school, position or status..."
+                                class="w-full rounded-lg border-gray-300
+                                       py-2.5 pl-10 pr-4 text-sm
+                                       shadow-sm focus:border-green-600
+                                       focus:ring-green-600"
+                            >
+
                         </div>
+
 
                         <button
-                            type="button"
-                            @click="show = false"
-                            class="ml-4 rounded-md p-1 text-green-600 hover:bg-green-100 hover:text-green-800"
-                            aria-label="Close notification"
+                            type="submit"
+                            class="min-h-10 rounded-lg bg-green-700
+                                   px-5 text-sm font-semibold text-white
+                                   transition hover:bg-green-800"
                         >
-                            <svg
-                                class="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
+                            Search
                         </button>
-                    </div>
-                @endif
 
-                {{-- HEADER --}}
-                <div class="flex flex-col gap-4 border-b border-gray-200 p-4 sm:p-6 md:flex-row md:items-center md:justify-between bg-green-800">
 
-                    <div>
+                        @if($search !== '' || $filter !== 'all')
 
-                        <h2 class="text-lg font-semibold text-white">
-                            Medical Allowance Records
+                            <a
+                                href="{{ route(
+                                    'data-management.medical-allowance'
+                                ) }}#medical-allowance-table"
+                                class="flex min-h-10 items-center
+                                       justify-center rounded-lg border
+                                       border-gray-300 bg-white px-4
+                                       text-sm font-semibold text-gray-600
+                                       hover:bg-gray-50"
+                            >
+                                Clear
+                            </a>
 
-                            @if (auth()->user()->role === 'admin')
-                                (
-                                    {{ auth()->user()->employmentStatus?->school?->school_name ?? 'No assigned school' }}
-                                    -
-                                    {{ auth()->user()->employmentStatus?->school?->school_district ?? 'No district' }}
-                                )
-                            @elseif (auth()->user()->role === 'super_admin')
-                                (All Schools)
-                            @endif
-                        </h2>
-
-                        <p class="mt-1 text-sm text-white">
-                            List of personnel medical allowance records and
-                            related employment information.
-                        </p>
+                        @endif
 
                     </div>
 
-                </div>
+                </form>
+
+            </div>
 
 
-                {{-- SEARCH --}}
-                <div 
-                    id="medical-allowance-table"
-                    class="border-b border-gray-200 p-4 sm:p-6">
+            {{-- =====================================================
+                SORT URL
+            ====================================================== --}}
 
-                    <form
-                        action="{{ route('data-management.medical-allowance') }}"
-                        method="GET"
-                    >
+            @php
 
-                        <div class="flex flex-col gap-3 md:flex-row">
+                $sortUrl = function ($column) use (
+                    $sort,
+                    $direction
+                ) {
 
-                            <div class="min-w-0 flex-1">
+                    $newDirection =
+                        ($sort === $column && $direction === 'asc')
+                            ? 'desc'
+                            : 'asc';
 
-                                <label
-                                    for="search"
-                                    class="mb-2 block text-sm font-medium text-gray-700"
+                    return request()->fullUrlWithQuery([
+                        'sort' => $column,
+                        'direction' => $newDirection,
+                        'page' => 1,
+                    ]) . '#medical-allowance-table';
+
+                };
+
+            @endphp
+
+
+            {{-- =====================================================
+                TABLE
+            ====================================================== --}}
+
+            <div class="overflow-x-auto">
+
+                <table class="min-w-full divide-y divide-gray-200">
+
+                    <thead>
+
+                        {{-- YEAR GROUP --}}
+
+                        <tr class="border-b border-gray-200 bg-gray-50">
+
+                            <th
+                                colspan="{{ auth()->user()->role === 'super_admin' ? 3 : 2 }}"
+                                class="px-4 py-2"
+                            ></th>                                                                          
+
+
+                            <th
+                                class="border-l border-gray-200
+                                       bg-slate-100 px-4 py-2 text-center"
+                            >
+                                <span
+                                    class="text-xs font-bold uppercase
+                                           tracking-wide text-slate-600"
                                 >
-                                    Search Personnel
-                                </label>
+                                    {{ $previousYear }}
+                                </span>
+                            </th>
 
-                                <input
-                                    type="text"
-                                    id="search"
-                                    name="search"
-                                    value="{{ $search }}"
-                                    placeholder="Search by name, email, school, or status..."
-                                    class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-green-600 focus:ring-green-600"
+
+                            <th
+                                class="border-l border-gray-200
+                                       bg-green-100 px-4 py-2 text-center"
+                            >
+                                <span
+                                    class="text-xs font-bold uppercase
+                                           tracking-wide text-green-700"
                                 >
-
-                            </div>
-
-
-                            <div class="flex flex-wrap items-end gap-2 [&>*]:flex-1 md:[&>*]:flex-none">
-
-                                <button
-                                    type="submit"
-                                    class="rounded-md bg-green-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-800"
-                                >
-                                    Search
-                                </button>
+                                    {{ $currentYear }}
+                                </span>
+                            </th>
 
 
-                                @if($search !== '')
+                            <th colspan="3"></th>
 
-                                    <a
-                                        href="{{ route('data-management.medical-allowance') }}"
-                                        class="rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                                    >
-                                        Clear
-                                    </a>
-
-                                @endif
-
-                            </div>
-
-                        </div>
-
-                    </form>
-
-                </div>
+                        </tr>
 
 
-                {{-- TABLE --}}
-                <p class="px-4 py-2 text-xs text-gray-500 lg:hidden">
-                    Swipe left or right to view all columns and the Update button.
-                </p>
-                <div
-                    class="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain scroll-mt-24" tabindex="0" role="region" aria-label="Medical allowance records, horizontally scrollable"
-                >
+                        <tr class="bg-white">
 
-                     @php
-                        $sortUrl = function ($column) use ($sort, $direction) {
+                            {{-- NAME --}}
 
-                            $newDirection =
-                                ($sort === $column && $direction === 'asc')
-                                    ? 'desc'
-                                    : 'asc';
-
-                            return request()->fullUrlWithQuery([
-                                'sort' => $column,
-                                'direction' => $newDirection,
-                                'page' => 1,
-                            ]) . '#medical-allowance-table';
-                        };
-                    @endphp
-
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-green-50">
-                        <tr>
-
-                            {{-- NAME AND EMAIL --}}
-                            <th class="min-w-[220px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-
+                            <th
+                                class="min-w-[240px] px-4 py-3
+                                       text-left text-xs font-semibold
+                                       uppercase tracking-wide text-gray-500"
+                            >
                                 <a
                                     href="{{ $sortUrl('name') }}"
-                                    class="flex items-center justify-between gap-3 hover:text-green-700"
+                                    class="hover:text-green-700"
                                 >
-                                    <span>Name and Email</span>
-
-                                    {{-- SORT ICON --}}
-                                    <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                                        {{-- ASCENDING --}}
-                                        <span class="text-[11px] font-black
-                                            {{ $sort === 'name' && $direction === 'asc'
-                                                ? 'text-green-700'
-                                                : 'text-gray-300'
-                                            }}">
-                                            ▲
-                                        </span>
-
-                                        {{-- DESCENDING --}}
-                                        <span class="text-[11px] font-black
-                                            {{ $sort === 'name' && $direction === 'desc'
-                                                ? 'text-green-700'
-                                                : 'text-gray-300'
-                                            }}">
-                                            ▼
-                                        </span>
-
-                                    </span>
+                                    Employee
                                 </a>
-
                             </th>
 
-
-                            @if (auth()->user()->role === 'super_admin')
-
-                                {{-- SCHOOL NAME --}}
-                                <th class="min-w-[220px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-
-                                    <a
-                                        href="{{ $sortUrl('school') }}"
-                                        class="flex items-center justify-between gap-3 hover:text-green-700"
-                                    >
-                                        <span>School Name</span>
-
-                                        <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                                            <span class="text-[11px] font-black
-                                                {{ $sort === 'school' && $direction === 'asc'
-                                                    ? 'text-green-700'
-                                                    : 'text-gray-300'
-                                                }}">
-                                                ▲
-                                            </span>
-
-                                            <span class="text-[11px] font-black
-                                                {{ $sort === 'school' && $direction === 'desc'
-                                                    ? 'text-green-700'
-                                                    : 'text-gray-300'
-                                                }}">
-                                                ▼
-                                            </span>
-
-                                        </span>
-                                    </a>
-
-                                </th>
-
-
-                                {{-- DISTRICT --}}
-                                <th class="min-w-[140px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-
-                                    <a
-                                        href="{{ $sortUrl('district') }}"
-                                        class="flex items-center justify-between gap-3 hover:text-green-700"
-                                    >
-                                        <span>District</span>
-
-                                        <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                                            <span class="text-[11px] font-black
-                                                {{ $sort === 'district' && $direction === 'asc'
-                                                    ? 'text-green-700'
-                                                    : 'text-gray-300'
-                                                }}">
-                                                ▲
-                                            </span>
-
-                                            <span class="text-[11px] font-black
-                                                {{ $sort === 'district' && $direction === 'desc'
-                                                    ? 'text-green-700'
-                                                    : 'text-gray-300'
-                                                }}">
-                                                ▼
-                                            </span>
-
-                                        </span>
-                                    </a>
-
-                                </th>
-
-
-                                {{-- ITEM FROM SCHOOL LEVEL --}}
-                                <th class="min-w-[180px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-
-                                    <a
-                                        href="{{ $sortUrl('school_level') }}"
-                                        class="flex items-center justify-between gap-3 hover:text-green-700"
-                                    >
-                                        <span>
-                                            Item From<br>
-                                            School Level
-                                        </span>
-
-                                        <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                                            <span class="text-[11px] font-black
-                                                {{ $sort === 'school_level' && $direction === 'asc'
-                                                    ? 'text-green-700'
-                                                    : 'text-gray-300'
-                                                }}">
-                                                ▲
-                                            </span>
-
-                                            <span class="text-[11px] font-black
-                                                {{ $sort === 'school_level' && $direction === 'desc'
-                                                    ? 'text-green-700'
-                                                    : 'text-gray-300'
-                                                }}">
-                                                ▼
-                                            </span>
-
-                                        </span>
-                                    </a>
-
-                                </th>
-
-                            @endif
-
-
-                            {{-- POSITION TITLE --}}
-                            <th class="min-w-[200px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-
-                                <a
-                                    href="{{ $sortUrl('position') }}"
-                                    class="flex items-center justify-between gap-3 hover:text-green-700"
-                                >
-                                    <span>Position Title</span>
-
-                                    <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                                        <span class="text-[11px] font-black
-                                            {{ $sort === 'position' && $direction === 'asc'
-                                                ? 'text-green-700'
-                                                : 'text-gray-300'
-                                            }}">
-                                            ▲
-                                        </span>
-
-                                        <span class="text-[11px] font-black
-                                            {{ $sort === 'position' && $direction === 'desc'
-                                                ? 'text-green-700'
-                                                : 'text-gray-300'
-                                            }}">
-                                            ▼
-                                        </span>
-
-                                    </span>
-                                </a>
-
-                            </th>
-
-
-                            {{-- EMPLOYMENT STATUS --}}
-                            <th class="min-w-[170px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-
-                                <a
-                                    href="{{ $sortUrl('employment_status') }}"
-                                    class="flex items-center justify-between gap-3 hover:text-green-700"
-                                >
-                                    <span>
-                                        Employment<br>
-                                        Status
-                                    </span>
-
-                                    <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                                        <span class="text-[11px] font-black
-                                            {{ $sort === 'employment_status' && $direction === 'asc'
-                                                ? 'text-green-700'
-                                                : 'text-gray-300'
-                                            }}">
-                                            ▲
-                                        </span>
-
-                                        <span class="text-[11px] font-black
-                                            {{ $sort === 'employment_status' && $direction === 'desc'
-                                                ? 'text-green-700'
-                                                : 'text-gray-300'
-                                            }}">
-                                            ▼
-                                        </span>
-
-                                    </span>
-                                </a>
-
-                            </th>
-
-
-                            {{-- MEDICAL ALLOWANCE MODE AVAILMENT --}}
-                            <th class="min-w-[230px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-
-                                <a
-                                    href="{{ $sortUrl('mode_of_availment') }}"
-                                    class="flex items-center justify-between gap-3 hover:text-green-700"
-                                >
-                                    <span>
-                                        Medical Allowance<br>
-                                        Mode Availment
-                                    </span>
-
-                                    <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                                        <span class="text-[11px] font-black
-                                            {{ $sort === 'mode_of_availment' && $direction === 'asc'
-                                                ? 'text-green-700'
-                                                : 'text-gray-300'
-                                            }}">
-                                            ▲
-                                        </span>
-
-                                        <span class="text-[11px] font-black
-                                            {{ $sort === 'mode_of_availment' && $direction === 'desc'
-                                                ? 'text-green-700'
-                                                : 'text-gray-300'
-                                            }}">
-                                            ▼
-                                        </span>
-
-                                    </span>
-                                </a>
-
-                            </th>
 
                             @if(auth()->user()->role === 'super_admin')
-                                {{-- DISBURSEMENT STATUS --}}
-                                <th class="min-w-[190px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
 
-                                    <a
-                                        href="{{ $sortUrl('disbursement_status') }}"
-                                        class="flex items-center justify-between gap-3 hover:text-green-700"
-                                    >
-                                        <span>
-                                            Disbursement<br>
-                                            Status
-                                        </span>
-
-                                        <span class="flex shrink-0 flex-col items-center leading-[9px]">
-
-                                            <span class="text-[11px] font-black
-                                                {{ $sort === 'disbursement_status' && $direction === 'asc'
-                                                    ? 'text-green-700'
-                                                    : 'text-gray-300'
-                                                }}">
-                                                ▲
-                                            </span>
-
-                                            <span class="text-[11px] font-black
-                                                {{ $sort === 'disbursement_status' && $direction === 'desc'
-                                                    ? 'text-green-700'
-                                                    : 'text-gray-300'
-                                                }}">
-                                                ▼
-                                            </span>
-
-                                        </span>
+                                <th
+                                    class="min-w-[210px] px-4 py-3
+                                           text-left text-xs font-semibold
+                                           uppercase text-gray-500"
+                                >
+                                    <a href="{{ $sortUrl('school') }}">
+                                        School Assignment
                                     </a>
-
                                 </th>
+
                             @endif
+
+
+                            {{-- POSITION --}}
+
+                            <th
+                                class="min-w-[190px] px-4 py-3
+                                       text-left text-xs font-semibold
+                                       uppercase text-gray-500"
+                            >
+                                <a href="{{ $sortUrl('position') }}">
+                                    Position Status 
+                                </a>
+                            </th>
+
+
+                            {{-- PREVIOUS --}}
+
+                            <th
+                                class="min-w-[190px] border-l
+                                       border-gray-200 bg-slate-50
+                                       px-4 py-3 text-left text-xs
+                                       font-semibold uppercase text-slate-600"
+                            >
+                                Previous Availment
+                            </th>
+
+
+                            {{-- CURRENT --}}
+
+                            <th
+                                class="min-w-[190px] border-l
+                                    border-gray-200 bg-green-100
+                                    px-4 py-3 text-left text-xs
+                                    font-semibold uppercase text-green-700"
+                            >
+                                Current Availment
+                            </th>
+
+
+                            {{-- COMPARISON --}}
+
+                            <th
+                                class="min-w-[120px] px-4 py-3
+                                       text-center text-xs font-semibold
+                                       uppercase text-gray-500"
+                            >
+                                Comparison
+                            </th>
+
+
+                            {{-- VALIDATION --}}
+
+                            <th
+                                class="min-w-[120px] px-4 py-3
+                                       text-center text-xs font-semibold
+                                       uppercase text-gray-500"
+                            >
+                                Validation
+                            </th>
 
 
                             {{-- ACTION --}}
-                            <th class="min-w-[110px] px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
+
+                            <th
+                                class="min-w-[100px] px-4 py-3
+                                       text-center text-xs font-semibold
+                                       uppercase text-gray-500"
+                            >
                                 Action
                             </th>
 
                         </tr>
+
                     </thead>
 
-                        <tbody class="divide-y divide-gray-200 bg-white">
-                            @forelse ($medicalAllowances as $record)
-                                @php
-                                    $basic = $record->user?->basicInformation;
 
-                                    $name = trim(
-                                        ($basic?->first_name ?? '') . ' ' .
-                                        ($basic?->middle_name ?? '') . ' ' .
-                                        ($basic?->last_name ?? '') . ' ' .
-                                        ($basic?->extension_name ?? '')
+                    <tbody class="divide-y divide-gray-100">
+
+                        @forelse($medicalAllowances as $record)
+
+                            @php
+
+                                $basic =
+                                    $record->user?->basicInformation;
+
+                                $name = trim(
+
+                                    ($basic?->first_name ?? '') . ' ' .
+
+                                    ($basic?->middle_name ?? '') . ' ' .
+
+                                    ($basic?->last_name ?? '') . ' ' .
+
+                                    ($basic?->extension_name ?? '')
+
+                                );
+
+
+                                $employment =
+                                    $record->user?->employmentStatus;
+
+                                $plantilla =
+                                    $employment?->plantilla;
+
+                                $school =
+                                    $employment?->school;
+
+
+                                $previous =
+                                    trim(
+                                        (string)
+                                        ($record->previous_mode_of_availment ?? '')
                                     );
 
-                                    $employment = $record->user?->employmentStatus;
-                                    $plantilla = $employment?->plantilla;
-                                    $school = $employment?->school;
-
-                                    $disbursementStatus = strtolower(
-                                        trim($record->disbursement_status ?? '')
+                                $current =
+                                    trim(
+                                        (string)
+                                        ($record->mode_of_availment ?? '')
                                     );
-                                @endphp
 
-                                <tr
-                                    class="hover:bg-gray-50"
-                                    x-data="{ updateModalOpen: false }"
-                                >
-                                    {{-- NAME + EMAIL --}}
-                                    <td class="min-w-[220px] px-4 py-4">
-                                        <div class="text-sm font-semibold text-gray-900">
-                                            {{ $name ?: '—' }}
-                                        </div>
 
-                                        <div class="mt-1 break-words text-sm text-gray-500">
-                                            {{ $record->user?->email ?? '—' }}
-                                        </div>
+                                if (!$record->previous_medical_id) {
+
+                                    $comparison = 'missing';
+
+                                } elseif ($previous === $current) {
+
+                                    $comparison = 'same';
+
+                                } else {
+
+                                    $comparison = 'changed';
+
+                                }
+
+
+                                $validationStatus = strtolower(
+
+                                    trim(
+                                        $record->validation_status
+                                        ?? 'Pending'
+                                    )
+
+                                );
+
+
+                                $isLocked =
+                                    auth()->user()?->role === 'admin'
+                                    &&
+                                    $medicalSubmission?->status === 'Verified';
+
+                            @endphp
+
+
+                            <tr
+                                x-data="{ updateModalOpen: false }"
+                                class="transition hover:bg-gray-50"
+                            >
+
+                                {{-- EMPLOYEE --}}
+
+                                <td class="px-4 py-4">
+
+                                    <p
+                                        class="text-sm font-semibold
+                                               text-gray-900"
+                                    >
+                                        {{ $name ?: '—' }}
+                                    </p>
+
+                                    <p
+                                        class="mt-1 break-all text-xs
+                                               text-gray-500"
+                                    >
+                                        {{ $record->user?->email ?? '—' }}
+                                    </p>
+
+                                </td>
+
+
+                                @if(auth()->user()->role === 'super_admin')
+
+                                    <td
+                                        class="px-4 py-4 text-sm text-gray-700"
+                                    >
+                                        {{ $school?->school_name ?? '—' }} - {{ $school?->school_district ?? '—' }}
                                     </td>
 
-                                    @if (auth()->user()->role === 'super_admin')
-                                        {{-- SCHOOL NAME --}}
-                                        <td class="min-w-[220px] px-4 py-4 text-sm text-gray-700">
-                                            {{ $school?->school_name ?? '—' }}
-                                        </td>
+                                @endif
 
-                                        {{-- DISTRICT --}}
-                                        <td class="min-w-[140px] px-4 py-4 text-sm text-gray-700">
-                                            {{ $school?->school_district ?? '—' }}
-                                        </td>
 
-                                        {{-- ITEM FROM SCHOOL LEVEL --}}
-                                        <td class="min-w-[180px] px-4 py-4 text-sm text-gray-700">
-                                            {{ $plantilla?->item_from_school_level ?? '—' }}
-                                        </td>
-                                    @endif
+                                {{-- POSITION --}}
 
-                                    {{-- POSITION TITLE --}}
-                                    <td class="min-w-[200px] px-4 py-4 text-sm font-medium text-gray-900">
+                                <td class="px-4 py-4">
+
+                                    <p
+                                        class="text-sm font-medium
+                                               text-gray-800"
+                                    >
                                         {{ $plantilla?->position_title ?? '—' }}
-                                    </td>
+                                    </p>
 
-                                    {{-- EMPLOYMENT STATUS --}}
-                                    <td class="min-w-[160px] px-4 py-4">
-                                        @if ($employment?->employment_status)
-                                            <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                                                {{ $employment->employment_status }}
-                                            </span>
-                                        @else
-                                            <span class="text-sm text-gray-400">—</span>
-                                        @endif
-                                    </td>
+                                    @if($employment?->employment_status)
 
-                                    {{-- GROUP AVAILMENT --}}
-                                    <td class="min-w-[200px] px-4 py-4 text-sm text-gray-700">
-                                        {{ $record->mode_of_availment ?? '—' }}
-                                    </td>
+                                        <span
+                                            class="inline-flex rounded-full
+                                                   bg-green-50 px-2.5 py-1
+                                                   text-xs font-semibold
+                                                   text-green-700"
+                                        >
+                                            {{ $employment->employment_status }}
+                                        </span>
 
+                                    @else
 
-                                    {{-- DISBURSEMENT STATUS --}}
+                                        <span class="text-sm text-gray-400">
+                                            —
+                                        </span>
 
-                                    @if(auth()->user()->role === 'super_admin')
-                                        <td class="min-w-[180px] px-4 py-4">
-                                            @if ($record->disbursement_status)
-                                                @if ($disbursementStatus === 'paid')
-                                                    <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                                                        {{ $record->disbursement_status }}
-                                                    </span>
-                                                @elseif ($disbursementStatus === 'pending')
-                                                    <span class="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
-                                                        {{ $record->disbursement_status }}
-                                                    </span>
-                                                @else
-                                                    <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
-                                                        {{ $record->disbursement_status }}
-                                                    </span>
-                                                @endif
-                                            @else
-                                                <span class="text-sm text-gray-400">—</span>
-                                            @endif
-                                        </td>
                                     @endif
 
-                                    {{-- ACTION --}}
-                                    <td class="whitespace-nowrap px-4 py-4 text-center">
-                                        @php
-                                            $isValidated = auth()->user()?->role === 'admin'
-                                                && $medicalSubmission?->status === 'Verified';
-                                        @endphp
+                                </td>
 
-                                        <button
-                                            type="button"
-                                            @disabled($isValidated)
-                                            @if (!$isValidated)
-                                                @click="updateModalOpen = true"
-                                            @endif
-                                            title="{{ $isValidated
-                                                ? 'Updates are disabled because this report has been validated.'
-                                                : 'Update medical allowance' }}"
-                                            style="{{ $isValidated
-                                                ? 'background-color: #d1d5db; color: #6b7280; cursor: not-allowed;'
-                                                : 'background-color: #15803d; color: #ffffff;' }}"
-                                            class="inline-flex items-center rounded-md px-4 py-2
-                                                text-sm font-semibold transition"
+                                {{-- =================================================
+                                    2025
+                                ================================================== --}}
+
+                                <td
+                                    class="border-l border-gray-100
+                                           bg-slate-50/60 px-4 py-4"
+                                >
+
+                                    @if($record->previous_medical_id)
+
+                                        <p
+                                            class="text-sm font-medium
+                                                   text-gray-800"
                                         >
-                                            Update
-                                        </button>
+                                            {{ $previous ?: '—' }}
+                                        </p>
 
-                                        {{-- UPDATE MODAL --}}
-                                        <template x-teleport="body">
+                                    @else
+
+                                        <span
+                                            class="inline-flex rounded-md
+                                                   bg-purple-50 px-2.5 py-1
+                                                   text-xs font-semibold
+                                                   text-purple-700"
+                                        >
+                                            Needs Review
+                                        </span>
+
+                                        <p
+                                            class="mt-1 text-xs text-gray-400"
+                                        >
+                                            No existing {{ $previousYear }} record
+                                        </p>
+
+                                    @endif
+
+                                </td>
+
+
+                                {{-- =================================================
+                                    2026
+                                ================================================== --}}
+
+                                <td
+                                    class="border-l border-gray-100
+                                           bg-green-50/30 px-4 py-4"
+                                >
+
+                                    <p
+                                        class="text-sm font-semibold
+                                               text-green-800"
+                                    >
+                                        {{ $current ?: '—' }}
+                                    </p>
+
+                                </td>
+
+
+                                {{-- =================================================
+                                    COMPARISON
+                                ================================================== --}}
+
+                                <td class="px-4 py-4 text-center">
+
+                                    @if($comparison === 'same')
+
+                                        <span
+                                            class="inline-flex rounded-full
+                                                   bg-gray-100 px-2.5 py-1
+                                                   text-xs font-semibold
+                                                   text-gray-600"
+                                        >
+                                            No Changes
+                                        </span>
+
+
+                                    @elseif($comparison === 'changed')
+
+                                        <span
+                                            class="inline-flex rounded-full
+                                                   bg-blue-50 px-2.5 py-1
+                                                   text-xs font-semibold
+                                                   text-blue-700"
+                                        >
+                                            Changed
+                                        </span>
+
+
+                                    @else
+
+                                        <span
+                                            class="inline-flex rounded-full
+                                                   bg-purple-50 px-2.5 py-1
+                                                   text-xs font-semibold
+                                                   text-purple-700"
+                                        >
+                                            Review
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+
+                                {{-- =================================================
+                                    VALIDATION
+                                ================================================== --}}
+
+                                <td class="px-4 py-4 text-center">
+
+                                    @if($validationStatus === 'validated')
+
+                                        <span
+                                            class="inline-flex items-center
+                                                   gap-1 rounded-full
+                                                   bg-green-50 px-2.5 py-1
+                                                   text-xs font-semibold
+                                                   text-green-700"
+                                        >
+                                            ✓ Validated
+                                        </span>
+
+                                    @else
+
+                                        <span
+                                            class="inline-flex items-center
+                                                   gap-1 rounded-full
+                                                   bg-amber-50 px-2.5 py-1
+                                                   text-xs font-semibold
+                                                   text-amber-700"
+                                        >
+                                            <span
+                                                class="h-1.5 w-1.5
+                                                       rounded-full
+                                                       bg-amber-500"
+                                            ></span>
+
+                                            Pending
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+
+                                {{-- =================================================
+                                    ACTION
+                                ================================================== --}}
+
+                                <td class="px-4 py-4 text-center">
+
+                                    <button
+                                        type="button"
+
+                                        @disabled($isLocked)
+
+                                        @if(!$isLocked)
+                                            @click="updateModalOpen = true"
+                                        @endif
+
+                                        class="
+                                            inline-flex min-h-10 min-w-[90px]
+                                            items-center justify-center
+                                            rounded-lg px-5 py-2
+                                            text-sm font-semibold
+                                            transition shadow-sm
+
+                                            {{ $isLocked
+                                                ? 'cursor-not-allowed border border-gray-200 bg-gray-100 text-gray-400 shadow-none'
+                                                : 'border border-green-600 bg-green-50 text-green-700 hover:bg-green-700 hover:text-white'
+                                            }}
+                                        "
+                                    >
+                                        Review
+                                    </button>
+
+
+                                    {{-- =============================================
+                                        UPDATE MODAL
+                                    ============================================== --}}
+
+                                    <template x-teleport="body">
+
+                                        <div
+                                            x-cloak
+                                            x-show="updateModalOpen"
+                                            x-transition.opacity
+                                            @keydown.escape.window="
+                                                updateModalOpen = false
+                                            "
+                                            class="fixed inset-0 z-50
+                                                   flex items-center justify-center
+                                                   bg-gray-900/50 p-4"
+                                            role="dialog"
+                                            aria-modal="true"
+                                        >
+
                                             <div
-                                                x-cloak
                                                 x-show="updateModalOpen"
-                                                x-transition.opacity
-                                                @keydown.escape.window="updateModalOpen = false"
-                                                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-                                                role="dialog"
-                                                aria-modal="true"
-                                                aria-labelledby="update-availment-title-{{ $record->id }}"
+                                                x-transition.scale.origin.center
+                                                @click.outside="
+                                                    updateModalOpen = false
+                                                "
+                                                class="w-full max-w-xl
+                                                       overflow-hidden rounded-xl
+                                                       bg-white shadow-2xl"
                                             >
+
+                                                {{-- =================================
+                                                    MODAL HEADER
+                                                ================================== --}}
+
                                                 <div
-                                                    x-show="updateModalOpen"
-                                                    x-transition.scale.origin.center
-                                                    @click.outside="updateModalOpen = false"
-                                                    class="w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-xl bg-white text-left shadow-2xl"
-                                                    style="max-width: 420px;"
+                                                    class="flex items-center
+                                                           justify-between
+                                                           border-b
+                                                           border-gray-200
+                                                           px-5 py-4"
                                                 >
-                                                    {{-- GREEN HEADER --}}
-                                                    <div class="flex items-start justify-between bg-green-700 px-5 py-4">
-                                                        <div class="min-w-0 pr-4">
-                                                            <h3
-                                                                id="update-availment-title-{{ $record->id }}"
-                                                                class="text-base font-semibold text-white"
+
+                                                    <div>
+
+                                                        <h3
+                                                            class="text-base
+                                                                   font-bold
+                                                                   text-gray-900"
+                                                        >
+                                                            Review Medical Allowance
+                                                        </h3>
+
+                                                        <p
+                                                            class="mt-0.5 text-xs
+                                                                   text-gray-500"
+                                                        >
+                                                            Verify both year records
+                                                            before saving.
+                                                        </p>
+
+                                                    </div>
+
+
+                                                    <button
+                                                        type="button"
+                                                        @click="
+                                                            updateModalOpen = false
+                                                        "
+                                                        class="flex h-9 w-9
+                                                               items-center
+                                                               justify-center
+                                                               rounded-lg
+                                                               text-gray-400
+                                                               transition
+                                                               hover:bg-gray-100
+                                                               hover:text-gray-700"
+                                                    >
+                                                        <svg
+                                                            class="h-5 w-5"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M6 18L18 6M6 6l12 12"
+                                                            />
+                                                        </svg>
+                                                    </button>
+
+                                                </div>
+
+
+                                                {{-- =================================
+                                                    FORM
+                                                ================================== --}}
+
+                                                <form
+                                                    method="POST"
+                                                    action="{{ route(
+                                                        'medical-allowance.update-availment',
+                                                        $record
+                                                    ) }}"
+                                                >
+
+                                                    @csrf
+                                                    @method('PATCH')
+
+
+                                                    <div class="p-5">
+
+                                                        {{-- EMPLOYEE --}}
+
+                                                        <div
+                                                            class="mb-5 flex
+                                                                   items-start gap-3
+                                                                   rounded-lg
+                                                                   bg-gray-50 p-4"
+                                                        >
+
+                                                            <div
+                                                                class="flex h-10 w-10
+                                                                       shrink-0 items-center
+                                                                       justify-center
+                                                                       rounded-full
+                                                                       bg-green-100
+                                                                       text-sm
+                                                                       font-bold
+                                                                       text-green-700"
                                                             >
-                                                                Update Medical Allowance Availment
-                                                            </h3>
+                                                                {{ strtoupper(
+                                                                    substr(
+                                                                        $basic?->first_name ?? 'E',
+                                                                        0,
+                                                                        1
+                                                                    )
+                                                                ) }}
+                                                            </div>
+
+
+                                                            <div class="min-w-0">
+
+                                                                <p
+                                                                    class="font-semibold
+                                                                           text-gray-900"
+                                                                >
+                                                                    {{ $name ?: 'Unknown Employee' }}
+                                                                </p>
+
+                                                                <p
+                                                                    class="mt-0.5 text-xs
+                                                                           text-gray-500"
+                                                                >
+                                                                    {{ $plantilla?->position_title ?? 'No position' }}
+                                                                </p>
+
+                                                                <p
+                                                                    class="mt-0.5 text-xs
+                                                                           text-gray-500"
+                                                                >
+                                                                    {{ $school?->school_name ?? 'No school' }}
+
+                                                                    @if($school?->school_district)
+                                                                        •
+                                                                        {{ $school->school_district }}
+                                                                    @endif
+                                                                </p>
+
+                                                            </div>
+
                                                         </div>
+
+
+                                                        {{-- =================================
+                                                            YEARS
+                                                        ================================== --}}
+
+                                                        <div
+                                                            class="grid gap-4
+                                                                   sm:grid-cols-2"
+                                                        >
+
+                                                            {{-- =============================
+                                                                PREVIOUS YEAR
+                                                            ============================== --}}
+
+                                                            <div
+                                                                class="rounded-xl
+                                                                       border
+                                                                       border-slate-200
+                                                                       bg-slate-50 p-4"
+                                                            >
+
+                                                                <div
+                                                                    class="mb-3 flex
+                                                                           items-center
+                                                                           justify-between"
+                                                                >
+
+                                                                    <div>
+
+                                                                        <p
+                                                                            class="text-xs
+                                                                                   font-semibold
+                                                                                   uppercase
+                                                                                   tracking-wide
+                                                                                   text-slate-500"
+                                                                        >
+                                                                            Previous Year
+                                                                        </p>
+
+                                                                        <p
+                                                                            class="text-xl
+                                                                                   font-bold
+                                                                                   text-slate-800"
+                                                                        >
+                                                                            {{ $previousYear }}
+                                                                        </p>
+
+                                                                    </div>
+
+
+                                                                    @if(!$record->previous_medical_id)
+
+                                                                        <span
+                                                                            class="rounded-full
+                                                                                   bg-purple-100
+                                                                                   px-2 py-1
+                                                                                   text-[10px]
+                                                                                   font-semibold
+                                                                                   text-purple-700"
+                                                                        >
+                                                                            Needs Review
+                                                                        </span>
+
+                                                                    @endif
+
+                                                                </div>
+
+
+                                                                <label
+                                                                    for="previous_mode_{{ $record->id }}"
+                                                                    class="mb-2 block
+                                                                           text-xs
+                                                                           font-semibold
+                                                                           text-gray-700"
+                                                                >
+                                                                    Mode of Availment
+                                                                </label>
+
+
+                                                                <select
+                                                                    id="previous_mode_{{ $record->id }}"
+                                                                    name="previous_mode_of_availment"
+                                                                    required
+                                                                    class="w-full rounded-lg
+                                                                           border-gray-300
+                                                                           bg-white text-sm
+                                                                           shadow-sm
+                                                                           focus:border-green-600
+                                                                           focus:ring-green-600"
+                                                                >
+
+                                                                    <option value="" disabled
+                                                                        @selected(!$previous)
+                                                                    >
+                                                                        Select availment
+                                                                    </option>
+
+
+                                                                    <option
+                                                                        value="Group Availment (HMO)"
+                                                                        @selected(
+                                                                            $previous
+                                                                            ===
+                                                                            'Group Availment (HMO)'
+                                                                        )
+                                                                    >
+                                                                        Group Availment (HMO)
+                                                                    </option>
+
+
+                                                                    <option
+                                                                        value="Individual Availment (HMO)"
+                                                                        @selected(
+                                                                            $previous
+                                                                            ===
+                                                                            'Individual Availment (HMO)'
+                                                                        )
+                                                                    >
+                                                                        Individual Availment (HMO)
+                                                                    </option>
+
+
+                                                                    <option
+                                                                        value="Not Eligible"
+                                                                        @selected(
+                                                                            $previous
+                                                                            ===
+                                                                            'Not Eligible'
+                                                                        )
+                                                                    >
+                                                                        Not Eligible
+                                                                    </option>
+
+                                                                </select>
+
+
+                                                                @if(!$record->previous_medical_id)
+
+                                                                    <p
+                                                                        class="mt-2 text-xs
+                                                                               leading-5
+                                                                               text-slate-500"
+                                                                    >
+                                                                        No record exists yet.
+                                                                        Selecting an option will
+                                                                        create the
+                                                                        {{ $previousYear }}
+                                                                        record.
+                                                                    </p>
+
+                                                                @endif
+
+                                                            </div>
+
+
+                                                            {{-- =============================
+                                                                CURRENT YEAR
+                                                            ============================== --}}
+
+                                                            <div
+                                                                class="rounded-xl
+                                                                       border
+                                                                       border-green-200
+                                                                       bg-green-50 p-4"
+                                                            >
+
+                                                                <div class="mb-3">
+
+                                                                    <p
+                                                                        class="text-xs
+                                                                               font-semibold
+                                                                               uppercase
+                                                                               tracking-wide
+                                                                               text-green-600"
+                                                                    >
+                                                                        Current Year
+                                                                    </p>
+
+                                                                    <p
+                                                                        class="text-xl
+                                                                               font-bold
+                                                                               text-green-800"
+                                                                    >
+                                                                        {{ $currentYear }}
+                                                                    </p>
+
+                                                                </div>
+
+
+                                                                <label
+                                                                    for="current_mode_{{ $record->id }}"
+                                                                    class="mb-2 block
+                                                                           text-xs
+                                                                           font-semibold
+                                                                           text-gray-700"
+                                                                >
+                                                                    Mode of Availment
+                                                                </label>
+
+
+                                                                <select
+                                                                    id="current_mode_{{ $record->id }}"
+                                                                    name="current_mode_of_availment"
+                                                                    required
+                                                                    class="w-full rounded-lg
+                                                                           border-green-300
+                                                                           bg-white text-sm
+                                                                           shadow-sm
+                                                                           focus:border-green-600
+                                                                           focus:ring-green-600"
+                                                                >
+
+                                                                    <option
+                                                                        value="Group Availment (HMO)"
+                                                                        @selected(
+                                                                            $current
+                                                                            ===
+                                                                            'Group Availment (HMO)'
+                                                                        )
+                                                                    >
+                                                                        Group Availment (HMO)
+                                                                    </option>
+
+
+                                                                    <option
+                                                                        value="Individual Availment (HMO)"
+                                                                        @selected(
+                                                                            $current
+                                                                            ===
+                                                                            'Individual Availment (HMO)'
+                                                                        )
+                                                                    >
+                                                                        Individual Availment (HMO)
+                                                                    </option>
+
+
+                                                                    <option
+                                                                        value="Not Eligible"
+                                                                        @selected(
+                                                                            $current
+                                                                            ===
+                                                                            'Not Eligible'
+                                                                        )
+                                                                    >
+                                                                        Not Eligible
+                                                                    </option>
+
+                                                                </select>
+
+                                                            </div>
+
+                                                        </div>
+
+
+                                                        {{-- =================================
+                                                            NOTICE
+                                                        ================================== --}}
+
+                                                        <div
+                                                            class="mt-4 flex
+                                                                   items-start gap-2
+                                                                   rounded-lg
+                                                                   border
+                                                                   border-blue-100
+                                                                   bg-blue-50
+                                                                   px-3 py-2.5"
+                                                        >
+
+                                                            <svg
+                                                                class="mt-0.5 h-4 w-4
+                                                                       shrink-0 text-blue-600"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <circle
+                                                                    cx="12"
+                                                                    cy="12"
+                                                                    r="9"
+                                                                />
+
+                                                                <path
+                                                                    stroke-linecap="round"
+                                                                    stroke-width="2"
+                                                                    d="M12 11v5m0-8h.01"
+                                                                />
+                                                            </svg>
+
+
+                                                            <p
+                                                                class="text-xs
+                                                                       leading-5
+                                                                       text-blue-700"
+                                                            >
+                                                                Review both selections carefully.
+                                                                These records will be included in
+                                                                the school's Medical Allowance
+                                                                validation.
+                                                            </p>
+
+                                                        </div>
+
+                                                    </div>
+
+
+                                                    {{-- =================================
+                                                        FOOTER
+                                                    ================================== --}}
+
+                                                    <div
+                                                        class="flex items-center
+                                                               justify-end gap-2
+                                                               border-t
+                                                               border-gray-200
+                                                               bg-gray-50
+                                                               px-5 py-3"
+                                                    >
 
                                                         <button
                                                             type="button"
-                                                            @click="updateModalOpen = false"
-                                                            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-green-100 transition hover:bg-green-800 hover:text-white"
-                                                            aria-label="Close modal"
+                                                            @click="
+                                                                updateModalOpen = false
+                                                            "
+                                                            class="min-h-10
+                                                                   rounded-lg border
+                                                                   border-gray-300
+                                                                   bg-white px-4
+                                                                   text-sm
+                                                                   font-semibold
+                                                                   text-gray-700
+                                                                   transition
+                                                                   hover:bg-gray-50"
                                                         >
+                                                            Cancel
+                                                        </button>
+
+
+                                                        <button
+                                                            type="submit"
+                                                            class="inline-flex
+                                                                   min-h-10
+                                                                   items-center
+                                                                   justify-center
+                                                                   gap-2 rounded-lg
+                                                                   bg-green-700
+                                                                   px-5 text-sm
+                                                                   font-semibold
+                                                                   text-white
+                                                                   transition
+                                                                   hover:bg-green-800"
+                                                        >
+
                                                             <svg
-                                                                class="h-5 w-5"
+                                                                class="h-4 w-4"
                                                                 fill="none"
-                                                                viewBox="0 0 24 24"
                                                                 stroke="currentColor"
+                                                                viewBox="0 0 24 24"
                                                             >
                                                                 <path
                                                                     stroke-linecap="round"
                                                                     stroke-linejoin="round"
                                                                     stroke-width="2"
-                                                                    d="M6 18 18 6M6 6l12 12"
+                                                                    d="M5 13l4 4L19 7"
                                                                 />
                                                             </svg>
+
+                                                            Save Changes
+
                                                         </button>
+
                                                     </div>
 
-                                                    {{-- FORM --}}
-                                                    <form
-                                                        method="POST"
-                                                        action="{{ route(
-                                                            'medical-allowance.update-availment',
-                                                            $record
-                                                        ) }}"
-                                                    >
-                                                        @csrf
-                                                        @method('PATCH')
+                                                </form>
 
-                                                        <div class="space-y-4 px-5 py-5">
-                                                            {{-- SCHOOL AND DISTRICT DETAILS --}}
-                                                            <div
-                                                                class="rounded-lg border border-green-100 bg-green-50"
-                                                                style="padding: 18px 20px;"
-                                                                >
-                                                                <div class="space-y-4">
-                                                                    {{-- NAME --}}
-                                                                    <div style="padding-bottom: 12px;">
-                                                                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                                                            Employee Name
-                                                                        </p>
-
-                                                                        <p class="mt-1 text-sm font-medium text-gray-800">
-                                                                            {{ $name ?: 'Unknown personnel' }}
-                                                                        </p>
-                                                                    </div>
-
-                                                                    {{-- SCHOOL DISTRICT --}}
-                                                                    <div
-                                                                        class="border-t border-green-100"
-                                                                        style="padding-top: 12px;"
-                                                                    >
-                                                                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                                                            School Assignment
-                                                                        </p>
-
-                                                                        <p class="mt-1 text-sm font-medium text-gray-800">
-                                                                            {{ $school?->school_name ?? '—' }} - {{ $school?->school_district ?? '—' }}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            {{-- =====================================================
-                                                                MODE OF AVAILMENT
-                                                            ====================================================== --}}
-                                                            <div class="rounded-lg border border-gray-200 bg-white" style="padding: 18px 20px;">
-                                                                <label
-                                                                    for="mode_of_availment_{{ $record->id }}"
-                                                                    class="mb-2 block text-sm font-semibold text-gray-700"
-                                                                >
-                                                                    Mode of Availment
-                                                                </label>
-
-                                                                <select
-                                                                    id="mode_of_availment_{{ $record->id }}"
-                                                                    name="mode_of_availment"
-                                                                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-600"
-                                                                >
-                                                                    <option value="Group Availment (HMO)" @selected($record->mode_of_availment === 'Group Availment (HMO)')>
-                                                                        Group Availment (HMO)
-                                                                    </option>
-                                                                    <option value="Individual Availment (HMO)" @selected($record->mode_of_availment === 'Individual Availment (HMO)')>
-                                                                        Individual Availment (HMO)
-                                                                    </option>
-                                                                    <option value="Not Eligible" @selected($record->mode_of_availment === 'Not Eligible')>
-                                                                        Not Eligible
-                                                                    </option>
-                                                                </select>
-
-                                                                <div class="mt-5 flex justify-end [&>button]:min-h-11 [&>button]:w-full sm:[&>button]:w-auto">
-                                                                    <button
-                                                                        type="submit"
-                                                                        class="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-300"
-                                                                    >
-                                                                        Save Changes
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-
-                                                        </div>
-                                                    </form>
-                                                </div>
                                             </div>
-                                        </template>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td
-                                        colspan="{{ auth()->user()->role === 'super_admin' ? 10 : 7 }}"
-                                        class="px-4 sm:px-6 py-12 text-center"
-                                    >
-                                        <div class="text-sm font-medium text-gray-700">
-                                            No medical allowance records found.
+
                                         </div>
 
-                                        @if ($search !== '')
-                                            <p class="mt-1 text-sm text-gray-500">
-                                                No records matched your search for
-                                                <span class="font-semibold">
-                                                    “{{ $search }}”
-                                                </span>.
-                                            </p>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                    </template>
 
-                {{-- Required for Alpine modal elements --}}
-                @once
-                    <style>
-                        [x-cloak] {
-                            display: none !important;
-                        }
-                    </style>
-                @endonce
+                                </td>
+
+                            </tr>
 
 
-                {{-- PAGINATION --}}
-                <div class="border-t border-gray-200 px-4 sm:px-6 py-4">
+                        @empty
 
-                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <tr>
 
-                        {{-- RECORD COUNT --}}
-                        <div class="text-sm text-gray-500">
+                                <td
+                                    colspan="{{ auth()->user()->role === 'super_admin'
+                                        ? 10
+                                        : 8 }}"
+                                    class="px-6 py-14 text-center"
+                                >
 
-                            @if($medicalAllowances->total() > 0)
+                                    <div
+                                        class="mx-auto flex h-12 w-12
+                                               items-center justify-center
+                                               rounded-full bg-gray-100
+                                               text-gray-400"
+                                    >
+                                        <svg
+                                            class="h-6 w-6"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                cx="11"
+                                                cy="11"
+                                                r="7"
+                                            />
 
-                                Showing
-
-                                <span class="font-semibold text-gray-700">
-                                    {{ $medicalAllowances->firstItem() }}
-                                </span>
-
-                                to
-
-                                <span class="font-semibold text-gray-700">
-                                    {{ $medicalAllowances->lastItem() }}
-                                </span>
-
-                                of
-
-                                <span class="font-semibold text-gray-700">
-                                    {{ $medicalAllowances->total() }}
-                                </span>
-
-                                records
-
-                            @else
-
-                                Showing 0 records
-
-                            @endif
-
-                        </div>
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-width="2"
+                                                d="m20 20-3.5-3.5"
+                                            />
+                                        </svg>
+                                    </div>
 
 
-                        {{-- PAGINATION LINKS --}}
-                        <div>
+                                    <p
+                                        class="mt-3 text-sm font-semibold
+                                               text-gray-700"
+                                    >
+                                        No medical allowance records found.
+                                    </p>
 
-                            {{ $medicalAllowances->links() }}
 
-                        </div>
+                                    @if($search !== '')
 
+                                        <p
+                                            class="mt-1 text-sm
+                                                   text-gray-500"
+                                        >
+                                            No results matched
+                                            “{{ $search }}”.
+                                        </p>
+
+                                    @endif
+
+                                </td>
+
+                            </tr>
+
+                        @endforelse
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            {{-- =====================================================
+                PAGINATION
+            ====================================================== --}}
+
+            <div
+                class="border-t border-gray-200
+                       bg-gray-50/50 px-4 py-3"
+            >
+
+                <div
+                    class="flex flex-col gap-3
+                           sm:flex-row sm:items-center
+                           sm:justify-between"
+                >
+
+                    <p class="text-xs text-gray-500">
+
+                        @if($medicalAllowances->total() > 0)
+
+                            Showing
+
+                            <span class="font-semibold text-gray-700">
+                                {{ $medicalAllowances->firstItem() }}
+                            </span>
+
+                            to
+
+                            <span class="font-semibold text-gray-700">
+                                {{ $medicalAllowances->lastItem() }}
+                            </span>
+
+                            of
+
+                            <span class="font-semibold text-gray-700">
+                                {{ $medicalAllowances->total() }}
+                            </span>
+
+                            records
+
+                        @else
+
+                            Showing 0 records
+
+                        @endif
+
+                    </p>
+
+
+                    <div>
+                        {{ $medicalAllowances->links() }}
                     </div>
 
                 </div>
 
-
             </div>
+
         </div>
+
     </div>
+
+</div>
+
+
+@once
+
+<style>
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+</style>
+
+@endonce
 
 </x-app-layout>

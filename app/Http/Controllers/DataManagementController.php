@@ -6889,8 +6889,63 @@ class DataManagementController extends Controller
 
     public function medicalAllowance(Request $request)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | SEARCH
+        |--------------------------------------------------------------------------
+        */
+
         $search = trim($request->input('search', ''));
+
         $user = $request->user();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | MEDICAL ALLOWANCE YEAR
+        |--------------------------------------------------------------------------
+        |
+        | Current records are based on the current calendar year.
+        | Example:
+        |
+        | Current Year  = 2026
+        | Previous Year = 2025
+        |
+        */
+
+        $currentYear = now()->year;
+        $previousYear = $currentYear - 1;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | FILTER
+        |--------------------------------------------------------------------------
+        |
+        | all
+        | changed
+        | no_change
+        | pending
+        | validated
+        | new
+        |
+        */
+
+        $filter = $request->input('filter', 'all');
+
+        $allowedFilters = [
+            'all',
+            'changed',
+            'no_change',
+            'pending',
+            'validated',
+            'new',
+        ];
+
+        if (!in_array($filter, $allowedFilters, true)) {
+            $filter = 'all';
+        }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -6898,27 +6953,46 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $sort = $request->input('sort', 'created_at');
-        $direction = strtolower($request->input('direction', 'desc'));
+        $sort = $request->input('sort', 'name');
 
-        if (!in_array($direction, ['asc', 'desc'])) {
+        $direction = strtolower(
+            $request->input('direction', 'asc')
+        );
+
+        if (!in_array($direction, ['asc', 'desc'], true)) {
             $direction = 'asc';
         }
 
+
         $allowedSorts = [
+
             'name',
+
             'school',
+
             'district',
+
             'school_level',
+
             'position',
+
             'employment_status',
+
+            'previous_availment',
+
             'mode_of_availment',
+
+            'validation_status',
+
             'disbursement_status',
+
             'created_at',
+
         ];
 
-        if (!in_array($sort, $allowedSorts)) {
-            $sort = 'created_at';
+
+        if (!in_array($sort, $allowedSorts, true)) {
+            $sort = 'name';
         }
 
 
@@ -6926,51 +7000,190 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         | BASE QUERY
         |--------------------------------------------------------------------------
+        |
+        | The main medical_allowance table represents the CURRENT YEAR.
+        |
+        | We LEFT JOIN the same table as "previous_medical" to retrieve
+        | the employee's previous-year medical allowance.
+        |
         */
 
         $query = MedicalAllowance::query()
+
             ->whereNull('users.deleted_at')
-            ->select('medical_allowance.*')
+
+            ->where(
+                'medical_allowance.year',
+                $currentYear
+            )
+
+            ->select([
+
+                'medical_allowance.*',
+
+                /*
+                |--------------------------------------------------------------------------
+                | Previous Year Data
+                |--------------------------------------------------------------------------
+                */
+
+                'previous_medical.id as previous_medical_id',
+
+                'previous_medical.mode_of_availment as previous_mode_of_availment',
+
+                'previous_medical.disbursement_status as previous_disbursement_status',
+
+                'previous_medical.validation_status as previous_validation_status',
+
+            ])
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | USERS
+            |--------------------------------------------------------------------------
+            */
 
             ->leftJoin(
+
                 'users',
+
                 'users.id',
+
                 '=',
+
                 'medical_allowance.users_id'
+
             )
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | BASIC INFORMATION
+            |--------------------------------------------------------------------------
+            */
+
             ->leftJoin(
+
                 'basic_information',
+
                 'basic_information.users_id',
+
                 '=',
+
                 'users.id'
+
             )
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | EMPLOYMENT STATUS
+            |--------------------------------------------------------------------------
+            */
+
             ->leftJoin(
+
                 'employment_status',
+
                 'employment_status.users_id',
+
                 '=',
+
                 'users.id'
+
             )
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | PLANTILLA
+            |--------------------------------------------------------------------------
+            */
+
             ->leftJoin(
+
                 'plantilla_db',
+
                 'plantilla_db.id',
+
                 '=',
+
                 'employment_status.plantilla_db_id'
+
             )
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | SCHOOL
+            |--------------------------------------------------------------------------
+            */
+
             ->leftJoin(
+
                 'school_db',
+
                 'school_db.id',
+
                 '=',
+
                 'employment_status.school_db_id'
+
             )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PREVIOUS YEAR MEDICAL ALLOWANCE
+            |--------------------------------------------------------------------------
+            */
+
+            ->leftJoin(
+
+                'medical_allowance as previous_medical',
+
+                function ($join) use ($previousYear) {
+
+                    $join->on(
+
+                        'previous_medical.users_id',
+
+                        '=',
+
+                        'medical_allowance.users_id'
+
+                    )
+
+                    ->where(
+
+                        'previous_medical.year',
+
+                        '=',
+
+                        $previousYear
+
+                    );
+
+                }
+
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | EAGER LOAD RELATIONSHIPS
+            |--------------------------------------------------------------------------
+            */
 
             ->with([
+
                 'user.basicInformation',
+
                 'user.employmentStatus.plantilla',
+
                 'user.employmentStatus.school',
+
             ]);
 
 
@@ -6982,19 +7195,32 @@ class DataManagementController extends Controller
 
         if ($user->role === 'admin') {
 
-            $schoolId = $user->employmentStatus?->school_db_id;
+            $schoolId =
+                $user->employmentStatus?->school_db_id;
+
 
             if ($schoolId) {
 
                 $query->where(
+
                     'employment_status.school_db_id',
+
                     $schoolId
+
                 );
 
             } else {
 
+                /*
+                |--------------------------------------------------------------------------
+                | Admin Has No Assigned School
+                |--------------------------------------------------------------------------
+                */
+
                 $query->whereRaw('1 = 0');
+
             }
+
         }
 
 
@@ -7008,6 +7234,7 @@ class DataManagementController extends Controller
 
             $query->where(function ($q) use ($search) {
 
+
                 /*
                 |--------------------------------------------------------------------------
                 | EMAIL
@@ -7015,9 +7242,13 @@ class DataManagementController extends Controller
                 */
 
                 $q->where(
+
                     'users.email',
+
                     'like',
+
                     "%{$search}%"
+
                 );
 
 
@@ -7028,40 +7259,91 @@ class DataManagementController extends Controller
                 */
 
                 $q->orWhere(
+
                     'basic_information.first_name',
+
                     'like',
+
                     "%{$search}%"
+
                 );
 
+
                 $q->orWhere(
+
                     'basic_information.middle_name',
+
                     'like',
+
                     "%{$search}%"
+
                 );
 
+
                 $q->orWhere(
+
                     'basic_information.last_name',
+
                     'like',
+
                     "%{$search}%"
+
                 );
 
 
                 /*
                 |--------------------------------------------------------------------------
-                | MEDICAL ALLOWANCE
+                | CURRENT MEDICAL ALLOWANCE
                 |--------------------------------------------------------------------------
                 */
 
                 $q->orWhere(
+
                     'medical_allowance.mode_of_availment',
+
                     'like',
+
                     "%{$search}%"
+
                 );
 
+
                 $q->orWhere(
+
                     'medical_allowance.disbursement_status',
+
                     'like',
+
                     "%{$search}%"
+
+                );
+
+
+                $q->orWhere(
+
+                    'medical_allowance.validation_status',
+
+                    'like',
+
+                    "%{$search}%"
+
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | PREVIOUS MEDICAL ALLOWANCE
+                |--------------------------------------------------------------------------
+                */
+
+                $q->orWhere(
+
+                    'previous_medical.mode_of_availment',
+
+                    'like',
+
+                    "%{$search}%"
+
                 );
 
 
@@ -7072,9 +7354,13 @@ class DataManagementController extends Controller
                 */
 
                 $q->orWhere(
+
                     'employment_status.employment_status',
+
                     'like',
+
                     "%{$search}%"
+
                 );
 
 
@@ -7085,15 +7371,24 @@ class DataManagementController extends Controller
                 */
 
                 $q->orWhere(
+
                     'school_db.school_name',
+
                     'like',
+
                     "%{$search}%"
+
                 );
 
+
                 $q->orWhere(
+
                     'school_db.school_district',
+
                     'like',
+
                     "%{$search}%"
+
                 );
 
 
@@ -7104,11 +7399,135 @@ class DataManagementController extends Controller
                 */
 
                 $q->orWhere(
+
                     'plantilla_db.position_title',
+
                     'like',
+
                     "%{$search}%"
+
                 );
+
             });
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | QUICK FILTER
+        |--------------------------------------------------------------------------
+        */
+
+        switch ($filter) {
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CHANGED
+            |--------------------------------------------------------------------------
+            */
+
+            case 'changed':
+
+                $query
+
+                    ->whereNotNull(
+                        'previous_medical.id'
+                    )
+
+                    ->whereColumn(
+
+                        'previous_medical.mode_of_availment',
+
+                        '<>',
+
+                        'medical_allowance.mode_of_availment'
+
+                    );
+
+                break;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | NO CHANGE
+            |--------------------------------------------------------------------------
+            */
+
+            case 'no_change':
+
+                $query
+
+                    ->whereNotNull(
+                        'previous_medical.id'
+                    )
+
+                    ->whereColumn(
+
+                        'previous_medical.mode_of_availment',
+
+                        '=',
+
+                        'medical_allowance.mode_of_availment'
+
+                    );
+
+                break;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PENDING VALIDATION
+            |--------------------------------------------------------------------------
+            */
+
+            case 'pending':
+
+                $query->where(
+
+                    'medical_allowance.validation_status',
+
+                    'Pending'
+
+                );
+
+                break;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDATED
+            |--------------------------------------------------------------------------
+            */
+
+            case 'validated':
+
+                $query->where(
+
+                    'medical_allowance.validation_status',
+
+                    'Validated'
+
+                );
+
+                break;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | NEW / NO PREVIOUS YEAR RECORD
+            |--------------------------------------------------------------------------
+            */
+
+            case 'new':
+
+                $query->whereNull(
+                    'previous_medical.id'
+                );
+
+                break;
+
         }
 
 
@@ -7120,16 +7539,25 @@ class DataManagementController extends Controller
 
         switch ($sort) {
 
+
             case 'name':
 
                 $query
+
                     ->orderBy(
+
                         'basic_information.last_name',
+
                         $direction
+
                     )
+
                     ->orderBy(
+
                         'basic_information.first_name',
+
                         $direction
+
                     );
 
                 break;
@@ -7138,8 +7566,11 @@ class DataManagementController extends Controller
             case 'school':
 
                 $query->orderBy(
+
                     'school_db.school_name',
+
                     $direction
+
                 );
 
                 break;
@@ -7148,8 +7579,11 @@ class DataManagementController extends Controller
             case 'district':
 
                 $query->orderBy(
+
                     'school_db.school_district',
+
                     $direction
+
                 );
 
                 break;
@@ -7158,8 +7592,11 @@ class DataManagementController extends Controller
             case 'school_level':
 
                 $query->orderBy(
+
                     'plantilla_db.item_from_school_level',
+
                     $direction
+
                 );
 
                 break;
@@ -7168,8 +7605,11 @@ class DataManagementController extends Controller
             case 'position':
 
                 $query->orderBy(
+
                     'plantilla_db.position_title',
+
                     $direction
+
                 );
 
                 break;
@@ -7178,8 +7618,24 @@ class DataManagementController extends Controller
             case 'employment_status':
 
                 $query->orderBy(
+
                     'employment_status.employment_status',
+
                     $direction
+
+                );
+
+                break;
+
+
+            case 'previous_availment':
+
+                $query->orderBy(
+
+                    'previous_medical.mode_of_availment',
+
+                    $direction
+
                 );
 
                 break;
@@ -7188,8 +7644,24 @@ class DataManagementController extends Controller
             case 'mode_of_availment':
 
                 $query->orderBy(
+
                     'medical_allowance.mode_of_availment',
+
                     $direction
+
+                );
+
+                break;
+
+
+            case 'validation_status':
+
+                $query->orderBy(
+
+                    'medical_allowance.validation_status',
+
+                    $direction
+
                 );
 
                 break;
@@ -7198,8 +7670,11 @@ class DataManagementController extends Controller
             case 'disbursement_status':
 
                 $query->orderBy(
+
                     'medical_allowance.disbursement_status',
+
                     $direction
+
                 );
 
                 break;
@@ -7208,11 +7683,15 @@ class DataManagementController extends Controller
             default:
 
                 $query->orderBy(
+
                     'medical_allowance.created_at',
+
                     $direction
+
                 );
 
                 break;
+
         }
 
 
@@ -7223,8 +7702,193 @@ class DataManagementController extends Controller
         */
 
         $medicalAllowances = $query
+
             ->paginate(10)
+
             ->withQueryString();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUMMARY COUNTS
+        |--------------------------------------------------------------------------
+        |
+        | These counts are based on the CURRENT YEAR and the user's access.
+        |
+        */
+
+        $summaryQuery = MedicalAllowance::query()
+
+            ->whereNull('users.deleted_at')
+
+            ->where(
+                'medical_allowance.year',
+                $currentYear
+            )
+
+            ->leftJoin(
+
+                'users',
+
+                'users.id',
+
+                '=',
+
+                'medical_allowance.users_id'
+
+            )
+
+            ->leftJoin(
+
+                'employment_status',
+
+                'employment_status.users_id',
+
+                '=',
+
+                'users.id'
+
+            )
+
+            ->leftJoin(
+
+                'medical_allowance as previous_summary',
+
+                function ($join) use ($previousYear) {
+
+                    $join->on(
+
+                        'previous_summary.users_id',
+
+                        '=',
+
+                        'medical_allowance.users_id'
+
+                    )
+
+                    ->where(
+
+                        'previous_summary.year',
+
+                        $previousYear
+
+                    );
+
+                }
+
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SCHOOL RESTRICTION FOR SUMMARY
+        |--------------------------------------------------------------------------
+        */
+
+        if ($user->role === 'admin') {
+
+            $schoolId =
+                $user->employmentStatus?->school_db_id;
+
+
+            if ($schoolId) {
+
+                $summaryQuery->where(
+
+                    'employment_status.school_db_id',
+
+                    $schoolId
+
+                );
+
+            } else {
+
+                $summaryQuery->whereRaw('1 = 0');
+
+            }
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUMMARY VALUES
+        |--------------------------------------------------------------------------
+        */
+
+        $summary = [
+
+            'total' => (clone $summaryQuery)->count(),
+
+            'changed' => (clone $summaryQuery)
+
+                ->whereNotNull(
+                    'previous_summary.id'
+                )
+
+                ->whereColumn(
+
+                    'previous_summary.mode_of_availment',
+
+                    '<>',
+
+                    'medical_allowance.mode_of_availment'
+
+                )
+
+                ->count(),
+
+            'no_change' => (clone $summaryQuery)
+
+                ->whereNotNull(
+                    'previous_summary.id'
+                )
+
+                ->whereColumn(
+
+                    'previous_summary.mode_of_availment',
+
+                    '=',
+
+                    'medical_allowance.mode_of_availment'
+
+                )
+
+                ->count(),
+
+            'pending' => (clone $summaryQuery)
+
+                ->where(
+
+                    'medical_allowance.validation_status',
+
+                    'Pending'
+
+                )
+
+                ->count(),
+
+            'validated' => (clone $summaryQuery)
+
+                ->where(
+
+                    'medical_allowance.validation_status',
+
+                    'Validated'
+
+                )
+
+                ->count(),
+
+            'new' => (clone $summaryQuery)
+
+                ->whereNull(
+                    'previous_summary.id'
+                )
+
+                ->count(),
+
+        ];
 
 
         /*
@@ -7234,29 +7898,84 @@ class DataManagementController extends Controller
         */
 
         $medicalReport = Report::where(
-            'name_of_report',
-            'Medical Allowance Report'
-        )->latest('id')->first();
 
-        // employmentStatus.school_db_id references school_db.id.
-        // Submissions use school_db.school_id instead.
+            'name_of_report',
+
+            'Medical Allowance Report'
+
+        )
+            ->latest('id')
+            ->first();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SCHOOL CODE
+        |--------------------------------------------------------------------------
+        |
+        | employment_status.school_db_id references school_db.id.
+        | Report submissions use school_db.school_id.
+        |
+        */
+
         $schoolCode = DB::table('school_db')
-            ->where('id', $user->employmentStatus?->school_db_id)
+
+            ->where(
+
+                'id',
+
+                $user->employmentStatus?->school_db_id
+
+            )
+
             ->value('school_id');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SCHOOL MEDICAL SUBMISSION
+        |--------------------------------------------------------------------------
+        */
 
         $medicalSubmission = null;
 
+
         if (
+
             $user->role === 'admin'
+
             && $medicalReport
+
             && $schoolCode !== null
+
             && $schoolCode !== ''
+
         ) {
-            $medicalSubmission = ReportSubmission::with('validatedBy')
-                ->where('report_id', $medicalReport->id)
-                ->where('school_id', $schoolCode)
+
+            $medicalSubmission = ReportSubmission::with(
+                'validatedBy'
+            )
+
+                ->where(
+
+                    'report_id',
+
+                    $medicalReport->id
+
+                )
+
+                ->where(
+
+                    'school_id',
+
+                    $schoolCode
+
+                )
+
                 ->first();
+
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -7265,18 +7984,37 @@ class DataManagementController extends Controller
         */
 
         return view(
+
             'data-management.medical-allowance',
+
             compact(
+
                 'medicalAllowances',
+
                 'search',
+
                 'sort',
+
                 'direction',
+
+                'filter',
+
+                'currentYear',
+
+                'previousYear',
+
+                'summary',
+
                 'medicalReport',
+
                 'medicalSubmission',
+
                 'schoolCode'
+
             )
+
         );
-    } 
+    }
 
     public function importMedicalAllowance(Request $request)
     {
@@ -8395,33 +9133,338 @@ class DataManagementController extends Controller
         );
     }
 
-    public function updateAvailment(Request $request, $record)
-    {
-        $validated = $request->validate([
-            'mode_of_availment' => [
-                'required',
-                'in:Group Availment (HMO),Individual Availment (HMO),Not Eligible',
-            ],
-        ]);
+    public function updateAvailment(
+        Request $request,
+        MedicalAllowance $medicalAllowance
+    ) {
+        /*
+        |--------------------------------------------------------------------------
+        | Logged-in User
+        |--------------------------------------------------------------------------
+        */
 
-        $medicalAllowance = \App\Models\MedicalAllowance::whereHas('user')
-            ->findOrFail($record);
-
-        $medicalAllowance->update([
-            'mode_of_availment' => $validated['mode_of_availment'],
-        ]);
-
-        return back()->with('success', 'Mode of availment updated successfully.');
-    }
-
-    public function validateMedicalAllowance(Request $request, Report $report): RedirectResponse 
-    {
         $user = $request->user();
 
-        abort_unless($user && $user->role === 'admin', 403);
+        abort_unless(
+            $user && in_array(
+                $user->role,
+                ['super_admin', 'admin'],
+                true
+            ),
+            403
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Years
+        |--------------------------------------------------------------------------
+        */
+
+        $currentYear = now()->year;
+        $previousYear = $currentYear - 1;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Input
+        |--------------------------------------------------------------------------
+        */
+
+        $validated = $request->validate([
+
+            'previous_mode_of_availment' => [
+                'required',
+                'string',
+                'in:Group Availment (HMO),Individual Availment (HMO),Not Eligible',
+            ],
+
+            'current_mode_of_availment' => [
+                'required',
+                'string',
+                'in:Group Availment (HMO),Individual Availment (HMO),Not Eligible',
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Current Record Must Belong To Current Year
+        |--------------------------------------------------------------------------
+        */
+
+        abort_unless(
+            (int) $medicalAllowance->year === (int) $currentYear,
+            404
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load Employee
+        |--------------------------------------------------------------------------
+        */
+
+        $medicalAllowance->load([
+            'user.employmentStatus.school',
+        ]);
+
+        $targetUser = $medicalAllowance->user;
+
+        abort_unless(
+            $targetUser,
+            404
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Role-Based School Security
+        |--------------------------------------------------------------------------
+        */
+
+        if ($user->role === 'admin') {
+
+            $adminSchoolId =
+                $user->employmentStatus?->school_db_id;
+
+            $employeeSchoolId =
+                $targetUser->employmentStatus?->school_db_id;
+
+
+            abort_unless(
+                $adminSchoolId
+                && $employeeSchoolId
+                && (int) $adminSchoolId === (int) $employeeSchoolId,
+                403
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check If Report Has Already Been Submitted
+        |--------------------------------------------------------------------------
+        */
+
+        if ($user->role === 'admin') {
+
+            $medicalReport = Report::where(
+                'name_of_report',
+                'Medical Allowance Report'
+            )
+                ->latest('id')
+                ->first();
+
+
+            if ($medicalReport) {
+
+                $schoolCode = DB::table('school_db')
+                    ->where(
+                        'id',
+                        $user->employmentStatus?->school_db_id
+                    )
+                    ->value('school_id');
+
+
+                if ($schoolCode) {
+
+                    $submission = ReportSubmission::where(
+                        'report_id',
+                        $medicalReport->id
+                    )
+                        ->where(
+                            'school_id',
+                            $schoolCode
+                        )
+                        ->first();
+
+
+                    if ($submission?->status === 'Verified') {
+
+                        return back()
+                            ->with(
+                                'error',
+                                'This Medical Allowance Report has already been validated and submitted. Records can no longer be edited.'
+                            )
+                            ->withFragment(
+                                'medical-allowance-table'
+                            );
+                    }
+                }
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Save 2025 + 2026
+        |--------------------------------------------------------------------------
+        */
+
+        DB::transaction(function () use (
+            $medicalAllowance,
+            $validated,
+            $previousYear,
+            $currentYear
+        ) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Previous Year Record
+            |--------------------------------------------------------------------------
+            |
+            | Find the existing previous-year record first.
+            |
+            */
+
+            $previousRecord = MedicalAllowance::where(
+                'users_id',
+                $medicalAllowance->users_id
+            )
+                ->where(
+                    'year',
+                    $previousYear
+                )
+                ->first();
+
+
+            if ($previousRecord) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Existing Previous Record
+                |--------------------------------------------------------------------------
+                |
+                | Preserve disbursement_status.
+                | Only update the availment and return validation to Pending.
+                |
+                */
+
+                $previousRecord->update([
+
+                    'mode_of_availment' =>
+                        $validated['previous_mode_of_availment'],
+
+                    'validation_status' =>
+                        'Pending',
+
+                ]);
+
+            } else {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Create Missing Previous Record
+                |--------------------------------------------------------------------------
+                |
+                | disbursement_status is required by the database, therefore
+                | it must be supplied when creating the record.
+                |
+                */
+
+                MedicalAllowance::create([
+
+                    'users_id' =>
+                        $medicalAllowance->users_id,
+
+                    'year' =>
+                        $previousYear,
+
+                    'mode_of_availment' =>
+                        $validated['previous_mode_of_availment'],
+
+                    'disbursement_status' =>
+                        'Pending',
+
+                    'validation_status' =>
+                        'Pending',
+
+                ]);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Current Year Record
+            |--------------------------------------------------------------------------
+            |
+            | Keep the existing disbursement status.
+            |
+            */
+
+            $medicalAllowance->update([
+
+                'year' =>
+                    $currentYear,
+
+                'mode_of_availment' =>
+                    $validated['current_mode_of_availment'],
+
+                'validation_status' =>
+                    'Pending',
+
+            ]);
+
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Success
+        |--------------------------------------------------------------------------
+        */
+
+        return back()
+            ->with(
+                'success',
+                "{$previousYear} and {$currentYear} medical allowance records were updated successfully."
+            )
+            ->withFragment(
+                'medical-allowance-table'
+            );
+    }
+
+    public function validateMedicalAllowance(Request $request,Report $report): RedirectResponse
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Logged-in User
+        |--------------------------------------------------------------------------
+        */
+
+        $user = $request->user();
+
+        abort_unless(
+            $user && $user->role === 'admin',
+            403
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Admin's Assigned School
+        |--------------------------------------------------------------------------
+        */
+
+        $schoolDbId = $user->employmentStatus?->school_db_id;
+
+        abort_if(
+            !$schoolDbId,
+            403,
+            'Your account has no assigned school.'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get School Code
+        |--------------------------------------------------------------------------
+        */
 
         $schoolCode = DB::table('school_db')
-            ->where('id', $user->employmentStatus?->school_db_id)
+            ->where('id', $schoolDbId)
             ->value('school_id');
 
         abort_if(
@@ -8430,19 +9473,60 @@ class DataManagementController extends Controller
             'Your account has no assigned school.'
         );
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Medical Allowance Years
+        |--------------------------------------------------------------------------
+        */
+
+        $currentYear = now()->year;
+        $previousYear = $currentYear - 1;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Report
+        |--------------------------------------------------------------------------
+        */
+
         $changed = DB::transaction(function () use (
             $report,
             $user,
-            $schoolCode
+            $schoolCode,
+            $schoolDbId,
+            $currentYear,
+            $previousYear
         ) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lock Report
+            |--------------------------------------------------------------------------
+            */
+
             $lockedReport = Report::query()
                 ->lockForUpdate()
                 ->findOrFail($report->id);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Confirm Correct Report
+            |--------------------------------------------------------------------------
+            */
 
             abort_unless(
                 $lockedReport->name_of_report === 'Medical Allowance Report',
                 404
             );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Report Must Be Ongoing
+            |--------------------------------------------------------------------------
+            */
 
             abort_unless(
                 $lockedReport->status === 'Ongoing',
@@ -8450,50 +9534,206 @@ class DataManagementController extends Controller
                 'This report is closed.'
             );
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lock School Submission
+            |--------------------------------------------------------------------------
+            */
+
             $submission = ReportSubmission::query()
-                ->where('report_id', $lockedReport->id)
-                ->where('school_id', $schoolCode)
+                ->where(
+                    'report_id',
+                    $lockedReport->id
+                )
+                ->where(
+                    'school_id',
+                    $schoolCode
+                )
                 ->lockForUpdate()
                 ->first();
 
-            // Only schools assigned when the report was created may submit.
+
+            /*
+            |--------------------------------------------------------------------------
+            | School Must Be Assigned To Report
+            |--------------------------------------------------------------------------
+            */
+
             abort_if(
                 !$submission,
                 403,
                 'Your school is not assigned to this report.'
             );
 
-            // Preserve the original validation details on repeated requests.
+
+            /*
+            |--------------------------------------------------------------------------
+            | Already Verified
+            |--------------------------------------------------------------------------
+            |
+            | Preserve the original validator and validation date.
+            |
+            */
+
             if ($submission->status === 'Verified') {
                 return false;
             }
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Allowed Submission Status
+            |--------------------------------------------------------------------------
+            */
+
             abort_unless(
-                in_array($submission->status, ['Pending', 'Done'], true),
+                in_array(
+                    $submission->status,
+                    ['Pending', 'Done'],
+                    true
+                ),
                 409,
                 'This submission cannot be validated.'
             );
 
-            // Preserve the submitter if the report was already submitted.
+
+            /*
+            |--------------------------------------------------------------------------
+            | Get Personnel Belonging To This School
+            |--------------------------------------------------------------------------
+            |
+            | We use the employment_status table to determine which users
+            | currently belong to the logged-in admin's school.
+            |
+            */
+
+            $employeeUserIds = DB::table('employment_status')
+                ->where(
+                    'school_db_id',
+                    $schoolDbId
+                )
+                ->pluck('users_id');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Make Sure School Has Personnel
+            |--------------------------------------------------------------------------
+            */
+
+            abort_if(
+                $employeeUserIds->isEmpty(),
+                422,
+                'No personnel records were found for your school.'
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Check Current-Year Medical Allowance Records
+            |--------------------------------------------------------------------------
+            |
+            | Every personnel included in the school's medical allowance report
+            | should have a current-year record before final validation.
+            |
+            */
+
+            $currentYearEmployeeIds = MedicalAllowance::query()
+                ->whereIn(
+                    'users_id',
+                    $employeeUserIds
+                )
+                ->where(
+                    'year',
+                    $currentYear
+                )
+                ->pluck('users_id');
+
+
+            $missingCurrentYear = $employeeUserIds
+                ->diff($currentYearEmployeeIds);
+
+
+            abort_if(
+                $missingCurrentYear->isNotEmpty(),
+                422,
+                "There are personnel without a {$currentYear} Medical Allowance record. Please complete all current-year records before validating the report."
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Validate Medical Allowance Records
+            |--------------------------------------------------------------------------
+            |
+            | Mark both previous-year and current-year records belonging to
+            | personnel from this school as Validated.
+            |
+            */
+
+            MedicalAllowance::query()
+                ->whereIn(
+                    'users_id',
+                    $employeeUserIds
+                )
+                ->whereIn(
+                    'year',
+                    [
+                        $previousYear,
+                        $currentYear,
+                    ]
+                )
+                ->update([
+                    'validation_status' => 'Validated',
+                ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Preserve Original Submitter
+            |--------------------------------------------------------------------------
+            */
+
             if ($submission->user_id === null) {
                 $submission->user_id = $user->id;
             }
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Mark School Report As Verified
+            |--------------------------------------------------------------------------
+            */
+
             $submission->status = 'Verified';
+
             $submission->validated_by = $user->id;
+
             $submission->validated_at = now();
+
             $submission->save();
+
 
             return true;
         });
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect
+        |--------------------------------------------------------------------------
+        */
+
         return redirect()
-            ->route('data-management.medical-allowance')
+            ->route(
+                'data-management.medical-allowance'
+            )
             ->with(
                 'success',
                 $changed
-                    ? 'Your school’s Medical Allowance Report was validated and submitted.'
-                    : 'Your school’s Medical Allowance Report is already verified.'
+                    ? "Your school's {$previousYear} and {$currentYear} Medical Allowance records were validated and the report was submitted successfully."
+                    : "Your school's Medical Allowance Report is already verified."
             );
     }
 

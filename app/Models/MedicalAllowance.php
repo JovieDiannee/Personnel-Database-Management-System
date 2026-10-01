@@ -2,21 +2,35 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MedicalAllowance extends Model
 {
+    use HasFactory;
+
     protected $table = 'medical_allowance';
 
     protected $fillable = [
         'users_id',
+        'year',
         'mode_of_availment',
         'disbursement_status',
+        'validation_status',
     ];
 
-    public function user(): BelongsTo
+
+    /*
+    |--------------------------------------------------------------------------
+    | User Relationship
+    |--------------------------------------------------------------------------
+    */
+
+    public function user()
     {
-        return $this->belongsTo(User::class, 'users_id');
+        return $this->belongsTo(
+            User::class,
+            'users_id'
+        );
     }
 }

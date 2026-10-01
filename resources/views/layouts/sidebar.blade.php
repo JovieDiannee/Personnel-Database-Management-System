@@ -425,81 +425,51 @@
 
         {{-- EMPLOYEE BENEFITS --}}
         @php
-            $benefitsActive = request()->routeIs('data-management.medical-allowance*');
+            $benefitsActive =
+                request()->routeIs('data-management.medical-allowance*') ||
+                request()->routeIs('data-management.pbb*');
         @endphp
-            <div
-                class="mb-1"
-                x-data="{ employeeBenefitsOpen: {{ $benefitsActive ? 'true' : 'false' }} }"
+
+        <div
+            class="mb-1"
+            x-data="{ employeeBenefitsOpen: {{ $benefitsActive ? 'true' : 'false' }} }"
+        >
+            {{-- MAIN BUTTON --}}
+            <button
+                type="button"
+                @click="
+                    if (!sidebarOpen) {
+                        sidebarOpen = true;
+                        employeeBenefitsOpen = true;
+                    } else {
+                        employeeBenefitsOpen = !employeeBenefitsOpen;
+                    }
+                "
+                :aria-expanded="employeeBenefitsOpen && sidebarOpen"
+                aria-controls="employee-benefits-submenu"
+                aria-label="Employee Benefits"
+                title="Employee Benefits"
+                class="group flex w-full items-center gap-3
+                    rounded-xl px-2 py-1.5
+                    text-sm font-semibold
+                    transition-all duration-200
+                    {{ $benefitsActive
+                        ? 'bg-green-700 text-white shadow-md'
+                        : 'text-gray-600 hover:bg-green-50 hover:text-green-800'
+                    }}"
             >
-                {{-- MAIN BUTTON --}}
-                <button
-                    type="button"
-                    @click="
-                        if (!sidebarOpen) {
-                            sidebarOpen = true;
-                            employeeBenefitsOpen = true;
-                        } else {
-                            employeeBenefitsOpen = !employeeBenefitsOpen;
-                        }
-                    "
-                    :aria-expanded="employeeBenefitsOpen && sidebarOpen"
-                    aria-controls="employee-benefits-submenu"
-                    aria-label="Employee Benefits"
-                    title="Employee Benefits"
-                    class="group flex w-full items-center gap-3
-                        rounded-xl px-2 py-1.5
-                        text-sm font-semibold
-                        transition-all duration-200
+                {{-- ICON --}}
+                <span
+                    class="flex h-8 w-8 shrink-0
+                        items-center justify-center rounded-lg
                         {{ $benefitsActive
-                                ? 'bg-green-700 text-white shadow-md'
-                                : 'text-gray-600 hover:bg-green-50 hover:text-green-800'
+                            ? 'bg-white/15 text-white'
+                            : 'bg-green-50 text-green-700'
                         }}"
                 >
-                    {{-- ICON --}}
-                    <span
-                        class="flex h-8 w-8 shrink-0
-                            items-center justify-center rounded-lg
-                            {{ $benefitsActive
-                                    ? 'bg-white/15 text-white'
-                                    : 'bg-green-50 text-green-700'
-                            }}"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            aria-hidden="true"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"
-                            />
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M14 2v6h6M8 13h8M8 17h5"
-                            />
-                        </svg>
-                    </span>
-
-                    <span
-                        x-show="sidebarOpen"
-                        x-transition
-                        class="flex-1 whitespace-nowrap text-left"
-                    >
-                        Employee Benefits
-                    </span>
-
-                    {{-- ARROW --}}
                     <svg
-                        x-show="sidebarOpen"
-                        :class="{ 'rotate-180': employeeBenefitsOpen }"
                         xmlns="http://www.w3.org/2000/svg"
-                        class="h-4 w-4 shrink-0 transition-transform duration-200"
+                        class="h-5 w-5"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -509,34 +479,83 @@
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            d="M6 9l6 6 6-6"
+                            d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"
+                        />
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M14 2v6h6M8 13h8M8 17h5"
                         />
                     </svg>
-                </button>
+                </span>
 
-                {{-- SUBMENU --}}
-                <div
-                    id="employee-benefits-submenu"
-                    x-show="employeeBenefitsOpen && sidebarOpen"
+                <span
+                    x-show="sidebarOpen"
                     x-transition
-                    style="display: none;"
-                    class="ml-5 mt-1 space-y-0.5 border-l-2 border-green-100 pl-4"
+                    class="flex-1 whitespace-nowrap text-left"
                 >
-                    <a
-                        href="{{ route('data-management.medical-allowance') }}"
-                        @if(request()->routeIs('data-management.medical-allowance*'))
-                            aria-current="page"
-                        @endif
-                        class="block rounded-lg px-3 py-1.5 text-sm transition
-                            {{ request()->routeIs('data-management.medical-allowance*')
-                                    ? 'bg-green-50 font-semibold text-green-800'
-                                    : 'text-gray-500 hover:bg-green-50 hover:text-green-700'
-                            }}"
-                    >
-                        Medical Allowance
-                    </a>
-                </div>
+                    Employee Benefits
+                </span>
+
+                {{-- ARROW --}}
+                <svg
+                    x-show="sidebarOpen"
+                    :class="{ 'rotate-180': employeeBenefitsOpen }"
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4 shrink-0 transition-transform duration-200"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M6 9l6 6 6-6"
+                    />
+                </svg>
+            </button>
+
+            {{-- SUBMENU --}}
+            <div
+                id="employee-benefits-submenu"
+                x-show="employeeBenefitsOpen && sidebarOpen"
+                x-transition
+                style="display: none;"
+                class="ml-5 mt-1 space-y-0.5 border-l-2 border-green-100 pl-4"
+            >
+
+                {{-- MEDICAL ALLOWANCE --}}
+                <a
+                    href="{{ route('data-management.medical-allowance') }}"
+                    @if(request()->routeIs('data-management.medical-allowance*'))
+                        aria-current="page"
+                    @endif
+                    class="block rounded-lg px-3 py-1.5 text-sm transition
+                        {{ request()->routeIs('data-management.medical-allowance*')
+                            ? 'bg-green-50 font-semibold text-green-800'
+                            : 'text-gray-500 hover:bg-green-50 hover:text-green-700'
+                        }}"
+                >
+                    Medical Allowance
+                </a>
+
+                {{-- PBB 2024 --}}
+                <a
+                    href="#"
+                    
+                    class="block rounded-lg px-3 py-1.5 text-sm transition
+                        {{ request()->routeIs('data-management.pbb*')
+                            ? 'bg-green-50 font-semibold text-green-800'
+                            : 'text-gray-500 hover:bg-green-50 hover:text-green-700'
+                        }}"
+                >
+                    Performance-Based Bonus 
+                </a>
+
             </div>
+        </div>
 
         {{-- =====================================================
             PAYROLL SERVICES — START
