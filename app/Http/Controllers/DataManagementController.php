@@ -9426,7 +9426,10 @@ class DataManagementController extends Controller
             );
     }
 
-    public function validateMedicalAllowance(Request $request,Report $report): RedirectResponse
+    public function validateMedicalAllowance(
+        Request $request,
+        Report $report
+    ): RedirectResponse
     {
         /*
         |--------------------------------------------------------------------------
@@ -9603,8 +9606,8 @@ class DataManagementController extends Controller
             | Get Personnel Belonging To This School
             |--------------------------------------------------------------------------
             |
-            | We use the employment_status table to determine which users
-            | currently belong to the logged-in admin's school.
+            | Employment status determines which users currently belong
+            | to the logged-in admin's school.
             |
             */
 
@@ -9613,7 +9616,10 @@ class DataManagementController extends Controller
                     'school_db_id',
                     $schoolDbId
                 )
-                ->pluck('users_id');
+                ->whereNotNull('users_id')
+                ->pluck('users_id')
+                ->unique()
+                ->values();
 
 
             /*
@@ -9631,48 +9637,20 @@ class DataManagementController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Check Current-Year Medical Allowance Records
+            | Get Existing Medical Allowance Records
             |--------------------------------------------------------------------------
             |
-            | Every personnel included in the school's medical allowance report
-            | should have a current-year record before final validation.
+            | IMPORTANT:
+            |
+            | We no longer require every personnel member to have a
+            | current-year Medical Allowance record.
+            |
+            | Only existing Medical Allowance records for the previous
+            | and current year will be included in the validation.
             |
             */
 
-            $currentYearEmployeeIds = MedicalAllowance::query()
-                ->whereIn(
-                    'users_id',
-                    $employeeUserIds
-                )
-                ->where(
-                    'year',
-                    $currentYear
-                )
-                ->pluck('users_id');
-
-
-            $missingCurrentYear = $employeeUserIds
-                ->diff($currentYearEmployeeIds);
-
-
-            abort_if(
-                $missingCurrentYear->isNotEmpty(),
-                422,
-                "There are personnel without a {$currentYear} Medical Allowance record. Please complete all current-year records before validating the report."
-            );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Validate Medical Allowance Records
-            |--------------------------------------------------------------------------
-            |
-            | Mark both previous-year and current-year records belonging to
-            | personnel from this school as Validated.
-            |
-            */
-
-            MedicalAllowance::query()
+            $medicalAllowanceQuery = MedicalAllowance::query()
                 ->whereIn(
                     'users_id',
                     $employeeUserIds
@@ -9683,10 +9661,36 @@ class DataManagementController extends Controller
                         $previousYear,
                         $currentYear,
                     ]
-                )
-                ->update([
-                    'validation_status' => 'Validated',
-                ]);
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Make Sure There Is Something To Validate
+            |--------------------------------------------------------------------------
+            */
+
+            $medicalAllowanceCount = (clone $medicalAllowanceQuery)->count();
+
+            abort_if(
+                $medicalAllowanceCount === 0,
+                422,
+                "No {$previousYear} or {$currentYear} Medical Allowance records were found for your school."
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Validate Existing Medical Allowance Records
+            |--------------------------------------------------------------------------
+            |
+            | Validate only records that actually exist.
+            |
+            */
+
+            $medicalAllowanceQuery->update([
+                'validation_status' => 'Validated',
+            ]);
 
 
             /*
@@ -9732,7 +9736,7 @@ class DataManagementController extends Controller
             ->with(
                 'success',
                 $changed
-                    ? "Your school's {$previousYear} and {$currentYear} Medical Allowance records were validated and the report was submitted successfully."
+                    ? "Your school's existing {$previousYear} and {$currentYear} Medical Allowance records were validated and the report was submitted successfully."
                     : "Your school's Medical Allowance Report is already verified."
             );
     }
