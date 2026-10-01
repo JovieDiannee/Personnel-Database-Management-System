@@ -400,18 +400,15 @@
                         <div class="min-w-0 flex-1">
 
                             <p class="text-sm font-semibold text-red-700">
-
                                 Medical Allowance Validation Deadline:
 
                                 <strong>
                                     {{ $medicalReport->deadline
-                                        ?->copy()
-                                        ->timezone('Asia/Manila')
-                                        ->format('F j, Y • g:i A')
+                                        ?->format('F j, Y • g:i A')
                                         ?? 'Not configured' }}
                                 </strong>
-
                             </p>
+
 
 
                             <p class="mt-1 text-sm text-gray-600">
