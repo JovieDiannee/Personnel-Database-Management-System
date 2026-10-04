@@ -16,20 +16,44 @@ class DatabaseSeeder extends Seeder
     {
         /*
         |--------------------------------------------------------------------------
-        | Office Database
+        | Application Seeders
         |--------------------------------------------------------------------------
         |
         | Seeds:
-        | - OSDS
-        | - CID
-        | - SGOD
-        | - Office Units
-        | - Sub-units / Sections
+        | - Office Database
+        | - Super Admin Account
         |
         */
 
         $this->call([
+
+            /*
+            |--------------------------------------------------------------------------
+            | Office Database
+            |--------------------------------------------------------------------------
+            |
+            | Seeds:
+            | - OSDS
+            | - CID
+            | - SGOD
+            | - Office Units
+            | - Sub-units / Sections
+            |
+            */
+
             OfficeDatabaseSeeder::class,
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Super Admin
+            |--------------------------------------------------------------------------
+            |
+            | Creates or updates the default Super Admin account.
+            |
+            */
+
+            SuperAdminSeeder::class,
         ]);
     }
 }
