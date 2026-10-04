@@ -171,7 +171,7 @@ class DashboardController extends Controller
         | Temporary until the HR Transactions model/table is connected.
         */
 
-        $hrTransactions = '3,118';
+        $hrTransactions = 3110;
 
         /*
         |--------------------------------------------------------------------------
