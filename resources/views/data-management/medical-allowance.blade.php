@@ -229,7 +229,6 @@
 
         @endif
 
-
         {{-- =========================================================
             VALIDATION / DEADLINE BAR
         ========================================================== --}}
@@ -535,6 +534,187 @@
         @endif
 
 
+        {{-- =====================================================
+            SUPER ADMIN - IMPORT PERSONNEL
+        ====================================================== --}}
+
+        @if(auth()->user()->role === 'super_admin')
+
+            <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+
+                <h2 class="text-lg font-bold text-gray-800">
+                    Import Medical Allowance Status
+                </h2>
+
+
+                <p class="mt-1 text-sm text-gray-500">
+                    Upload the official Medical Allowance Status Excel file.
+                </p>
+
+
+                <form
+                    action="{{ route('data-management.medical-allowance.import') }}"
+                    method="POST"
+                    enctype="multipart/form-data"
+                    class="mt-6"
+                >
+
+                    @csrf
+
+
+                    <div class="flex flex-col gap-3 xl:flex-row xl:items-center">
+
+
+                        {{-- EXCEL FILE LABEL --}}
+
+                        <label
+                            for="file"
+                            class="shrink-0 text-sm font-semibold text-gray-700"
+                        >
+                            EXCEL FILE
+                        </label>
+
+
+                        {{-- CUSTOM FILE INPUT --}}
+
+                        <div class="relative flex h-11 min-w-0 w-full xl:flex-1">
+
+                            <input
+                                type="file"
+                                id="file"
+                                name="file"
+                                accept=".xlsx,.xls"
+                                required
+                                class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                                onchange="
+                                    document.getElementById('file-name').textContent =
+                                    this.files.length
+                                        ? this.files[0].name
+                                        : 'No file selected'
+                                "
+                            >
+
+
+                            <div
+                                class="flex h-full w-full items-center overflow-hidden
+                                        rounded-lg border border-gray-300 bg-white shadow-sm"
+                            >
+
+                                <span
+                                    class="flex h-full shrink-0 items-center
+                                            border-r border-green-200
+                                            bg-green-50 px-4
+                                            text-sm font-semibold text-green-700"
+                                >
+                                    Browse...
+                                </span>
+
+
+                                <span
+                                    id="file-name"
+                                    class="truncate px-4 text-sm text-gray-500"
+                                >
+                                    No file selected
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- ACTION BUTTONS --}}
+
+                        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+
+                            <button
+                                type="submit"
+                                class="inline-flex min-h-11 items-center justify-center gap-2
+                                        rounded-lg bg-green-700 px-5
+                                        text-sm font-semibold text-white
+                                        shadow-sm transition hover:bg-green-800"
+                            >
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M12 3v10m0-10L8 7m4-4l4 4"
+                                    />
+                                </svg>
+
+                                Upload & Preview
+
+                            </button>
+
+
+                            <a
+                                href="{{ route('data-management.medical-allowance.template') }}"
+                                class="inline-flex min-h-11 items-center justify-center gap-2
+                                        rounded-lg border border-green-700 bg-white px-4
+                                        text-sm font-semibold text-green-700
+                                        shadow-sm transition hover:bg-green-50"
+                            >
+
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M12 3v12m0 0l-4-4m4 4l4-4"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M5 21h14"
+                                    />
+                                </svg>
+
+                                Download Template
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+
+                    <p class="mt-1.5 text-xs text-gray-500">
+                        Accepted formats:
+                        <span class="font-medium">.xlsx</span>
+                        and
+                        <span class="font-medium">.xls</span>.
+                        Maximum file size:
+                        <span class="font-medium">10 MB</span>.
+                    </p>
+
+                </form>
+
+            </div>
+            <br>
+
+        @endif
+
+
         {{-- =========================================================
             VALIDATION SUMMARY
         ========================================================== --}}
@@ -556,137 +736,224 @@
             </div>
 
 
-            {{-- 6 CARDS IN ONE ROW --}}
+            {{-- =====================================================
+                7 CARDS IN ONE ROW
+            ====================================================== --}}
 
             <div
                 class="grid gap-2"
-                style="grid-template-columns: repeat(6, minmax(0, 1fr));"
+                style="grid-template-columns: repeat(7, minmax(0, 1fr));"
             >
 
+                {{-- ================================================= --}}
                 {{-- TOTAL --}}
+                {{-- ================================================= --}}
+
                 <a
                     href="{{ request()->fullUrlWithQuery([
                         'filter' => 'all',
                         'page' => 1
                     ]) }}#medical-allowance-table"
+
                     class="min-w-0 rounded-lg border px-3 py-2.5 transition
                         {{ $filter === 'all'
                             ? 'border-green-300 bg-green-50 shadow-sm'
                             : 'border-gray-200 bg-white hover:border-green-300' }}"
                 >
-                    <p class="truncate text-[10px] font-semibold uppercase text-gray-500">
+
+                    <p
+                        class="truncate text-[10px]
+                            font-semibold uppercase text-gray-500"
+                    >
                         Total
                     </p>
 
                     <p class="mt-1 text-lg font-bold text-gray-900">
                         {{ number_format($summary['total']) }}
                     </p>
+
+                </a>
+
+                {{-- ================================================= --}}
+                {{-- NO SCHOOL ASSIGNMENT --}}
+                {{-- ================================================= --}}
+
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                        'filter' => 'no_school',
+                        'page' => 1
+                    ]) }}#medical-allowance-table"
+
+                    class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                        {{ $filter === 'no_school'
+                            ? 'border-red-300 bg-red-50 shadow-sm'
+                            : 'border-gray-200 bg-white hover:border-red-300' }}"
+                    >
+
+                    <p
+                        class="truncate text-[10px]
+                            font-semibold uppercase text-red-600"
+                        title="No School Assignment"
+                    >
+                        No School Assignment
+                    </p>
+
+                    <p class="mt-1 text-lg font-bold text-red-700">
+                        {{ number_format($summary['no_school'] ?? 0) }}
+                    </p>
+
                 </a>
 
 
+                {{-- ================================================= --}}
                 {{-- CHANGED --}}
+                {{-- ================================================= --}}
+
                 <a
                     href="{{ request()->fullUrlWithQuery([
                         'filter' => 'changed',
                         'page' => 1
                     ]) }}#medical-allowance-table"
+
                     class="min-w-0 rounded-lg border px-3 py-2.5 transition
                         {{ $filter === 'changed'
                             ? 'border-blue-300 bg-blue-50 shadow-sm'
                             : 'border-gray-200 bg-white hover:border-blue-300' }}"
                 >
-                    <p class="truncate text-[10px] font-semibold uppercase text-blue-600">
+
+                    <p
+                        class="truncate text-[10px]
+                            font-semibold uppercase text-blue-600"
+                    >
                         Changed
                     </p>
 
                     <p class="mt-1 text-lg font-bold text-blue-700">
                         {{ number_format($summary['changed']) }}
                     </p>
+
                 </a>
 
 
+                {{-- ================================================= --}}
                 {{-- NO CHANGES --}}
+                {{-- ================================================= --}}
+
                 <a
                     href="{{ request()->fullUrlWithQuery([
                         'filter' => 'no_change',
                         'page' => 1
                     ]) }}#medical-allowance-table"
+
                     class="min-w-0 rounded-lg border px-3 py-2.5 transition
                         {{ $filter === 'no_change'
                             ? 'border-gray-400 bg-gray-100 shadow-sm'
                             : 'border-gray-200 bg-white hover:border-gray-300' }}"
                 >
-                    <p class="truncate text-[10px] font-semibold uppercase text-gray-500">
+
+                    <p
+                        class="truncate text-[10px]
+                            font-semibold uppercase text-gray-500"
+                    >
                         No Changes
                     </p>
 
                     <p class="mt-1 text-lg font-bold text-gray-700">
                         {{ number_format($summary['no_change']) }}
                     </p>
+
                 </a>
 
 
+                {{-- ================================================= --}}
                 {{-- NO PREVIOUS RECORD --}}
+                {{-- ================================================= --}}
+
                 <a
                     href="{{ request()->fullUrlWithQuery([
                         'filter' => 'new',
                         'page' => 1
                     ]) }}#medical-allowance-table"
+
                     class="min-w-0 rounded-lg border px-3 py-2.5 transition
                         {{ $filter === 'new'
                             ? 'border-purple-300 bg-purple-50 shadow-sm'
                             : 'border-gray-200 bg-white hover:border-purple-300' }}"
                 >
-                    <p class="truncate text-[10px] font-semibold uppercase text-purple-600">
+
+                    <p
+                        class="truncate text-[10px]
+                            font-semibold uppercase text-purple-600"
+                    >
                         No {{ $previousYear }} Record
                     </p>
 
                     <p class="mt-1 text-lg font-bold text-purple-700">
                         {{ number_format($summary['new']) }}
                     </p>
+
                 </a>
 
 
+                {{-- ================================================= --}}
                 {{-- PENDING --}}
+                {{-- ================================================= --}}
+
                 <a
                     href="{{ request()->fullUrlWithQuery([
                         'filter' => 'pending',
                         'page' => 1
                     ]) }}#medical-allowance-table"
+
                     class="min-w-0 rounded-lg border px-3 py-2.5 transition
                         {{ $filter === 'pending'
                             ? 'border-amber-300 bg-amber-50 shadow-sm'
                             : 'border-gray-200 bg-white hover:border-amber-300' }}"
                 >
-                    <p class="truncate text-[10px] font-semibold uppercase text-amber-600">
+
+                    <p
+                        class="truncate text-[10px]
+                            font-semibold uppercase text-amber-600"
+                    >
                         Pending
                     </p>
 
                     <p class="mt-1 text-lg font-bold text-amber-700">
                         {{ number_format($summary['pending']) }}
                     </p>
+
                 </a>
 
 
+                {{-- ================================================= --}}
                 {{-- VALIDATED --}}
+                {{-- ================================================= --}}
+
                 <a
                     href="{{ request()->fullUrlWithQuery([
                         'filter' => 'validated',
                         'page' => 1
                     ]) }}#medical-allowance-table"
+
                     class="min-w-0 rounded-lg border px-3 py-2.5 transition
                         {{ $filter === 'validated'
                             ? 'border-green-300 bg-green-50 shadow-sm'
                             : 'border-gray-200 bg-white hover:border-green-300' }}"
                 >
-                    <p class="truncate text-[10px] font-semibold uppercase text-green-600">
+
+                    <p
+                        class="truncate text-[10px]
+                            font-semibold uppercase text-green-600"
+                    >
                         Validated
                     </p>
 
                     <p class="mt-1 text-lg font-bold text-green-700">
                         {{ number_format($summary['validated']) }}
                     </p>
+
                 </a>
+
 
             </div>
 
@@ -701,7 +968,7 @@
             id="medical-allowance-table"
             class="overflow-hidden rounded-xl
                    border border-gray-200 bg-white shadow-sm"
-        >
+            >
 
 
             {{-- HEADER --}}
@@ -810,7 +1077,7 @@
                                 type="text"
                                 name="search"
                                 value="{{ $search }}"
-                                placeholder="Search employee name, email, school, position or status..."
+                                placeholder="  Search employee name, email, school, position or status..."
                                 class="w-full rounded-lg border-gray-300
                                        py-2.5 pl-10 pr-4 text-sm
                                        shadow-sm focus:border-green-600
@@ -1044,45 +1311,95 @@
                         @forelse($medicalAllowances as $record)
 
                             @php
-
-                                $basic =
-                                    $record->user?->basicInformation;
+                                /*
+                                |--------------------------------------------------------------------------
+                                | EMPLOYEE NAME
+                                |--------------------------------------------------------------------------
+                                |
+                                | $record is a stdClass returned by DB::table().
+                                | Therefore, use the selected columns directly.
+                                |
+                                */
 
                                 $name = trim(
+                                    ($record->first_name ?? '') . ' ' .
+                                    ($record->middle_name ?? '') . ' ' .
+                                    ($record->last_name ?? '') . ' ' .
+                                    ($record->extension_name ?? '')
+                                );
 
-                                    ($basic?->first_name ?? '') . ' ' .
+                                /*
+                                |--------------------------------------------------------------------------
+                                | FALLBACK NAME
+                                |--------------------------------------------------------------------------
+                                */
 
-                                    ($basic?->middle_name ?? '') . ' ' .
+                                if ($name === '') {
+                                    $name = $record->name ?? 'Unknown Employee';
+                                }
 
-                                    ($basic?->last_name ?? '') . ' ' .
 
-                                    ($basic?->extension_name ?? '')
+                                /*
+                                |--------------------------------------------------------------------------
+                                | SCHOOL ASSIGNMENT
+                                |--------------------------------------------------------------------------
+                                */
 
+                                $schoolName = trim(
+                                    (string) ($record->school_name ?? '')
+                                );
+
+                                $schoolDistrict = trim(
+                                    (string) ($record->school_district ?? '')
                                 );
 
 
-                                $employment =
-                                    $record->user?->employmentStatus;
+                                /*
+                                |--------------------------------------------------------------------------
+                                | POSITION
+                                |--------------------------------------------------------------------------
+                                */
 
-                                $plantilla =
-                                    $employment?->plantilla;
+                                $positionTitle = trim(
+                                    (string) ($record->position_title ?? '')
+                                );
 
-                                $school =
-                                    $employment?->school;
+                                $employmentStatus = trim(
+                                    (string) ($record->employment_status ?? '')
+                                );
 
 
-                                $previous =
-                                    trim(
-                                        (string)
-                                        ($record->previous_mode_of_availment ?? '')
-                                    );
+                                /*
+                                |--------------------------------------------------------------------------
+                                | PREVIOUS YEAR MEDICAL ALLOWANCE
+                                |--------------------------------------------------------------------------
+                                */
 
-                                $current =
-                                    trim(
-                                        (string)
-                                        ($record->mode_of_availment ?? '')
-                                    );
+                                $previous = trim(
+                                    (string) (
+                                        $record->previous_mode_of_availment ?? ''
+                                    )
+                                );
 
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | CURRENT YEAR MEDICAL ALLOWANCE
+                                |--------------------------------------------------------------------------
+                                */
+
+                                $current = trim(
+                                    (string) (
+                                        $record->mode_of_availment ?? ''
+                                    )
+                                );
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | COMPARISON
+                                |--------------------------------------------------------------------------
+                                */
 
                                 if (!$record->previous_medical_id) {
 
@@ -1095,25 +1412,50 @@
                                 } else {
 
                                     $comparison = 'changed';
-
                                 }
 
 
-                                $validationStatus = strtolower(
+                                /*
+                                |--------------------------------------------------------------------------
+                                | VALIDATION STATUS
+                                |--------------------------------------------------------------------------
+                                */
 
+                                $validationStatus = strtolower(
                                     trim(
                                         $record->validation_status
                                         ?? 'Pending'
                                     )
-
                                 );
 
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | LOCK STATUS
+                                |--------------------------------------------------------------------------
+                                */
 
                                 $isLocked =
                                     auth()->user()?->role === 'admin'
                                     &&
                                     $medicalSubmission?->status === 'Verified';
 
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | INITIAL
+                                |--------------------------------------------------------------------------
+                                */
+
+                                $initial = strtoupper(
+                                    substr(
+                                        $record->first_name
+                                        ?? $record->name
+                                        ?? 'E',
+                                        0,
+                                        1
+                                    )
+                                );
                             @endphp
 
 
@@ -1122,58 +1464,93 @@
                                 class="transition hover:bg-gray-50"
                             >
 
-                                {{-- EMPLOYEE --}}
+                                {{-- =========================================================
+                                    EMPLOYEE
+                                ========================================================== --}}
 
                                 <td class="px-4 py-4">
 
-                                    <p
-                                        class="text-sm font-semibold
-                                               text-gray-900"
-                                    >
+                                    <p class="text-sm font-semibold text-gray-900">
                                         {{ $name ?: '—' }}
                                     </p>
 
-                                    <p
-                                        class="mt-1 break-all text-xs
-                                               text-gray-500"
-                                    >
-                                        {{ $record->user?->email ?? '—' }}
+                                    <p class="mt-1 break-all text-xs text-gray-500">
+                                        {{ $record->email ?? '—' }}
                                     </p>
+
+                                    @if(!empty($record->employee_id))
+
+                                        <p class="mt-1 text-[11px] text-gray-400">
+                                            Employee ID:
+                                            {{ $record->employee_id }}
+                                        </p>
+
+                                    @endif
 
                                 </td>
 
 
+                                {{-- =========================================================
+                                    SCHOOL ASSIGNMENT
+                                    SUPER ADMIN ONLY
+                                ========================================================== --}}
+
                                 @if(auth()->user()->role === 'super_admin')
 
-                                    <td
-                                        class="px-4 py-4 text-sm text-gray-700"
-                                    >
-                                        {{ $school?->school_name ?? '—' }} - {{ $school?->school_district ?? '—' }}
+                                    <td class="px-4 py-4 text-sm text-gray-700">
+
+                                        @if($schoolName !== '')
+
+                                            <p class="font-medium text-gray-800">
+                                                {{ $schoolName }}
+                                            </p>
+
+                                            @if($schoolDistrict !== '')
+
+                                                <p class="mt-1 text-xs text-gray-500">
+                                                    {{ $schoolDistrict }}
+                                                </p>
+
+                                            @endif
+
+                                        @else
+
+                                            <span
+                                                class="inline-flex rounded-full
+                                                    bg-gray-100 px-2.5 py-1
+                                                    text-xs font-semibold
+                                                    text-gray-600"
+                                            >
+                                                No School Assignment
+                                            </span>
+
+                                        @endif
+
                                     </td>
 
                                 @endif
 
 
-                                {{-- POSITION --}}
+                                {{-- =========================================================
+                                    POSITION STATUS
+                                ========================================================== --}}
 
                                 <td class="px-4 py-4">
 
-                                    <p
-                                        class="text-sm font-medium
-                                               text-gray-800"
-                                    >
-                                        {{ $plantilla?->position_title ?? '—' }}
+                                    <p class="text-sm font-medium text-gray-800">
+                                        {{ $positionTitle ?: '—' }}
                                     </p>
 
-                                    @if($employment?->employment_status)
+
+                                    @if($employmentStatus !== '')
 
                                         <span
-                                            class="inline-flex rounded-full
-                                                   bg-green-50 px-2.5 py-1
-                                                   text-xs font-semibold
-                                                   text-green-700"
+                                            class="mt-1 inline-flex rounded-full
+                                                bg-green-50 px-2.5 py-1
+                                                text-xs font-semibold
+                                                text-green-700"
                                         >
-                                            {{ $employment->employment_status }}
+                                            {{ $employmentStatus }}
                                         </span>
 
                                     @else
@@ -1186,21 +1563,19 @@
 
                                 </td>
 
-                                {{-- =================================================
-                                    2025
-                                ================================================== --}}
+
+                                {{-- =========================================================
+                                    PREVIOUS YEAR
+                                ========================================================== --}}
 
                                 <td
                                     class="border-l border-gray-100
-                                           bg-slate-50/60 px-4 py-4"
+                                        bg-slate-50/60 px-4 py-4"
                                 >
 
                                     @if($record->previous_medical_id)
 
-                                        <p
-                                            class="text-sm font-medium
-                                                   text-gray-800"
-                                        >
+                                        <p class="text-sm font-medium text-gray-800">
                                             {{ $previous ?: '—' }}
                                         </p>
 
@@ -1208,16 +1583,14 @@
 
                                         <span
                                             class="inline-flex rounded-md
-                                                   bg-purple-50 px-2.5 py-1
-                                                   text-xs font-semibold
-                                                   text-purple-700"
+                                                bg-purple-50 px-2.5 py-1
+                                                text-xs font-semibold
+                                                text-purple-700"
                                         >
                                             Needs Review
                                         </span>
 
-                                        <p
-                                            class="mt-1 text-xs text-gray-400"
-                                        >
+                                        <p class="mt-1 text-xs text-gray-400">
                                             No existing {{ $previousYear }} record
                                         </p>
 
@@ -1226,28 +1599,25 @@
                                 </td>
 
 
-                                {{-- =================================================
-                                    2026
-                                ================================================== --}}
+                                {{-- =========================================================
+                                    CURRENT YEAR
+                                ========================================================== --}}
 
                                 <td
                                     class="border-l border-gray-100
-                                           bg-green-50/30 px-4 py-4"
+                                        bg-green-50/30 px-4 py-4"
                                 >
 
-                                    <p
-                                        class="text-sm font-semibold
-                                               text-green-800"
-                                    >
+                                    <p class="text-sm font-semibold text-green-800">
                                         {{ $current ?: '—' }}
                                     </p>
 
                                 </td>
 
 
-                                {{-- =================================================
+                                {{-- =========================================================
                                     COMPARISON
-                                ================================================== --}}
+                                ========================================================== --}}
 
                                 <td class="px-4 py-4 text-center">
 
@@ -1255,33 +1625,31 @@
 
                                         <span
                                             class="inline-flex rounded-full
-                                                   bg-gray-100 px-2.5 py-1
-                                                   text-xs font-semibold
-                                                   text-gray-600"
+                                                bg-gray-100 px-2.5 py-1
+                                                text-xs font-semibold
+                                                text-gray-600"
                                         >
                                             No Changes
                                         </span>
-
 
                                     @elseif($comparison === 'changed')
 
                                         <span
                                             class="inline-flex rounded-full
-                                                   bg-blue-50 px-2.5 py-1
-                                                   text-xs font-semibold
-                                                   text-blue-700"
+                                                bg-blue-50 px-2.5 py-1
+                                                text-xs font-semibold
+                                                text-blue-700"
                                         >
                                             Changed
                                         </span>
-
 
                                     @else
 
                                         <span
                                             class="inline-flex rounded-full
-                                                   bg-purple-50 px-2.5 py-1
-                                                   text-xs font-semibold
-                                                   text-purple-700"
+                                                bg-purple-50 px-2.5 py-1
+                                                text-xs font-semibold
+                                                text-purple-700"
                                         >
                                             Review
                                         </span>
@@ -1291,20 +1659,19 @@
                                 </td>
 
 
-                                {{-- =================================================
+                                {{-- =========================================================
                                     VALIDATION
-                                ================================================== --}}
+                                ========================================================== --}}
 
                                 <td class="px-4 py-4 text-center">
 
                                     @if($validationStatus === 'validated')
 
                                         <span
-                                            class="inline-flex items-center
-                                                   gap-1 rounded-full
-                                                   bg-green-50 px-2.5 py-1
-                                                   text-xs font-semibold
-                                                   text-green-700"
+                                            class="inline-flex items-center gap-1
+                                                rounded-full bg-green-50
+                                                px-2.5 py-1 text-xs
+                                                font-semibold text-green-700"
                                         >
                                             ✓ Validated
                                         </span>
@@ -1312,19 +1679,19 @@
                                     @else
 
                                         <span
-                                            class="inline-flex items-center
-                                                   gap-1 rounded-full
-                                                   bg-amber-50 px-2.5 py-1
-                                                   text-xs font-semibold
-                                                   text-amber-700"
+                                            class="inline-flex items-center gap-1
+                                                rounded-full bg-amber-50
+                                                px-2.5 py-1 text-xs
+                                                font-semibold text-amber-700"
                                         >
+
                                             <span
                                                 class="h-1.5 w-1.5
-                                                       rounded-full
-                                                       bg-amber-500"
+                                                    rounded-full bg-amber-500"
                                             ></span>
 
                                             Pending
+
                                         </span>
 
                                     @endif
@@ -1332,9 +1699,9 @@
                                 </td>
 
 
-                                {{-- =================================================
+                                {{-- =========================================================
                                     ACTION
-                                ================================================== --}}
+                                ========================================================== --}}
 
                                 <td class="px-4 py-4 text-center">
 
@@ -1364,9 +1731,9 @@
                                     </button>
 
 
-                                    {{-- =============================================
+                                    {{-- =====================================================
                                         UPDATE MODAL
-                                    ============================================== --}}
+                                    ====================================================== --}}
 
                                     <template x-teleport="body">
 
@@ -1374,12 +1741,15 @@
                                             x-cloak
                                             x-show="updateModalOpen"
                                             x-transition.opacity
+
                                             @keydown.escape.window="
                                                 updateModalOpen = false
                                             "
+
                                             class="fixed inset-0 z-50
-                                                   flex items-center justify-center
-                                                   bg-gray-900/50 p-4"
+                                                flex items-center justify-center
+                                                bg-gray-900/50 p-4"
+
                                             role="dialog"
                                             aria-modal="true"
                                         >
@@ -1387,39 +1757,39 @@
                                             <div
                                                 x-show="updateModalOpen"
                                                 x-transition.scale.origin.center
+
                                                 @click.outside="
                                                     updateModalOpen = false
                                                 "
+
                                                 class="w-full max-w-xl
-                                                       overflow-hidden rounded-xl
-                                                       bg-white shadow-2xl"
+                                                    overflow-hidden rounded-xl
+                                                    bg-white shadow-2xl"
                                             >
 
-                                                {{-- =================================
+                                                {{-- =========================================
                                                     MODAL HEADER
-                                                ================================== --}}
+                                                ========================================== --}}
 
                                                 <div
                                                     class="flex items-center
-                                                           justify-between
-                                                           border-b
-                                                           border-gray-200
-                                                           px-5 py-4"
+                                                        justify-between
+                                                        border-b border-gray-200
+                                                        px-5 py-4"
                                                 >
 
                                                     <div>
 
                                                         <h3
-                                                            class="text-base
-                                                                   font-bold
-                                                                   text-gray-900"
+                                                            class="text-base font-bold
+                                                                text-gray-900"
                                                         >
                                                             Review Medical Allowance
                                                         </h3>
 
                                                         <p
                                                             class="mt-0.5 text-xs
-                                                                   text-gray-500"
+                                                                text-gray-500"
                                                         >
                                                             Verify both year records
                                                             before saving.
@@ -1430,18 +1800,19 @@
 
                                                     <button
                                                         type="button"
+
                                                         @click="
                                                             updateModalOpen = false
                                                         "
+
                                                         class="flex h-9 w-9
-                                                               items-center
-                                                               justify-center
-                                                               rounded-lg
-                                                               text-gray-400
-                                                               transition
-                                                               hover:bg-gray-100
-                                                               hover:text-gray-700"
+                                                            items-center justify-center
+                                                            rounded-lg text-gray-400
+                                                            transition
+                                                            hover:bg-gray-100
+                                                            hover:text-gray-700"
                                                     >
+
                                                         <svg
                                                             class="h-5 w-5"
                                                             fill="none"
@@ -1455,20 +1826,22 @@
                                                                 d="M6 18L18 6M6 6l12 12"
                                                             />
                                                         </svg>
+
                                                     </button>
 
                                                 </div>
 
 
-                                                {{-- =================================
+                                                {{-- =========================================
                                                     FORM
-                                                ================================== --}}
+                                                ========================================== --}}
 
                                                 <form
                                                     method="POST"
+
                                                     action="{{ route(
                                                         'medical-allowance.update-availment',
-                                                        $record
+                                                        $record->users_id
                                                     ) }}"
                                                 >
 
@@ -1478,517 +1851,475 @@
 
                                                     <div class="p-5">
 
-                                                        {{-- EMPLOYEE --}}
+                                                        {{-- =================================
+                                                            EMPLOYEE INFORMATION
+                                                        ================================== --}}
 
                                                         <div
                                                             class="mb-5 flex
-                                                                   items-start gap-3
-                                                                   rounded-lg
-                                                                   bg-gray-50 p-4"
+                                                                items-start gap-3
+                                                                rounded-lg
+                                                                bg-gray-50 p-4"
                                                         >
 
                                                             <div
                                                                 class="flex h-10 w-10
-                                                                       shrink-0 items-center
-                                                                       justify-center
-                                                                       rounded-full
-                                                                       bg-green-100
-                                                                       text-sm
-                                                                       font-bold
-                                                                       text-green-700"
+                                                                    shrink-0 items-center
+                                                                    justify-center
+                                                                    rounded-full
+                                                                    bg-green-100
+                                                                    text-sm font-bold
+                                                                    text-green-700"
                                                             >
-                                                                {{ strtoupper(
-                                                                    substr(
-                                                                        $basic?->first_name ?? 'E',
-                                                                        0,
-                                                                        1
-                                                                    )
-                                                                ) }}
+                                                                {{ $initial }}
                                                             </div>
 
 
-                                                            <div class="min-w-0">
+                                            <div class="min-w-0">
 
-                                                                <p
-                                                                    class="font-semibold
-                                                                           text-gray-900"
-                                                                >
-                                                                    {{ $name ?: 'Unknown Employee' }}
-                                                                </p>
+                                                <p class="font-semibold text-gray-900">
+                                                    {{ $name ?: 'Unknown Employee' }}
+                                                </p>
 
-                                                                <p
-                                                                    class="mt-0.5 text-xs
-                                                                           text-gray-500"
-                                                                >
-                                                                    {{ $plantilla?->position_title ?? 'No position' }}
-                                                                </p>
+                                                <p class="mt-0.5 text-xs text-gray-500">
+                                                    {{ $positionTitle ?: 'No position' }}
+                                                </p>
 
-                                                                <p
-                                                                    class="mt-0.5 text-xs
-                                                                           text-gray-500"
-                                                                >
-                                                                    {{ $school?->school_name ?? 'No school' }}
 
-                                                                    @if($school?->school_district)
-                                                                        •
-                                                                        {{ $school->school_district }}
-                                                                    @endif
-                                                                </p>
+                                                @if($schoolName !== '')
 
-                                                            </div>
+                                                    <p class="mt-0.5 text-xs text-gray-500">
 
-                                                        </div>
+                                                        {{ $schoolName }}
 
+                                                        @if($schoolDistrict !== '')
+                                                            • {{ $schoolDistrict }}
+                                                        @endif
 
-                                                        {{-- =================================
-                                                            YEARS
-                                                        ================================== --}}
+                                                    </p>
 
-                                                        <div
-                                                            class="grid gap-4
-                                                                   sm:grid-cols-2"
-                                                        >
+                                                @else
 
-                                                            {{-- =============================
-                                                                PREVIOUS YEAR
-                                                            ============================== --}}
+                                                    <p class="mt-0.5 text-xs text-gray-400">
+                                                        No school assignment
+                                                    </p>
 
-                                                            <div
-                                                                class="rounded-xl
-                                                                       border
-                                                                       border-slate-200
-                                                                       bg-slate-50 p-4"
-                                                            >
-
-                                                                <div
-                                                                    class="mb-3 flex
-                                                                           items-center
-                                                                           justify-between"
-                                                                >
-
-                                                                    <div>
-
-                                                                        <p
-                                                                            class="text-xs
-                                                                                   font-semibold
-                                                                                   uppercase
-                                                                                   tracking-wide
-                                                                                   text-slate-500"
-                                                                        >
-                                                                            Previous Year
-                                                                        </p>
-
-                                                                        <p
-                                                                            class="text-xl
-                                                                                   font-bold
-                                                                                   text-slate-800"
-                                                                        >
-                                                                            {{ $previousYear }}
-                                                                        </p>
-
-                                                                    </div>
-
-
-                                                                    @if(!$record->previous_medical_id)
-
-                                                                        <span
-                                                                            class="rounded-full
-                                                                                   bg-purple-100
-                                                                                   px-2 py-1
-                                                                                   text-[10px]
-                                                                                   font-semibold
-                                                                                   text-purple-700"
-                                                                        >
-                                                                            Needs Review
-                                                                        </span>
-
-                                                                    @endif
-
-                                                                </div>
-
-
-                                                                <label
-                                                                    for="previous_mode_{{ $record->id }}"
-                                                                    class="mb-2 block
-                                                                           text-xs
-                                                                           font-semibold
-                                                                           text-gray-700"
-                                                                >
-                                                                    Mode of Availment
-                                                                </label>
-
-
-                                                                <select
-                                                                    id="previous_mode_{{ $record->id }}"
-                                                                    name="previous_mode_of_availment"
-                                                                    required
-                                                                    class="w-full rounded-lg
-                                                                           border-gray-300
-                                                                           bg-white text-sm
-                                                                           shadow-sm
-                                                                           focus:border-green-600
-                                                                           focus:ring-green-600"
-                                                                >
-
-                                                                    <option value="" disabled
-                                                                        @selected(!$previous)
-                                                                    >
-                                                                        Select availment
-                                                                    </option>
-
-
-                                                                    <option
-                                                                        value="Group Availment (HMO)"
-                                                                        @selected(
-                                                                            $previous
-                                                                            ===
-                                                                            'Group Availment (HMO)'
-                                                                        )
-                                                                    >
-                                                                        Group Availment (HMO)
-                                                                    </option>
-
-
-                                                                    <option
-                                                                        value="Individual Availment (HMO)"
-                                                                        @selected(
-                                                                            $previous
-                                                                            ===
-                                                                            'Individual Availment (HMO)'
-                                                                        )
-                                                                    >
-                                                                        Individual Availment (HMO)
-                                                                    </option>
-
-
-                                                                    <option
-                                                                        value="Not Eligible"
-                                                                        @selected(
-                                                                            $previous
-                                                                            ===
-                                                                            'Not Eligible'
-                                                                        )
-                                                                    >
-                                                                        Not Eligible
-                                                                    </option>
-
-                                                                </select>
-
-
-                                                                @if(!$record->previous_medical_id)
-
-                                                                    <p
-                                                                        class="mt-2 text-xs
-                                                                               leading-5
-                                                                               text-slate-500"
-                                                                    >
-                                                                        No record exists yet.
-                                                                        Selecting an option will
-                                                                        create the
-                                                                        {{ $previousYear }}
-                                                                        record.
-                                                                    </p>
-
-                                                                @endif
-
-                                                            </div>
-
-
-                                                            {{-- =============================
-                                                                CURRENT YEAR
-                                                            ============================== --}}
-
-                                                            <div
-                                                                class="rounded-xl
-                                                                       border
-                                                                       border-green-200
-                                                                       bg-green-50 p-4"
-                                                            >
-
-                                                                <div class="mb-3">
-
-                                                                    <p
-                                                                        class="text-xs
-                                                                               font-semibold
-                                                                               uppercase
-                                                                               tracking-wide
-                                                                               text-green-600"
-                                                                    >
-                                                                        Current Year
-                                                                    </p>
-
-                                                                    <p
-                                                                        class="text-xl
-                                                                               font-bold
-                                                                               text-green-800"
-                                                                    >
-                                                                        {{ $currentYear }}
-                                                                    </p>
-
-                                                                </div>
-
-
-                                                                <label
-                                                                    for="current_mode_{{ $record->id }}"
-                                                                    class="mb-2 block
-                                                                           text-xs
-                                                                           font-semibold
-                                                                           text-gray-700"
-                                                                >
-                                                                    Mode of Availment
-                                                                </label>
-
-
-                                                                <select
-                                                                    id="current_mode_{{ $record->id }}"
-                                                                    name="current_mode_of_availment"
-                                                                    required
-                                                                    class="w-full rounded-lg
-                                                                           border-green-300
-                                                                           bg-white text-sm
-                                                                           shadow-sm
-                                                                           focus:border-green-600
-                                                                           focus:ring-green-600"
-                                                                >
-
-                                                                    <option
-                                                                        value="Group Availment (HMO)"
-                                                                        @selected(
-                                                                            $current
-                                                                            ===
-                                                                            'Group Availment (HMO)'
-                                                                        )
-                                                                    >
-                                                                        Group Availment (HMO)
-                                                                    </option>
-
-
-                                                                    <option
-                                                                        value="Individual Availment (HMO)"
-                                                                        @selected(
-                                                                            $current
-                                                                            ===
-                                                                            'Individual Availment (HMO)'
-                                                                        )
-                                                                    >
-                                                                        Individual Availment (HMO)
-                                                                    </option>
-
-
-                                                                    <option
-                                                                        value="Not Eligible"
-                                                                        @selected(
-                                                                            $current
-                                                                            ===
-                                                                            'Not Eligible'
-                                                                        )
-                                                                    >
-                                                                        Not Eligible
-                                                                    </option>
-
-                                                                </select>
-
-                                                            </div>
-
-                                                        </div>
-
-
-                                                        {{-- =================================
-                                                            NOTICE
-                                                        ================================== --}}
-
-                                                        <div
-                                                            class="mt-4 flex
-                                                                   items-start gap-2
-                                                                   rounded-lg
-                                                                   border
-                                                                   border-blue-100
-                                                                   bg-blue-50
-                                                                   px-3 py-2.5"
-                                                        >
-
-                                                            <svg
-                                                                class="mt-0.5 h-4 w-4
-                                                                       shrink-0 text-blue-600"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                viewBox="0 0 24 24"
-                                                            >
-                                                                <circle
-                                                                    cx="12"
-                                                                    cy="12"
-                                                                    r="9"
-                                                                />
-
-                                                                <path
-                                                                    stroke-linecap="round"
-                                                                    stroke-width="2"
-                                                                    d="M12 11v5m0-8h.01"
-                                                                />
-                                                            </svg>
-
-
-                                                            <p
-                                                                class="text-xs
-                                                                       leading-5
-                                                                       text-blue-700"
-                                                            >
-                                                                Review both selections carefully.
-                                                                These records will be included in
-                                                                the school's Medical Allowance
-                                                                validation.
-                                                            </p>
-
-                                                        </div>
-
-                                                    </div>
-
-
-                                                    {{-- =================================
-                                                        FOOTER
-                                                    ================================== --}}
-
-                                                    <div
-                                                        class="flex items-center
-                                                               justify-end gap-2
-                                                               border-t
-                                                               border-gray-200
-                                                               bg-gray-50
-                                                               px-5 py-3"
-                                                    >
-
-                                                        <button
-                                                            type="button"
-                                                            @click="
-                                                                updateModalOpen = false
-                                                            "
-                                                            class="min-h-10
-                                                                   rounded-lg border
-                                                                   border-gray-300
-                                                                   bg-white px-4
-                                                                   text-sm
-                                                                   font-semibold
-                                                                   text-gray-700
-                                                                   transition
-                                                                   hover:bg-gray-50"
-                                                        >
-                                                            Cancel
-                                                        </button>
-
-
-                                                        <button
-                                                            type="submit"
-                                                            class="inline-flex
-                                                                   min-h-10
-                                                                   items-center
-                                                                   justify-center
-                                                                   gap-2 rounded-lg
-                                                                   bg-green-700
-                                                                   px-5 text-sm
-                                                                   font-semibold
-                                                                   text-white
-                                                                   transition
-                                                                   hover:bg-green-800"
-                                                        >
-
-                                                            <svg
-                                                                class="h-4 w-4"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                viewBox="0 0 24 24"
-                                                            >
-                                                                <path
-                                                                    stroke-linecap="round"
-                                                                    stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M5 13l4 4L19 7"
-                                                                />
-                                                            </svg>
-
-                                                            Save Changes
-
-                                                        </button>
-
-                                                    </div>
-
-                                                </form>
+                                                @endif
 
                                             </div>
 
                                         </div>
 
-                                    </template>
 
-                                </td>
+                                        {{-- =================================
+                                            YEARS
+                                        ================================== --}}
 
-                            </tr>
+                                        <div class="grid gap-4 sm:grid-cols-2">
 
 
-                        @empty
+                                            {{-- =============================
+                                                PREVIOUS YEAR
+                                            ============================== --}}
 
-                            <tr>
+                                            <div
+                                                class="rounded-xl
+                                                    border border-slate-200
+                                                    bg-slate-50 p-4"
+                                            >
 
-                                <td
-                                    colspan="{{ auth()->user()->role === 'super_admin'
-                                        ? 10
-                                        : 8 }}"
-                                    class="px-6 py-14 text-center"
-                                >
+                                                <div
+                                                    class="mb-3 flex
+                                                        items-center
+                                                        justify-between"
+                                                >
 
-                                    <div
-                                        class="mx-auto flex h-12 w-12
-                                               items-center justify-center
-                                               rounded-full bg-gray-100
-                                               text-gray-400"
-                                    >
-                                        <svg
-                                            class="h-6 w-6"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
+                                                    <div>
+
+                                                        <p
+                                                            class="text-xs
+                                                                font-semibold
+                                                                uppercase
+                                                                tracking-wide
+                                                                text-slate-500"
+                                                        >
+                                                            Previous Year
+                                                        </p>
+
+                                                        <p
+                                                            class="text-xl
+                                                                font-bold
+                                                                text-slate-800"
+                                                        >
+                                                            {{ $previousYear }}
+                                                        </p>
+
+                                                    </div>
+
+
+                                                    @if(!$record->previous_medical_id)
+
+                                                        <span
+                                                            class="rounded-full
+                                                                bg-purple-100
+                                                                px-2 py-1
+                                                                text-[10px]
+                                                                font-semibold
+                                                                text-purple-700"
+                                                        >
+                                                            Needs Review
+                                                        </span>
+
+                                                    @endif
+
+                                                </div>
+
+
+                                                <label
+                                                    for="previous_mode_{{ $record->users_id }}"
+                                                    class="mb-2 block
+                                                        text-xs font-semibold
+                                                        text-gray-700"
+                                                >
+                                                    Mode of Availment
+                                                </label>
+
+
+                                                <select
+                                                    id="previous_mode_{{ $record->users_id }}"
+                                                    name="previous_mode_of_availment"
+                                                    required
+
+                                                    class="w-full rounded-lg
+                                                        border-gray-300
+                                                        bg-white text-sm
+                                                        shadow-sm
+                                                        focus:border-green-600
+                                                        focus:ring-green-600"
+                                                >
+
+                                                    <option
+                                                        value=""
+                                                        disabled
+                                                        @selected(!$previous)
+                                                    >
+                                                        Select availment
+                                                    </option>
+
+
+                                                    @foreach($availmentOptions as $option)
+
+                                                        <option
+                                                            value="{{ $option }}"
+
+                                                            @selected(
+                                                                $previous === $option
+                                                            )
+                                                        >
+                                                            {{ $option }}
+                                                        </option>
+
+                                                    @endforeach
+
+                                                </select>
+
+
+                                                @if(!$record->previous_medical_id)
+
+                                                    <p
+                                                        class="mt-2 text-xs
+                                                            leading-5
+                                                            text-slate-500"
+                                                    >
+                                                        No record exists yet.
+                                                        Selecting an option will
+                                                        create the
+                                                        {{ $previousYear }}
+                                                        record.
+                                                    </p>
+
+                                                @endif
+
+                                            </div>
+
+
+                                            {{-- =============================
+                                                CURRENT YEAR
+                                            ============================== --}}
+
+                                            <div
+                                                class="rounded-xl
+                                                    border border-green-200
+                                                    bg-green-50 p-4"
+                                            >
+
+                                                <div class="mb-3">
+
+                                                    <p
+                                                        class="text-xs
+                                                            font-semibold
+                                                            uppercase
+                                                            tracking-wide
+                                                            text-green-600"
+                                                    >
+                                                        Current Year
+                                                    </p>
+
+                                                    <p
+                                                        class="text-xl
+                                                            font-bold
+                                                            text-green-800"
+                                                    >
+                                                        {{ $currentYear }}
+                                                    </p>
+
+                                                </div>
+
+
+                                                <label
+                                                    for="current_mode_{{ $record->users_id }}"
+                                                    class="mb-2 block
+                                                        text-xs font-semibold
+                                                        text-gray-700"
+                                                >
+                                                    Mode of Availment
+                                                </label>
+
+
+                                                <select
+                                                    id="current_mode_{{ $record->users_id }}"
+                                                    name="current_mode_of_availment"
+                                                    required
+
+                                                    class="w-full rounded-lg
+                                                        border-green-300
+                                                        bg-white text-sm
+                                                        shadow-sm
+                                                        focus:border-green-600
+                                                        focus:ring-green-600"
+                                                >
+
+                                                    <option
+                                                        value=""
+                                                        disabled
+                                                        @selected(!$current)
+                                                    >
+                                                        Select availment
+                                                    </option>
+
+
+                                                    @foreach($availmentOptions as $option)
+
+                                                        <option
+                                                            value="{{ $option }}"
+
+                                                            @selected(
+                                                                $current === $option
+                                                            )
+                                                        >
+                                                            {{ $option }}
+                                                        </option>
+
+                                                    @endforeach
+
+                                                </select>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        {{-- =================================
+                                            NOTICE
+                                        ================================== --}}
+
+                                        <div
+                                            class="mt-4 flex items-start
+                                                gap-2 rounded-lg
+                                                border border-blue-100
+                                                bg-blue-50 px-3 py-2.5"
                                         >
-                                            <circle
-                                                cx="11"
-                                                cy="11"
-                                                r="7"
-                                            />
 
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-width="2"
-                                                d="m20 20-3.5-3.5"
-                                            />
-                                        </svg>
+                                            <svg
+                                                class="mt-0.5 h-4 w-4
+                                                    shrink-0 text-blue-600"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <circle
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="9"
+                                                />
+
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-width="2"
+                                                    d="M12 11v5m0-8h.01"
+                                                />
+                                            </svg>
+
+
+                                            <p
+                                                class="text-xs leading-5
+                                                    text-blue-700"
+                                            >
+                                                Review both selections carefully.
+                                                These records will be included in
+                                                the school's Medical Allowance
+                                                validation.
+                                            </p>
+
+                                        </div>
+
                                     </div>
 
 
-                                    <p
-                                        class="mt-3 text-sm font-semibold
-                                               text-gray-700"
+                                    {{-- =====================================
+                                        FOOTER
+                                    ====================================== --}}
+
+                                    <div
+                                        class="flex items-center justify-end gap-3
+                                            border-t border-gray-200
+                                            bg-gray-50 px-5 py-4"
                                     >
-                                        No medical allowance records found.
-                                    </p>
 
-
-                                    @if($search !== '')
-
-                                        <p
-                                            class="mt-1 text-sm
-                                                   text-gray-500"
+                                        {{-- CANCEL --}}
+                                        <button
+                                            type="button"
+                                            @click="updateModalOpen = false"
+                                            style="height: 48px; padding-left: 24px; padding-right: 24px;"
+                                            class="rounded-lg
+                                                border border-gray-300
+                                                bg-white
+                                                text-sm font-semibold
+                                                text-gray-700
+                                                transition
+                                                hover:bg-gray-100"
                                         >
-                                            No results matched
-                                            “{{ $search }}”.
-                                        </p>
+                                            Cancel
+                                        </button>
 
-                                    @endif
 
-                                </td>
+                                        {{-- SAVE CHANGES --}}
+                                        <button
+                                            type="submit"
+                                            style="height: 48px; min-width: 175px; padding-left: 24px; padding-right: 24px;"
+                                            class="inline-flex
+                                                items-center justify-center
+                                                gap-2 rounded-lg
+                                                bg-green-700
+                                                text-sm font-semibold
+                                                text-white
+                                                shadow-sm transition
+                                                hover:bg-green-800"
+                                        >
 
-                            </tr>
+                                            <svg
+                                                class="h-5 w-5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M5 13l4 4L19 7"
+                                                />
+                                            </svg>
 
-                        @endforelse
+                                            Save Changes
 
-                    </tbody>
+                                        </button>
+
+                                    </div>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    </template>
+
+                </td>
+
+            </tr>
+
+
+        @empty
+
+            <tr>
+
+                <td
+                    colspan="{{ auth()->user()->role === 'super_admin'
+                        ? 8
+                        : 7 }}"
+
+                    class="px-6 py-14 text-center"
+                >
+
+                    <div
+                        class="mx-auto flex h-12 w-12
+                            items-center justify-center
+                            rounded-full bg-gray-100
+                            text-gray-400"
+                    >
+
+                        <svg
+                            class="h-6 w-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+
+                            <circle
+                                cx="11"
+                                cy="11"
+                                r="7"
+                            />
+
+                            <path
+                                stroke-linecap="round"
+                                stroke-width="2"
+                                d="m20 20-3.5-3.5"
+                            />
+
+                        </svg>
+
+                    </div>
+
+
+                    <p
+                        class="mt-3 text-sm font-semibold
+                            text-gray-700"
+                    >
+                        No medical allowance records found.
+                    </p>
+
+
+                    @if($search !== '')
+
+                        <p
+                            class="mt-1 text-sm
+                                text-gray-500"
+                        >
+                            No results matched
+                            “{{ $search }}”.
+                        </p>
+
+                    @endif
+
+                </td>
+
+            </tr>
+
+        @endforelse
+
+    </tbody>
 
                 </table>
 

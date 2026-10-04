@@ -379,109 +379,7 @@
 
                 </div>
 
-
-            {{-- =====================================================
-                ADMIN - MANUAL PERSONNEL ENTRY
-            ====================================================== --}}
-
-            @elseif(auth()->user()->role === 'admin')
-
-                <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
-
-                    <div
-                        class="flex flex-col gap-5
-                               md:flex-row md:items-center md:justify-between"
-                    >
-
-                        <div>
-
-                            <h2 class="text-lg font-bold text-gray-900">
-                                Add Personnel Information
-                            </h2>
-
-                            <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
-                                Excel import is available only to the Super Admin.
-                                To add a personnel record, complete the personnel information form.
-                            </p>
-
-                        </div>
-
-
-                        <div
-                            class="flex w-full shrink-0 flex-col gap-2
-                                   sm:flex-row md:w-auto"
-                            >
-
-                            <a
-                                href="{{ route('add-personnel-requests.index') }}"
-                                class="inline-flex min-h-11 items-center justify-center gap-2
-                                    rounded-lg border border-green-700 bg-white px-5
-                                    text-sm font-semibold text-green-700
-                                    shadow-sm transition hover:bg-green-50"
-                            >
-                                {{-- LIST ICON --}}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4 shrink-0"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    aria-hidden="true"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M8.25 6.75h12
-                                        M8.25 12h12
-                                        M8.25 17.25h12
-                                        M3.75 6.75h.008v.008H3.75V6.75z
-                                        M3.75 12h.008v.008H3.75V12z
-                                        M3.75 17.25h.008v.008H3.75v-.008z"
-                                    />
-                                </svg>
-
-                                View Request Status
-                            </a>
-
-
-                            <a
-                                href="{{ route('add-personnel-requests.create') }}"
-                                class="inline-flex min-h-11 items-center justify-center gap-2
-                                       rounded-lg bg-green-700 px-5
-                                       text-sm font-semibold text-white
-                                       shadow-sm transition hover:bg-green-800"
-                            >
-
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M12 4.5v15m7.5-7.5h-15"
-                                    />
-                                </svg>
-
-                                Add Personnel
-
-                            </a>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
             @endif
-
-
-            <br>
 
 
             {{-- =====================================================
@@ -1381,7 +1279,7 @@
                                    sm:justify-between"
                         >
 
-                            <div class="text-sm text-gray-500">
+                            <div class="text-sm text-gray-5300">
 
                                 @if($employmentStatuses->total() > 0)
 
@@ -1434,26 +1332,110 @@
                 <div
                     class="min-w-0 overflow-hidden rounded-xl
                            border border-gray-200 bg-white shadow-sm"
-                >
+                    >
 
 
-                    {{-- HEADER --}}
+                    {{-- =====================================================
+                        HEADER
+                    ====================================================== --}}
 
                     <div
-                        class="border-b border-green-800
-                               bg-green-800 px-5 py-4 text-white"
+                        class="border-b border-green-800 bg-green-800 px-5 py-5 text-white"
                         style="background-color: #166534;"
                     >
 
-                        <h3 class="text-xl font-semibold text-white">
-                            Employment Profile Records
-                            ({{ $schoolName }} - {{ $districtName }})
-                        </h3>
+                        {{-- ONE ROW: TITLE LEFT / BUTTONS RIGHT --}}
+                        <div class="flex w-full items-center justify-between gap-6">
+
+                            {{-- LEFT SIDE --}}
+                            <div class="min-w-0 flex-1">
+
+                                <h3 class="text-xl font-semibold text-white">
+                                    Employment Profile Records
+                                    ({{ $schoolName }} - {{ $districtName }})
+                                </h3>
+
+                                <p class="mt-1 text-sm text-green-100">
+                                    List of personnel employment status records and related information.
+                                </p>
+
+                            </div>
 
 
-                        <p class="mt-1 text-sm text-green-100">
-                            List of personnel employment status records and related information.
-                        </p>
+                            {{-- RIGHT SIDE --}}
+                            <div class="ml-auto flex shrink-0 items-center gap-3">
+
+                                {{-- VIEW REQUEST STATUS --}}
+                                <a
+                                    href="{{ route('add-personnel-requests.index') }}"
+                                    class="inline-flex h-11 items-center justify-center gap-2
+                                        whitespace-nowrap rounded-lg
+                                        border border-white/60
+                                        bg-transparent px-5
+                                        text-sm font-semibold text-white
+                                        transition
+                                        hover:bg-white/10"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M8.25 6.75h12
+                                            M8.25 12h12
+                                            M8.25 17.25h12
+                                            M3.75 6.75h.008v.008H3.75V6.75z
+                                            M3.75 12h.008v.008H3.75V12z
+                                            M3.75 17.25h.008v.008H3.75v-.008z"
+                                        />
+                                    </svg>
+
+                                    View Request Status
+                                </a>
+
+
+                                {{-- ADD PERSONNEL - PRIMARY BUTTON --}}
+                                <a
+                                    href="{{ route('add-personnel-requests.create') }}"
+                                    class="inline-flex h-11 items-center justify-center gap-2
+                                        whitespace-nowrap rounded-lg
+                                        border border-white
+                                        bg-white px-5
+                                        text-sm font-bold text-green-800
+                                        shadow-md transition
+                                        hover:bg-green-50 hover:shadow-lg"
+                                    style="
+                                        background-color: #ffffff;
+                                        color: #166534;
+                                    "
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M12 4.5v15m7.5-7.5h-15"
+                                        />
+                                    </svg>
+
+                                    Add Personnel
+                                </a>
+
+                            </div>
+
+                        </div>
 
                     </div>
 

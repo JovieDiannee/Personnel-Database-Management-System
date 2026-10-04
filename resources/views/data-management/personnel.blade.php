@@ -430,39 +430,25 @@
 
                 </div>
 
-
-            {{-- =====================================================
-                ADMIN - MANUAL PERSONNEL ENTRY
-            ====================================================== --}}
-            @elseif(auth()->user()->role === 'admin')
-            
-                <div
-                    class="rounded-2xl border border-green-200 bg-white p-4 sm:p-6 shadow-sm"
-                    >
-
-                    <div
-                        class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between"
-                    >
-
-                        <div class="flex items-start gap-4">
-
-                            <div>
-
-                                <h2 class="text-lg font-bold text-gray-900">
-                                    Add Personnel Information
-                                </h2>
-
-                                <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
-                                    Excel import is available only to the Super Admin.
-                                    To add a personnel record, complete the personnel information form.
-                                </p>
-
-                            </div>
-
-                        </div>
+            @endif
 
 
-                        <div class="flex w-full shrink-0 flex-col gap-2 sm:flex-row md:w-auto">
+            {{-- RECORDS SECTION --}}
+            <div class="min-w-0 rounded-lg border border-gray-200 bg-white shadow-sm">
+
+                {{-- SECTION HEADER --}}
+                <div class="flex items-center justify-between border-b border-gray-200 p-4 sm:p-6">
+
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-800">
+                            Personnel User Accounts
+                        </h2>
+
+                        <p class="mt-1 text-sm text-gray-500">
+                            List of personnel records maintained in the system.
+                        </p>
+                    </div>
+                    <div class="flex w-full shrink-0 flex-col gap-2 sm:flex-row md:w-auto">
 
                             {{-- VIEW PERSONNEL REQUESTS --}}
                             <a
@@ -528,31 +514,6 @@
                             </a>
 
                         </div>
-
-                    </div>
-
-                </div>
-
-            @endif
-            
-            <br>
-
-
-            {{-- RECORDS SECTION --}}
-            <div class="min-w-0 rounded-lg border border-gray-200 bg-white shadow-sm">
-
-                {{-- SECTION HEADER --}}
-                <div class="flex items-center justify-between border-b border-gray-200 p-4 sm:p-6">
-
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-800">
-                            Personnel User Accounts
-                        </h2>
-
-                        <p class="mt-1 text-sm text-gray-500">
-                            List of personnel records maintained in the system.
-                        </p>
-                    </div>
                 </div>
 
 

@@ -88,7 +88,7 @@ Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
     Route::post('/data-management/medical-allowance/import/confirm',[DataManagementController::class, 'confirmMedicalAllowanceImport'])->name('data-management.medical-allowance.import.confirm');
     Route::get('/data-management/medical-allowance/report',[DataManagementController::class, 'medicalAllowanceReport'])->name('data-management.medical-allowance.report');
     Route::get('/data-management/medical-allowance/template',[DataManagementController::class, 'downloadMedicalAllowanceTemplate'])->name('data-management.medical-allowance.template');
-    Route::patch('/data-management/medical-allowance/{medicalAllowance}/availment',[DataManagementController::class, 'updateAvailment'])->name('medical-allowance.update-availment');
+    Route::patch('/data-management/medical-allowance/{userId}/availment',[DataManagementController::class, 'updateAvailment'])->name('medical-allowance.update-availment');
 
 });
 

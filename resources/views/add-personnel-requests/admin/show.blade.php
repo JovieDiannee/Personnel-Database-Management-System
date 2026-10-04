@@ -381,9 +381,10 @@
                                 </p>
 
                                 <p class="mt-1 text-gray-800">
-                                    {{ $personnelRequest->created_at->format(
-                                        'F d, Y h:i A'
-                                    ) }}
+                                    {{ $personnelRequest->created_at
+                                    ->copy()
+                                    ->timezone('Asia/Manila')
+                                    ->format('F d, Y h:i A') }}
                                 </p>
 
                             </div>

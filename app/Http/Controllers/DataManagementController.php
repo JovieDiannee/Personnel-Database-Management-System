@@ -37,6 +37,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use App\Models\OfficeGroup;
 use App\Models\OfficeUnit;
+use Illuminate\View\View;
 
 
 
@@ -6887,59 +6888,61 @@ class DataManagementController extends Controller
     |   START OF MEDICAL ALLOWANCE RECORDS FUNCTIONS
     */
 
-    public function medicalAllowance(Request $request)
+    public function medicalAllowance(Request $request): \Illuminate\View\View
     {
         /*
         |--------------------------------------------------------------------------
-        | SEARCH
+        | AUTHENTICATED USER
         |--------------------------------------------------------------------------
         */
-
-        $search = trim($request->input('search', ''));
 
         $user = $request->user();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | MEDICAL ALLOWANCE YEAR
-        |--------------------------------------------------------------------------
-        |
-        | Current records are based on the current calendar year.
-        | Example:
-        |
-        | Current Year  = 2026
-        | Previous Year = 2025
-        |
-        */
-
-        $currentYear = now()->year;
-        $previousYear = $currentYear - 1;
+        abort_unless(
+            $user && in_array($user->role, ['admin', 'super_admin'], true),
+            403
+        );
 
 
         /*
         |--------------------------------------------------------------------------
-        | FILTER
+        | YEARS
         |--------------------------------------------------------------------------
-        |
-        | all
-        | changed
-        | no_change
-        | pending
-        | validated
-        | new
-        |
         */
 
-        $filter = $request->input('filter', 'all');
+        $previousYear = 2025;
+        $currentYear  = 2026;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | FILTERS / SEARCH / SORTING
+        |--------------------------------------------------------------------------
+        */
+
+        $search = trim((string) $request->input('search', ''));
+        $filter = (string) $request->input('filter', 'all');
+
+        $sort = (string) $request->input('sort', 'name');
+        $direction = strtolower(
+            (string) $request->input('direction', 'asc')
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ALLOWED FILTERS
+        |--------------------------------------------------------------------------
+        */
 
         $allowedFilters = [
             'all',
             'changed',
             'no_change',
+            'new',
             'pending',
             'validated',
-            'new',
+            'no_school',
         ];
 
         if (!in_array($filter, $allowedFilters, true)) {
@@ -6949,50 +6952,110 @@ class DataManagementController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | SORTING
+        | ALLOWED SORTS
         |--------------------------------------------------------------------------
         */
 
-        $sort = $request->input('sort', 'name');
+        $allowedSorts = [
+            'name',
+            'school',
+            'position',
+        ];
 
-        $direction = strtolower(
-            $request->input('direction', 'asc')
-        );
+        if (!in_array($sort, $allowedSorts, true)) {
+            $sort = 'name';
+        }
 
         if (!in_array($direction, ['asc', 'desc'], true)) {
             $direction = 'asc';
         }
 
 
-        $allowedSorts = [
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN SCHOOL INFORMATION
+        |--------------------------------------------------------------------------
+        |
+        | Admin:
+        |   Only personnel assigned to the admin's school.
+        |
+        | Super Admin:
+        |   All qualified Plantilla personnel, including personnel without
+        |   a school assignment.
+        |
+        */
 
-            'name',
+        $schoolDbId = null;
+        $schoolCode = null;
+        $schoolName = null;
 
-            'school',
+        if ($user->role === 'admin') {
 
-            'district',
+            $schoolDbId = $user->employmentStatus?->school_db_id;
 
-            'school_level',
+            if ($schoolDbId) {
 
-            'position',
+                $school = DB::table('school_db')
+                    ->where('id', $schoolDbId)
+                    ->first([
+                        'id',
+                        'school_id',
+                        'school_name',
+                        'school_district',
+                    ]);
 
-            'employment_status',
+                if ($school) {
 
-            'previous_availment',
+                    $schoolCode = $school->school_id;
 
-            'mode_of_availment',
+                    $schoolName = trim(
+                        ($school->school_name ?? '')
+                        .
+                        (
+                            !empty($school->school_district)
+                                ? ' - ' . $school->school_district
+                                : ''
+                        )
+                    );
+                }
+            }
+        }
 
-            'validation_status',
 
-            'disbursement_status',
+        /*
+        |--------------------------------------------------------------------------
+        | MEDICAL ALLOWANCE REPORT
+        |--------------------------------------------------------------------------
+        */
 
-            'created_at',
+        $medicalReport = Report::query()
+            ->where('name_of_report', 'Medical Allowance Report')
+            ->latest('id')
+            ->first();
 
-        ];
 
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN'S REPORT SUBMISSION
+        |--------------------------------------------------------------------------
+        */
 
-        if (!in_array($sort, $allowedSorts, true)) {
-            $sort = 'name';
+        $medicalSubmission = null;
+
+        if (
+            $medicalReport &&
+            $user->role === 'admin' &&
+            $schoolCode
+        ) {
+
+            $medicalSubmission = ReportSubmission::query()
+                ->with([
+                    'submittedBy',
+                    'validatedBy',
+                ])
+                ->where('report_id', $medicalReport->id)
+                ->where('school_id', $schoolCode)
+                ->first();
         }
 
 
@@ -7001,60 +7064,16 @@ class DataManagementController extends Controller
         | BASE QUERY
         |--------------------------------------------------------------------------
         |
-        | The main medical_allowance table represents the CURRENT YEAR.
+        | IMPORTANT:
         |
-        | We LEFT JOIN the same table as "previous_medical" to retrieve
-        | the employee's previous-year medical allowance.
+        | - Plantilla employees only.
+        | - Super Admin can see personnel even if school_db_id is NULL.
+        | - Admin only sees employees assigned to their own school.
+        | - Employee ID 1000001 excluded.
         |
         */
 
-        $query = MedicalAllowance::query()
-
-            ->whereNull('users.deleted_at')
-
-            ->where(
-                'medical_allowance.year',
-                $currentYear
-            )
-
-            ->select([
-
-                'medical_allowance.*',
-
-                /*
-                |--------------------------------------------------------------------------
-                | Previous Year Data
-                |--------------------------------------------------------------------------
-                */
-
-                'previous_medical.id as previous_medical_id',
-
-                'previous_medical.mode_of_availment as previous_mode_of_availment',
-
-                'previous_medical.disbursement_status as previous_disbursement_status',
-
-                'previous_medical.validation_status as previous_validation_status',
-
-            ])
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | USERS
-            |--------------------------------------------------------------------------
-            */
-
-            ->leftJoin(
-
-                'users',
-
-                'users.id',
-
-                '=',
-
-                'medical_allowance.users_id'
-
-            )
+        $baseQuery = DB::table('users')
 
 
             /*
@@ -7064,15 +7083,31 @@ class DataManagementController extends Controller
             */
 
             ->leftJoin(
-
                 'basic_information',
-
                 'basic_information.users_id',
-
                 '=',
-
                 'users.id'
+            )
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | ISSUED ID
+            |--------------------------------------------------------------------------
+            |
+            | employee_id belongs to issued_id.
+            |
+            | issued_id.basic_information_id
+            |              ↓
+            | basic_information.id
+            |
+            */
+
+            ->leftJoin(
+                'issued_id',
+                'issued_id.basic_information_id',
+                '=',
+                'basic_information.id'
             )
 
 
@@ -7082,54 +7117,46 @@ class DataManagementController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            ->leftJoin(
-
+            ->join(
                 'employment_status',
-
                 'employment_status.users_id',
-
                 '=',
-
                 'users.id'
-
             )
 
 
             /*
             |--------------------------------------------------------------------------
-            | PLANTILLA
+            | PLANTILLA DATABASE
             |--------------------------------------------------------------------------
             */
 
             ->leftJoin(
-
                 'plantilla_db',
-
                 'plantilla_db.id',
-
                 '=',
-
                 'employment_status.plantilla_db_id'
-
             )
 
 
             /*
             |--------------------------------------------------------------------------
-            | SCHOOL
+            | SCHOOL DATABASE
             |--------------------------------------------------------------------------
+            |
+            | IMPORTANT:
+            | Must remain LEFT JOIN.
+            |
+            | This allows Super Admin to see Plantilla personnel who currently
+            | have no school assignment.
+            |
             */
 
             ->leftJoin(
-
                 'school_db',
-
                 'school_db.id',
-
                 '=',
-
                 'employment_status.school_db_id'
-
             )
 
 
@@ -7140,88 +7167,253 @@ class DataManagementController extends Controller
             */
 
             ->leftJoin(
-
                 'medical_allowance as previous_medical',
-
                 function ($join) use ($previousYear) {
 
                     $join->on(
-
                         'previous_medical.users_id',
-
                         '=',
-
-                        'medical_allowance.users_id'
-
+                        'users.id'
                     )
-
                     ->where(
-
                         'previous_medical.year',
-
                         '=',
-
                         $previousYear
-
                     );
-
                 }
-
             )
 
 
             /*
             |--------------------------------------------------------------------------
-            | EAGER LOAD RELATIONSHIPS
+            | CURRENT YEAR MEDICAL ALLOWANCE
             |--------------------------------------------------------------------------
             */
 
-            ->with([
+            ->leftJoin(
+                'medical_allowance as current_medical',
+                function ($join) use ($currentYear) {
 
-                'user.basicInformation',
+                    $join->on(
+                        'current_medical.users_id',
+                        '=',
+                        'users.id'
+                    )
+                    ->where(
+                        'current_medical.year',
+                        '=',
+                        $currentYear
+                    );
+                }
+            )
 
-                'user.employmentStatus.plantilla',
 
-                'user.employmentStatus.school',
+            /*
+            |--------------------------------------------------------------------------
+            | PLANTILLA ONLY
+            |--------------------------------------------------------------------------
+            */
 
-            ]);
+            ->where(
+                'employment_status.source_of_fund',
+                '=',
+                'Plantilla'
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | EXCLUDE SOFT-DELETED USERS
+            |--------------------------------------------------------------------------
+            */
+
+            ->whereNull(
+                'users.deleted_at'
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | EXCLUDE EMPLOYEE ID 1000001
+            |--------------------------------------------------------------------------
+            |
+            | Employee ID is stored in:
+            |
+            | issued_id.employee_id
+            |
+            | Employees without an employee ID are still included.
+            |
+            */
+
+            ->where(function ($query) {
+
+                $query
+                    ->whereNull(
+                        'issued_id.employee_id'
+                    )
+                    ->orWhere(
+                        'issued_id.employee_id',
+                        '<>',
+                        '1000001'
+                    );
+            });
 
 
         /*
         |--------------------------------------------------------------------------
-        | RESTRICT ADMIN TO THEIR ASSIGNED SCHOOL
+        | ADMIN SCHOOL RESTRICTION
         |--------------------------------------------------------------------------
+        |
+        | Admin:
+        |   Personnel from assigned school only.
+        |
+        | Super Admin:
+        |   No school restriction.
+        |
+        | Therefore Super Admin can see Plantilla personnel with:
+        |
+        |   school_db_id = NULL
+        |   school_db_id = assigned school
+        |   office_unit_id = assigned office
+        |
         */
 
         if ($user->role === 'admin') {
 
-            $schoolId =
-                $user->employmentStatus?->school_db_id;
+            if ($schoolDbId) {
 
-
-            if ($schoolId) {
-
-                $query->where(
-
+                $baseQuery->where(
                     'employment_status.school_db_id',
-
-                    $schoolId
-
+                    '=',
+                    $schoolDbId
                 );
 
             } else {
 
                 /*
                 |--------------------------------------------------------------------------
-                | Admin Has No Assigned School
+                | ADMIN WITHOUT SCHOOL
                 |--------------------------------------------------------------------------
+                |
+                | Never show all employees if an Admin does not have an assigned
+                | school.
+                |
                 */
 
-                $query->whereRaw('1 = 0');
-
+                $baseQuery->whereRaw('1 = 0');
             }
-
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SELECT
+        |--------------------------------------------------------------------------
+        */
+
+        $baseQuery->select([
+
+            /*
+            |--------------------------------------------------------------------------
+            | USER
+            |--------------------------------------------------------------------------
+            */
+
+            'users.id as users_id',
+            'users.name',
+            'users.email',
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | BASIC INFORMATION
+            |--------------------------------------------------------------------------
+            */
+
+            'basic_information.id as basic_information_id',
+            'basic_information.first_name',
+            'basic_information.middle_name',
+            'basic_information.last_name',
+            'basic_information.extension_name',
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ISSUED ID
+            |--------------------------------------------------------------------------
+            */
+
+            'issued_id.employee_id',
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | EMPLOYMENT STATUS
+            |--------------------------------------------------------------------------
+            */
+
+            'employment_status.id as employment_status_id',
+            'employment_status.school_db_id',
+            'employment_status.office_unit_id',
+            'employment_status.plantilla_db_id',
+            'employment_status.employment_status',
+            'employment_status.warm_body_status',
+            'employment_status.nature_of_work',
+            'employment_status.source_of_fund',
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SCHOOL
+            |--------------------------------------------------------------------------
+            */
+
+            'school_db.school_id',
+            'school_db.school_name',
+            'school_db.school_district',
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PLANTILLA
+            |--------------------------------------------------------------------------
+            */
+
+            'plantilla_db.item_number',
+            'plantilla_db.position_title',
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PREVIOUS YEAR
+            |--------------------------------------------------------------------------
+            |
+            | Aliases match the Blade variables.
+            |
+            */
+
+            'previous_medical.id as previous_medical_id',
+
+            'previous_medical.mode_of_availment as previous_mode_of_availment',
+
+            'previous_medical.validation_status as previous_validation_status',
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CURRENT YEAR
+            |--------------------------------------------------------------------------
+            |
+            | Aliases match the Blade variables.
+            |
+            */
+
+            'current_medical.id as current_medical_id',
+
+            'current_medical.mode_of_availment as mode_of_availment',
+
+            'current_medical.validation_status as validation_status',
+        ]);
 
 
         /*
@@ -7232,195 +7424,184 @@ class DataManagementController extends Controller
 
         if ($search !== '') {
 
-            $query->where(function ($q) use ($search) {
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | EMAIL
-                |--------------------------------------------------------------------------
-                */
-
-                $q->where(
-
-                    'users.email',
-
-                    'like',
-
-                    "%{$search}%"
-
-                );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | PERSONNEL NAME
-                |--------------------------------------------------------------------------
-                */
-
-                $q->orWhere(
-
-                    'basic_information.first_name',
-
-                    'like',
-
-                    "%{$search}%"
-
-                );
-
-
-                $q->orWhere(
-
-                    'basic_information.middle_name',
-
-                    'like',
-
-                    "%{$search}%"
-
-                );
-
-
-                $q->orWhere(
-
-                    'basic_information.last_name',
-
-                    'like',
-
-                    "%{$search}%"
-
-                );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | CURRENT MEDICAL ALLOWANCE
-                |--------------------------------------------------------------------------
-                */
-
-                $q->orWhere(
-
-                    'medical_allowance.mode_of_availment',
-
-                    'like',
-
-                    "%{$search}%"
-
-                );
-
-
-                $q->orWhere(
-
-                    'medical_allowance.disbursement_status',
-
-                    'like',
-
-                    "%{$search}%"
-
-                );
-
-
-                $q->orWhere(
-
-                    'medical_allowance.validation_status',
-
-                    'like',
-
-                    "%{$search}%"
-
-                );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | PREVIOUS MEDICAL ALLOWANCE
-                |--------------------------------------------------------------------------
-                */
-
-                $q->orWhere(
-
-                    'previous_medical.mode_of_availment',
-
-                    'like',
-
-                    "%{$search}%"
-
-                );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | EMPLOYMENT STATUS
-                |--------------------------------------------------------------------------
-                */
-
-                $q->orWhere(
-
-                    'employment_status.employment_status',
-
-                    'like',
-
-                    "%{$search}%"
-
-                );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | SCHOOL
-                |--------------------------------------------------------------------------
-                */
-
-                $q->orWhere(
-
-                    'school_db.school_name',
-
-                    'like',
-
-                    "%{$search}%"
-
-                );
-
-
-                $q->orWhere(
-
-                    'school_db.school_district',
-
-                    'like',
-
-                    "%{$search}%"
-
-                );
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | POSITION
-                |--------------------------------------------------------------------------
-                */
-
-                $q->orWhere(
-
-                    'plantilla_db.position_title',
-
-                    'like',
-
-                    "%{$search}%"
-
-                );
-
+            $baseQuery->where(function ($query) use ($search) {
+
+                $like = '%' . $search . '%';
+
+                $query
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | EMPLOYEE ID
+                    |--------------------------------------------------------------------------
+                    */
+
+                    ->where(
+                        'issued_id.employee_id',
+                        'like',
+                        $like
+                    )
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | NAME
+                    |--------------------------------------------------------------------------
+                    */
+
+                    ->orWhere(
+                        'basic_information.first_name',
+                        'like',
+                        $like
+                    )
+
+                    ->orWhere(
+                        'basic_information.middle_name',
+                        'like',
+                        $like
+                    )
+
+                    ->orWhere(
+                        'basic_information.last_name',
+                        'like',
+                        $like
+                    )
+
+                    ->orWhere(
+                        'basic_information.extension_name',
+                        'like',
+                        $like
+                    )
+
+                    ->orWhere(
+                        'users.name',
+                        'like',
+                        $like
+                    )
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | EMAIL
+                    |--------------------------------------------------------------------------
+                    */
+
+                    ->orWhere(
+                        'users.email',
+                        'like',
+                        $like
+                    )
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | SCHOOL
+                    |--------------------------------------------------------------------------
+                    */
+
+                    ->orWhere(
+                        'school_db.school_id',
+                        'like',
+                        $like
+                    )
+
+                    ->orWhere(
+                        'school_db.school_name',
+                        'like',
+                        $like
+                    )
+
+                    ->orWhere(
+                        'school_db.school_district',
+                        'like',
+                        $like
+                    )
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | POSITION
+                    |--------------------------------------------------------------------------
+                    */
+
+                    ->orWhere(
+                        'plantilla_db.item_number',
+                        'like',
+                        $like
+                    )
+
+                    ->orWhere(
+                        'plantilla_db.position_title',
+                        'like',
+                        $like
+                    )
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | EMPLOYMENT
+                    |--------------------------------------------------------------------------
+                    */
+
+                    ->orWhere(
+                        'employment_status.employment_status',
+                        'like',
+                        $like
+                    )
+
+                    ->orWhere(
+                        'employment_status.warm_body_status',
+                        'like',
+                        $like
+                    )
+
+                    ->orWhere(
+                        'employment_status.nature_of_work',
+                        'like',
+                        $like
+                    )
+
+                    ->orWhere(
+                        'employment_status.source_of_fund',
+                        'like',
+                        $like
+                    )
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | MEDICAL ALLOWANCE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    ->orWhere(
+                        'previous_medical.mode_of_availment',
+                        'like',
+                        $like
+                    )
+
+                    ->orWhere(
+                        'current_medical.mode_of_availment',
+                        'like',
+                        $like
+                    )
+
+                    ->orWhere(
+                        'current_medical.validation_status',
+                        'like',
+                        $like
+                    );
             });
-
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | QUICK FILTER
+        | CARD FILTER
         |--------------------------------------------------------------------------
         */
 
         switch ($filter) {
-
 
             /*
             |--------------------------------------------------------------------------
@@ -7430,20 +7611,17 @@ class DataManagementController extends Controller
 
             case 'changed':
 
-                $query
-
+                $baseQuery
                     ->whereNotNull(
                         'previous_medical.id'
                     )
-
+                    ->whereNotNull(
+                        'current_medical.id'
+                    )
                     ->whereColumn(
-
                         'previous_medical.mode_of_availment',
-
                         '<>',
-
-                        'medical_allowance.mode_of_availment'
-
+                        'current_medical.mode_of_availment'
                     );
 
                 break;
@@ -7457,20 +7635,17 @@ class DataManagementController extends Controller
 
             case 'no_change':
 
-                $query
-
+                $baseQuery
                     ->whereNotNull(
                         'previous_medical.id'
                     )
-
+                    ->whereNotNull(
+                        'current_medical.id'
+                    )
                     ->whereColumn(
-
                         'previous_medical.mode_of_availment',
-
                         '=',
-
-                        'medical_allowance.mode_of_availment'
-
+                        'current_medical.mode_of_availment'
                     );
 
                 break;
@@ -7478,19 +7653,39 @@ class DataManagementController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | PENDING VALIDATION
+            | NO PREVIOUS YEAR RECORD
+            |--------------------------------------------------------------------------
+            */
+
+            case 'new':
+
+                $baseQuery->whereNull(
+                    'previous_medical.id'
+                );
+
+                break;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PENDING
             |--------------------------------------------------------------------------
             */
 
             case 'pending':
 
-                $query->where(
+                $baseQuery->where(function ($query) {
 
-                    'medical_allowance.validation_status',
-
-                    'Pending'
-
-                );
+                    $query
+                        ->whereNull(
+                            'current_medical.validation_status'
+                        )
+                        ->orWhere(
+                            'current_medical.validation_status',
+                            '<>',
+                            'Validated'
+                        );
+                });
 
                 break;
 
@@ -7503,12 +7698,30 @@ class DataManagementController extends Controller
 
             case 'validated':
 
-                $query->where(
-
-                    'medical_allowance.validation_status',
-
+                $baseQuery->where(
+                    'current_medical.validation_status',
+                    '=',
                     'Validated'
+                );
 
+                break;
+
+            /*
+            |--------------------------------------------------------------------------
+            | NO SCHOOL ASSIGNMENT
+            |--------------------------------------------------------------------------
+            |
+            | Plantilla-funded employees whose current employment record
+            | has no assigned school.
+            |
+            | Super Admin can use this filter.
+            |
+            */
+
+            case 'no_school':
+
+                $baseQuery->whereNull(
+                    'employment_status.school_db_id'
                 );
 
                 break;
@@ -7516,182 +7729,110 @@ class DataManagementController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | NEW / NO PREVIOUS YEAR RECORD
+            | ALL
             |--------------------------------------------------------------------------
             */
 
-            case 'new':
-
-                $query->whereNull(
-                    'previous_medical.id'
-                );
+            case 'all':
+            default:
 
                 break;
-
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | APPLY SORT
+        | SORTING
         |--------------------------------------------------------------------------
         */
 
         switch ($sort) {
 
+            /*
+            |--------------------------------------------------------------------------
+            | SCHOOL
+            |--------------------------------------------------------------------------
+            */
 
-            case 'name':
+            case 'school':
 
-                $query
-
+                $baseQuery
+                    ->orderByRaw("
+                        CASE
+                            WHEN employment_status.school_db_id IS NULL
+                            THEN 1
+                            ELSE 0
+                        END
+                    ")
                     ->orderBy(
-
-                        'basic_information.last_name',
-
+                        'school_db.school_name',
                         $direction
-
                     )
-
                     ->orderBy(
-
+                        'basic_information.last_name',
+                        'asc'
+                    )
+                    ->orderBy(
                         'basic_information.first_name',
-
-                        $direction
-
+                        'asc'
                     );
 
                 break;
 
 
-            case 'school':
-
-                $query->orderBy(
-
-                    'school_db.school_name',
-
-                    $direction
-
-                );
-
-                break;
-
-
-            case 'district':
-
-                $query->orderBy(
-
-                    'school_db.school_district',
-
-                    $direction
-
-                );
-
-                break;
-
-
-            case 'school_level':
-
-                $query->orderBy(
-
-                    'plantilla_db.item_from_school_level',
-
-                    $direction
-
-                );
-
-                break;
-
+            /*
+            |--------------------------------------------------------------------------
+            | POSITION
+            |--------------------------------------------------------------------------
+            */
 
             case 'position':
 
-                $query->orderBy(
-
-                    'plantilla_db.position_title',
-
-                    $direction
-
-                );
-
-                break;
-
-
-            case 'employment_status':
-
-                $query->orderBy(
-
-                    'employment_status.employment_status',
-
-                    $direction
-
-                );
+                $baseQuery
+                    ->orderBy(
+                        'plantilla_db.position_title',
+                        $direction
+                    )
+                    ->orderBy(
+                        'basic_information.last_name',
+                        'asc'
+                    )
+                    ->orderBy(
+                        'basic_information.first_name',
+                        'asc'
+                    );
 
                 break;
 
 
-            case 'previous_availment':
+            /*
+            |--------------------------------------------------------------------------
+            | EMPLOYEE NAME
+            |--------------------------------------------------------------------------
+            */
 
-                $query->orderBy(
-
-                    'previous_medical.mode_of_availment',
-
-                    $direction
-
-                );
-
-                break;
-
-
-            case 'mode_of_availment':
-
-                $query->orderBy(
-
-                    'medical_allowance.mode_of_availment',
-
-                    $direction
-
-                );
-
-                break;
-
-
-            case 'validation_status':
-
-                $query->orderBy(
-
-                    'medical_allowance.validation_status',
-
-                    $direction
-
-                );
-
-                break;
-
-
-            case 'disbursement_status':
-
-                $query->orderBy(
-
-                    'medical_allowance.disbursement_status',
-
-                    $direction
-
-                );
-
-                break;
-
-
+            case 'name':
             default:
 
-                $query->orderBy(
-
-                    'medical_allowance.created_at',
-
-                    $direction
-
-                );
+                $baseQuery
+                    ->orderBy(
+                        'basic_information.last_name',
+                        $direction
+                    )
+                    ->orderBy(
+                        'basic_information.first_name',
+                        $direction
+                    )
+                    ->orderBy(
+                        'basic_information.middle_name',
+                        $direction
+                    )
+                    ->orderBy(
+                        'users.name',
+                        $direction
+                    );
 
                 break;
-
         }
 
 
@@ -7701,280 +7842,448 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $medicalAllowances = $query
-
-            ->paginate(10)
-
+        $medicalAllowances = $baseQuery
+            ->paginate(15)
             ->withQueryString();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUMMARY QUERY
+        |--------------------------------------------------------------------------
+        |
+        | This uses the same employee population as the table.
+        |
+        | It is intentionally NOT affected by:
+        |
+        | - search
+        | - selected summary card
+        |
+        */
+
+        $summaryQuery = DB::table('users')
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | BASIC INFORMATION
+            |--------------------------------------------------------------------------
+            */
+
+            ->leftJoin(
+                'basic_information',
+                'basic_information.users_id',
+                '=',
+                'users.id'
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ISSUED ID
+            |--------------------------------------------------------------------------
+            */
+
+            ->leftJoin(
+                'issued_id',
+                'issued_id.basic_information_id',
+                '=',
+                'basic_information.id'
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | EMPLOYMENT STATUS
+            |--------------------------------------------------------------------------
+            */
+
+            ->join(
+                'employment_status',
+                'employment_status.users_id',
+                '=',
+                'users.id'
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SCHOOL
+            |--------------------------------------------------------------------------
+            |
+            | LEFT JOIN is important because a Super Admin must still see
+            | personnel without a school assignment.
+            |
+            */
+
+            ->leftJoin(
+                'school_db',
+                'school_db.id',
+                '=',
+                'employment_status.school_db_id'
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PREVIOUS MEDICAL ALLOWANCE
+            |--------------------------------------------------------------------------
+            */
+
+            ->leftJoin(
+                'medical_allowance as previous_medical',
+                function ($join) use ($previousYear) {
+
+                    $join->on(
+                        'previous_medical.users_id',
+                        '=',
+                        'users.id'
+                    )
+                    ->where(
+                        'previous_medical.year',
+                        '=',
+                        $previousYear
+                    );
+                }
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CURRENT MEDICAL ALLOWANCE
+            |--------------------------------------------------------------------------
+            */
+
+            ->leftJoin(
+                'medical_allowance as current_medical',
+                function ($join) use ($currentYear) {
+
+                    $join->on(
+                        'current_medical.users_id',
+                        '=',
+                        'users.id'
+                    )
+                    ->where(
+                        'current_medical.year',
+                        '=',
+                        $currentYear
+                    );
+                }
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PLANTILLA ONLY
+            |--------------------------------------------------------------------------
+            */
+
+            ->where(
+                'employment_status.source_of_fund',
+                '=',
+                'Plantilla'
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ACTIVE USERS ONLY
+            |--------------------------------------------------------------------------
+            */
+
+            ->whereNull(
+                'users.deleted_at'
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | EXCLUDE EMPLOYEE ID 1000001
+            |--------------------------------------------------------------------------
+            */
+
+            ->where(function ($query) {
+
+                $query
+                    ->whereNull(
+                        'issued_id.employee_id'
+                    )
+                    ->orWhere(
+                        'issued_id.employee_id',
+                        '<>',
+                        '1000001'
+                    );
+            });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN SCHOOL RESTRICTION - SUMMARY
+        |--------------------------------------------------------------------------
+        */
+
+        if ($user->role === 'admin') {
+
+            if ($schoolDbId) {
+
+                $summaryQuery->where(
+                    'employment_status.school_db_id',
+                    '=',
+                    $schoolDbId
+                );
+
+            } else {
+
+                $summaryQuery->whereRaw('1 = 0');
+            }
+        }
 
 
         /*
         |--------------------------------------------------------------------------
         | SUMMARY COUNTS
         |--------------------------------------------------------------------------
-        |
-        | These counts are based on the CURRENT YEAR and the user's access.
-        |
         */
 
-        $summaryQuery = MedicalAllowance::query()
+        $summaryRow = $summaryQuery
+            ->selectRaw("
+                COUNT(
+                    DISTINCT users.id
+                ) AS total,
 
-            ->whereNull('users.deleted_at')
 
-            ->where(
-                'medical_allowance.year',
-                $currentYear
-            )
+                /*
+                |--------------------------------------------------------------------------
+                | CHANGED
+                |--------------------------------------------------------------------------
+                |
+                | Has both previous and current records, but the mode of
+                | availment is different.
+                |
+                */
 
-            ->leftJoin(
+                COUNT(
+                    DISTINCT CASE
 
-                'users',
+                        WHEN previous_medical.id IS NOT NULL
 
-                'users.id',
+                        AND current_medical.id IS NOT NULL
 
-                '=',
+                        AND previous_medical.mode_of_availment
+                            <> current_medical.mode_of_availment
 
-                'medical_allowance.users_id'
+                        THEN users.id
 
-            )
+                    END
+                ) AS changed,
 
-            ->leftJoin(
 
-                'employment_status',
+                /*
+                |--------------------------------------------------------------------------
+                | NO CHANGE
+                |--------------------------------------------------------------------------
+                |
+                | Has both previous and current records and the mode of
+                | availment remains the same.
+                |
+                */
 
-                'employment_status.users_id',
+                COUNT(
+                    DISTINCT CASE
 
-                '=',
+                        WHEN previous_medical.id IS NOT NULL
 
-                'users.id'
+                        AND current_medical.id IS NOT NULL
 
-            )
+                        AND previous_medical.mode_of_availment
+                            = current_medical.mode_of_availment
 
-            ->leftJoin(
+                        THEN users.id
 
-                'medical_allowance as previous_summary',
+                    END
+                ) AS no_change,
 
-                function ($join) use ($previousYear) {
 
-                    $join->on(
+                /*
+                |--------------------------------------------------------------------------
+                | NO PREVIOUS YEAR RECORD
+                |--------------------------------------------------------------------------
+                */
 
-                        'previous_summary.users_id',
+                COUNT(
+                    DISTINCT CASE
 
-                        '=',
+                        WHEN previous_medical.id IS NULL
 
-                        'medical_allowance.users_id'
+                        THEN users.id
 
-                    )
+                    END
+                ) AS new_records,
 
-                    ->where(
 
-                        'previous_summary.year',
+                /*
+                |--------------------------------------------------------------------------
+                | PENDING
+                |--------------------------------------------------------------------------
+                |
+                | No current validation status or current record has not
+                | yet been validated.
+                |
+                */
 
-                        $previousYear
+                COUNT(
+                    DISTINCT CASE
 
-                    );
+                        WHEN current_medical.validation_status IS NULL
 
-                }
+                        OR current_medical.validation_status <> 'Validated'
 
-            );
+                        THEN users.id
+
+                    END
+                ) AS pending,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | VALIDATED
+                |--------------------------------------------------------------------------
+                */
+
+                COUNT(
+                    DISTINCT CASE
+
+                        WHEN current_medical.validation_status = 'Validated'
+
+                        THEN users.id
+
+                    END
+                ) AS validated,
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | NO SCHOOL ASSIGNMENT
+                |--------------------------------------------------------------------------
+                |
+                | Plantilla-funded employee whose current employment record
+                | does not have a school assignment.
+                |
+                */
+
+                COUNT(
+                    DISTINCT CASE
+
+                        WHEN employment_status.school_db_id IS NULL
+
+                        THEN users.id
+
+                    END
+                ) AS no_school
+
+            ")
+            ->first();
 
 
         /*
         |--------------------------------------------------------------------------
-        | SCHOOL RESTRICTION FOR SUMMARY
-        |--------------------------------------------------------------------------
-        */
-
-        if ($user->role === 'admin') {
-
-            $schoolId =
-                $user->employmentStatus?->school_db_id;
-
-
-            if ($schoolId) {
-
-                $summaryQuery->where(
-
-                    'employment_status.school_db_id',
-
-                    $schoolId
-
-                );
-
-            } else {
-
-                $summaryQuery->whereRaw('1 = 0');
-
-            }
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SUMMARY VALUES
+        | SUMMARY ARRAY
         |--------------------------------------------------------------------------
         */
 
         $summary = [
 
-            'total' => (clone $summaryQuery)->count(),
+            /*
+            |--------------------------------------------------------------------------
+            | TOTAL
+            |--------------------------------------------------------------------------
+            */
 
-            'changed' => (clone $summaryQuery)
+            'total' => (int) (
+                $summaryRow->total ?? 0
+            ),
 
-                ->whereNotNull(
-                    'previous_summary.id'
-                )
 
-                ->whereColumn(
+            /*
+            |--------------------------------------------------------------------------
+            | CHANGED
+            |--------------------------------------------------------------------------
+            */
 
-                    'previous_summary.mode_of_availment',
+            'changed' => (int) (
+                $summaryRow->changed ?? 0
+            ),
 
-                    '<>',
 
-                    'medical_allowance.mode_of_availment'
+            /*
+            |--------------------------------------------------------------------------
+            | NO CHANGE
+            |--------------------------------------------------------------------------
+            */
 
-                )
+            'no_change' => (int) (
+                $summaryRow->no_change ?? 0
+            ),
 
-                ->count(),
 
-            'no_change' => (clone $summaryQuery)
+            /*
+            |--------------------------------------------------------------------------
+            | NO PREVIOUS YEAR RECORD
+            |--------------------------------------------------------------------------
+            */
 
-                ->whereNotNull(
-                    'previous_summary.id'
-                )
+            'new' => (int) (
+                $summaryRow->new_records ?? 0
+            ),
 
-                ->whereColumn(
 
-                    'previous_summary.mode_of_availment',
+            /*
+            |--------------------------------------------------------------------------
+            | PENDING
+            |--------------------------------------------------------------------------
+            */
 
-                    '=',
+            'pending' => (int) (
+                $summaryRow->pending ?? 0
+            ),
 
-                    'medical_allowance.mode_of_availment'
 
-                )
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDATED
+            |--------------------------------------------------------------------------
+            */
 
-                ->count(),
+            'validated' => (int) (
+                $summaryRow->validated ?? 0
+            ),
 
-            'pending' => (clone $summaryQuery)
 
-                ->where(
+            /*
+            |--------------------------------------------------------------------------
+            | NO SCHOOL ASSIGNMENT
+            |--------------------------------------------------------------------------
+            */
 
-                    'medical_allowance.validation_status',
-
-                    'Pending'
-
-                )
-
-                ->count(),
-
-            'validated' => (clone $summaryQuery)
-
-                ->where(
-
-                    'medical_allowance.validation_status',
-
-                    'Validated'
-
-                )
-
-                ->count(),
-
-            'new' => (clone $summaryQuery)
-
-                ->whereNull(
-                    'previous_summary.id'
-                )
-
-                ->count(),
+            'no_school' => (int) (
+                $summaryRow->no_school ?? 0
+            ),
 
         ];
 
 
         /*
         |--------------------------------------------------------------------------
-        | MEDICAL ALLOWANCE REPORT
+        | AVAILMENT OPTIONS
         |--------------------------------------------------------------------------
         */
 
-        $medicalReport = Report::where(
-
-            'name_of_report',
-
-            'Medical Allowance Report'
-
-        )
-            ->latest('id')
-            ->first();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SCHOOL CODE
-        |--------------------------------------------------------------------------
-        |
-        | employment_status.school_db_id references school_db.id.
-        | Report submissions use school_db.school_id.
-        |
-        */
-
-        $schoolCode = DB::table('school_db')
-
-            ->where(
-
-                'id',
-
-                $user->employmentStatus?->school_db_id
-
-            )
-
-            ->value('school_id');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SCHOOL MEDICAL SUBMISSION
-        |--------------------------------------------------------------------------
-        */
-
-        $medicalSubmission = null;
-
-
-        if (
-
-            $user->role === 'admin'
-
-            && $medicalReport
-
-            && $schoolCode !== null
-
-            && $schoolCode !== ''
-
-        ) {
-
-            $medicalSubmission = ReportSubmission::with(
-                'validatedBy'
-            )
-
-                ->where(
-
-                    'report_id',
-
-                    $medicalReport->id
-
-                )
-
-                ->where(
-
-                    'school_id',
-
-                    $schoolCode
-
-                )
-
-                ->first();
-
-        }
+        $availmentOptions = [
+            'Group Availment (HMO)',
+            'Individual Availment (HMO)',
+            'Individual Availment (Medical Expenses)',
+            'Not Eligible',
+        ];
 
 
         /*
@@ -7984,35 +8293,23 @@ class DataManagementController extends Controller
         */
 
         return view(
-
             'data-management.medical-allowance',
-
             compact(
-
                 'medicalAllowances',
-
-                'search',
-
-                'sort',
-
-                'direction',
-
-                'filter',
-
-                'currentYear',
-
-                'previousYear',
-
-                'summary',
-
                 'medicalReport',
-
                 'medicalSubmission',
-
-                'schoolCode'
-
+                'previousYear',
+                'currentYear',
+                'summary',
+                'filter',
+                'search',
+                'sort',
+                'direction',
+                'schoolDbId',
+                'schoolCode',
+                'schoolName',
+                'availmentOptions'
             )
-
         );
     }
 
@@ -8587,35 +8884,153 @@ class DataManagementController extends Controller
 
     public function medicalAllowanceReport(Request $request)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Logged-in User
+        |--------------------------------------------------------------------------
+        */
+
         $user = $request->user();
 
         abort_unless(
-            $user && in_array($user->role, ['super_admin', 'admin'], true),
+            $user && in_array(
+                $user->role,
+                ['super_admin', 'admin'],
+                true
+            ),
             403
         );
 
-        $filters = $request->validate([
-            'search' => ['nullable', 'string', 'max:255'],
-            'district' => ['nullable', 'string', 'max:150'],
-        ]);
-
-        $search = trim($filters['search'] ?? '');
-        $district = $filters['district'] ?? '';
-
-        $adminSchool = null;
-        $showOwnSchool = false;
 
         /*
         |--------------------------------------------------------------------------
-        | School admin scope
+        | Current Year
         |--------------------------------------------------------------------------
-        | Initial visit: own school.
-        | Search submitted: schools within the assigned district.
         */
+
+        $currentYear = now()
+            ->timezone('Asia/Manila')
+            ->year;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Filters
+        |--------------------------------------------------------------------------
+        */
+
+        $filters = $request->validate([
+
+            'search' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'district' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
+
+            'year' => [
+                'nullable',
+                'integer',
+                'min:2025',
+                'max:' . $currentYear,
+            ],
+
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Filter Values
+        |--------------------------------------------------------------------------
+        */
+
+        $search = trim(
+            $filters['search'] ?? ''
+        );
+
+        $district =
+            $filters['district'] ?? '';
+
+        /*
+        |--------------------------------------------------------------------------
+        | Selected Report Year
+        |--------------------------------------------------------------------------
+        |
+        | Default:
+        | Current year.
+        |
+        | Example:
+        | 2025 = Medical Allowance Report for 2025
+        | 2026 = Medical Allowance Report for 2026
+        |
+        */
+
+        $selectedYear = (int) (
+            $filters['year']
+            ?? $currentYear
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Available Report Years
+        |--------------------------------------------------------------------------
+        |
+        | Generates:
+        |
+        | 2026
+        | 2025
+        |
+        | Additional years will automatically become available in the future.
+        |
+        */
+
+        $availableYears = collect(
+            range(
+                $currentYear,
+                2025
+            )
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Admin School
+        |--------------------------------------------------------------------------
+        */
+
+        $adminSchool = null;
+
+        $showOwnSchool = false;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | School Admin Scope
+        |--------------------------------------------------------------------------
+        |
+        | Initial visit:
+        | Show the admin's own school.
+        |
+        | When search is submitted:
+        | Allow searching schools within the admin's assigned district.
+        |
+        */
+
         if ($user->role === 'admin') {
+
             $adminSchool = DB::table('school_db')
-                ->where('id', $user->employmentStatus?->school_db_id)
+                ->where(
+                    'id',
+                    $user->employmentStatus?->school_db_id
+                )
                 ->first();
+
 
             abort_unless(
                 $adminSchool,
@@ -8623,163 +9038,574 @@ class DataManagementController extends Controller
                 'Your account has no assigned school.'
             );
 
+
             abort_if(
-                trim((string) $adminSchool->school_district) === '',
+                trim(
+                    (string) $adminSchool->school_district
+                ) === '',
                 403,
                 'Your assigned school has no district configured.'
             );
 
-            // Always enforce the assigned district on the server.
-            $district = $adminSchool->school_district;
 
-            // The existing search form sends "search", even when it is empty.
-            $showOwnSchool = !$request->query->has('search');
+            /*
+            |--------------------------------------------------------------------------
+            | Always Restrict Admin To Assigned District
+            |--------------------------------------------------------------------------
+            */
+
+            $district =
+                $adminSchool->school_district;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Initial Page
+            |--------------------------------------------------------------------------
+            |
+            | If search is not present in the URL,
+            | show only the admin's assigned school.
+            |
+            */
+
+            $showOwnSchool =
+                !$request->query->has('search');
+
 
             if ($showOwnSchool) {
-                $search = (string) $adminSchool->school_id;
+
+                $search =
+                    (string) $adminSchool->school_id;
             }
         }
 
+
         /*
         |--------------------------------------------------------------------------
-        | Personnel with an assigned plantilla
+        | Vacant Warm Body Statuses
         |--------------------------------------------------------------------------
+        |
+        | These records must NOT be considered active employees.
+        |
         */
+
+        $vacantStatuses = [
+
+            'Vacant (Retired)',
+
+            'Vacant (Resigned)',
+
+            'Vacant (Others)',
+
+        ];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Medical Allowance Report Query
+        |--------------------------------------------------------------------------
+        |
+        | Employee Population:
+        |
+        | source_of_fund = Plantilla
+        |
+        | IMPORTANT:
+        | We do NOT require plantilla_db_id because some Plantilla-funded
+        | employees may not yet have a plantilla item linked.
+        |
+        | Medical allowance records are restricted to the selected year.
+        |
+        */
+
         $query = DB::table('employment_status')
-            ->whereNull('users.deleted_at')
+
+            /*
+            |--------------------------------------------------------------------------
+            | User
+            |--------------------------------------------------------------------------
+            */
+
             ->join(
                 'users',
                 'users.id',
                 '=',
                 'employment_status.users_id'
             )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | School
+            |--------------------------------------------------------------------------
+            |
+            | This is a per-school report, therefore employees shown here must
+            | have a school assignment.
+            |
+            */
+
             ->join(
                 'school_db',
                 'school_db.id',
                 '=',
                 'employment_status.school_db_id'
             )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Medical Allowance - Selected Year Only
+            |--------------------------------------------------------------------------
+            */
+
             ->leftJoin(
                 'medical_allowance',
-                'medical_allowance.users_id',
-                '=',
-                'users.id'
+                function ($join) use ($selectedYear) {
+
+                    $join->on(
+                        'medical_allowance.users_id',
+                        '=',
+                        'users.id'
+                    );
+
+                    $join->where(
+                        'medical_allowance.year',
+                        '=',
+                        $selectedYear
+                    );
+                }
             )
-            ->whereNotNull('employment_status.plantilla_db_id')
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Exclude Deleted Users
+            |--------------------------------------------------------------------------
+            */
+
+            ->whereNull(
+                'users.deleted_at'
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Source of Fund = Plantilla
+            |--------------------------------------------------------------------------
+            |
+            | This replaces:
+            |
+            | ->whereNotNull('employment_status.plantilla_db_id')
+            |
+            | We now determine the employee population using Source of Fund.
+            |
+            */
+
+            ->where(
+                'employment_status.source_of_fund',
+                'Plantilla'
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Admin Scope
+            |--------------------------------------------------------------------------
+            */
+
             ->when(
                 $user->role === 'admin',
-                function ($query) use ($district, $showOwnSchool, $adminSchool) {
-                    $query->where('school_db.school_district', $district);
+
+                function ($query) use (
+                    $district,
+                    $showOwnSchool,
+                    $adminSchool
+                ) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Assigned District Only
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $query->where(
+                        'school_db.school_district',
+                        $district
+                    );
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Initial Visit = Own School
+                    |--------------------------------------------------------------------------
+                    */
 
                     if ($showOwnSchool) {
-                        $query->where('school_db.id', $adminSchool->id);
+
+                        $query->where(
+                            'school_db.id',
+                            $adminSchool->id
+                        );
                     }
                 }
             )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | School Information
+            |--------------------------------------------------------------------------
+            */
+
             ->select(
+
                 'school_db.id as school_db_id',
+
                 'school_db.school_id',
+
                 'school_db.school_name',
+
                 'school_db.school_district',
+
                 'school_db.school_area'
+
             )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Medical Allowance Counts
+            |--------------------------------------------------------------------------
+            */
+
             ->selectRaw("
-                COUNT(DISTINCT CASE
-                    WHEN medical_allowance.mode_of_availment = 'Group Availment (HMO)'
-                    THEN users.id
-                END) AS group_hmo,
 
-                COUNT(DISTINCT CASE
-                    WHEN medical_allowance.mode_of_availment = 'Individual Availment (HMO)'
-                    THEN users.id
-                END) AS individual_hmo,
+                COUNT(
+                    DISTINCT CASE
 
-                COUNT(DISTINCT CASE
-                    WHEN medical_allowance.mode_of_availment = 'Not Eligible'
-                    THEN users.id
-                END) AS not_eligible,
+                        WHEN medical_allowance.mode_of_availment =
+                            'Group Availment (HMO)'
 
-                COUNT(DISTINCT users.id) AS total_eligible_employee
+                        THEN users.id
+
+                    END
+                ) AS group_hmo,
+
+
+                COUNT(
+                    DISTINCT CASE
+
+                        WHEN medical_allowance.mode_of_availment =
+                            'Individual Availment (HMO)'
+
+                        THEN users.id
+
+                    END
+                ) AS individual_hmo,
+
+
+                COUNT(
+                    DISTINCT CASE
+
+                        WHEN medical_allowance.mode_of_availment =
+                            'Not Eligible'
+
+                        THEN users.id
+
+                    END
+                ) AS not_eligible,
+
+
+                COUNT(
+                    DISTINCT CASE
+
+                        WHEN medical_allowance.id IS NULL
+
+                        THEN users.id
+
+                    END
+                ) AS no_record,
+
+
+                COUNT(
+                    DISTINCT users.id
+                ) AS total_plantilla_employee
+
             ")
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('school_db.school_id', 'like', "%{$search}%")
-                        ->orWhere('school_db.school_name', 'like', "%{$search}%")
-                        ->orWhere('school_db.school_district', 'like', "%{$search}%");
-                });
-            })
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Search
+            |--------------------------------------------------------------------------
+            */
+
             ->when(
-                $user->role === 'super_admin' && $district !== '',
-                function ($query) use ($district) {
-                    $query->where('school_db.school_district', $district);
+                $search !== '',
+
+                function ($query) use ($search) {
+
+                    $query->where(
+                        function ($q) use ($search) {
+
+                            $q
+                                ->where(
+                                    'school_db.school_id',
+                                    'like',
+                                    "%{$search}%"
+                                )
+
+                                ->orWhere(
+                                    'school_db.school_name',
+                                    'like',
+                                    "%{$search}%"
+                                )
+
+                                ->orWhere(
+                                    'school_db.school_district',
+                                    'like',
+                                    "%{$search}%"
+                                );
+                        }
+                    );
                 }
             )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Super Admin District Filter
+            |--------------------------------------------------------------------------
+            */
+
+            ->when(
+                $user->role === 'super_admin'
+                && $district !== '',
+
+                function ($query) use ($district) {
+
+                    $query->where(
+                        'school_db.school_district',
+                        $district
+                    );
+                }
+            )
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Group By School
+            |--------------------------------------------------------------------------
+            */
+
             ->groupBy(
+
                 'school_db.id',
+
                 'school_db.school_id',
+
                 'school_db.school_name',
+
                 'school_db.school_district',
+
                 'school_db.school_area'
+
             );
 
+
         /*
         |--------------------------------------------------------------------------
-        | Summary before pagination
+        | Summary Before Pagination
         |--------------------------------------------------------------------------
         */
+
         $summary = DB::query()
-            ->fromSub(clone $query, 'school_summary')
+
+            ->fromSub(
+                clone $query,
+                'school_summary'
+            )
+
             ->selectRaw('
+
                 COUNT(*) AS total_schools,
-                COALESCE(SUM(total_eligible_employee), 0) AS total_plantilla_employee,
-                COALESCE(SUM(not_eligible), 0) AS total_not_eligible,
-                COALESCE(SUM(group_hmo), 0) AS total_group_availment,
-                COALESCE(SUM(individual_hmo), 0) AS total_individual_availment
+
+                COALESCE(
+                    SUM(total_plantilla_employee),
+                    0
+                ) AS total_plantilla_employee,
+
+                COALESCE(
+                    SUM(not_eligible),
+                    0
+                ) AS total_not_eligible,
+
+                COALESCE(
+                    SUM(group_hmo),
+                    0
+                ) AS total_group_availment,
+
+                COALESCE(
+                    SUM(individual_hmo),
+                    0
+                ) AS total_individual_availment,
+
+                COALESCE(
+                    SUM(no_record),
+                    0
+                ) AS total_no_record
+
             ')
+
             ->first();
 
-        $totalSchools = (int) $summary->total_schools;
-        $totalPlantillaEmployee = (int) $summary->total_plantilla_employee;
-        $totalNotEligible = (int) $summary->total_not_eligible;
-        $totalGroupAvailment = (int) $summary->total_group_availment;
-        $totalIndividualAvailment = (int) $summary->total_individual_availment;
-        $totalEligible = $totalGroupAvailment + $totalIndividualAvailment;
-
-        $reports = $query
-            ->orderBy('school_db.school_name')
-            ->orderBy('school_db.id')
-            ->paginate(15)
-            ->withQueryString();
 
         /*
         |--------------------------------------------------------------------------
-        | Available districts
+        | Summary Values
         |--------------------------------------------------------------------------
         */
+
+        $totalSchools =
+            (int) ($summary->total_schools ?? 0);
+
+
+        $totalPlantillaEmployee =
+            (int) ($summary->total_plantilla_employee ?? 0);
+
+
+        $totalNotEligible =
+            (int) ($summary->total_not_eligible ?? 0);
+
+
+        $totalGroupAvailment =
+            (int) ($summary->total_group_availment ?? 0);
+
+
+        $totalIndividualAvailment =
+            (int) ($summary->total_individual_availment ?? 0);
+
+
+        $totalNoRecord =
+            (int) ($summary->total_no_record ?? 0);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Total Eligible
+        |--------------------------------------------------------------------------
+        |
+        | Eligible =
+        |
+        | Group Availment (HMO)
+        | +
+        | Individual Availment (HMO)
+        |
+        */
+
+        $totalEligible =
+            $totalGroupAvailment
+            + $totalIndividualAvailment;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Paginated School Reports
+        |--------------------------------------------------------------------------
+        */
+
+        $reports = $query
+
+            ->orderBy(
+                'school_db.school_name'
+            )
+
+            ->orderBy(
+                'school_db.id'
+            )
+
+            ->paginate(15)
+
+            ->withQueryString();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Available Districts
+        |--------------------------------------------------------------------------
+        */
+
         $districts = DB::table('school_db')
+
             ->when(
                 $user->role === 'admin',
-                fn ($query) => $query->where('school_district', $district)
+
+                fn ($query) =>
+                    $query->where(
+                        'school_district',
+                        $district
+                    )
             )
-            ->whereNotNull('school_district')
-            ->where('school_district', '!=', '')
+
+            ->whereNotNull(
+                'school_district'
+            )
+
+            ->where(
+                'school_district',
+                '!=',
+                ''
+            )
+
             ->distinct()
-            ->orderBy('school_district')
-            ->pluck('school_district');
+
+            ->orderBy(
+                'school_district'
+            )
+
+            ->pluck(
+                'school_district'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Return View
+        |--------------------------------------------------------------------------
+        */
 
         return view(
             'data-management.medical-allowance-report-per-school',
+
             compact(
+
                 'reports',
+
                 'districts',
+
                 'search',
+
                 'district',
+
+                'selectedYear',
+
+                'availableYears',
+
+                'currentYear',
+
                 'totalSchools',
+
                 'totalPlantillaEmployee',
+
                 'totalNotEligible',
+
                 'totalGroupAvailment',
+
                 'totalIndividualAvailment',
-                'totalEligible'
+
+                'totalEligible',
+
+                'totalNoRecord'
+
             )
         );
     }
@@ -9135,7 +9961,7 @@ class DataManagementController extends Controller
 
     public function updateAvailment(
         Request $request,
-        MedicalAllowance $medicalAllowance
+        $userId
     ) {
         /*
         |--------------------------------------------------------------------------
@@ -9152,6 +9978,20 @@ class DataManagementController extends Controller
                 true
             ),
             403
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Target User ID
+        |--------------------------------------------------------------------------
+        */
+
+        $userId = (int) $userId;
+
+        abort_unless(
+            $userId > 0,
+            404
         );
 
 
@@ -9190,30 +10030,25 @@ class DataManagementController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Current Record Must Belong To Current Year
+        | Load Target User
         |--------------------------------------------------------------------------
         */
 
-        abort_unless(
-            (int) $medicalAllowance->year === (int) $currentYear,
-            404
-        );
+        $targetUser = User::with([
+            'employmentStatus.school',
+        ])->findOrFail($userId);
 
 
         /*
         |--------------------------------------------------------------------------
-        | Load Employee
+        | Employee Must Be Active
         |--------------------------------------------------------------------------
         */
 
-        $medicalAllowance->load([
-            'user.employmentStatus.school',
-        ]);
-
-        $targetUser = $medicalAllowance->user;
+        $employmentStatus = $targetUser->employmentStatus;
 
         abort_unless(
-            $targetUser,
+            $employmentStatus,
             404
         );
 
@@ -9222,6 +10057,13 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         | Role-Based School Security
         |--------------------------------------------------------------------------
+        |
+        | Super Admin:
+        | Can update any employee.
+        |
+        | Admin:
+        | Can only update employees assigned to the same school.
+        |
         */
 
         if ($user->role === 'admin') {
@@ -9244,8 +10086,12 @@ class DataManagementController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Check If Report Has Already Been Submitted
+        | Check Medical Allowance Report
         |--------------------------------------------------------------------------
+        |
+        | Admin cannot edit after the school's report has already been
+        | validated/submitted.
+        |
         */
 
         if ($user->role === 'admin') {
@@ -9260,6 +10106,12 @@ class DataManagementController extends Controller
 
             if ($medicalReport) {
 
+                /*
+                |--------------------------------------------------------------------------
+                | Get Admin School Code
+                |--------------------------------------------------------------------------
+                */
+
                 $schoolCode = DB::table('school_db')
                     ->where(
                         'id',
@@ -9269,6 +10121,12 @@ class DataManagementController extends Controller
 
 
                 if ($schoolCode) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Find Existing Submission
+                    |--------------------------------------------------------------------------
+                    */
 
                     $submission = ReportSubmission::where(
                         'report_id',
@@ -9280,6 +10138,12 @@ class DataManagementController extends Controller
                         )
                         ->first();
 
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Already Verified
+                    |--------------------------------------------------------------------------
+                    */
 
                     if ($submission?->status === 'Verified') {
 
@@ -9299,12 +10163,12 @@ class DataManagementController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Save 2025 + 2026
+        | Save Previous + Current Year
         |--------------------------------------------------------------------------
         */
 
         DB::transaction(function () use (
-            $medicalAllowance,
+            $userId,
             $validated,
             $previousYear,
             $currentYear
@@ -9314,14 +10178,11 @@ class DataManagementController extends Controller
             |--------------------------------------------------------------------------
             | Previous Year Record
             |--------------------------------------------------------------------------
-            |
-            | Find the existing previous-year record first.
-            |
             */
 
             $previousRecord = MedicalAllowance::where(
                 'users_id',
-                $medicalAllowance->users_id
+                $userId
             )
                 ->where(
                     'year',
@@ -9330,17 +10191,13 @@ class DataManagementController extends Controller
                 ->first();
 
 
-            if ($previousRecord) {
+            /*
+            |--------------------------------------------------------------------------
+            | Update Existing Previous Record
+            |--------------------------------------------------------------------------
+            */
 
-                /*
-                |--------------------------------------------------------------------------
-                | Existing Previous Record
-                |--------------------------------------------------------------------------
-                |
-                | Preserve disbursement_status.
-                | Only update the availment and return validation to Pending.
-                |
-                */
+            if ($previousRecord) {
 
                 $previousRecord->update([
 
@@ -9358,16 +10215,12 @@ class DataManagementController extends Controller
                 |--------------------------------------------------------------------------
                 | Create Missing Previous Record
                 |--------------------------------------------------------------------------
-                |
-                | disbursement_status is required by the database, therefore
-                | it must be supplied when creating the record.
-                |
                 */
 
                 MedicalAllowance::create([
 
                     'users_id' =>
-                        $medicalAllowance->users_id,
+                        $userId,
 
                     'year' =>
                         $previousYear,
@@ -9389,23 +10242,64 @@ class DataManagementController extends Controller
             |--------------------------------------------------------------------------
             | Current Year Record
             |--------------------------------------------------------------------------
-            |
-            | Keep the existing disbursement status.
-            |
             */
 
-            $medicalAllowance->update([
+            $currentRecord = MedicalAllowance::where(
+                'users_id',
+                $userId
+            )
+                ->where(
+                    'year',
+                    $currentYear
+                )
+                ->first();
 
-                'year' =>
-                    $currentYear,
 
-                'mode_of_availment' =>
-                    $validated['current_mode_of_availment'],
+            /*
+            |--------------------------------------------------------------------------
+            | Update Existing Current Record
+            |--------------------------------------------------------------------------
+            */
 
-                'validation_status' =>
-                    'Pending',
+            if ($currentRecord) {
 
-            ]);
+                $currentRecord->update([
+
+                    'mode_of_availment' =>
+                        $validated['current_mode_of_availment'],
+
+                    'validation_status' =>
+                        'Pending',
+
+                ]);
+
+            } else {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Create Missing Current Record
+                |--------------------------------------------------------------------------
+                */
+
+                MedicalAllowance::create([
+
+                    'users_id' =>
+                        $userId,
+
+                    'year' =>
+                        $currentYear,
+
+                    'mode_of_availment' =>
+                        $validated['current_mode_of_availment'],
+
+                    'disbursement_status' =>
+                        'Pending',
+
+                    'validation_status' =>
+                        'Pending',
+
+                ]);
+            }
 
         });
 
@@ -9416,7 +10310,10 @@ class DataManagementController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        return back()
+        return redirect()
+            ->route(
+                'data-management.medical-allowance'
+            )
             ->with(
                 'success',
                 "{$previousYear} and {$currentYear} medical allowance records were updated successfully."
