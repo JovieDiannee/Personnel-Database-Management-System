@@ -179,12 +179,35 @@ class DashboardController extends Controller
         | Medical Allowance Base Query
         |--------------------------------------------------------------------------
         |
-        | Dashboard Medical Allowance statistics should use 2026 records only.
+        | Dashboard Medical Allowance statistics:
+        | - Year = 2026
+        | - Source of Fund = Plantilla
         |
         */
 
         $medicalQuery = MedicalAllowance::query()
-            ->where('year', 2026);
+
+            /*
+            |--------------------------------------------------------------------------
+            | 2026 Records Only
+            |--------------------------------------------------------------------------
+            */
+
+            ->where('year', 2026)
+
+            /*
+            |--------------------------------------------------------------------------
+            | Plantilla Personnel Only
+            |--------------------------------------------------------------------------
+            */
+
+            ->whereHas('user.employmentStatus', function ($query) {
+
+                $query->where(
+                    'source_of_fund',
+                    'Plantilla'
+                );
+            });
 
 
         /*
