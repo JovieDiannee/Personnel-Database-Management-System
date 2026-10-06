@@ -737,223 +737,241 @@
 
 
             {{-- =====================================================
-                7 CARDS IN ONE ROW
+                9 CARDS IN ONE ROW
             ====================================================== --}}
 
-            <div
-                class="grid gap-2"
-                style="grid-template-columns: repeat(7, minmax(0, 1fr));"
-            >
+            <div class="w-full overflow-x-auto">
 
-                {{-- ================================================= --}}
-                {{-- TOTAL --}}
-                {{-- ================================================= --}}
-
-                <a
-                    href="{{ request()->fullUrlWithQuery([
-                        'filter' => 'all',
-                        'page' => 1
-                    ]) }}#medical-allowance-table"
-
-                    class="min-w-0 rounded-lg border px-3 py-2.5 transition
-                        {{ $filter === 'all'
-                            ? 'border-green-300 bg-green-50 shadow-sm'
-                            : 'border-gray-200 bg-white hover:border-green-300' }}"
+                <div
+                    class="grid gap-2"
+                    style="
+                        grid-template-columns: repeat(9, minmax(125px, 1fr));
+                        min-width: 1150px;
+                    "
                 >
 
-                    <p
-                        class="truncate text-[10px]
-                            font-semibold uppercase text-gray-500"
+                    {{-- ================================================= --}}
+                    {{-- TOTAL --}}
+                    {{-- ================================================= --}}
+
+                    <a
+                        href="{{ request()->fullUrlWithQuery([
+                            'filter' => 'all',
+                            'page' => 1
+                        ]) }}#medical-allowance-table"
+                        class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                            {{ $filter === 'all'
+                                ? 'border-slate-400 bg-slate-50 shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-slate-300' }}"
                     >
-                        Total
-                    </p>
+                        <p class="truncate text-[10px] font-semibold uppercase text-gray-500">
+                            Total
+                        </p>
 
-                    <p class="mt-1 text-lg font-bold text-gray-900">
-                        {{ number_format($summary['total']) }}
-                    </p>
+                        <p class="mt-1 text-lg font-bold text-gray-900">
+                            {{ number_format($summary['total'] ?? 0) }}
+                        </p>
+                    </a>
 
-                </a>
 
-                {{-- ================================================= --}}
-                {{-- NO SCHOOL ASSIGNMENT --}}
-                {{-- ================================================= --}}
+                    {{-- ================================================= --}}
+                    {{-- ACTIVE --}}
+                    {{-- ================================================= --}}
 
-                <a
-                    href="{{ request()->fullUrlWithQuery([
-                        'filter' => 'no_school',
-                        'page' => 1
-                    ]) }}#medical-allowance-table"
-
-                    class="min-w-0 rounded-lg border px-3 py-2.5 transition
-                        {{ $filter === 'no_school'
-                            ? 'border-red-300 bg-red-50 shadow-sm'
-                            : 'border-gray-200 bg-white hover:border-red-300' }}"
+                    <a
+                        href="{{ request()->fullUrlWithQuery([
+                            'filter' => 'active',
+                            'page' => 1
+                        ]) }}#medical-allowance-table"
+                        class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                            {{ $filter === 'active'
+                                ? 'border-green-300 bg-green-50 shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-green-300' }}"
                     >
+                        <p class="truncate text-[10px] font-semibold uppercase text-green-600">
+                            Active
+                        </p>
 
-                    <p
-                        class="truncate text-[10px]
-                            font-semibold uppercase text-red-600"
-                        title="No School Assignment"
+                        <p class="mt-1 text-lg font-bold text-green-700">
+                            {{ number_format($summary['active'] ?? 0) }}
+                        </p>
+                    </a>
+
+
+                    {{-- ================================================= --}}
+                    {{-- INACTIVE --}}
+                    {{-- ================================================= --}}
+
+                    <a
+                        href="{{ request()->fullUrlWithQuery([
+                            'filter' => 'inactive',
+                            'page' => 1
+                        ]) }}#medical-allowance-table"
+                        class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                            {{ $filter === 'inactive'
+                                ? 'border-red-300 bg-red-50 shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-red-300' }}"
                     >
-                        No School Assignment
-                    </p>
+                        <p class="truncate text-[10px] font-semibold uppercase text-red-600">
+                            Inactive
+                        </p>
 
-                    <p class="mt-1 text-lg font-bold text-red-700">
-                        {{ number_format($summary['no_school'] ?? 0) }}
-                    </p>
+                        <p class="mt-1 text-lg font-bold text-red-700">
+                            {{ number_format($summary['inactive'] ?? 0) }}
+                        </p>
+                    </a>
 
-                </a>
 
+                    {{-- ================================================= --}}
+                    {{-- NO SCHOOL ASSIGNMENT --}}
+                    {{-- ================================================= --}}
 
-                {{-- ================================================= --}}
-                {{-- CHANGED --}}
-                {{-- ================================================= --}}
-
-                <a
-                    href="{{ request()->fullUrlWithQuery([
-                        'filter' => 'changed',
-                        'page' => 1
-                    ]) }}#medical-allowance-table"
-
-                    class="min-w-0 rounded-lg border px-3 py-2.5 transition
-                        {{ $filter === 'changed'
-                            ? 'border-blue-300 bg-blue-50 shadow-sm'
-                            : 'border-gray-200 bg-white hover:border-blue-300' }}"
-                >
-
-                    <p
-                        class="truncate text-[10px]
-                            font-semibold uppercase text-blue-600"
+                    <a
+                        href="{{ request()->fullUrlWithQuery([
+                            'filter' => 'no_school',
+                            'page' => 1
+                        ]) }}#medical-allowance-table"
+                        class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                            {{ $filter === 'no_school'
+                                ? 'border-orange-300 bg-orange-50 shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-orange-300' }}"
                     >
-                        Changed
-                    </p>
+                        <p
+                            class="truncate text-[10px] font-semibold uppercase text-orange-600"
+                            title="No School Assignment"
+                        >
+                            No School
+                        </p>
 
-                    <p class="mt-1 text-lg font-bold text-blue-700">
-                        {{ number_format($summary['changed']) }}
-                    </p>
+                        <p class="mt-1 text-lg font-bold text-orange-700">
+                            {{ number_format($summary['no_school'] ?? 0) }}
+                        </p>
+                    </a>
 
-                </a>
 
+                    {{-- ================================================= --}}
+                    {{-- CHANGED --}}
+                    {{-- ================================================= --}}
 
-                {{-- ================================================= --}}
-                {{-- NO CHANGES --}}
-                {{-- ================================================= --}}
-
-                <a
-                    href="{{ request()->fullUrlWithQuery([
-                        'filter' => 'no_change',
-                        'page' => 1
-                    ]) }}#medical-allowance-table"
-
-                    class="min-w-0 rounded-lg border px-3 py-2.5 transition
-                        {{ $filter === 'no_change'
-                            ? 'border-gray-400 bg-gray-100 shadow-sm'
-                            : 'border-gray-200 bg-white hover:border-gray-300' }}"
-                >
-
-                    <p
-                        class="truncate text-[10px]
-                            font-semibold uppercase text-gray-500"
+                    <a
+                        href="{{ request()->fullUrlWithQuery([
+                            'filter' => 'changed',
+                            'page' => 1
+                        ]) }}#medical-allowance-table"
+                        class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                            {{ $filter === 'changed'
+                                ? 'border-blue-300 bg-blue-50 shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-blue-300' }}"
                     >
-                        No Changes
-                    </p>
+                        <p class="truncate text-[10px] font-semibold uppercase text-blue-600">
+                            Changed
+                        </p>
 
-                    <p class="mt-1 text-lg font-bold text-gray-700">
-                        {{ number_format($summary['no_change']) }}
-                    </p>
+                        <p class="mt-1 text-lg font-bold text-blue-700">
+                            {{ number_format($summary['changed'] ?? 0) }}
+                        </p>
+                    </a>
 
-                </a>
 
+                    {{-- ================================================= --}}
+                    {{-- NO CHANGES --}}
+                    {{-- ================================================= --}}
 
-                {{-- ================================================= --}}
-                {{-- NO PREVIOUS RECORD --}}
-                {{-- ================================================= --}}
-
-                <a
-                    href="{{ request()->fullUrlWithQuery([
-                        'filter' => 'new',
-                        'page' => 1
-                    ]) }}#medical-allowance-table"
-
-                    class="min-w-0 rounded-lg border px-3 py-2.5 transition
-                        {{ $filter === 'new'
-                            ? 'border-purple-300 bg-purple-50 shadow-sm'
-                            : 'border-gray-200 bg-white hover:border-purple-300' }}"
-                >
-
-                    <p
-                        class="truncate text-[10px]
-                            font-semibold uppercase text-purple-600"
+                    <a
+                        href="{{ request()->fullUrlWithQuery([
+                            'filter' => 'no_change',
+                            'page' => 1
+                        ]) }}#medical-allowance-table"
+                        class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                            {{ $filter === 'no_change'
+                                ? 'border-gray-400 bg-gray-100 shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-gray-300' }}"
                     >
-                        No {{ $previousYear }} Record
-                    </p>
+                        <p class="truncate text-[10px] font-semibold uppercase text-gray-500">
+                            No Changes
+                        </p>
 
-                    <p class="mt-1 text-lg font-bold text-purple-700">
-                        {{ number_format($summary['new']) }}
-                    </p>
+                        <p class="mt-1 text-lg font-bold text-gray-700">
+                            {{ number_format($summary['no_change'] ?? 0) }}
+                        </p>
+                    </a>
 
-                </a>
 
+                    {{-- ================================================= --}}
+                    {{-- NO PREVIOUS RECORD --}}
+                    {{-- ================================================= --}}
 
-                {{-- ================================================= --}}
-                {{-- PENDING --}}
-                {{-- ================================================= --}}
-
-                <a
-                    href="{{ request()->fullUrlWithQuery([
-                        'filter' => 'pending',
-                        'page' => 1
-                    ]) }}#medical-allowance-table"
-
-                    class="min-w-0 rounded-lg border px-3 py-2.5 transition
-                        {{ $filter === 'pending'
-                            ? 'border-amber-300 bg-amber-50 shadow-sm'
-                            : 'border-gray-200 bg-white hover:border-amber-300' }}"
-                >
-
-                    <p
-                        class="truncate text-[10px]
-                            font-semibold uppercase text-amber-600"
+                    <a
+                        href="{{ request()->fullUrlWithQuery([
+                            'filter' => 'new',
+                            'page' => 1
+                        ]) }}#medical-allowance-table"
+                        class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                            {{ $filter === 'new'
+                                ? 'border-purple-300 bg-purple-50 shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-purple-300' }}"
                     >
-                        Pending
-                    </p>
+                        <p
+                            class="truncate text-[10px] font-semibold uppercase text-purple-600"
+                            title="No {{ $previousYear }} Record"
+                        >
+                            No {{ $previousYear }} Record
+                        </p>
 
-                    <p class="mt-1 text-lg font-bold text-amber-700">
-                        {{ number_format($summary['pending']) }}
-                    </p>
+                        <p class="mt-1 text-lg font-bold text-purple-700">
+                            {{ number_format($summary['new'] ?? 0) }}
+                        </p>
+                    </a>
 
-                </a>
 
+                    {{-- ================================================= --}}
+                    {{-- PENDING --}}
+                    {{-- ================================================= --}}
 
-                {{-- ================================================= --}}
-                {{-- VALIDATED --}}
-                {{-- ================================================= --}}
-
-                <a
-                    href="{{ request()->fullUrlWithQuery([
-                        'filter' => 'validated',
-                        'page' => 1
-                    ]) }}#medical-allowance-table"
-
-                    class="min-w-0 rounded-lg border px-3 py-2.5 transition
-                        {{ $filter === 'validated'
-                            ? 'border-green-300 bg-green-50 shadow-sm'
-                            : 'border-gray-200 bg-white hover:border-green-300' }}"
-                >
-
-                    <p
-                        class="truncate text-[10px]
-                            font-semibold uppercase text-green-600"
+                    <a
+                        href="{{ request()->fullUrlWithQuery([
+                            'filter' => 'pending',
+                            'page' => 1
+                        ]) }}#medical-allowance-table"
+                        class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                            {{ $filter === 'pending'
+                                ? 'border-amber-300 bg-amber-50 shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-amber-300' }}"
                     >
-                        Validated
-                    </p>
+                        <p class="truncate text-[10px] font-semibold uppercase text-amber-600">
+                            Pending
+                        </p>
 
-                    <p class="mt-1 text-lg font-bold text-green-700">
-                        {{ number_format($summary['validated']) }}
-                    </p>
+                        <p class="mt-1 text-lg font-bold text-amber-700">
+                            {{ number_format($summary['pending'] ?? 0) }}
+                        </p>
+                    </a>
 
-                </a>
 
+                    {{-- ================================================= --}}
+                    {{-- VALIDATED --}}
+                    {{-- ================================================= --}}
+
+                    <a
+                        href="{{ request()->fullUrlWithQuery([
+                            'filter' => 'validated',
+                            'page' => 1
+                        ]) }}#medical-allowance-table"
+                        class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                            {{ $filter === 'validated'
+                                ? 'border-green-300 bg-green-50 shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-green-300' }}"
+                    >
+                        <p class="truncate text-[10px] font-semibold uppercase text-green-600">
+                            Validated
+                        </p>
+
+                        <p class="mt-1 text-lg font-bold text-green-700">
+                            {{ number_format($summary['validated'] ?? 0) }}
+                        </p>
+                    </a>
+
+                </div>
 
             </div>
 
@@ -1162,146 +1180,188 @@
 
                         <tr class="border-b border-gray-200 bg-gray-50">
 
-                            <th
-                                colspan="{{ auth()->user()->role === 'super_admin' ? 3 : 2 }}"
-                                class="px-4 py-2"
-                            ></th>                                                                          
+                        {{-- Employee + School + Position + Warm Body --}}
+                        <th
+                            colspan="{{ auth()->user()->role === 'super_admin' ? 4 : 3 }}"
+                            class="px-4 py-2"
+                        ></th>
 
 
-                            <th
-                                class="border-l border-gray-200
-                                       bg-slate-100 px-4 py-2 text-center"
+                        {{-- PREVIOUS YEAR --}}
+                        <th
+                            class="border-l border-gray-200
+                                bg-slate-100 px-4 py-2 text-center"
+                        >
+                            <span
+                                class="text-xs font-bold uppercase
+                                    tracking-wide text-slate-600"
                             >
-                                <span
-                                    class="text-xs font-bold uppercase
-                                           tracking-wide text-slate-600"
-                                >
-                                    {{ $previousYear }}
-                                </span>
-                            </th>
+                                {{ $previousYear }}
+                            </span>
+                        </th>
 
 
-                            <th
-                                class="border-l border-gray-200
-                                       bg-green-100 px-4 py-2 text-center"
+                        {{-- CURRENT YEAR --}}
+                        <th
+                            class="border-l border-gray-200
+                                bg-green-100 px-4 py-2 text-center"
+                        >
+                            <span
+                                class="text-xs font-bold uppercase
+                                    tracking-wide text-green-700"
                             >
-                                <span
-                                    class="text-xs font-bold uppercase
-                                           tracking-wide text-green-700"
-                                >
-                                    {{ $currentYear }}
-                                </span>
-                            </th>
+                                {{ $currentYear }}
+                            </span>
+                        </th>
 
 
-                            <th colspan="3"></th>
+                        {{-- Comparison + Validation + Action --}}
+                        <th colspan="3"></th>
 
-                        </tr>
+                    </tr>
 
 
                         <tr class="bg-white">
 
-                            {{-- NAME --}}
+                        {{-- ================================================= --}}
+                        {{-- EMPLOYEE --}}
+                        {{-- ================================================= --}}
+
+                        <th
+                            class="min-w-[240px] px-4 py-3
+                                text-left text-xs font-semibold
+                                uppercase tracking-wide text-gray-500"
+                        >
+                            <a
+                                href="{{ $sortUrl('name') }}"
+                                class="hover:text-green-700"
+                            >
+                                Employee
+                            </a>
+                        </th>
+
+
+                        {{-- ================================================= --}}
+                        {{-- SCHOOL ASSIGNMENT --}}
+                        {{-- SUPER ADMIN ONLY --}}
+                        {{-- ================================================= --}}
+
+                        @if(auth()->user()->role === 'super_admin')
 
                             <th
-                                class="min-w-[240px] px-4 py-3
-                                       text-left text-xs font-semibold
-                                       uppercase tracking-wide text-gray-500"
+                                class="min-w-[210px] px-4 py-3
+                                    text-left text-xs font-semibold
+                                    uppercase text-gray-500"
                             >
                                 <a
-                                    href="{{ $sortUrl('name') }}"
+                                    href="{{ $sortUrl('school') }}"
                                     class="hover:text-green-700"
                                 >
-                                    Employee
+                                    School Assignment
                                 </a>
                             </th>
 
-
-                            @if(auth()->user()->role === 'super_admin')
-
-                                <th
-                                    class="min-w-[210px] px-4 py-3
-                                           text-left text-xs font-semibold
-                                           uppercase text-gray-500"
-                                >
-                                    <a href="{{ $sortUrl('school') }}">
-                                        School Assignment
-                                    </a>
-                                </th>
-
-                            @endif
+                        @endif
 
 
-                            {{-- POSITION --}}
+                        {{-- ================================================= --}}
+                        {{-- POSITION --}}
+                        {{-- ================================================= --}}
 
-                            <th
-                                class="min-w-[190px] px-4 py-3
-                                       text-left text-xs font-semibold
-                                       uppercase text-gray-500"
+                        <th
+                            class="min-w-[190px] px-4 py-3
+                                text-center text-xs font-semibold
+                                uppercase text-gray-500"
+                        >
+                            <a
+                                href="{{ $sortUrl('position') }}"
+                                class="hover:text-green-700"
                             >
-                                <a href="{{ $sortUrl('position') }}">
-                                    Position Status 
-                                </a>
-                            </th>
+                                Position Status
+                            </a>
+                        </th>
 
 
-                            {{-- PREVIOUS --}}
+                        {{-- ================================================= --}}
+                        {{-- WARM BODY STATUS --}}
+                        {{-- ================================================= --}}
 
-                            <th
-                                class="min-w-[190px] border-l
-                                       border-gray-200 bg-slate-50
-                                       px-4 py-3 text-left text-xs
-                                       font-semibold uppercase text-slate-600"
-                            >
-                                Previous Availment
-                            </th>
-
-
-                            {{-- CURRENT --}}
-
-                            <th
-                                class="min-w-[190px] border-l
-                                    border-gray-200 bg-green-100
-                                    px-4 py-3 text-left text-xs
-                                    font-semibold uppercase text-green-700"
-                            >
-                                Current Availment
-                            </th>
+                        <th
+                            class="min-w-[170px] px-4 py-3
+                                text-center text-xs font-semibold
+                                uppercase tracking-wide text-gray-500"
+                        >
+                            Warm Body Status
+                        </th>
 
 
-                            {{-- COMPARISON --}}
+                        {{-- ================================================= --}}
+                        {{-- PREVIOUS --}}
+                        {{-- ================================================= --}}
 
-                            <th
-                                class="min-w-[120px] px-4 py-3
-                                       text-center text-xs font-semibold
-                                       uppercase text-gray-500"
-                            >
-                                Comparison
-                            </th>
-
-
-                            {{-- VALIDATION --}}
-
-                            <th
-                                class="min-w-[120px] px-4 py-3
-                                       text-center text-xs font-semibold
-                                       uppercase text-gray-500"
-                            >
-                                Validation
-                            </th>
+                        <th
+                            class="min-w-[190px] border-l
+                                border-gray-200 bg-slate-50
+                                px-4 py-3 text-left text-xs
+                                font-semibold uppercase text-slate-600"
+                        >
+                            Previous Availment
+                        </th>
 
 
-                            {{-- ACTION --}}
+                        {{-- ================================================= --}}
+                        {{-- CURRENT --}}
+                        {{-- ================================================= --}}
 
-                            <th
-                                class="min-w-[100px] px-4 py-3
-                                       text-center text-xs font-semibold
-                                       uppercase text-gray-500"
-                            >
-                                Action
-                            </th>
+                        <th
+                            class="min-w-[190px] border-l
+                                border-gray-200 bg-green-100
+                                px-4 py-3 text-left text-xs
+                                font-semibold uppercase text-green-700"
+                        >
+                            Current Availment
+                        </th>
 
-                        </tr>
+
+                        {{-- ================================================= --}}
+                        {{-- COMPARISON --}}
+                        {{-- ================================================= --}}
+
+                        <th
+                            class="min-w-[120px] px-4 py-3
+                                text-center text-xs font-semibold
+                                uppercase text-gray-500"
+                        >
+                            Comparison
+                        </th>
+
+
+                        {{-- ================================================= --}}
+                        {{-- VALIDATION --}}
+                        {{-- ================================================= --}}
+
+                        <th
+                            class="min-w-[120px] px-4 py-3
+                                text-center text-xs font-semibold
+                                uppercase text-gray-500"
+                        >
+                            Validation
+                        </th>
+
+
+                        {{-- ================================================= --}}
+                        {{-- ACTION --}}
+                        {{-- ================================================= --}}
+
+                        <th
+                            class="min-w-[100px] px-4 py-3
+                                text-center text-xs font-semibold
+                                uppercase text-gray-500"
+                        >
+                            Action
+                        </th>
+
+                    </tr>
 
                     </thead>
 
@@ -1368,6 +1428,50 @@
                                     (string) ($record->employment_status ?? '')
                                 );
 
+                                /*
+                                |--------------------------------------------------------------------------
+                                | WARM BODY STATUS
+                                |--------------------------------------------------------------------------
+                                */
+
+                                $warmBodyStatus = trim(
+                                    (string) ($record->warm_body_status ?? '')
+                                );
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | ACTIVE / INACTIVE
+                                |--------------------------------------------------------------------------
+                                |
+                                | Inactive:
+                                |
+                                | - Vacant (Resigned)
+                                | - Vacant (Retired)
+                                | - Vacant (Others)
+                                |
+                                | All other values are considered Active.
+                                |
+                                */
+
+                                $inactiveWarmBodyStatuses = [
+                                    'Vacant (Resigned)',
+                                    'Vacant (Retired)',
+                                    'Vacant (Others)',
+                                ];
+
+
+                                $isInactive = in_array(
+                                    $warmBodyStatus,
+                                    $inactiveWarmBodyStatuses,
+                                    true
+                                );
+
+
+                                $warmBodyClassification =
+                                    $isInactive
+                                        ? 'Inactive'
+                                        : 'Active';
 
                                 /*
                                 |--------------------------------------------------------------------------
@@ -1535,7 +1639,7 @@
                                     POSITION STATUS
                                 ========================================================== --}}
 
-                                <td class="px-4 py-4">
+                                <td class="px-4 py-4 text-center">
 
                                     <p class="text-sm font-medium text-gray-800">
                                         {{ $positionTitle ?: '—' }}
@@ -1560,6 +1664,82 @@
                                         </span>
 
                                     @endif
+
+                                </td>
+
+                                {{-- =========================================================
+                                    WARM BODY STATUS
+                                ========================================================== --}}
+
+                                <td class="px-4 py-4 text-center">
+
+                                    <div class="flex flex-col items-center justify-center gap-1.5">
+
+                                        {{-- =================================================
+                                            ACTIVE / INACTIVE CLASSIFICATION
+                                        ================================================== --}}
+
+                                        @if($isInactive)
+
+                                            <span
+                                                class="inline-flex items-center justify-center gap-1.5
+                                                    rounded-full bg-red-50
+                                                    px-2.5 py-1
+                                                    text-xs font-semibold text-red-700"
+                                            >
+
+                                                <span
+                                                    class="h-1.5 w-1.5 rounded-full bg-red-500"
+                                                ></span>
+
+                                                Inactive
+
+                                            </span>
+
+                                        @else
+
+                                            <span
+                                                class="inline-flex items-center justify-center gap-1.5
+                                                    rounded-full bg-green-50
+                                                    px-2.5 py-1
+                                                    text-xs font-semibold text-green-700"
+                                            >
+
+                                                <span
+                                                    class="h-1.5 w-1.5 rounded-full bg-green-500"
+                                                ></span>
+
+                                                Active
+
+                                            </span>
+
+                                        @endif
+
+
+                                        {{-- =================================================
+                                            ACTUAL WARM BODY STATUS
+                                        ================================================== --}}
+
+                                        @if($warmBodyStatus !== '')
+
+                                            <span
+                                                class="text-center text-xs
+                                                    {{ $isInactive
+                                                        ? 'font-medium text-red-600'
+                                                        : 'text-gray-500' }}"
+                                            >
+                                                {{ $warmBodyStatus }}
+                                            </span>
+
+                                        @else
+
+                                            <span class="text-center text-xs text-gray-400">
+                                                Not Specified
+                                            </span>
+
+                                        @endif
+
+                                    </div>
 
                                 </td>
 

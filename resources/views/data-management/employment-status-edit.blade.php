@@ -359,7 +359,7 @@
                                 )
                             >
                                 Search a plantilla item number
-                            </option>
+                            </option> 
 
                             @foreach ($plantillaItems as $item)
                                 <option value="{{ $item->item_number }}"
