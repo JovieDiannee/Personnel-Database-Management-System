@@ -541,6 +541,17 @@ class PersonnelExportController extends Controller
     |--------------------------------------------------------------------------
     | Build Personnel Query
     |--------------------------------------------------------------------------
+    |
+    | Export only non-deleted personnel accounts.
+    |
+    | Exclusions:
+    | 1. Soft-deleted employees (Trash Bin)
+    | 2. Super Admin accounts
+    | 3. System account with User ID 1
+    | 4. Employee ID 1000001
+    |
+    | Include only user and admin accounts.
+    |
     */
 
     private function buildQuery(array $filters): Builder
@@ -549,15 +560,38 @@ class PersonnelExportController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Exclude Super Admin Account
+        | Exclude Deleted Employees
         |--------------------------------------------------------------------------
-        |
-        | User ID 1 is the system Super Admin account.
-        | Do not include this account in personnel reports.
-        |
+        */
+
+        ->whereNull('users.deleted_at')
+
+        /*
+        |--------------------------------------------------------------------------
+        | Include Only Personnel Accounts
+        |--------------------------------------------------------------------------
+        */
+
+        ->whereIn('users.role', [
+            'user',
+            'admin',
+        ])
+
+        /*
+        |--------------------------------------------------------------------------
+        | Exclude System Super Admin
+        |--------------------------------------------------------------------------
         */
 
         ->where('users.id', '<>', 1)
+
+        /*
+        |--------------------------------------------------------------------------
+        | Require Basic Information
+        |--------------------------------------------------------------------------
+        */
+
+        ->whereHas('basicInformation')
 
         /*
         |--------------------------------------------------------------------------
@@ -567,8 +601,11 @@ class PersonnelExportController extends Controller
 
         ->whereDoesntHave(
             'basicInformation.issuedId',
-            function ($q) {
-                $q->where('employee_id', '1000001');
+            function ($query) {
+                $query->where(
+                    'employee_id',
+                    '1000001'
+                );
             }
         );
 
