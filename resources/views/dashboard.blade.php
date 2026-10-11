@@ -44,7 +44,7 @@
                         {{ ucwords(str_replace('_', ' ', auth()->user()->role ?? 'User')) }}
                     </p>
 
-                </div>
+                </div> 
 
             </div>
 
@@ -281,6 +281,7 @@
 
             </div>
 
+            
             {{-- =====================================================
                 MEDICAL ALLOWANCE REPORT
             ====================================================== --}}
@@ -288,11 +289,14 @@
             <div>
 
                 {{-- SECTION TITLE --}}
-                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-900 to-green-800 px-4 sm:px-6 py-4 text-white shadow-lg">
+                <div class="relative overflow-hidden rounded-2xl
+                            bg-gradient-to-br from-green-950 via-green-900
+                            to-green-800 px-4 py-4 shadow-lg sm:px-6">
 
                     <div class="text-center">
 
-                        <h3 class="text-base sm:text-xl font-bold uppercase tracking-wide text-white">
+                        <h3 class="text-base font-bold uppercase tracking-wide
+                                text-white sm:text-xl">
                             Medical Allowance Report School Year 2026–2027
                         </h3>
 
@@ -305,13 +309,20 @@
                 </div>
 
 
-                {{-- DEADLINE NOTICE --}}
-                <div class="mt-3 flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-5 py-3 shadow-sm">
+                {{-- =====================================================
+                    DEADLINE NOTICE
+                ====================================================== --}}
+
+                <div class="mt-3 flex items-center justify-center
+                            rounded-xl border border-red-200
+                            bg-red-50 px-5 py-3 shadow-sm">
 
                     <div class="flex items-center gap-3">
 
                         {{-- CLOCK ICON --}}
-                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+                        <div class="flex h-8 w-8 shrink-0 items-center
+                                    justify-center rounded-full
+                                    bg-red-100 text-red-600">
 
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -331,56 +342,94 @@
                         </div>
 
                         <div class="text-sm text-red-700">
+
                             <span class="font-medium">
                                 Deadline for Validation of Medical Report:
                             </span>
 
                             <span class="ml-1 font-bold">
+
                                 @if ($medicalReport?->deadline)
+
                                     {{ $medicalReport->deadline->format('F j, Y • g:i A') }}
+
                                 @else
+
                                     No deadline has been configured.
+
                                 @endif
+
                             </span>
+
                         </div>
 
                     </div>
 
                 </div>
 
-                <br>
-                
 
-                {{-- RESPONSIVE MEDICAL ALLOWANCE CARDS --}}
-                <div class="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
+                {{-- =====================================================
+                    RESPONSIVE MEDICAL ALLOWANCE CARDS
+                    Group | Individual | Not Eligible
+                ====================================================== --}}
+
+                <div class="mt-6 grid min-w-0 grid-cols-1
+                            gap-4 md:grid-cols-3 lg:gap-6">
+
 
                     {{-- =================================================
-                        GROUP AVAILMENT
+                        GROUP AVAILMENT (HMO)
                     ================================================== --}}
+
                     <a
                         href="{{ route('data-management.medical-allowance') }}"
-                        class="group block min-w-0 flex-1 cursor-pointer rounded-2xl bg-white p-4 sm:p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:ring-green-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                        aria-label="View medical allowance records"
+                        class="group block min-w-0 cursor-pointer
+                            rounded-2xl bg-white p-4 shadow-sm
+                            ring-1 ring-gray-100
+                            transition duration-300
+                            hover:-translate-y-1
+                            hover:shadow-lg
+                            hover:ring-green-200
+                            focus:outline-none
+                            focus:ring-2
+                            focus:ring-green-500
+                            focus:ring-offset-2
+                            sm:p-5"
+                        aria-label="View Group Availment medical allowance records"
                     >
-                        <div class="flex items-start justify-between gap-4 [&>div]:min-w-0">
+
+                        <div class="flex items-start justify-between gap-4">
+
                             <div class="min-w-0 flex-1">
-                                <p class="text-sm font-medium text-gray-500">
+
+                                <p class="text-sm font-medium text-gray-500
+                                        transition group-hover:text-green-700">
                                     Group Availment (HMO)
                                 </p>
 
-                                <p class="mt-2 text-3xl font-bold text-green-700">
+                                <p class="mt-2 text-3xl font-bold
+                                        text-green-700">
                                     {{ number_format($groupAvailment) }}
                                 </p>
 
-                                <p class="mt-1 text-xs text-gray-400">
-                                    Personnel enrolled in the group medical program
+                                <p class="mt-1 text-xs leading-relaxed
+                                        text-gray-400">
+                                    Active Plantilla personnel enrolled
+                                    in the group medical program
                                 </p>
+
                             </div>
 
-                            {{-- ICON --}}
-                            <div
-                                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700"
-                            >
+
+                            {{-- GROUP ICON --}}
+                            <div class="flex h-12 w-12 shrink-0
+                                        items-center justify-center
+                                        rounded-xl bg-green-100
+                                        text-green-700
+                                        transition duration-300
+                                        group-hover:bg-green-700
+                                        group-hover:text-white">
+
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     class="h-6 w-6"
@@ -396,37 +445,68 @@
                                         d="M3 21h18M5 21V7a2 2 0 012-2h2v4h6V5h2a2 2 0 012 2v14M9 21v-4h6v4"
                                     />
                                 </svg>
+
                             </div>
+
                         </div>
+
                     </a>
 
+
+
                     {{-- =================================================
-                        INDIVIDUAL AVAILMENT HMO
+                        INDIVIDUAL AVAILMENT (HMO)
                     ================================================== --}}
+
                     <a
                         href="{{ route('data-management.medical-allowance') }}"
-                        class="group block min-w-0 flex-1 cursor-pointer rounded-2xl bg-white p-4 sm:p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:ring-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                        aria-label="View medical allowance records"
+                        class="group block min-w-0 cursor-pointer
+                            rounded-2xl bg-white p-4 shadow-sm
+                            ring-1 ring-gray-100
+                            transition duration-300
+                            hover:-translate-y-1
+                            hover:shadow-lg
+                            hover:ring-blue-200
+                            focus:outline-none
+                            focus:ring-2
+                            focus:ring-blue-500
+                            focus:ring-offset-2
+                            sm:p-5"
+                        aria-label="View Individual Availment medical allowance records"
                     >
-                        <div class="flex items-start justify-between gap-4 [&>div]:min-w-0">
+
+                        <div class="flex items-start justify-between gap-4">
+
                             <div class="min-w-0 flex-1">
-                                <p class="text-sm font-medium text-gray-500">
+
+                                <p class="text-sm font-medium text-gray-500
+                                        transition group-hover:text-blue-600">
                                     Individual Availment (HMO)
                                 </p>
 
-                                <p class="mt-2 text-3xl font-bold text-blue-600">
+                                <p class="mt-2 text-3xl font-bold
+                                        text-blue-600">
                                     {{ number_format($individualAvailment) }}
                                 </p>
 
-                                <p class="mt-1 text-xs text-gray-400">
-                                    Personnel utilizing HMO medical benefits
+                                <p class="mt-1 text-xs leading-relaxed
+                                        text-gray-400">
+                                    Active Plantilla personnel utilizing
+                                    individual HMO medical benefits
                                 </p>
+
                             </div>
 
-                            {{-- ICON --}}
-                            <div
-                                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600"
-                            >
+
+                            {{-- INDIVIDUAL ICON --}}
+                            <div class="flex h-12 w-12 shrink-0
+                                        items-center justify-center
+                                        rounded-xl bg-blue-100
+                                        text-blue-600
+                                        transition duration-300
+                                        group-hover:bg-blue-600
+                                        group-hover:text-white">
+
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     class="h-6 w-6"
@@ -442,39 +522,68 @@
                                         d="M20 8h-3V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2v-8a2 2 0 00-2-2zM9 6h6v2H9V6zm3 5v2m-2-1h4"
                                     />
                                 </svg>
+
                             </div>
+
                         </div>
+
                     </a>
 
+
+
                     {{-- =================================================
-                        MEDICAL ALLOWANCE RECEIVED - CLICKABLE CARD
+                        NOT ELIGIBLE - 2026
                     ================================================== --}}
+
                     <a
                         href="{{ route('data-management.medical-allowance') }}"
-                        class="group block min-w-0 flex-1 cursor-pointer rounded-2xl bg-white p-4 sm:p-5 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:ring-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                        aria-label="View medical allowance records"
+                        class="group block min-w-0 cursor-pointer
+                            rounded-2xl bg-white p-4 shadow-sm
+                            ring-1 ring-gray-100
+                            transition duration-300
+                            hover:-translate-y-1
+                            hover:shadow-lg
+                            hover:ring-amber-200
+                            focus:outline-none
+                            focus:ring-2
+                            focus:ring-amber-500
+                            focus:ring-offset-2
+                            sm:p-5"
+                        aria-label="View Not Eligible medical allowance records"
                     >
-                        <div class="flex items-start justify-between gap-4 [&>div]:min-w-0">
+
+                        <div class="flex items-start justify-between gap-4">
+
                             <div class="min-w-0 flex-1">
-                                <p
-                                    class="text-sm font-medium text-gray-500 transition group-hover:text-red-600"
-                                >
-                                    Medical Allowance Received
+
+                                <p class="text-sm font-medium text-gray-500
+                                        transition group-hover:text-amber-700">
+                                    Not Eligible
                                 </p>
 
-                                <p class="mt-2 text-3xl font-bold text-red-600">
-                                    {{ number_format($numberOfDisbursement) }}
+                                <p class="mt-2 text-3xl font-bold
+                                        text-amber-700">
+                                    {{ number_format($notEligible) }}
                                 </p>
 
-                                <p class="mt-1 text-xs text-gray-400">
-                                    Personnel who have already received their medical allowance
+                                <p class="mt-1 text-xs leading-relaxed
+                                        text-gray-400">
+                                    Active Plantilla personnel marked
+                                    as not eligible for medical allowance
                                 </p>
+
                             </div>
 
-                            {{-- ICON --}}
-                            <div
-                                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600 transition group-hover:bg-red-600 group-hover:text-white"
-                            >
+
+                            {{-- NOT ELIGIBLE ICON --}}
+                            <div class="flex h-12 w-12 shrink-0
+                                        items-center justify-center
+                                        rounded-xl bg-amber-100
+                                        text-amber-700
+                                        transition duration-300
+                                        group-hover:bg-amber-600
+                                        group-hover:text-white">
+
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     class="h-6 w-6"
@@ -484,20 +593,29 @@
                                     stroke-width="1.8"
                                     aria-hidden="true"
                                 >
+                                    <circle
+                                        cx="12"
+                                        cy="12"
+                                        r="9"
+                                    />
+
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        d="M20 8h-3V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2v-8a2 2 0 00-2-2zM9 6h6v2H9V6zm3 5v2m-2-1h4"
+                                        d="M9 9l6 6m0-6l-6 6"
                                     />
                                 </svg>
+
                             </div>
+
                         </div>
+
                     </a>
 
                 </div>
 
-
             </div>
+
         @endif
         @if(auth()->user()->role === 'super_admin')
 

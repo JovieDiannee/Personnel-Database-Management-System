@@ -6,6 +6,7 @@ use App\Models\EmploymentStatus;
 use App\Models\MedicalAllowance;
 use App\Models\Report;
 use App\Models\SchoolDb;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -19,6 +20,7 @@ class DashboardController extends Controller
 
         $user = auth()->user();
 
+        abort_unless($user, 401);
 
         /*
         |--------------------------------------------------------------------------
@@ -32,40 +34,60 @@ class DashboardController extends Controller
             $adminSchoolId = $user->employmentStatus?->school_db_id;
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Inactive Warm Body Statuses
+        |--------------------------------------------------------------------------
+        */
+
+        $vacantStatuses = [
+            'Vacant (Retired)',
+            'Vacant (Resigned)',
+            'Vacant (Others)',
+        ];
 
         /*
         |--------------------------------------------------------------------------
-        | Employment Status Base Query
+        | Active, Non-Deleted Personnel
         |--------------------------------------------------------------------------
         |
-        | Dashboard personnel statistics should include ACTIVE personnel only.
+        | Assumes deleted employees are soft-deleted
+        | in the users table using deleted_at.
         |
-        | Excluded Warm Body Status:
-        | - Vacant (Retired)
-        | - Vacant (Resigned)
-        | - Vacant (Others)
+        | NULL warm body status is considered active.
         |
         */
 
         $employmentQuery = EmploymentStatus::query()
-            ->where(function ($query) {
 
-                $query->whereNull('employment_status.warm_body_status')
+            ->whereExists(function ($query) {
 
+                $query->selectRaw('1')
+                    ->from('users')
+                    ->whereColumn(
+                        'users.id',
+                        'employment_status.users_id'
+                    )
+                    ->whereNull('users.deleted_at');
+
+            })
+
+            ->where(function ($query) use ($vacantStatuses) {
+
+                $query
+                    ->whereNull(
+                        'employment_status.warm_body_status'
+                    )
                     ->orWhereNotIn(
                         'employment_status.warm_body_status',
-                        [
-                            'Vacant (Retired)',
-                            'Vacant (Resigned)',
-                            'Vacant (Others)',
-                        ]
+                        $vacantStatuses
                     );
-            });
 
+            });
 
         /*
         |--------------------------------------------------------------------------
-        | Restrict Employment Records for Admin
+        | Restrict Personnel to Admin School
         |--------------------------------------------------------------------------
         */
 
@@ -80,52 +102,45 @@ class DashboardController extends Controller
 
             } else {
 
-                /*
-                |--------------------------------------------------------------------------
-                | Admin Has No Assigned School
-                |--------------------------------------------------------------------------
-                */
-
                 $employmentQuery->whereRaw('1 = 0');
+
             }
         }
-
 
         /*
         |--------------------------------------------------------------------------
         | Plantilla-Based Employees
         |--------------------------------------------------------------------------
         |
-        | Count DISTINCT ACTIVE personnel with an assigned plantilla.
+        | Active + Non-Deleted + Assigned Plantilla Item
         |
         */
 
         $plantillaEmployees = (clone $employmentQuery)
-            ->whereNotNull('employment_status.plantilla_db_id')
-            ->distinct()
-            ->count('employment_status.users_id');
 
+            ->whereNotNull(
+                'employment_status.plantilla_db_id'
+            )
+
+            ->distinct()
+
+            ->count('employment_status.users_id');
 
         /*
         |--------------------------------------------------------------------------
         | Other Funds Employees
         |--------------------------------------------------------------------------
         |
-        | Count DISTINCT ACTIVE personnel without an assigned plantilla.
-        |
-        | Exclude employee ID 1000001 through:
-        |
-        | employment_status.users_id
-        |      -> basic_information.users_id
-        |
-        | basic_information.id
-        |      -> issued_id.basic_information_id
+        | Active + Non-Deleted + No Assigned Plantilla
+        | Exclude employee ID 1000001.
         |
         */
 
         $otherFundsEmployees = (clone $employmentQuery)
 
-            ->whereNull('employment_status.plantilla_db_id')
+            ->whereNull(
+                'employment_status.plantilla_db_id'
+            )
 
             ->whereNotExists(function ($query) {
 
@@ -149,12 +164,12 @@ class DashboardController extends Controller
                         'issued_id.employee_id',
                         '1000001'
                     );
+
             })
 
             ->distinct()
 
             ->count('employment_status.users_id');
-
 
         /*
         |--------------------------------------------------------------------------
@@ -165,84 +180,97 @@ class DashboardController extends Controller
         if ($user->role === 'admin') {
 
             $numberOfSchools = $adminSchoolId
-                ? SchoolDb::where('id', $adminSchoolId)->count()
+                ? SchoolDb::where(
+                    'id',
+                    $adminSchoolId
+                )->count()
                 : 0;
 
         } else {
 
             $numberOfSchools = SchoolDb::count();
-        }
 
+        }
 
         /*
         |--------------------------------------------------------------------------
         | Medical Allowance Base Query
         |--------------------------------------------------------------------------
         |
-        | Dashboard Medical Allowance statistics:
-        | - Year = 2026
-        | - Source of Fund = Plantilla
+        | Include only:
+        |
+        | 1. Year = 2026
+        | 2. Source of Fund = Plantilla
+        | 3. Non-deleted personnel
+        | 4. Admin's assigned school, if applicable
         |
         */
 
         $medicalQuery = MedicalAllowance::query()
 
-            /*
-            |--------------------------------------------------------------------------
-            | 2026 Records Only
-            |--------------------------------------------------------------------------
-            */
-
             ->where('year', 2026)
 
-            /*
-            |--------------------------------------------------------------------------
-            | Plantilla Personnel Only
-            |--------------------------------------------------------------------------
-            */
+            ->whereHas('user', function ($query) {
 
-            ->whereHas('user.employmentStatus', function ($query) {
+                $query->whereNull('users.deleted_at');
 
-                $query->where(
-                    'source_of_fund',
-                    'Plantilla'
-                );
-            });
+            })
 
+            ->whereHas(
+                'user.employmentStatus',
+                function ($query) use (
+                    $vacantStatuses,
+                    $user,
+                    $adminSchoolId
+                ) {
 
-        /*
-        |--------------------------------------------------------------------------
-        | Restrict Medical Allowance Records for Admin
-        |--------------------------------------------------------------------------
-        */
+                    $query->where(
+                        'source_of_fund',
+                        'Plantilla'
+                    );
 
-        if ($user->role === 'admin') {
+                    /*
+                    |----------------------------------------------
+                    | Active Personnel Only
+                    |----------------------------------------------
+                    */
 
-            if ($adminSchoolId) {
+                    // $query->where(
+                    //     function ($subQuery) use ($vacantStatuses) {
 
-                $medicalQuery->whereHas(
-                    'user.employmentStatus',
-                    function ($query) use ($adminSchoolId) {
+                    //         $subQuery
+                    //             ->whereNull('warm_body_status')
+                    //             ->orWhereNotIn(
+                    //                 'warm_body_status',
+                    //                 $vacantStatuses
+                    //             );
 
-                        $query->where(
-                            'school_db_id',
-                            $adminSchoolId
-                        );
+                    //     }
+                    // );
+
+                    /*
+                    |----------------------------------------------
+                    | Admin School Restriction
+                    |----------------------------------------------
+                    */
+
+                    if ($user->role === 'admin') {
+
+                        if ($adminSchoolId) {
+
+                            $query->where(
+                                'school_db_id',
+                                $adminSchoolId
+                            );
+
+                        } else {
+
+                            $query->whereRaw('1 = 0');
+
+                        }
                     }
-                );
-
-            } else {
-
-                /*
-                |--------------------------------------------------------------------------
-                | Admin Has No Assigned School
-                |--------------------------------------------------------------------------
-                */
-
-                $medicalQuery->whereRaw('1 = 0');
-            }
-        }
-
+                }
+            );
 
         /*
         |--------------------------------------------------------------------------
@@ -251,12 +279,15 @@ class DashboardController extends Controller
         */
 
         $groupAvailment = (clone $medicalQuery)
+
             ->where(
                 'mode_of_availment',
                 'Group Availment (HMO)'
             )
-            ->count();
 
+            ->distinct()
+
+            ->count('users_id');
 
         /*
         |--------------------------------------------------------------------------
@@ -265,38 +296,44 @@ class DashboardController extends Controller
         */
 
         $individualAvailment = (clone $medicalQuery)
+
             ->where(
                 'mode_of_availment',
                 'Individual Availment (HMO)'
             )
-            ->count();
 
+            ->distinct()
+
+            ->count('users_id');
 
         /*
         |--------------------------------------------------------------------------
-        | Medical Allowance Received / Disbursed - 2026
+        | Not Eligible - 2026
         |--------------------------------------------------------------------------
+        |
+        | Assumes Not Eligible is stored as an exact
+        | mode_of_availment value.
+        |
         */
 
-        $numberOfDisbursement = (clone $medicalQuery)
-            ->where(
-                'disbursement_status',
-                'Disbursed'
-            )
-            ->count();
+        $notEligible = (clone $medicalQuery)
 
+            ->where(
+                'mode_of_availment',
+                'Not Eligible'
+            )
+
+            ->distinct()
+
+            ->count('users_id');
 
         /*
         |--------------------------------------------------------------------------
         | HR Transactions
         |--------------------------------------------------------------------------
-        |
-        | Temporary until the HR Transactions model/table is connected.
-        |
         */
 
         $hrTransactions = 3110;
-
 
         /*
         |--------------------------------------------------------------------------
@@ -311,7 +348,6 @@ class DashboardController extends Controller
             ->latest('id')
             ->first();
 
-
         /*
         |--------------------------------------------------------------------------
         | Return Dashboard
@@ -325,7 +361,7 @@ class DashboardController extends Controller
             'hrTransactions',
             'groupAvailment',
             'individualAvailment',
-            'numberOfDisbursement',
+            'notEligible',
             'medicalReport'
         ));
     }
