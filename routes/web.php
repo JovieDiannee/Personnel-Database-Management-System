@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AddPersonnelRequestController;
 use App\Http\Controllers\EmployeeTrashController;
+use App\Http\Controllers\PersonnelExportController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -161,6 +162,13 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('data-management/reports
         Route::patch('/submissions/{submission}/revert-validation',[ReportController::class, 'revertValidation'])->name('reports.revert-validation');
         Route::get('/submissions/export',[ReportController::class, 'exportSubmissions'])->name('reports.submissions.export');
         
+        // ============================================================
+        // EXPORT DATA
+        // ============================================================
+
+        Route::get('/export-data',[PersonnelExportController::class, 'index'])->name('data-management.reports.export-data');
+        Route::post('/export-data/download',[PersonnelExportController::class, 'download'])->name('data-management.reports.export-data.download');
+
 });
 
 // ============================================================

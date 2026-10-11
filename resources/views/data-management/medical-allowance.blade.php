@@ -745,8 +745,8 @@
                 <div
                     class="grid gap-2"
                     style="
-                        grid-template-columns: repeat(9, minmax(125px, 1fr));
-                        min-width: 1150px;
+                        grid-template-columns: repeat(10, minmax(140px, 1fr));
+                        min-width: 1480px;
                     "
                 >
 
@@ -848,51 +848,78 @@
                         </p>
                     </a>
 
-
+                    
                     {{-- ================================================= --}}
-                    {{-- CHANGED --}}
+                    {{-- GROUP CURRENT YEAR --}}
                     {{-- ================================================= --}}
 
                     <a
                         href="{{ request()->fullUrlWithQuery([
-                            'filter' => 'changed',
+                            'filter' => 'group_current',
                             'page' => 1
                         ]) }}#medical-allowance-table"
                         class="min-w-0 rounded-lg border px-3 py-2.5 transition
-                            {{ $filter === 'changed'
+                            {{ $filter === 'group_current'
                                 ? 'border-blue-300 bg-blue-50 shadow-sm'
                                 : 'border-gray-200 bg-white hover:border-blue-300' }}"
                     >
-                        <p class="truncate text-[10px] font-semibold uppercase text-blue-600">
-                            Changed
+                        <p class="text-[10px] font-semibold uppercase text-blue-600"
+                        title="Group Current Year">
+                            Group <br>Current Year
                         </p>
 
                         <p class="mt-1 text-lg font-bold text-blue-700">
-                            {{ number_format($summary['changed'] ?? 0) }}
+                            {{ number_format($summary['group_current'] ?? 0) }}
                         </p>
                     </a>
 
 
                     {{-- ================================================= --}}
-                    {{-- NO CHANGES --}}
+                    {{-- INDIVIDUAL CURRENT YEAR --}}
                     {{-- ================================================= --}}
 
                     <a
                         href="{{ request()->fullUrlWithQuery([
-                            'filter' => 'no_change',
+                            'filter' => 'individual_current',
                             'page' => 1
                         ]) }}#medical-allowance-table"
                         class="min-w-0 rounded-lg border px-3 py-2.5 transition
-                            {{ $filter === 'no_change'
-                                ? 'border-gray-400 bg-gray-100 shadow-sm'
-                                : 'border-gray-200 bg-white hover:border-gray-300' }}"
+                            {{ $filter === 'individual_current'
+                                ? 'border-teal-300 bg-teal-50 shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-teal-300' }}"
                     >
-                        <p class="truncate text-[10px] font-semibold uppercase text-gray-500">
-                            No Changes
+                        <p class="text-[10px] font-semibold uppercase text-teal-600"
+                        title="Individual Current Year">
+                            Individual <br>Current Year
                         </p>
 
-                        <p class="mt-1 text-lg font-bold text-gray-700">
-                            {{ number_format($summary['no_change'] ?? 0) }}
+                        <p class="mt-1 text-lg font-bold text-teal-700">
+                            {{ number_format($summary['individual_current'] ?? 0) }}
+                        </p>
+                    </a>
+
+
+                    {{-- ================================================= --}}
+                    {{-- NOT ELIGIBLE --}}
+                    {{-- ================================================= --}}
+
+                    <a
+                        href="{{ request()->fullUrlWithQuery([
+                            'filter' => 'not_eligible',
+                            'page' => 1
+                        ]) }}#medical-allowance-table"
+                        class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                            {{ $filter === 'not_eligible'
+                                ? 'border-red-300 bg-red-50 shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-red-300' }}"
+                    >
+                        <p class="text-[10px] font-semibold uppercase text-red-600"
+                        title="Not Eligible">
+                            Not Eligible<br>Current Year
+                        </p>
+
+                        <p class="mt-1 text-lg font-bold text-red-700">
+                            {{ number_format($summary['not_eligible'] ?? 0) }}
                         </p>
                     </a>
 

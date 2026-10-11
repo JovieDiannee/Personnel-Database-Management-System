@@ -1763,7 +1763,7 @@
 
                 x-data="{ reportsOpen: {{ $reportsActive ? 'true' : 'false' }} }"
 
-            >
+                >
 
                 {{-- MAIN BUTTON --}}
 
@@ -1993,14 +1993,39 @@
 
                     </a>
 
+                    
+                    {{-- =================================================
+                        EXPORT DATA
+                    ================================================== --}}
+
+                    <a
+                        href="{{ route('data-management.reports.export-data') }}"
+
+                        @if(request()->routeIs('data-management.reports.export-data*'))
+                            aria-current="page"
+                        @endif
+
+                        class="block rounded-lg px-3 py-1.5 text-sm transition
+                            {{ request()->routeIs('data-management.reports.export-data*')
+                                ? 'bg-green-50 font-semibold text-green-800'
+                                : 'text-gray-500 hover:bg-green-50 hover:text-green-700'
+                            }}"
+                    >
+                        Export Data
+                    </a>
+
                 </div>
 
             </div>
 
         @endif
 
-        {{-- DANGER ZONE: visible to super_admin and admin. --}}
+        {{-- =================================================
 
+            DANGER ZONE: visible to super_admin and admin.
+
+        ================================================== --}}
+        
         @if(in_array(auth()->user()?->role, ['super_admin', 'admin'], true))
 
             @php

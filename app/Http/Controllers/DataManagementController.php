@@ -7495,7 +7495,7 @@ class DataManagementController extends Controller
     */
 
     public function medicalAllowance(Request $request): \Illuminate\View\View
-    {
+    { 
         /*
         |--------------------------------------------------------------------------
         | AUTHENTICATED USER
@@ -7559,9 +7559,10 @@ class DataManagementController extends Controller
             'active',
             'inactive',
 
-            // Medical Allowance Comparison
-            'changed',
-            'no_change',
+            // Medical Allowance
+            'group_current',
+            'individual_current',
+            'not_eligible',
             'new',
 
             // Validation
@@ -8311,52 +8312,51 @@ class DataManagementController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | CHANGED
+            | GROUP CURRENT YEAR
             |--------------------------------------------------------------------------
             */
 
-            case 'changed':
+            case 'group_current':
 
-                $baseQuery
-                    ->whereNotNull(
-                        'previous_medical.id'
-                    )
-
-                    ->whereNotNull(
-                        'current_medical.id'
-                    )
-
-                    ->whereColumn(
-                        'previous_medical.mode_of_availment',
-                        '<>',
-                        'current_medical.mode_of_availment'
-                    );
+                $baseQuery->where(
+                    'current_medical.mode_of_availment',
+                    'Group Availment (HMO)'
+                );
 
                 break;
 
 
             /*
             |--------------------------------------------------------------------------
-            | NO CHANGE
+            | INDIVIDUAL CURRENT YEAR
             |--------------------------------------------------------------------------
             */
 
-            case 'no_change':
+            case 'individual_current':
 
-                $baseQuery
-                    ->whereNotNull(
-                        'previous_medical.id'
-                    )
+                $baseQuery->whereIn(
+                    'current_medical.mode_of_availment',
+                    [
+                        'Individual Availment (HMO)',
+                        'Individual Availment (Medical Expenses)',
+                    ]
+                );
 
-                    ->whereNotNull(
-                        'current_medical.id'
-                    )
+                break;
 
-                    ->whereColumn(
-                        'previous_medical.mode_of_availment',
-                        '=',
-                        'current_medical.mode_of_availment'
-                    );
+
+            /*
+            |--------------------------------------------------------------------------
+            | NOT ELIGIBLE
+            |--------------------------------------------------------------------------
+            */
+
+            case 'not_eligible':
+
+                $baseQuery->where(
+                    'current_medical.mode_of_availment',
+                    'Not Eligible'
+                );
 
                 break;
 
@@ -8824,46 +8824,46 @@ class DataManagementController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | CHANGED
+                | GROUP AVAILMENT
                 |--------------------------------------------------------------------------
                 */
 
                 COUNT(
                     DISTINCT CASE
-
-                        WHEN previous_medical.id IS NOT NULL
-
-                        AND current_medical.id IS NOT NULL
-
-                        AND previous_medical.mode_of_availment
-                            <> current_medical.mode_of_availment
-
+                        WHEN current_medical.mode_of_availment =
+                            'Group Availment (HMO)'
                         THEN users.id
-
                     END
-                ) AS changed,
-
+                ) AS group_current,
 
                 /*
                 |--------------------------------------------------------------------------
-                | NO CHANGE
+                | INDIVIDUAL AVAILMENT
                 |--------------------------------------------------------------------------
                 */
 
                 COUNT(
                     DISTINCT CASE
-
-                        WHEN previous_medical.id IS NOT NULL
-
-                        AND current_medical.id IS NOT NULL
-
-                        AND previous_medical.mode_of_availment
-                            = current_medical.mode_of_availment
-
+                        WHEN current_medical.mode_of_availment IN (
+                            'Individual Availment (HMO)',
+                            'Individual Availment (Medical Expenses)'
+                        )
                         THEN users.id
-
                     END
-                ) AS no_change,
+                ) AS individual_current,
+
+                /*
+                |--------------------------------------------------------------------------
+                | NOT ELIGIBLE
+                |--------------------------------------------------------------------------
+                */
+
+                COUNT(
+                    DISTINCT CASE
+                        WHEN current_medical.mode_of_availment = 'Not Eligible'
+                        THEN users.id
+                    END
+                ) AS not_eligible,
 
 
                 /*
@@ -8959,12 +8959,16 @@ class DataManagementController extends Controller
                 $summaryRow->inactive ?? 0
             ),
 
-            'changed' => (int) (
-                $summaryRow->changed ?? 0
+            'group_current' => (int) (
+                $summaryRow->group_current ?? 0
             ),
 
-            'no_change' => (int) (
-                $summaryRow->no_change ?? 0
+            'individual_current' => (int) (
+                $summaryRow->individual_current ?? 0
+            ),
+
+            'not_eligible' => (int) (
+                $summaryRow->not_eligible ?? 0
             ),
 
             'new' => (int) (
