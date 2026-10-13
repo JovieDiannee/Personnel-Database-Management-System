@@ -437,7 +437,74 @@
                 SUPER ADMIN RECORDS
             ====================================================== --}}
 
-            @if($isSuperAdmin)
+            @if($employeeTab === 'no_employment')
+                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                    <div class="bg-green-800 px-5 py-4 text-white">
+                        <h2 class="text-xl font-semibold">No Employment Details</h2>
+                        <p class="mt-1 text-sm text-green-100">Employees without an employment status record.</p>
+                    </div>
+                    <div class="border-b border-gray-200 px-4 py-3">
+                        <div class="inline-flex flex-wrap rounded-lg border border-gray-200 bg-gray-100 p-1">
+                            @foreach(['active' => 'Active Employees', 'inactive' => 'Inactive Employees', 'no_employment' => 'No Employment Details'] as $tabValue => $tabLabel)
+                                <a href="{{ route('data-management.employment-status', array_filter(['status' => $tabValue, 'search' => $search ?: null])) }}"
+                                   class="inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold {{ $employeeTab === $tabValue ? 'bg-white text-amber-700 shadow-sm' : 'text-gray-500 hover:bg-white/60 hover:text-gray-700' }}">
+                                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
+                                        @if($tabValue === 'active')
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        @elseif($tabValue === 'inactive')
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                        @else
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        @endif
+                                    </svg>
+                                    {{ $tabLabel }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                    <form action="{{ route('data-management.employment-status') }}" method="GET" class="border-b border-gray-200 p-4">
+                        <input type="hidden" name="status" value="no_employment">
+                        <label for="missing-employment-search" class="mb-2 block text-sm font-semibold text-gray-700">Search No Employment Details</label>
+                        <div class="flex flex-col gap-2 sm:flex-row">
+                            <input id="missing-employment-search" name="search" value="{{ $search }}" placeholder="Search employee name or email..." class="min-h-10 min-w-0 flex-1 rounded-lg border-gray-300 text-sm focus:border-green-600 focus:ring-green-600">
+                            <button type="submit" class="rounded-lg bg-green-700 px-5 py-2 text-sm font-semibold text-white hover:bg-green-800">Search</button>
+                            @if($search !== '')
+                                <a href="{{ route('data-management.employment-status', ['status' => 'no_employment']) }}" class="rounded-lg border border-gray-300 px-4 py-2 text-center text-sm font-semibold text-gray-700">Clear</a>
+                            @endif
+                        </div>
+                    </form>
+                    @if($isAdmin && ! $isSuperAdmin)
+                        <p class="border-b border-gray-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">Employees without employment details have no school assignment and can only be viewed by a Super Admin.</p>
+                    @endif
+                    <div class="overflow-x-auto">
+                        <table class="w-full divide-y divide-gray-200 text-left text-sm">
+                            <thead class="bg-gray-50 text-gray-700">
+                                <tr><th class="px-4 py-3">No.</th><th class="px-4 py-3">Employee</th><th class="px-4 py-3">Email</th><th class="px-4 py-3">Employment Details</th></tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @forelse($employeesWithoutEmployment as $employee)
+                                    @php
+                                        $basic = $employee->basicInformation;
+                                        $name = trim(implode(' ', array_filter([$basic?->first_name, $basic?->middle_name, $basic?->last_name, $basic?->extension_name])));
+                                    @endphp
+                                    <tr class="hover:bg-green-50/30">
+                                        <td class="px-4 py-4 text-gray-500">{{ $employeesWithoutEmployment->firstItem() + $loop->index }}</td>
+                                        <td class="px-4 py-4 font-semibold text-gray-800">{{ $name ?: '—' }}</td>
+                                        <td class="px-4 py-4 text-gray-600">{{ $employee->email ?? '—' }}</td>
+                                        <td class="px-4 py-4"><span class="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">No Employment Details</span></td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="4" class="px-6 py-12 text-center text-gray-500">No employees without employment details found{{ $search !== '' ? ' matching your search' : '' }}.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="border-t border-gray-200 px-4 py-4">
+                        <p class="mb-3 text-sm text-gray-500">{{ $employeesWithoutEmployment->total() }} employee(s)</p>
+                        {{ $employeesWithoutEmployment->withQueryString()->links() }}
+                    </div>
+                </div>
+            @elseif($isSuperAdmin)
 
                 <div
                     class="min-w-0 overflow-hidden rounded-xl
@@ -471,7 +538,7 @@
                     <div class="border-b border-gray-200 bg-white px-4 py-3 sm:px-5">
 
                         <div
-                            class="inline-flex rounded-lg border border-gray-200
+                            class="inline-flex flex-wrap rounded-lg border border-gray-200
                                 bg-gray-100 p-1"
                         >
 
@@ -551,6 +618,15 @@
                                 Inactive Employees
 
                             </a>
+
+                            <a href="{{ route('data-management.employment-status', array_filter(['status' => 'no_employment', 'search' => $search ?: null])) }}"
+                               class="inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all {{ $employeeTab === 'no_employment' ? 'bg-white text-amber-700 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:bg-white/60 hover:text-gray-700' }}">
+                                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                No Employment Details
+                            </a>
+
 
                         </div>
 
@@ -1446,7 +1522,7 @@
                     <div class="border-b border-gray-200 bg-white px-4 py-3 sm:px-5">
 
                         <div
-                            class="inline-flex rounded-lg border border-gray-200
+                            class="inline-flex flex-wrap rounded-lg border border-gray-200
                                 bg-gray-100 p-1"
                         >
 
@@ -1526,6 +1602,15 @@
                                 Inactive Employees
 
                             </a>
+
+                            <a href="{{ route('data-management.employment-status', array_filter(['status' => 'no_employment', 'search' => $search ?: null])) }}"
+                               class="inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all {{ $employeeTab === 'no_employment' ? 'bg-white text-amber-700 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:bg-white/60 hover:text-gray-700' }}">
+                                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                No Employment Details
+                            </a>
+
 
                         </div>
 
