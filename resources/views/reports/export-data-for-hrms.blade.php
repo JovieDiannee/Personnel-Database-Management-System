@@ -29,7 +29,7 @@
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                     <div>
                         <label for="school_db_id" class="mb-1 block text-sm font-semibold text-gray-700">School</label>
-                        <select id="school_db_id" name="school_db_id" class="w-full rounded-lg border-gray-300 text-sm">
+                        <select id="school_db_id" name="school_db_id" class="w-full rounded-lg border-gray-300 text-sm searchable-dropdown" data-placeholder="Search and select school...">
                             <option value="">All Schools</option>
                             @foreach($schools as $school)
                                 <option value="{{ $school->id }}" @selected((string) ($filters['school_db_id'] ?? '') === (string) $school->id)>
@@ -40,7 +40,7 @@
                     </div>
                     <div>
                         <label for="school_district" class="mb-1 block text-sm font-semibold text-gray-700">District</label>
-                        <select id="school_district" name="school_district" class="w-full rounded-lg border-gray-300 text-sm">
+                        <select id="school_district" name="school_district" class="w-full rounded-lg border-gray-300 text-sm searchable-dropdown" data-placeholder="Search and select district...">
                             <option value="">All Districts</option>
                             @foreach($districts as $district)
                                 <option value="{{ $district }}" @selected(($filters['school_district'] ?? '') === $district)>{{ $district }}</option>
@@ -49,7 +49,7 @@
                     </div>
                     <div>
                         <label for="school_area" class="mb-1 block text-sm font-semibold text-gray-700">Area</label>
-                        <select id="school_area" name="school_area" class="w-full rounded-lg border-gray-300 text-sm">
+                        <select id="school_area" name="school_area" class="w-full rounded-lg border-gray-300 text-sm searchable-dropdown" data-placeholder="Search and select area...">
                             <option value="">All Areas</option>
                             @foreach($areas as $area)
                                 <option value="{{ $area }}" @selected(($filters['school_area'] ?? '') === $area)>{{ $area }}</option>
