@@ -479,7 +479,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full divide-y divide-gray-200 text-left text-sm">
                             <thead class="bg-gray-50 text-gray-700">
-                                <tr><th class="px-4 py-3">No.</th><th class="px-4 py-3">Employee</th><th class="px-4 py-3">Email</th><th class="px-4 py-3">Employment Details</th></tr>
+                                <tr><th class="px-4 py-3">No.</th><th class="px-4 py-3">Employee</th><th class="px-4 py-3">Email</th><th class="px-4 py-3">Employment Details</th><th class="px-4 py-3 text-center">Profile</th></tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 @forelse($employeesWithoutEmployment as $employee)
@@ -492,9 +492,20 @@
                                         <td class="px-4 py-4 font-semibold text-gray-800">{{ $name ?: '—' }}</td>
                                         <td class="px-4 py-4 text-gray-600">{{ $employee->email ?? '—' }}</td>
                                         <td class="px-4 py-4"><span class="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">No Employment Details</span></td>
+                                        <td class="px-4 py-4 text-center">
+                                            @if($basic)
+                                                <a href="{{ route('data-management.personnel.edit', $basic->id) }}" class="inline-flex min-h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-green-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                                                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-2a8 8 0 0 1 16 0v2" /></svg>
+                                                    Profile
+                                                </a>
+                                            @else
+                                                <span class="text-gray-400">—</span>
+                                            @endif
+                                        </td>
+
                                     </tr>
                                 @empty
-                                    <tr><td colspan="4" class="px-6 py-12 text-center text-gray-500">No employees without employment details found{{ $search !== '' ? ' matching your search' : '' }}.</td></tr>
+                                    <tr><td colspan="6" class="px-6 py-12 text-center text-gray-500">No employees without employment details found{{ $search !== '' ? ' matching your search' : '' }}.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -1222,23 +1233,9 @@
 
                                             @if($basic)
 
-                                                <a
-                                                    href="{{ route(
-                                                        'data-management.personnel.edit',
-                                                        $basic->id
-                                                    ) }}"
-                                                    title="Update Profile Information"
-                                                    class="inline-flex h-8 items-center
-                                                           justify-center rounded-md
-                                                           bg-green-700 px-2.5
-                                                           text-xs font-semibold
-                                                           text-white shadow-sm
-                                                           transition hover:bg-green-800
-                                                           focus:outline-none
-                                                           focus:ring-2
-                                                           focus:ring-green-500"
-                                                >
-                                                    Update
+                                                <a href="{{ route('data-management.personnel.edit', $basic->id) }}" class="inline-flex min-h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-green-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                                                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-2a8 8 0 0 1 16 0v2" /></svg>
+                                                    Profile
                                                 </a>
 
                                             @else
@@ -1265,24 +1262,10 @@
                                                    align-middle"
                                         >
 
-                                            <a
-                                                href="{{ route(
-                                                    'data-management.employment-status.edit',
-                                                    $record->id
-                                                ) }}"
-                                                title="Update Employment & Deployment Status"
-                                                class="inline-flex h-8 items-center
-                                                       justify-center rounded-md
-                                                       bg-green-700 px-2.5
-                                                       text-xs font-semibold
-                                                       text-white shadow-sm
-                                                       transition hover:bg-green-800
-                                                       focus:outline-none
-                                                       focus:ring-2
-                                                       focus:ring-green-500"
-                                            >
-                                                Update
-                                            </a>
+                                            <a href="{{ route('data-management.employment-status.edit', $record->id) }}" class="inline-flex min-h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-green-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                                                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6V4h6v2M3 10h18M9 10v3h6v-3M5 6h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" /></svg>
+                                                    Employment
+                                                </a>
 
                                         </td>
 
@@ -1965,19 +1948,9 @@
 
                                             @if($basic)
 
-                                                <a
-                                                    href="{{ route(
-                                                        'data-management.personnel.edit',
-                                                        $basic->id
-                                                    ) }}"
-                                                    class="inline-flex h-8 items-center
-                                                           justify-center rounded-md
-                                                           bg-green-700 px-2.5
-                                                           text-xs font-semibold
-                                                           text-white shadow-sm
-                                                           transition hover:bg-green-800"
-                                                >
-                                                    Update
+                                                <a href="{{ route('data-management.personnel.edit', $basic->id) }}" class="inline-flex min-h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-green-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                                                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-2a8 8 0 0 1 16 0v2" /></svg>
+                                                    Profile
                                                 </a>
 
                                             @else
@@ -2002,20 +1975,10 @@
                                                    align-middle"
                                         >
 
-                                            <a
-                                                href="{{ route(
-                                                    $editRouteName,
-                                                    $record->id
-                                                ) }}"
-                                                class="inline-flex h-8 items-center
-                                                       justify-center rounded-md
-                                                       bg-green-700 px-2.5
-                                                       text-xs font-semibold
-                                                       text-white shadow-sm
-                                                       transition hover:bg-green-800"
-                                            >
-                                                Update
-                                            </a>
+                                            <a href="{{ route($editRouteName, $record->id) }}" class="inline-flex min-h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-green-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                                                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6V4h6v2M3 10h18M9 10v3h6v-3M5 6h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" /></svg>
+                                                    Employment
+                                                </a>
 
                                         </td>
 

@@ -2106,34 +2106,35 @@ class DataManagementController extends Controller
         | Logged-in User and Allowed Roles
         |--------------------------------------------------------------------------
         */
-
         $loggedInUser = $request->user();
-
         abort_unless($loggedInUser, 401);
-
         abort_unless(
             in_array($loggedInUser->role, ['super_admin', 'admin'], true),
             403,
             'You are not authorized to update personnel.'
         );
-
         /*
         |--------------------------------------------------------------------------
         | Personnel and Employment Record
         |--------------------------------------------------------------------------
         */
-
         $person = \App\Models\BasicInformation::query()
-            ->whereHas('user')
+            ->whereHas('user', function ($query) {
+                $query->whereNull('deleted_at');
+            })
             ->with([
                 'user',
                 'issuedId',
                 'employmentStatus',
             ])
             ->findOrFail($id);
-
         $record = $person->employmentStatus;
-
+        $addEmployment = $request->boolean('add_employment');
+        $saveEmployment = (bool) $record || $addEmployment;
+        if ($addEmployment && ! $record) {
+            abort_unless($loggedInUser->role === 'super_admin', 403,
+                'Only Super Admins may add employment for personnel without a school assignment.');
+        }
         /*
         |--------------------------------------------------------------------------
         | Admin Access Check
@@ -2143,22 +2144,18 @@ class DataManagementController extends Controller
         | Admin can change school assignment but cannot assign Division Office.
         |
         */
-
         $checkAdminAccess = function ($employmentRecord) use ($loggedInUser) {
             if ($loggedInUser->role !== 'admin') {
                 return;
             }
-
             $adminSchoolId = $loggedInUser
                 ->employmentStatus()
                 ->value('school_db_id');
-
             abort_unless(
                 $adminSchoolId,
                 403,
                 'Your account does not have a valid school assignment.'
             );
-
             abort_unless(
                 $employmentRecord
                     && (int) $employmentRecord->school_db_id
@@ -2166,16 +2163,13 @@ class DataManagementController extends Controller
                 403,
                 'This employee is not currently assigned to your school.'
             );
-
             abort_if(
                 ! empty($employmentRecord->office_unit_id),
                 403,
                 'School administrators cannot modify Division Office personnel.'
             );
         };
-
         $checkAdminAccess($record);
-
         if ($loggedInUser->role === 'admin') {
             abort_if(
                 $request->filled('office_unit_id')
@@ -2184,13 +2178,11 @@ class DataManagementController extends Controller
                 'You are not authorized to assign personnel to a Division Office unit.'
             );
         }
-
         /*
         |--------------------------------------------------------------------------
         | Fields Per Table
         |--------------------------------------------------------------------------
         */
-
         $basicFields = [
             'first_name',
             'middle_name',
@@ -2210,7 +2202,6 @@ class DataManagementController extends Controller
             'telephone_number',
             'specialization',
         ];
-
         $issuedIdFields = [
             'umid_no',
             'gsis_no',
@@ -2220,7 +2211,6 @@ class DataManagementController extends Controller
             'philhealth_no',
             'employee_id',
         ];
-
         $addressFields = [
             'type',
             'street',
@@ -2230,7 +2220,6 @@ class DataManagementController extends Controller
             'province',
             'zip_postal',
         ];
-
         $employmentFields = [
             'date_of_original_appointment',
             'date_of_last_promotion',
@@ -2241,13 +2230,11 @@ class DataManagementController extends Controller
             'monthly_salary',
             'contract_duration',
         ];
-
         /*
         |--------------------------------------------------------------------------
         | Personnel Validation
         |--------------------------------------------------------------------------
         */
-
         $citizenshipModeRules = [
             'sometimes',
             'nullable',
@@ -2256,8 +2243,8 @@ class DataManagementController extends Controller
                 'By Naturalization',
             ]),
         ];
-
         $rules = [
+            'add_employment' => ['sometimes', 'boolean'],
             'email' => [
                 'required',
                 'email',
@@ -2267,32 +2254,27 @@ class DataManagementController extends Controller
                     'email'
                 )->ignore($person->user),
             ],
-
             'first_name' => ['required', 'string', 'max:255'],
             'middle_name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'extension_name' => ['sometimes', 'nullable', 'string', 'max:50'],
-
             'sex' => [
                 'sometimes',
                 'nullable',
                 \Illuminate\Validation\Rule::in(['Male', 'Female']),
             ],
-
             'birth_place' => [
                 'sometimes',
                 'nullable',
                 'string',
                 'max:255',
             ],
-
             'birth_date' => [
                 'sometimes',
                 'nullable',
                 'date_format:Y-m-d',
                 'before_or_equal:today',
             ],
-
             'civil_status' => [
                 'sometimes',
                 'nullable',
@@ -2305,17 +2287,13 @@ class DataManagementController extends Controller
                     'Others',
                 ]),
             ],
-
             'religion' => ['sometimes', 'nullable', 'string', 'max:100'],
             'citizenship' => ['sometimes', 'nullable', 'string', 'max:100'],
-
             // Support both the combined form and the original field name.
             'citizenship_mode' => $citizenshipModeRules,
             'mode_of_citizenship' => $citizenshipModeRules,
-
             'height_m' => ['sometimes', 'nullable', 'numeric', 'gt:0'],
             'weight_kg' => ['sometimes', 'nullable', 'numeric', 'gt:0'],
-
             'blood_type' => [
                 'sometimes',
                 'nullable',
@@ -2324,34 +2302,28 @@ class DataManagementController extends Controller
                     'AB+', 'AB-', 'O+', 'O-', 'Unknown',
                 ]),
             ],
-
             'mobile_number' => [
                 'sometimes',
                 'nullable',
                 'string',
                 'max:50',
             ],
-
             'telephone_number' => [
                 'sometimes',
                 'nullable',
                 'string',
                 'max:50',
             ],
-
             'specialization' => [
                 'sometimes',
                 'nullable',
                 'string',
                 'max:255',
             ],
-
             'addresses' => ['sometimes', 'array'],
-
             'addresses.*' => [
                 'array:id,type,street,brgy,subd_village,municipality_city,province,zip_postal',
             ],
-
             'addresses.*.id' => [
                 'required',
                 'integer',
@@ -2365,7 +2337,6 @@ class DataManagementController extends Controller
                     ),
             ],
         ];
-
         foreach ($issuedIdFields as $field) {
             $rules[$field] = [
                 'sometimes',
@@ -2374,7 +2345,6 @@ class DataManagementController extends Controller
                 'max:255',
             ];
         }
-
         foreach ($addressFields as $field) {
             $rules["addresses.*.$field"] = [
                 'sometimes',
@@ -2383,7 +2353,6 @@ class DataManagementController extends Controller
                 'max:255',
             ];
         }
-
         $rules['addresses.*.type'] = [
             'required',
             'string',
@@ -2392,22 +2361,19 @@ class DataManagementController extends Controller
                 'residential',
             ]),
         ];
-
         /*
         |--------------------------------------------------------------------------
         | Employment Validation
         |--------------------------------------------------------------------------
         |
-        | The combined Blade hides employment fields when no record exists.
+        | Employment is saved when a record exists or Add Employment Status is selected.
         | In that case, allow personnel information to be saved independently.
         |
         */
-
-        if ($record) {
+        if ($saveEmployment) {
             $effectiveSourceOfFund = $request->exists('source_of_fund')
                 ? $request->input('source_of_fund')
-                : $record->source_of_fund;
-
+                : $record?->source_of_fund;
             $rules = array_merge($rules, [
                 'item_number' => [
                     \Illuminate\Validation\Rule::requiredIf(
@@ -2421,54 +2387,45 @@ class DataManagementController extends Controller
                         'item_number'
                     ),
                 ],
-
                 'date_of_original_appointment' => [
                     'sometimes',
                     'nullable',
                     'date_format:Y-m-d',
                 ],
-
                 'date_of_last_promotion' => [
                     'sometimes',
                     'nullable',
                     'date_format:Y-m-d',
                 ],
-
                 'employment_status' => [
                     'sometimes',
                     'nullable',
                     'string',
                     'max:100',
                 ],
-
                 'warm_body_status' => [
                     'sometimes',
                     'nullable',
                     'string',
                     'max:100',
                 ],
-
                 'nature_of_work' => [
                     'sometimes',
                     'nullable',
                     'string',
                     'max:100',
                 ],
-
                 'source_of_fund' => [
-                    'sometimes',
-                    'nullable',
+                    'required',
                     'string',
                     'max:100',
                 ],
-
                 'monthly_salary' => [
                     'sometimes',
                     'nullable',
                     'numeric',
                     'min:0',
                 ],
-
                 'contract_duration' => [
                     'sometimes',
                     'nullable',
@@ -2476,7 +2433,6 @@ class DataManagementController extends Controller
                     'max:255',
                 ],
             ]);
-
             if ($loggedInUser->role === 'super_admin') {
                 $rules['personnel_assignment'] = [
                     'required',
@@ -2485,7 +2441,6 @@ class DataManagementController extends Controller
                         'division_office',
                     ]),
                 ];
-
                 $rules['school_id'] = [
                     'exclude_unless:personnel_assignment,school_based',
                     'required',
@@ -2496,7 +2451,6 @@ class DataManagementController extends Controller
                         'school_id'
                     ),
                 ];
-
                 $rules['office_unit_id'] = [
                     'exclude_unless:personnel_assignment,division_office',
                     'required',
@@ -2520,55 +2474,45 @@ class DataManagementController extends Controller
                 ];
             }
         }
-
         $validated = $request->validate($rules, [
+            'source_of_fund.required' => 'Please select the Source of Fund.',
             'personnel_assignment.required' =>
                 'Please select the personnel assignment type.',
-
             'personnel_assignment.in' =>
                 'The selected personnel assignment type is invalid.',
-
             'school_id.required' =>
                 'Please select the school where the employee will be assigned.',
-
             'school_id.exists' =>
                 'The selected school was not found.',
-
             'office_unit_id.required' =>
                 'Please select the Division Office unit.',
-
             'office_unit_id.exists' =>
                 'The selected Division Office unit was not found or is inactive.',
-
             'item_number.required' =>
                 'A Plantilla Item Number is required when Source of Fund is Plantilla.',
-
             'item_number.exists' =>
                 'The selected Plantilla Item Number was not found.',
         ]);
-
         /*
         |--------------------------------------------------------------------------
         | Map Form Field to Database Field
         |--------------------------------------------------------------------------
         */
-
         if (array_key_exists('citizenship_mode', $validated)) {
             $validated['mode_of_citizenship'] =
                 $validated['citizenship_mode'];
-
             unset($validated['citizenship_mode']);
         }
-
         /*
         |--------------------------------------------------------------------------
         | Save All Changes Together
         |--------------------------------------------------------------------------
         */
-
-        \Illuminate\Support\Facades\DB::transaction(function () use (
+        $person->getConnection()->transaction(function () use (
             $person,
             $record,
+            $addEmployment,
+            $saveEmployment,
             $loggedInUser,
             $checkAdminAccess,
             $validated,
@@ -2582,45 +2526,57 @@ class DataManagementController extends Controller
             | Lock and Recheck Employment Record
             |--------------------------------------------------------------------------
             */
-
+            // Lock the employee before reading or creating employment.
+            // The same lock is used by the employment-only save function.
+            $lockedUser = $person->user->newQuery()
+                ->whereKey($person->user->id)
+                ->whereNull('deleted_at')
+                ->lockForUpdate()
+                ->firstOrFail();
+            $person->newQuery()->whereKey($person->id)->lockForUpdate()->firstOrFail();
+            $person->setRelation('user', $lockedUser);
             $lockedRecord = null;
-
             if ($record) {
                 $lockedRecord = $record->newQuery()
                     ->whereKey($record->getKey())
                     ->lockForUpdate()
                     ->first();
-
                 if (! $lockedRecord) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
                         'employment_status' =>
                             'The employment record is no longer available. Reload the page.',
                     ]);
                 }
-
                 $checkAdminAccess($lockedRecord);
             }
-
+            elseif ($addEmployment) {
+                $alreadyExists = \App\Models\EmploymentStatus::query()
+                    ->where('users_id', $lockedUser->id)
+                    ->lockForUpdate()
+                    ->first();
+                if ($alreadyExists) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'add_employment' => 'Employment information already exists. Reload the page and edit the existing record.',
+                    ]);
+                }
+                $lockedRecord = new \App\Models\EmploymentStatus();
+                $lockedRecord->users_id = $lockedUser->id;
+            }
             /*
             |--------------------------------------------------------------------------
             | Basic Information
             |--------------------------------------------------------------------------
             */
-
             $person->fill(
                 \Illuminate\Support\Arr::only($validated, $basicFields)
             );
-
             $person->saveOrFail();
-
             /*
             |--------------------------------------------------------------------------
             | Account Name and Email
             |--------------------------------------------------------------------------
             */
-
             $user = $person->user;
-
             $user->name = collect([
                 $person->first_name,
                 $person->middle_name,
@@ -2629,24 +2585,19 @@ class DataManagementController extends Controller
             ])
                 ->filter(fn ($value) => filled($value))
                 ->implode(' ');
-
             $user->email = $validated['email'];
             $user->saveOrFail();
-
             /*
             |--------------------------------------------------------------------------
             | Government IDs and Employee ID
             |--------------------------------------------------------------------------
             */
-
             $issuedIdData = \Illuminate\Support\Arr::only(
                 $validated,
                 $issuedIdFields
             );
-
             if ($issuedIdData !== []) {
                 $issuedId = $person->issuedId;
-
                 if (
                     ! $issuedId
                     && collect($issuedIdData)->contains(
@@ -2655,58 +2606,48 @@ class DataManagementController extends Controller
                 ) {
                     $issuedId = $person->issuedId()->make();
                 }
-
                 if ($issuedId) {
                     $issuedId->fill($issuedIdData);
                     $issuedId->saveOrFail();
                 }
             }
-
             /*
             |--------------------------------------------------------------------------
             | Existing Addresses
             |--------------------------------------------------------------------------
             */
-
             foreach ($validated['addresses'] ?? [] as $index => $addressData) {
-                $address = \Illuminate\Support\Facades\DB::table('address')
+                $address = $person->getConnection()->table('address')
                     ->where('basic_information_id', $person->id)
                     ->where('id', $addressData['id'])
                     ->lockForUpdate()
                     ->first();
-
                 if (! $address) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
                         "addresses.$index.id" =>
                             'This address is no longer available. Reload the page.',
                     ]);
                 }
-
                 $values = \Illuminate\Support\Arr::only(
                     $addressData,
                     $addressFields
                 );
-
                 $values['updated_at'] = now();
-
-                \Illuminate\Support\Facades\DB::table('address')
+                $person->getConnection()->table('address')
                     ->where('basic_information_id', $person->id)
                     ->where('id', $address->id)
                     ->update($values);
             }
-
             /*
             |--------------------------------------------------------------------------
             | Employment Information
             |--------------------------------------------------------------------------
             */
-
             if ($lockedRecord) {
                 $employmentData = \Illuminate\Support\Arr::only(
                     $validated,
                     $employmentFields
                 );
-
                 /*
                 |--------------------------------------------------------------------------
                 | Resolve Plantilla Item
@@ -2716,50 +2657,40 @@ class DataManagementController extends Controller
                 | An explicitly cleared item removes the existing assignment.
                 |
                 */
-
                 if (array_key_exists('item_number', $validated)) {
                     $plantillaDbId = null;
-
                     if (filled($validated['item_number'])) {
                         $plantilla = \App\Models\PlantillaDb::query()
                             ->where('item_number', $validated['item_number'])
                             ->first();
-
                         if (! $plantilla) {
                             throw \Illuminate\Validation\ValidationException::withMessages([
                                 'item_number' =>
                                     'The selected Plantilla Item Number is no longer available.',
                             ]);
                         }
-
                         $plantillaDbId = $plantilla->id;
                     }
-
                     $employmentData['plantilla_db_id'] = $plantillaDbId;
                 }
-
                 /*
                 |--------------------------------------------------------------------------
                 | Resolve Personnel Assignment
                 |--------------------------------------------------------------------------
                 */
-
                 $assignmentType = $loggedInUser->role === 'super_admin'
                     ? $validated['personnel_assignment']
                     : 'school_based';
-
                 if ($assignmentType === 'school_based') {
                     $school = \App\Models\SchoolDb::query()
                         ->where('school_id', $validated['school_id'])
                         ->first();
-
                     if (! $school) {
                         throw \Illuminate\Validation\ValidationException::withMessages([
                             'school_id' =>
                                 'The selected school is no longer available.',
                         ]);
                     }
-
                     $employmentData['school_db_id'] = $school->id;
                     $employmentData['office_unit_id'] = null;
                 } else {
@@ -2767,34 +2698,39 @@ class DataManagementController extends Controller
                         ->whereKey($validated['office_unit_id'])
                         ->where('is_active', true)
                         ->first();
-
                     if (! $officeUnit) {
                         throw \Illuminate\Validation\ValidationException::withMessages([
                             'office_unit_id' =>
                                 'The selected Division Office unit is no longer available or is inactive.',
                         ]);
                     }
-
                     $employmentData['office_unit_id'] = $officeUnit->id;
                     $employmentData['school_db_id'] = null;
                 }
-
-                $lockedRecord->fill($employmentData);
+                if ($loggedInUser->role === 'admin') {
+                    // Preserve employment details: school admins reassign schools only.
+                    $employmentData = \Illuminate\Support\Arr::only(
+                        $employmentData, ['school_db_id', 'office_unit_id']
+                    );
+                }
+                foreach ($employmentData as $field => $value) {
+                    $lockedRecord->{$field} = $value;
+                }
                 $lockedRecord->saveOrFail();
             }
         });
-
         /*
         |--------------------------------------------------------------------------
         | Redirect
         |--------------------------------------------------------------------------
         */
-
         return redirect()
             ->route('data-management.personnel.edit', $person->id)
             ->with(
                 'success',
-                'Personnel and employment information updated successfully.'
+                ! $record && $addEmployment
+                    ? 'Personnel information updated and employment information added successfully.'
+                    : 'Personnel and employment information updated successfully.'
             );
     }
 
@@ -4540,17 +4476,42 @@ class DataManagementController extends Controller
         );
     }
 
-    public function searchEmploymentPlantilla(\Illuminate\Http\Request $request,$employmentStatus) 
-    {
-        \App\Models\EmploymentStatus::whereHas('user')->findOrFail($employmentStatus);
+    public function searchEmploymentPlantilla(
+        \Illuminate\Http\Request $request,
+        $employmentStatus = null
+    ) {
+        $actor = $request->user();
+
+        abort_unless(
+            $actor &&
+            in_array($actor->role, ['super_admin', 'admin'], true),
+            403
+        );
+
+        // Validate and authorize an existing record when its ID is supplied.
+        if ($employmentStatus !== null) {
+            $record = \App\Models\EmploymentStatus::whereHas('user')
+                ->findOrFail($employmentStatus);
+
+            if ($actor->role === 'admin') {
+                $schoolId = $actor->employmentStatus?->school_db_id;
+
+                abort_unless(
+                    $schoolId !== null &&
+                    (string) $record->school_db_id === (string) $schoolId,
+                    403
+                );
+            }
+        }
 
         $validated = $request->validate([
-            'q' => ['required', 'string', 'max:255'],
+            'q' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $input = trim($validated['q']);
+        $input = trim($validated['q'] ?? '');
 
-        if (!preg_match('/(?<!\d)(\d{6})(?!\d)/', $input, $matches)) {
+        // Accept six digits or a full item number containing six digits.
+        if (! preg_match('/(?<!\d)(\d{6})(?!\d)/', $input, $matches)) {
             return response()->json([]);
         }
 
@@ -4560,10 +4521,7 @@ class DataManagementController extends Controller
             ->select(['id', 'item_number', 'position_title'])
             ->where(function ($query) use ($number) {
                 $query
-                    // Example: OSEC-DECSB-MTCHR2-540126-2018
                     ->where('item_number', 'like', '%-' . $number . '-%')
-
-                    // Also support records without a year or position prefix.
                     ->orWhere('item_number', 'like', '%-' . $number)
                     ->orWhere('item_number', 'like', $number . '-%')
                     ->orWhere('item_number', $number);
@@ -4763,20 +4721,17 @@ class DataManagementController extends Controller
     }
 
     public function updateEmploymentStatus(
-        Request $request,
-        $employmentStatus
+        \Illuminate\Http\Request $request,
+        $employmentStatus = null,
+        $personId = null
     ) {
         /*
         |--------------------------------------------------------------------------
         | Logged-in User
         |--------------------------------------------------------------------------
         */
-
         $user = auth()->user();
-
         abort_unless($user, 401);
-
-
         /*
         |--------------------------------------------------------------------------
         | Allowed Roles
@@ -4792,31 +4747,38 @@ class DataManagementController extends Controller
         | - Cannot assign an employee to the Division Office
         |
         */
-
         abort_unless(
             in_array($user->role, ['super_admin', 'admin'], true),
             403,
             'You are not authorized to update employment information.'
         );
-
-
         /*
         |--------------------------------------------------------------------------
         | Employment Record
         |--------------------------------------------------------------------------
         */
-
-        $record = \App\Models\EmploymentStatus::query()
-            ->whereHas('user')
-            ->with([
-                'user',
-                'school',
-                'officeUnit',
-                'plantilla',
-            ])
-            ->findOrFail($employmentStatus);
-
-
+        $isCreating = $personId !== null;
+        if ($isCreating) {
+            // New employment is addressed by BasicInformation ID, never by
+            // treating a personnel ID as an EmploymentStatus ID.
+            abort_unless($user->role === 'super_admin', 403);
+            $person = \App\Models\BasicInformation::query()
+                ->whereHas('user', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->with('user')
+                ->findOrFail($personId);
+            $record = new \App\Models\EmploymentStatus();
+            $record->users_id = $person->user->id;
+            $record->setRelation('user', $person->user);
+        } else {
+            $record = \App\Models\EmploymentStatus::query()
+                ->whereHas('user', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->with(['user', 'school', 'officeUnit', 'plantilla'])
+                ->findOrFail($employmentStatus);
+        }
         /*
         |--------------------------------------------------------------------------
         | ADMIN SECURITY CHECK
@@ -4829,148 +4791,114 @@ class DataManagementController extends Controller
         | We check the employee's CURRENT school BEFORE changing anything.
         |
         */
-
         if ($user->role === 'admin') {
-
             /*
             |--------------------------------------------------------------------------
             | Get Admin's Current School
             |--------------------------------------------------------------------------
             */
-
             $adminSchoolId = $user->employmentStatus?->school_db_id;
-
-
             if (! $adminSchoolId) {
-
                 abort(
                     403,
                     'Your account does not have a valid school assignment.'
                 );
             }
-
-
             /*
             |--------------------------------------------------------------------------
             | Employee Must Currently Belong to Admin's School
             |--------------------------------------------------------------------------
             */
-
             if ((int) $record->school_db_id !== (int) $adminSchoolId) {
-
                 abort(
                     403,
                     'You are not authorized to update this employee because the employee is not assigned to your school.'
                 );
             }
-
-
             /*
             |--------------------------------------------------------------------------
             | Prevent Admin From Editing Division Office Personnel
             |--------------------------------------------------------------------------
             */
-
             if (! empty($record->office_unit_id)) {
-
                 abort(
                     403,
                     'School administrators cannot modify Division Office personnel.'
                 );
             }
         }
-
-
         /*
         |--------------------------------------------------------------------------
         | Validation Rules
         |--------------------------------------------------------------------------
         */
-
         $rules = [
-
             'item_number' => [
                 'nullable',
+                'required_if:source_of_fund,Plantilla',
                 'string',
                 'max:255',
             ],
-
             'date_of_original_appointment' => [
                 'nullable',
                 'date',
             ],
-
             'date_of_last_promotion' => [
                 'nullable',
                 'date',
             ],
-
             'employment_status' => [
                 'nullable',
                 'string',
                 'max:100',
             ],
-
             'warm_body_status' => [
                 'nullable',
                 'string',
                 'max:100',
             ],
-
             'nature_of_work' => [
                 'nullable',
                 'string',
                 'max:100',
             ],
-
             'source_of_fund' => [
-                'nullable',
+                'required',
                 'string',
                 'max:100',
             ],
-
             'monthly_salary' => [
                 'nullable',
                 'numeric',
                 'min:0',
             ],
-
             'contract_duration' => [
                 'nullable',
                 'string',
                 'max:255',
             ],
-
         ];
-
-
         /*
         |--------------------------------------------------------------------------
         | Super Admin Assignment Validation
         |--------------------------------------------------------------------------
         */
-
         if ($user->role === 'super_admin') {
-
             $rules['personnel_assignment'] = [
                 'required',
                 'in:school_based,division_office',
             ];
-
             $rules['school_id'] = [
                 'nullable',
                 'required_if:personnel_assignment,school_based',
                 'string',
             ];
-
             $rules['office_unit_id'] = [
                 'nullable',
                 'required_if:personnel_assignment,division_office',
                 'integer',
             ];
         }
-
-
         /*
         |--------------------------------------------------------------------------
         | Admin Assignment Validation
@@ -4982,43 +4910,36 @@ class DataManagementController extends Controller
         | School is required because Admin is changing school assignment only.
         |
         */
-
         if ($user->role === 'admin') {
-
             $rules['school_id'] = [
                 'required',
                 'string',
             ];
         }
-
-
         /*
         |--------------------------------------------------------------------------
         | Validate
         |--------------------------------------------------------------------------
         */
-
         $validated = $request->validate(
             $rules,
             [
+                'source_of_fund.required' =>
+                    'Please select the Source of Fund.',
+                'item_number.required_if' =>
+                    'Plantilla Item Number is required when Source of Fund is Plantilla.',
                 'personnel_assignment.required' =>
                     'Please select the personnel assignment type.',
-
                 'personnel_assignment.in' =>
                     'The selected personnel assignment type is invalid.',
-
                 'school_id.required' =>
                     'Please select the school where the employee will be assigned.',
-
                 'school_id.required_if' =>
                     'Please select the school where the employee will be assigned.',
-
                 'office_unit_id.required_if' =>
                     'Please select the Division Office unit where the employee will be assigned.',
             ]
         );
-
-
         /*
         |--------------------------------------------------------------------------
         | SECURITY: Reject Assignment Manipulation by Admin
@@ -5028,42 +4949,31 @@ class DataManagementController extends Controller
         | request, Admin cannot assign an Office Unit.
         |
         */
-
         if ($user->role === 'admin') {
-
             if (
                 $request->filled('office_unit_id') ||
                 $request->input('personnel_assignment') === 'division_office'
             ) {
-
                 abort(
                     403,
                     'You are not authorized to assign personnel to a Division Office unit.'
                 );
             }
         }
-
-
         /*
         |--------------------------------------------------------------------------
         | Resolve Plantilla Item
         |--------------------------------------------------------------------------
         */
-
         $plantillaDbId = null;
-
         if (! empty($validated['item_number'])) {
-
             $plantilla = \App\Models\PlantillaDb::query()
                 ->where(
                     'item_number',
                     $validated['item_number']
                 )
                 ->first();
-
-
             if (! $plantilla) {
-
                 return back()
                     ->withInput()
                     ->with(
@@ -5071,53 +4981,36 @@ class DataManagementController extends Controller
                         'The selected plantilla item number was not found.'
                     );
             }
-
-
             $plantillaDbId = $plantilla->id;
         }
-
-
         /*
         |--------------------------------------------------------------------------
         | Start With Existing Assignment
         |--------------------------------------------------------------------------
         */
-
         $schoolDbId = $record->school_db_id;
-
         $officeUnitId = $record->office_unit_id;
-
-
         /*
         |--------------------------------------------------------------------------
         | SUPER ADMIN - Resolve Assignment
         |--------------------------------------------------------------------------
         */
-
         if ($user->role === 'super_admin') {
-
             $assignmentType =
                 $validated['personnel_assignment'];
-
-
             /*
             |--------------------------------------------------------------------------
             | School Based
             |--------------------------------------------------------------------------
             */
-
             if ($assignmentType === 'school_based') {
-
                 $school = \App\Models\SchoolDb::query()
                     ->where(
                         'school_id',
                         $validated['school_id']
                     )
                     ->first();
-
-
                 if (! $school) {
-
                     return back()
                         ->withInput()
                         ->with(
@@ -5125,31 +5018,21 @@ class DataManagementController extends Controller
                             'The selected school was not found.'
                         );
                 }
-
-
                 /*
                 | Save selected school
                 */
-
                 $schoolDbId = $school->id;
-
-
                 /*
                 | Remove Division Office assignment
                 */
-
                 $officeUnitId = null;
             }
-
-
             /*
             |--------------------------------------------------------------------------
             | Division Office
             |--------------------------------------------------------------------------
             */
-
             elseif ($assignmentType === 'division_office') {
-
                 $officeUnit = \App\Models\OfficeUnit::query()
                     ->where(
                         'id',
@@ -5157,10 +5040,7 @@ class DataManagementController extends Controller
                     )
                     ->where('is_active', true)
                     ->first();
-
-
                 if (! $officeUnit) {
-
                     return back()
                         ->withInput()
                         ->with(
@@ -5168,24 +5048,16 @@ class DataManagementController extends Controller
                             'The selected Division Office unit was not found or is inactive.'
                         );
                 }
-
-
                 /*
                 | Save selected Office Unit
                 */
-
                 $officeUnitId = $officeUnit->id;
-
-
                 /*
                 | Remove School assignment
                 */
-
                 $schoolDbId = null;
             }
         }
-
-
         /*
         |--------------------------------------------------------------------------
         | ADMIN - Resolve New School Assignment
@@ -5197,19 +5069,14 @@ class DataManagementController extends Controller
         | converted to school_db_id.
         |
         */
-
         elseif ($user->role === 'admin') {
-
             $school = \App\Models\SchoolDb::query()
                 ->where(
                     'school_id',
                     $validated['school_id']
                 )
                 ->first();
-
-
             if (! $school) {
-
                 return back()
                     ->withInput()
                     ->with(
@@ -5217,17 +5084,12 @@ class DataManagementController extends Controller
                         'The selected school was not found.'
                     );
             }
-
-
             /*
             |--------------------------------------------------------------------------
             | Save New School
             |--------------------------------------------------------------------------
             */
-
             $schoolDbId = $school->id;
-
-
             /*
             |--------------------------------------------------------------------------
             | Security
@@ -5237,125 +5099,147 @@ class DataManagementController extends Controller
             | Therefore office_unit_id must always be NULL.
             |
             */
-
             $officeUnitId = null;
         }
-
-
         /*
         |--------------------------------------------------------------------------
         | Update Employment Status
         |--------------------------------------------------------------------------
         */
-
         try {
-
-            \Illuminate\Support\Facades\DB::transaction(
+            $record->getConnection()->transaction(
                 function () use (
-                    $record,
+                    &$record,
+                    $user,
+                    $isCreating,
                     $validated,
                     $plantillaDbId,
                     $schoolDbId,
                     $officeUnitId
                 ) {
-
-                    $record->update([
-
+                    // Lock the employee first, including when no employment
+                    // row exists yet. This serializes first-time saves.
+                    $employee = $record->user->newQuery()
+                        ->whereKey($record->users_id)
+                        ->whereNull('deleted_at')
+                        ->lockForUpdate()
+                        ->firstOrFail();
+                    $lockedRecord = \App\Models\EmploymentStatus::query()
+                        ->where('users_id', $employee->id)
+                        ->when(! $isCreating, function ($query) use ($record) {
+                            $query->whereKey($record->id);
+                        })
+                        ->lockForUpdate()
+                        ->first();
+                    if ($isCreating && $lockedRecord) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'add_employment' => 'An employment record already exists. Reload the personnel page and edit that record.',
+                        ]);
+                    }
+                    if (! $isCreating) {
+                        abort_unless($lockedRecord, 404);
+                        $record = $lockedRecord;
+                    }
+                    // Recheck current school authorization while holding locks.
+                    if ($user->role === 'admin') {
+                        $adminSchoolId = $user->employmentStatus?->school_db_id;
+                        abort_unless(
+                            $adminSchoolId &&
+                            (string) $record->school_db_id === (string) $adminSchoolId &&
+                            empty($record->office_unit_id),
+                            403,
+                            'This employee is no longer assigned to your school.'
+                        );
+                    }
+                    $attributes = [
                         /*
                         |--------------------------------------------------------------------------
                         | Plantilla
                         |--------------------------------------------------------------------------
                         */
-
                         'plantilla_db_id' =>
                             $plantillaDbId,
-
-
                         /*
                         |--------------------------------------------------------------------------
                         | Personnel Assignment
                         |--------------------------------------------------------------------------
                         */
-
                         'school_db_id' =>
                             $schoolDbId,
-
                         'office_unit_id' =>
                             $officeUnitId,
-
-
                         /*
                         |--------------------------------------------------------------------------
                         | Appointment Information
                         |--------------------------------------------------------------------------
                         */
-
                         'date_of_original_appointment' =>
                             $validated['date_of_original_appointment']
                                 ?? null,
-
                         'date_of_last_promotion' =>
                             $validated['date_of_last_promotion']
                                 ?? null,
-
-
                         /*
                         |--------------------------------------------------------------------------
                         | Employment Information
                         |--------------------------------------------------------------------------
                         */
-
                         'employment_status' =>
                             $validated['employment_status']
                                 ?? null,
-
                         'warm_body_status' =>
                             $validated['warm_body_status']
                                 ?? null,
-
                         'nature_of_work' =>
                             $validated['nature_of_work']
                                 ?? null,
-
                         'source_of_fund' =>
                             $validated['source_of_fund']
                                 ?? null,
-
-
                         /*
                         |--------------------------------------------------------------------------
                         | Salary
                         |--------------------------------------------------------------------------
                         */
-
                         'monthly_salary' =>
                             $validated['monthly_salary']
                                 ?? null,
-
-
                         /*
                         |--------------------------------------------------------------------------
                         | Contract
                         |--------------------------------------------------------------------------
                         */
-
                         'contract_duration' =>
                             $validated['contract_duration']
                                 ?? null,
-
-                    ]);
-
+                    ];
+                    if ($user->role === 'admin') {
+                        // School admins change school assignment only.
+                        $attributes = [
+                            'school_db_id' => $schoolDbId,
+                            'office_unit_id' => null,
+                        ];
+                    }
+                    // All values are validated or resolved server-side above.
+                    foreach ($attributes as $field => $value) {
+                        $record->{$field} = $value;
+                    }
+                    $record->users_id = $employee->id;
+                    $record->save();
                 }
             );
-
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e) {
+            throw $e;
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            throw $e;
         } catch (\Throwable $e) {
-
             /*
             |--------------------------------------------------------------------------
             | Log Actual Error
             |--------------------------------------------------------------------------
             */
-
             \Illuminate\Support\Facades\Log::error(
                 'Employment status update failed.',
                 [
@@ -5365,8 +5249,6 @@ class DataManagementController extends Controller
                     'error' => $e->getMessage(),
                 ]
             );
-
-
             return back()
                 ->withInput()
                 ->with(
@@ -5374,23 +5256,17 @@ class DataManagementController extends Controller
                     'Unable to update the employment information. Please try again.'
                 );
         }
-
-
         /*
         |--------------------------------------------------------------------------
         | Refresh Updated Record
         |--------------------------------------------------------------------------
         */
-
         $record->refresh();
-
-
         /*
         |--------------------------------------------------------------------------
         | Redirect
         |--------------------------------------------------------------------------
         */
-
         return redirect()
             ->route(
                 'data-management.employment-status.edit',
@@ -5398,9 +5274,25 @@ class DataManagementController extends Controller
             )
             ->with(
                 'success',
-                'Employment information and school assignment updated successfully.'
+                $isCreating
+                    ? 'Employment information added successfully.'
+                    : 'Employment information and school assignment updated successfully.'
             );
     }
+    /*
+    |--------------------------------------------------------------------------
+    | Save New Employment Status
+    |--------------------------------------------------------------------------
+    | $person is the BasicInformation ID used by the Personnel edit page.
+    | New records can only be added by Super Admins.
+    */
+    public function storePersonnelEmployment(
+        \Illuminate\Http\Request $request,
+        $person
+    ) {
+        return $this->updateEmploymentStatus($request, null, $person);
+    }
+
 
 
     /*   

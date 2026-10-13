@@ -8,6 +8,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AddPersonnelRequestController;
 use App\Http\Controllers\EmployeeTrashController;
 use App\Http\Controllers\PersonnelExportController;
+use App\Http\Controllers\PlantillaLookupController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -50,7 +51,8 @@ Route::middleware(['auth', 'role:super_admin,admin'])->group(function () {
     Route::put('/data-management/employment-status/{employmentStatus}',[DataManagementController::class, 'updateEmploymentStatus'])->name('data-management.employment-status.update');
     Route::get('/data-management/employment-status/{employmentStatus}/plantilla-search',[DataManagementController::class, 'searchEmploymentPlantilla'])->name('data-management.employment-status.plantilla-search');
     Route::get('/data-management/employment-status/{employmentStatus}/plantilla-assignments',[DataManagementController::class, 'employmentPlantillaAssignments'])->name('data-management.employment-status.plantilla-assignments');
-
+    Route::get('/data-management/personnel/plantilla-search',[\App\Http\Controllers\PlantillaLookupController::class, 'search'])->middleware(['auth', 'throttle:60,1'])->name('data-management.personnel.plantilla-search');
+    Route::get('/data-management/personnel/{person}/plantilla-remarks',[\App\Http\Controllers\PlantillaLookupController::class, 'assignments'])->middleware(['auth', 'throttle:60,1'])->whereNumber('person')->name('data-management.personnel.plantilla-remarks');
 });
 
 Route::middleware(['auth', 'role:super_admin'])->group(function () {

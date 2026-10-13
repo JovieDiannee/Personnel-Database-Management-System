@@ -1490,7 +1490,22 @@
 
             @endforelse
 
-            @if ($record)
+            @php
+                $hasEmploymentRecord = (bool) $record;
+                $showEmploymentForm = $hasEmploymentRecord || (string) old('add_employment', '0') === '1';
+            @endphp
+            @if(! $hasEmploymentRecord)
+                <div id="missing-employment-notice" class="mb-6 flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between" @if($showEmploymentForm) hidden @endif>
+                    <p class="text-sm text-amber-900">No employment record is available for this personnel.</p>
+                    <button type="button" id="add-employment-button" aria-controls="employment-information-fields" aria-expanded="{{ $showEmploymentForm ? 'true' : 'false' }}"
+                            class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M12 5v14M5 12h14" /></svg>
+                        Add Employment Status
+                    </button>
+                </div>
+            @endif
+            <input type="hidden" name="add_employment" id="add-employment-flag" value="{{ ! $hasEmploymentRecord && $showEmploymentForm ? '1' : '0' }}">
+            <fieldset id="employment-information-fields" class="min-w-0" @disabled(! $showEmploymentForm) @if(! $showEmploymentForm) hidden @endif>
             {{-- =================================================
                 EMPLOYMENT INFORMATION
             ================================================== --}}
@@ -1522,7 +1537,7 @@
                             <span
                                 id="plantilla-required-marker"
                                 class="text-red-600"
-                                @if(old('source_of_fund', $record->source_of_fund) !== 'Plantilla') hidden @endif
+                                @if(old('source_of_fund', $record?->source_of_fund) !== 'Plantilla') hidden @endif
                                 aria-hidden="true"
                             >*</span>
                         </label>
@@ -1542,8 +1557,8 @@
                         <select
                             id="item_number"
                             name="item_number"
-                            @required(old('source_of_fund', $record->source_of_fund) === 'Plantilla')
-                            aria-required="{{ old('source_of_fund', $record->source_of_fund) === 'Plantilla' ? 'true' : 'false' }}"
+                            @required(old('source_of_fund', $record?->source_of_fund) === 'Plantilla')
+                            aria-required="{{ old('source_of_fund', $record?->source_of_fund) === 'Plantilla' ? 'true' : 'false' }}"
                             class="employment-search-select w-full min-w-0"
                             data-placeholder="Search by item number or position title..."
                             aria-describedby="plantilla-requirement-help plantilla-assignment-remarks"
@@ -1554,16 +1569,19 @@
                                 @selected(
                                     (string) old(
                                         'item_number',
-                                        $record->plantilla?->item_number
+                                        $record?->plantilla?->item_number
                                     ) === ''
                                 )
                             >
                                 Search a plantilla item number
                             </option> 
 
-                            @foreach ($plantillaItems as $item)
+                            @if(! $record && old('item_number'))
+                                <option value="{{ old('item_number') }}" selected>{{ old('item_number') }}</option>
+                            @endif
+                            @foreach (($plantillaItems ?? []) as $item)
                                 <option value="{{ $item->item_number }}"
-                                    @selected((string) old('item_number', $record->plantilla?->item_number) === (string) $item->item_number)>
+                                    @selected((string) old('item_number', $record?->plantilla?->item_number) === (string) $item->item_number)>
                                     {{ $item->item_number }} - {{ $item->position_title }}
                                 </option>
                             @endforeach
@@ -1583,7 +1601,7 @@
                                 id="plantilla-assignment-text"
                                 class="mt-1 break-words"
                             >
-                                Loading assignment details…
+                                {{ $record ? 'Loading assignment details…' : 'Enter the item number when Source of Fund is Plantilla.' }}
                             </p>
 
                             <p class="mt-1 text-xs text-gray-500">
@@ -1593,7 +1611,7 @@
                         </div>
 
                         <p id="plantilla-requirement-help" class="mt-2 text-sm text-gray-600">
-                            {{ old('source_of_fund', $record->source_of_fund) === 'Plantilla'
+                            {{ old('source_of_fund', $record?->source_of_fund) === 'Plantilla'
                                 ? 'Required when Source of Fund is Plantilla.'
                                 : 'Optional for this Source of Fund.' }}
                         </p>
@@ -1697,6 +1715,7 @@
                                             <select
                                                 id="personnel_assignment"
                                                 name="personnel_assignment"
+                                                required
                                                 class="block h-11 w-full rounded-lg
                                                     border-gray-300 bg-white
                                                     px-3 text-sm text-gray-900
@@ -1778,7 +1797,7 @@
                                                         @selected(
                                                             (string) old(
                                                                 'school_id',
-                                                                $record->school?->school_id
+                                                                $record?->school?->school_id
                                                             ) === (string) $school->school_id
                                                         )
                                                     >
@@ -1853,7 +1872,7 @@
                                                                 @selected(
                                                                     (string) old(
                                                                         'office_unit_id',
-                                                                        $record->office_unit_id
+                                                                        $record?->office_unit_id
                                                                     ) === (string) $officeUnit->id
                                                                 )
                                                             >
@@ -1920,7 +1939,7 @@
                                                         @selected(
                                                             (string) old(
                                                                 'school_id',
-                                                                $record->school?->school_id
+                                                                $record?->school?->school_id
                                                             ) === (string) $school->school_id
                                                         )
                                                     >
@@ -1977,9 +1996,9 @@
                             name="date_of_original_appointment"
                             value="{{ old(
                                 'date_of_original_appointment',
-                                $record->date_of_original_appointment
+                                $record?->date_of_original_appointment
                                     ? \Carbon\Carbon::parse(
-                                        $record->date_of_original_appointment
+                                        $record?->date_of_original_appointment
                                     )->format('Y-m-d')
                                     : ''
                             ) }}"
@@ -2010,9 +2029,9 @@
                             name="date_of_last_promotion"
                             value="{{ old(
                                 'date_of_last_promotion',
-                                $record->date_of_last_promotion
+                                $record?->date_of_last_promotion
                                     ? \Carbon\Carbon::parse(
-                                        $record->date_of_last_promotion
+                                        $record?->date_of_last_promotion
                                     )->format('Y-m-d')
                                     : ''
                             ) }}"
@@ -2061,7 +2080,7 @@
                                     @selected(
                                         old(
                                             'employment_status',
-                                            $record->employment_status
+                                            $record?->employment_status
                                         ) === $status
                                     )
                                 >
@@ -2109,7 +2128,7 @@
                                     @selected(
                                         old(
                                             'warm_body_status',
-                                            $record->warm_body_status
+                                            $record?->warm_body_status
                                         ) === $status
                                     )
                                 >
@@ -2164,7 +2183,7 @@
                                     @selected(
                                         old(
                                             'nature_of_work',
-                                            $record->nature_of_work
+                                            $record?->nature_of_work
                                         ) === $nature
                                     )
                                 >
@@ -2198,7 +2217,7 @@
                             aria-required="true"
                             class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
-                            <option value="" @selected((string) old('source_of_fund', $record->source_of_fund) === '')>
+                            <option value="" @selected((string) old('source_of_fund', $record?->source_of_fund) === '')>
                                 Select Source of Fund
                             </option>
                             @foreach ([
@@ -2214,7 +2233,7 @@
                                     @selected(
                                         old(
                                             'source_of_fund',
-                                            $record->source_of_fund
+                                            $record?->source_of_fund
                                         ) === $fund
                                     )
                                 >
@@ -2249,7 +2268,7 @@
                             name="monthly_salary"
                             value="{{ old(
                                 'monthly_salary',
-                                $record->monthly_salary
+                                $record?->monthly_salary
                             ) }}"
                             class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
                         >
@@ -2278,7 +2297,7 @@
                             name="contract_duration"
                             value="{{ old(
                                 'contract_duration',
-                                $record->contract_duration
+                                $record?->contract_duration
                             ) }}"
                             placeholder="Example: Jan 2026 - Dec 2026"
                             class="min-h-11 w-full min-w-0 max-w-full rounded-lg border-gray-300 text-base sm:text-sm focus:border-green-600 focus:ring-green-600"
@@ -2320,7 +2339,7 @@
                         </p>
 
                         <p class="mt-1 text-sm font-semibold text-gray-900 break-words">
-                            {{ $record->school?->school_id ?? '—' }} - {{ $record->school?->school_name ?? '—' }}
+                            {{ $record?->school?->school_id ?? '—' }} - {{ $record?->school?->school_name ?? '—' }}
                         </p>
 
                     </div>
@@ -2332,7 +2351,7 @@
                         </p>
 
                         <p class="mt-1 text-sm font-semibold text-gray-900 break-words">
-                            {{ $record->school?->school_district ?? '—' }}
+                            {{ $record?->school?->school_district ?? '—' }}
                         </p>
 
                     </div>
@@ -2344,7 +2363,7 @@
                         </p>
 
                         <p class="mt-1 text-sm font-semibold text-gray-900 break-words">
-                            {{ $record->plantilla?->position_title ?? '—' }}
+                            {{ $record?->plantilla?->position_title ?? '—' }}
                         </p>
 
                     </div>
@@ -2356,7 +2375,7 @@
                         </p>
 
                         <p class="mt-1 text-sm font-semibold text-gray-900 break-words">
-                            {{ $record->plantilla?->item_number ?? '—' }}
+                            {{ $record?->plantilla?->item_number ?? '—' }}
                         </p>
 
                     </div>
@@ -2365,11 +2384,7 @@
 
             </div>
 
-@else
-                <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                    No employment record is available for this personnel.
-                </div>
-            @endif
+            </fieldset>
 
             {{-- =================================================
 
@@ -2413,6 +2428,34 @@
 
     </div>
 
+        <script>
+            (() => {
+                function initializeAddEmployment() {
+                    const button = document.getElementById('add-employment-button');
+                    const fields = document.getElementById('employment-information-fields');
+                    const flag = document.getElementById('add-employment-flag');
+                    const notice = document.getElementById('missing-employment-notice');
+                    if (!button || !fields || !flag) return;
+                    button.addEventListener('click', () => {
+                        flag.value = '1';
+                        fields.hidden = false;
+                        fields.disabled = false;
+                        button.setAttribute('aria-expanded', 'true');
+                        if (notice) { notice.hidden = true; notice.style.display = 'none'; }
+                        const item = document.getElementById('item_number');
+                        if (item?.tomselect) item.tomselect.refreshOptions(false);
+                        fields.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        fields.querySelector('input:not([type="hidden"]), select')?.focus({ preventScroll: true });
+                    });
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initializeAddEmployment, { once: true });
+                } else {
+                    initializeAddEmployment();
+                }
+            })();
+        </script>
+
     {{-- These controls are initialized only by this page. --}}
         <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
         <script>
@@ -2422,18 +2465,18 @@
                 const box = document.getElementById('plantilla-assignment-remarks');
                 const message = document.getElementById('plantilla-assignment-text');
     
-                if (!select || !box || !message) return;
+                if (!select || select.tagName !== 'SELECT' || !box || !message) return;
     
                 // Prevent duplicate initialization.
                 if (select.dataset.plantillaInitialized === 'true') return;
                 select.dataset.plantillaInitialized = 'true';
     
                 const searchUrl = {{ Illuminate\Support\Js::from(
-                    $record ? route('data-management.employment-status.plantilla-search', $record->id) : null
+                    route('data-management.personnel.plantilla-search')
                 ) }};
     
                 const assignmentUrl = {{ Illuminate\Support\Js::from(
-                    $record ? route('data-management.employment-status.plantilla-assignments', $record->id) : null
+                    route('data-management.personnel.plantilla-remarks', $person->id)
                 ) }};
     
                 const initialValue = select.value;
@@ -2505,7 +2548,6 @@
                 guide.insertAdjacentElement('afterend', searchError);
     
                 const searchCache = new Map();
-                const assignmentCache = new Map();
     
                 let assignmentRequest;
                 let assignmentVersion = 0;
@@ -2585,36 +2627,20 @@
                         return;
                     }
     
-                    display('Checking assigned employees...');
-    
+                    display('Checking current assignments...');
                     try {
-                        let data = cacheGet(assignmentCache, value);
-    
-                        if (!data) {
-                            assignmentRequest = new AbortController();
-    
-                            const url = new URL(
-                                assignmentUrl,
-                                window.location.origin
-                            );
-    
-                            url.searchParams.set('item_number', value);
-    
-                            data = await getJson(
-                                url,
-                                assignmentRequest.signal
-                            );
-    
-                            cachePut(assignmentCache, value, data);
-                        }
-    
+                        assignmentRequest = new AbortController();
+                        const url = new URL(assignmentUrl, window.location.origin);
+                        url.searchParams.set('item_number', value);
+                        const data = await getJson(url, assignmentRequest.signal);
+                        if (!Array.isArray(data.names)) throw new Error('Invalid assignment response');
                         if (version !== assignmentVersion) return;
     
                         display(
                             data.names.length
-                                ? 'Warning: this item is already assigned to: '
+                                ? 'Assigned to another employee: '
                                     + data.names.join('; ')
-                                : 'This item is not currently assigned to another employee.',
+                                : 'Available: this item is not assigned to another employee.',
                             data.names.length ? 'warning' : 'clear'
                         );
                     } catch (error) {
