@@ -630,14 +630,15 @@
 
                             </a>
 
-                            <a href="{{ route('data-management.employment-status', array_filter(['status' => 'no_employment', 'search' => $search ?: null])) }}"
-                               class="inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all {{ $employeeTab === 'no_employment' ? 'bg-white text-amber-700 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:bg-white/60 hover:text-gray-700' }}">
-                                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                </svg>
-                                No Employment Details
-                            </a>
-
+                            @if(auth()->user()->role === 'super_admin')
+                                <a href="{{ route('data-management.employment-status', array_filter(['status' => 'no_employment', 'search' => $search ?: null])) }}"
+                                class="inline-flex min-h-9 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all {{ $employeeTab === 'no_employment' ? 'bg-white text-amber-700 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:bg-white/60 hover:text-gray-700' }}">
+                                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                    </svg>
+                                    No Employment Details
+                                </a>
+                            @endif
 
                         </div>
 
