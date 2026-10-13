@@ -9,6 +9,7 @@ use App\Http\Controllers\AddPersonnelRequestController;
 use App\Http\Controllers\EmployeeTrashController;
 use App\Http\Controllers\PersonnelExportController;
 use App\Http\Controllers\PlantillaLookupController;
+use App\Http\Controllers\HrmsExportController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -171,6 +172,8 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('data-management/reports
         Route::get('/export-data',[PersonnelExportController::class, 'index'])->name('data-management.reports.export-data');
         Route::post('/export-data/download',[PersonnelExportController::class, 'download'])->name('data-management.reports.export-data.download');
 
+        Route::get('/data-management/reports/export-data-for-hrms', [HrmsExportController::class, 'index'])->name('data-management.reports.export-data-for-hrms');
+        Route::get('/data-management/reports/export-data-for-hrms/download', [HrmsExportController::class, 'download'])->name('data-management.reports.export-data-for-hrms.download');
 });
 
 // ============================================================

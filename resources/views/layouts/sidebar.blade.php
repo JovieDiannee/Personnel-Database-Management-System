@@ -1998,21 +1998,45 @@
                         EXPORT DATA
                     ================================================== --}}
 
+                    @php
+                        $exportDataActive = request()->routeIs(
+                            'data-management.reports.export-data',
+                            'data-management.reports.export-data.*'
+                        );
+
+                        $hrmsExportActive = request()->routeIs(
+                            'data-management.reports.export-data-for-hrms',
+                            'data-management.reports.export-data-for-hrms.*'
+                        );
+                    @endphp
+
                     <a
                         href="{{ route('data-management.reports.export-data') }}"
-
-                        @if(request()->routeIs('data-management.reports.export-data*'))
-                            aria-current="page"
-                        @endif
-
+                        @if($exportDataActive) aria-current="page" @endif
                         class="block rounded-lg px-3 py-1.5 text-sm transition
-                            {{ request()->routeIs('data-management.reports.export-data*')
+                            {{ $exportDataActive
                                 ? 'bg-green-50 font-semibold text-green-800'
                                 : 'text-gray-500 hover:bg-green-50 hover:text-green-700'
                             }}"
                     >
                         Export Data
                     </a>
+                    {{-- =================================================
+                        EXPORT DATA FOR HRMS
+                    ================================================== --}}
+
+                    <a
+                        href="{{ route('data-management.reports.export-data-for-hrms') }}"
+                        @if($hrmsExportActive) aria-current="page" @endif
+                        class="block rounded-lg px-3 py-1.5 text-sm transition
+                            {{ $hrmsExportActive
+                                ? 'bg-green-50 font-semibold text-green-800'
+                                : 'text-gray-500 hover:bg-green-50 hover:text-green-700'
+                            }}"
+                    >
+                        Export Data for HRMS
+                    </a>
+
 
                 </div>
 
