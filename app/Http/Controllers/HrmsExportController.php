@@ -77,7 +77,19 @@ class HrmsExportController extends Controller
             return redirect()->route('data-management.reports.export-data-for-hrms', $filters)
                 ->withErrors(['export' => 'No personnel records match the selected filters.']);
         }
-        return Excel::download(new HrmsPersonnelExport($query),
-            'HRMS_Consolidated_' . now('Asia/Manila')->format('Ymd_His') . '.xlsx');
+
+        $suffix = '';
+        if (!empty($filters['school_db_id'])) {
+            $school = SchoolDb::find($filters['school_db_id']);
+            $suffix = $school?->school_name ?? '';
+        } elseif (!empty($filters['school_district'])) {
+            $suffix = $filters['school_district'];
+        } elseif (!empty($filters['school_area'])) {
+            $suffix = $filters['school_area'];
+        }
+
+        $filename = 'HRMS_Consolidated' . ($suffix ? '_' . $suffix : '') . '_' . now('Asia/Manila')->format('Ymd_His') . '.xlsx';
+
+        return Excel::download(new HrmsPersonnelExport($query), $filename);
     }
 }
