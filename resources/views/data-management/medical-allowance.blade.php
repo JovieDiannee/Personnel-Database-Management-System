@@ -558,7 +558,7 @@
                 <div
                     class="grid gap-2"
                     style="
-                        grid-template-columns: repeat(10, minmax(140px, 1fr));
+                        grid-template-columns: repeat(11, minmax(140px, 1fr));
                         min-width: 1480px;
                     "
                 >
@@ -620,29 +620,6 @@
                         </p>
                         <p class="mt-1 text-lg font-bold text-red-700">
                             {{ number_format($summary['inactive'] ?? 0) }}
-                        </p>
-                    </a>
-                    {{-- ================================================= --}}
-                    {{-- NO SCHOOL ASSIGNMENT --}}
-                    {{-- ================================================= --}}
-                    <a
-                        href="{{ request()->fullUrlWithQuery([
-                            'filter' => 'no_school',
-                            'page' => 1
-                        ]) }}#medical-allowance-table"
-                        class="min-w-0 rounded-lg border px-3 py-2.5 transition
-                            {{ $filter === 'no_school'
-                                ? 'border-orange-300 bg-orange-50 shadow-sm'
-                                : 'border-gray-200 bg-white hover:border-orange-300' }}"
-                    >
-                        <p
-                            class="truncate text-[10px] font-semibold uppercase text-orange-600"
-                            title="No School Assignment"
-                        >
-                            No School
-                        </p>
-                        <p class="mt-1 text-lg font-bold text-orange-700">
-                            {{ number_format($summary['no_school'] ?? 0) }}
                         </p>
                     </a>
                     {{-- ================================================= --}}
@@ -709,6 +686,29 @@
                         </p>
                     </a>
                     {{-- ================================================= --}}
+                    {{-- NO CURRENT RECORD --}}
+                    {{-- ================================================= --}}
+                    <a
+                        href="{{ request()->fullUrlWithQuery([
+                            'filter' => 'no_current',
+                            'page' => 1
+                        ]) }}#medical-allowance-table"
+                        class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                            {{ $filter === 'no_current'
+                                ? 'border-red-300 bg-red-50 shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-red-300' }}"
+                    >
+                        <p
+                            class="truncate text-[10px] font-semibold uppercase text-red-600"
+                            title="No {{ $currentYear }} Record"
+                        >
+                            No {{ $currentYear }} Record
+                        </p>
+                        <p class="mt-1 text-lg font-bold text-red-700">
+                            {{ number_format($summary['no_current'] ?? 0) }}
+                        </p>
+                    </a>
+                    {{-- ================================================= --}}
                     {{-- NO PREVIOUS RECORD --}}
                     {{-- ================================================= --}}
                     <a
@@ -729,6 +729,29 @@
                         </p>
                         <p class="mt-1 text-lg font-bold text-purple-700">
                             {{ number_format($summary['new'] ?? 0) }}
+                        </p>
+                    </a>
+                    {{-- ================================================= --}}
+                    {{-- NO SCHOOL ASSIGNMENT --}}
+                    {{-- ================================================= --}}
+                    <a
+                        href="{{ request()->fullUrlWithQuery([
+                            'filter' => 'no_school',
+                            'page' => 1
+                        ]) }}#medical-allowance-table"
+                        class="min-w-0 rounded-lg border px-3 py-2.5 transition
+                            {{ $filter === 'no_school'
+                                ? 'border-orange-300 bg-orange-50 shadow-sm'
+                                : 'border-gray-200 bg-white hover:border-orange-300' }}"
+                    >
+                        <p
+                            class="truncate text-[10px] font-semibold uppercase text-orange-600"
+                            title="No School Assignment"
+                        >
+                            No School
+                        </p>
+                        <p class="mt-1 text-lg font-bold text-orange-700">
+                            {{ number_format($summary['no_school'] ?? 0) }}
                         </p>
                     </a>
                     {{-- ================================================= --}}

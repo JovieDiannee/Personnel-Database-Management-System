@@ -7210,22 +7210,15 @@ class DataManagementController extends Controller
 
         $allowedFilters = [
             'all',
-
-            // Warm Body Status
             'active',
             'inactive',
-
-            // Medical Allowance
             'group_current',
             'individual_current',
             'not_eligible',
+            'no_current',
             'new',
-
-            // Validation
             'pending',
             'validated',
-
-            // Assignment
             'no_school',
         ];
 
@@ -8000,6 +7993,10 @@ class DataManagementController extends Controller
 
                 break;
 
+            case 'no_current':
+                $baseQuery->whereNull('current_medical.id');
+                break;
+
 
             /*
             |--------------------------------------------------------------------------
@@ -8508,6 +8505,14 @@ class DataManagementController extends Controller
                     END
                 ) AS individual_current,
 
+                
+                COUNT(
+                    DISTINCT CASE
+                        WHEN current_medical.id IS NULL
+                        THEN users.id
+                    END
+                ) AS no_current,
+
                 /*
                 |--------------------------------------------------------------------------
                 | NOT ELIGIBLE
@@ -8622,6 +8627,8 @@ class DataManagementController extends Controller
             'individual_current' => (int) (
                 $summaryRow->individual_current ?? 0
             ),
+
+            'no_current' => (int) ($summaryRow->no_current ?? 0),
 
             'not_eligible' => (int) (
                 $summaryRow->not_eligible ?? 0
