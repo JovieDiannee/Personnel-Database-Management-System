@@ -2707,12 +2707,6 @@ class DataManagementController extends Controller
                     $employmentData['office_unit_id'] = $officeUnit->id;
                     $employmentData['school_db_id'] = null;
                 }
-                if ($loggedInUser->role === 'admin') {
-                    // Preserve employment details: school admins reassign schools only.
-                    $employmentData = \Illuminate\Support\Arr::only(
-                        $employmentData, ['school_db_id', 'office_unit_id']
-                    );
-                }
                 foreach ($employmentData as $field => $value) {
                     $lockedRecord->{$field} = $value;
                 }

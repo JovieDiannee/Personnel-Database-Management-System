@@ -1494,7 +1494,7 @@
                 $hasEmploymentRecord = (bool) $record;
                 $showEmploymentForm = $hasEmploymentRecord || (string) old('add_employment', '0') === '1';
             @endphp
-            @if(! $hasEmploymentRecord)
+            @if(! $hasEmploymentRecord) 
                 <div id="missing-employment-notice" class="mb-6 flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between" @if($showEmploymentForm) hidden @endif>
                     <p class="text-sm text-amber-900">No employment record is available for this personnel.</p>
                     <button type="button" id="add-employment-button" aria-controls="employment-information-fields" aria-expanded="{{ $showEmploymentForm ? 'true' : 'false' }}"
