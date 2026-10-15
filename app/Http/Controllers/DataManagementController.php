@@ -2740,21 +2740,47 @@ class DataManagementController extends Controller
 
     public function employmentStatus(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Search / Tab
-        |--------------------------------------------------------------------------
-        */
+        // Search and tab
         $search = trim((string) $request->input('search', ''));
         $employeeTab = $request->input('status', 'active');
+
         if (! in_array($employeeTab, ['active', 'inactive', 'no_employment'], true)) {
             $employeeTab = 'active';
         }
+
         $user = auth()->user();
 
-        abort_unless($user && in_array($user->role, ['admin', 'super_admin'], true), 403);
+        abort_unless(
+            $user && in_array($user->role, ['admin', 'super_admin'], true),
+            403
+        );
 
-        // Query employees directly: these users have no employment_status row.
+        // Match every entered name word across the personnel name fields.
+        // Supports "Jovelyn Gayo", "Jovelyn C. Gayo", and "Gayo, Jovelyn".
+        $nameParts = preg_split(
+            '/[\s,]+/u',
+            $search,
+            -1,
+            PREG_SPLIT_NO_EMPTY
+        ) ?: [];
+
+        $searchPersonnelName = function ($basicQuery) use ($nameParts) {
+            if ($nameParts === []) {
+                $basicQuery->whereRaw('1 = 0');
+                return;
+            }
+
+            foreach ($nameParts as $part) {
+                $basicQuery->where(function ($nameQuery) use ($part) {
+                    $nameQuery->where('first_name', 'like', "%{$part}%")
+                        ->orWhere('middle_name', 'like', "%{$part}%")
+                        ->orWhere('last_name', 'like', "%{$part}%")
+                        ->orWhere('extension_name', 'like', "%{$part}%");
+                });
+            }
+        };
+
+        // Employees without an employment status record
         if ($employeeTab === 'no_employment') {
             $missingQuery = \App\Models\User::query()
                 ->whereNull('deleted_at')
@@ -2766,351 +2792,152 @@ class DataManagementController extends Controller
                 })
                 ->with('basicInformation');
 
-            // A user without employment details has no verified school assignment.
-            // Preserve school-admin scope instead of exposing unassigned users.
+            // Preserve existing school-admin access scope.
             if ($user->role === 'admin') {
                 $missingQuery->whereRaw('1 = 0');
             }
 
             if ($search !== '') {
-                $missingQuery->where(function ($query) use ($search) {
+                $missingQuery->where(function ($query) use (
+                    $search,
+                    $searchPersonnelName
+                ) {
                     $query->where('email', 'like', "%{$search}%")
-                        ->orWhereHas('basicInformation', function ($basicQuery) use ($search) {
-                            $basicQuery->where(function ($nameQuery) use ($search) {
-                                $nameQuery->where('first_name', 'like', "%{$search}%")
-                                    ->orWhere('middle_name', 'like', "%{$search}%")
-                                    ->orWhere('last_name', 'like', "%{$search}%")
-                                    ->orWhere('extension_name', 'like', "%{$search}%");
-                            });
-                        });
+                        ->orWhereHas('basicInformation', $searchPersonnelName);
                 });
             }
 
-            $employeesWithoutEmployment = $missingQuery->latest('updated_at')
-                ->paginate(10)->withQueryString();
-            // The original view also references this paginator during setup.
+            $employeesWithoutEmployment = $missingQuery
+                ->latest('updated_at')
+                ->paginate(10)
+                ->withQueryString();
+
             $employmentStatuses = $employeesWithoutEmployment;
 
             return view('data-management.employment-status', compact(
-                'employmentStatuses', 'employeesWithoutEmployment', 'search', 'employeeTab'
+                'employmentStatuses',
+                'employeesWithoutEmployment',
+                'search',
+                'employeeTab'
             ));
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Vacant Warm Body Statuses
-        |--------------------------------------------------------------------------
-        */
+        // Inactive warm body statuses
         $vacantStatuses = [
             'Vacant (Retired)',
             'Vacant (Resigned)',
             'Vacant (Others)',
         ];
-        /*
-        |--------------------------------------------------------------------------
-        | Base Query
-        |--------------------------------------------------------------------------
-        */
+
+        // Base query
         $query = \App\Models\EmploymentStatus::query()
             ->whereHas('user')
             ->with([
                 'user.basicInformation',
                 'plantilla',
                 'school',
-                /*
-                |--------------------------------------------------------------------------
-                | Division Office Assignment
-                |--------------------------------------------------------------------------
-                */
                 'officeUnit.officeGroup',
                 'officeUnit.parent',
             ])
-            /*
-            |--------------------------------------------------------------------------
-            | Exclude Employee ID 1000001
-            |--------------------------------------------------------------------------
-            */
             ->whereDoesntHave(
                 'user.basicInformation.issuedId',
                 function ($issuedIdQuery) {
-                    $issuedIdQuery->where(
-                        'employee_id',
-                        '1000001'
-                    );
+                    $issuedIdQuery->where('employee_id', '1000001');
                 }
             );
-        /*
-        |--------------------------------------------------------------------------
-        | Active / Inactive Employee Filter
-        |--------------------------------------------------------------------------
-        |
-        | ACTIVE:
-        | - NULL Warm Body Status
-        | - Any status except the three Vacant statuses
-        |
-        | INACTIVE:
-        | - Vacant (Retired)
-        | - Vacant (Resigned)
-        | - Vacant (Others)
-        |
-        */
+
+        // Active / inactive filter
         if ($employeeTab === 'inactive') {
-            $query->whereIn(
-                'warm_body_status',
-                $vacantStatuses
-            );
+            $query->whereIn('warm_body_status', $vacantStatuses);
         } else {
             $query->where(function ($statusQuery) use ($vacantStatuses) {
-                $statusQuery
-                    ->whereNull('warm_body_status')
-                    ->orWhereNotIn(
-                        'warm_body_status',
-                        $vacantStatuses
-                    );
+                $statusQuery->whereNull('warm_body_status')
+                    ->orWhereNotIn('warm_body_status', $vacantStatuses);
             });
         }
-        /*
-        |--------------------------------------------------------------------------
-        | Admin Access Restriction
-        |--------------------------------------------------------------------------
-        |
-        | School Admins can only view personnel assigned to their school.
-        |
-        */
+
+        // School admins can view personnel assigned to their school.
         if ($user->role === 'admin') {
-            $adminSchool =
-                $user->employmentStatus?->school;
+            $adminSchool = $user->employmentStatus?->school;
+
             if (! $adminSchool) {
-                /*
-                |--------------------------------------------------------------------------
-                | Admin Has No Assigned School
-                |--------------------------------------------------------------------------
-                */
                 $query->whereRaw('1 = 0');
             } else {
-                /*
-                |--------------------------------------------------------------------------
-                | Personnel From Same School Only
-                |--------------------------------------------------------------------------
-                */
-                $query->whereHas(
-                    'school',
-                    function ($schoolQuery) use ($adminSchool) {
-                        $schoolQuery->where(
-                            'school_id',
-                            $adminSchool->school_id
-                        );
-                    }
-                );
+                $query->whereHas('school', function ($schoolQuery) use ($adminSchool) {
+                    $schoolQuery->where('school_id', $adminSchool->school_id);
+                });
             }
         }
-        /*
-        |--------------------------------------------------------------------------
-        | Search
-        |--------------------------------------------------------------------------
-        */
+
+        // Search
         if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                /*
-                |--------------------------------------------------------------------------
-                | Personnel Name
-                |--------------------------------------------------------------------------
-                */
-                $q->whereHas(
-                    'user.basicInformation',
-                    function ($basicQuery) use ($search) {
-                        $basicQuery->where(
-                            function ($nameQuery) use ($search) {
-                                $nameQuery
-                                    ->where(
-                                        'first_name',
-                                        'like',
-                                        "%{$search}%"
-                                    )
-                                    ->orWhere(
-                                        'middle_name',
-                                        'like',
-                                        "%{$search}%"
-                                    )
-                                    ->orWhere(
-                                        'last_name',
-                                        'like',
-                                        "%{$search}%"
-                                    )
-                                    ->orWhere(
-                                        'extension_name',
-                                        'like',
-                                        "%{$search}%"
-                                    );
-                            }
-                        );
-                    }
-                )
-                /*
-                |--------------------------------------------------------------------------
-                | School
-                |--------------------------------------------------------------------------
-                */
-                ->orWhereHas(
-                    'school',
-                    function ($schoolQuery) use ($search) {
-                        $schoolQuery->where(
-                            function ($fields) use ($search) {
-                                $fields
-                                    ->where(
-                                        'school_name',
-                                        'like',
-                                        "%{$search}%"
-                                    )
-                                    ->orWhere(
-                                        'school_id',
-                                        'like',
-                                        "%{$search}%"
-                                    )
-                                    ->orWhere(
-                                        'school_district',
-                                        'like',
-                                        "%{$search}%"
-                                    );
-                            }
-                        );
-                    }
-                )
-                /*
-                |--------------------------------------------------------------------------
-                | Division Office Unit
-                |--------------------------------------------------------------------------
-                */
-                ->orWhereHas(
-                    'officeUnit',
-                    function ($officeQuery) use ($search) {
-                        $officeQuery->where(
-                            function ($fields) use ($search) {
-                                $fields
-                                    ->where(
-                                        'name',
-                                        'like',
-                                        "%{$search}%"
-                                    )
-                                    ->orWhere(
-                                        'code',
-                                        'like',
-                                        "%{$search}%"
-                                    )
-                                    ->orWhere(
-                                        'short_name',
-                                        'like',
-                                        "%{$search}%"
-                                    )
-                                    ->orWhere(
-                                        'unit_type',
-                                        'like',
-                                        "%{$search}%"
-                                    );
-                            }
-                        );
-                    }
-                )
-                /*
-                |--------------------------------------------------------------------------
-                | Office Group
-                |--------------------------------------------------------------------------
-                */
-                ->orWhereHas(
-                    'officeUnit.officeGroup',
-                    function ($groupQuery) use ($search) {
-                        $groupQuery
-                            ->where(
-                                'name',
-                                'like',
-                                "%{$search}%"
-                            )
-                            ->orWhere(
-                                'code',
-                                'like',
-                                "%{$search}%"
-                            );
-                    }
-                )
-                /*
-                |--------------------------------------------------------------------------
-                | Plantilla
-                |--------------------------------------------------------------------------
-                */
-                ->orWhereHas(
-                    'plantilla',
-                    function ($plantillaQuery) use ($search) {
-                        $plantillaQuery->where(
-                            function ($fields) use ($search) {
-                                $fields
-                                    ->where(
-                                        'item_from_school_level',
-                                        'like',
-                                        "%{$search}%"
-                                    )
-                                    ->orWhere(
-                                        'item_number',
-                                        'like',
-                                        "%{$search}%"
-                                    )
-                                    ->orWhere(
-                                        'position_title',
-                                        'like',
-                                        "%{$search}%"
-                                    );
-                            }
-                        );
-                    }
-                )
-                /*
-                |--------------------------------------------------------------------------
-                | Employment Information
-                |--------------------------------------------------------------------------
-                */
-                ->orWhere(
-                    'employment_status',
-                    'like',
-                    "%{$search}%"
-                )
-                ->orWhere(
-                    'warm_body_status',
-                    'like',
-                    "%{$search}%"
-                )
-                ->orWhere(
-                    'nature_of_work',
-                    'like',
-                    "%{$search}%"
-                )
-                ->orWhere(
-                    'date_of_original_appointment',
-                    'like',
-                    "%{$search}%"
-                );
+            $query->where(function ($q) use ($search, $searchPersonnelName) {
+                // Complete name or first and last name
+                $q->whereHas('user.basicInformation', $searchPersonnelName)
+
+                    // Email address
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('email', 'like', "%{$search}%");
+                    })
+
+                    // School
+                    ->orWhereHas('school', function ($schoolQuery) use ($search) {
+                        $schoolQuery->where(function ($fields) use ($search) {
+                            $fields->where('school_name', 'like', "%{$search}%")
+                                ->orWhere('school_id', 'like', "%{$search}%")
+                                ->orWhere('school_district', 'like', "%{$search}%");
+                        });
+                    })
+
+                    // Division Office unit
+                    ->orWhereHas('officeUnit', function ($officeQuery) use ($search) {
+                        $officeQuery->where(function ($fields) use ($search) {
+                            $fields->where('name', 'like', "%{$search}%")
+                                ->orWhere('code', 'like', "%{$search}%")
+                                ->orWhere('short_name', 'like', "%{$search}%")
+                                ->orWhere('unit_type', 'like', "%{$search}%");
+                        });
+                    })
+
+                    // Office group
+                    ->orWhereHas(
+                        'officeUnit.officeGroup',
+                        function ($groupQuery) use ($search) {
+                            $groupQuery->where(function ($fields) use ($search) {
+                                $fields->where('name', 'like', "%{$search}%")
+                                    ->orWhere('code', 'like', "%{$search}%");
+                            });
+                        }
+                    )
+
+                    // Plantilla
+                    ->orWhereHas('plantilla', function ($plantillaQuery) use ($search) {
+                        $plantillaQuery->where(function ($fields) use ($search) {
+                            $fields->where('item_from_school_level', 'like', "%{$search}%")
+                                ->orWhere('item_number', 'like', "%{$search}%")
+                                ->orWhere('position_title', 'like', "%{$search}%");
+                        });
+                    })
+
+                    // Employment information
+                    ->orWhere('employment_status', 'like', "%{$search}%")
+                    ->orWhere('warm_body_status', 'like', "%{$search}%")
+                    ->orWhere('nature_of_work', 'like', "%{$search}%")
+                    ->orWhere('date_of_original_appointment', 'like', "%{$search}%");
             });
         }
-        /*
-        |--------------------------------------------------------------------------
-        | Pagination
-        |--------------------------------------------------------------------------
-        */
+
+        // Pagination
         $employmentStatuses = $query
             ->latest('updated_at')
             ->paginate(10)
             ->withQueryString();
-        /*
-        |--------------------------------------------------------------------------
-        | Return View
-        |--------------------------------------------------------------------------
-        */
-        return view(
-            'data-management.employment-status',
-            compact(
-                'employmentStatuses',
-                'search',
-                'employeeTab'
-            )
-        );
+
+        return view('data-management.employment-status', compact(
+            'employmentStatuses',
+            'search',
+            'employeeTab'
+        ));
     }
 
     public function importEmploymentStatus(Request $request)
