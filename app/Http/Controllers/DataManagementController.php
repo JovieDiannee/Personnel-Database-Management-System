@@ -2325,16 +2325,11 @@ class DataManagementController extends Controller
                 'array:id,type,street,brgy,subd_village,municipality_city,province,zip_postal',
             ],
             'addresses.*.id' => [
-                'required',
+                'nullable',
                 'integer',
                 'distinct',
                 \Illuminate\Validation\Rule::exists('address', 'id')
-                    ->where(
-                        fn ($query) => $query->where(
-                            'basic_information_id',
-                            $person->id
-                        )
-                    ),
+                    ->where('basic_information_id', $person->id),
             ],
         ];
         foreach ($issuedIdFields as $field) {
@@ -2617,26 +2612,45 @@ class DataManagementController extends Controller
             |--------------------------------------------------------------------------
             */
             foreach ($validated['addresses'] ?? [] as $index => $addressData) {
-                $address = $person->getConnection()->table('address')
-                    ->where('basic_information_id', $person->id)
-                    ->where('id', $addressData['id'])
-                    ->lockForUpdate()
-                    ->first();
-                if (! $address) {
-                    throw \Illuminate\Validation\ValidationException::withMessages([
-                        "addresses.$index.id" =>
-                            'This address is no longer available. Reload the page.',
-                    ]);
+                $values = \Illuminate\Support\Arr::only($addressData, $addressFields);
+                $addressId = $addressData['id'] ?? null;
+                $addressQuery = $person->getConnection()->table('address');
+
+                if ($addressId) {
+                    $address = (clone $addressQuery)
+                        ->where('basic_information_id', $person->id)
+                        ->where('id', $addressId)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (! $address) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            "addresses.$index.id" => 'This address is no longer available. Reload the page.',
+                        ]);
+                    }
+
+                    $values['updated_at'] = now();
+
+                    (clone $addressQuery)
+                        ->where('basic_information_id', $person->id)
+                        ->where('id', $addressId)
+                        ->update($values);
+                } else {
+                    // Do not create an address when all address details are blank.
+                    $hasDetails = collect(
+                        \Illuminate\Support\Arr::except($values, ['type'])
+                    )->contains(fn ($value) => filled($value));
+
+                    if (! $hasDetails) {
+                        continue;
+                    }
+
+                    $addressQuery->insert(array_merge($values, [
+                        'basic_information_id' => $person->id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]));
                 }
-                $values = \Illuminate\Support\Arr::only(
-                    $addressData,
-                    $addressFields
-                );
-                $values['updated_at'] = now();
-                $person->getConnection()->table('address')
-                    ->where('basic_information_id', $person->id)
-                    ->where('id', $address->id)
-                    ->update($values);
             }
             /*
             |--------------------------------------------------------------------------

@@ -1322,11 +1322,20 @@
 
             @endphp
 
-            @forelse ($addresses as $address)
+            @php
+                $editableAddresses = collect($addresses ?? [])->filter()->values();
+                if ($editableAddresses->isEmpty()) {
+                    $editableAddresses = collect([
+                        (object) ['id' => null, 'type' => 'residential'],
+                        (object) ['id' => null, 'type' => 'permanent'],
+                    ]);
+                }
+            @endphp
+            @foreach ($editableAddresses as $address)
 
                 @php
 
-                    $addressKey = $address->id;
+                    $addressKey = $address->id ?? 'new_'.$loop->index;
 
                 @endphp
 
@@ -1338,7 +1347,8 @@
 
                     </h3>
 
-                    {{-- Keep this hidden ID to identify the address being updated. --}}
+                    {{-- Existing addresses submit their ID; new addresses omit it. --}}
+                    @if($address->id)
 
                     <input
 
@@ -1349,6 +1359,7 @@
                         value="{{ $address->id }}"
 
                     >
+                    @endif
 
                     @error("addresses.$addressKey.id")
 
@@ -1480,15 +1491,7 @@
 
                 </div>
 
-            @empty
-
-                <p class="mb-6 text-sm text-gray-500">
-
-                    No address is currently recorded for this person.
-
-                </p>
-
-            @endforelse
+            @endforeach
 
             @php
                 $hasEmploymentRecord = (bool) $record;
