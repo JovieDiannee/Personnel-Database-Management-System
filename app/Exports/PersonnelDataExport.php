@@ -2,7 +2,6 @@
 
 namespace App\Exports;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -23,17 +22,15 @@ class PersonnelDataExport implements
 
     public function query()
     {
-        return $this->personnelQuery
+        // Preserve the controller's filtered medicalAllowance relationship.
+        $query = clone $this->personnelQuery;
+
+        return $query
             ->with([
                 'basicInformation.issuedId',
-
                 'employmentStatus.school',
-
                 'employmentStatus.plantilla',
-
                 'employmentStatus.officeUnit',
-
-                'medicalAllowance',
             ])
             ->orderBy('users.id');
     }
@@ -49,13 +46,8 @@ class PersonnelDataExport implements
     public function map($user): array
     {
         return array_map(function ($key) use ($user) {
-
             $definition = $this->columnDefinitions[$key];
-
-            $value = data_get(
-                $user,
-                $definition['path']
-            );
+            $value = data_get($user, $definition['path']);
 
             if ($value instanceof \DateTimeInterface) {
                 return $value->format('Y-m-d');
@@ -65,16 +57,14 @@ class PersonnelDataExport implements
                 return null;
             }
 
-            if (is_string($value)) {
-                // Prevent Excel from interpreting user-controlled
-                // text as a formula.
-                if (preg_match('/^[\s\x00-\x1F]*[=+\-@]/u', $value)) {
-                    return "'" . $value;
-                }
+            if (
+                is_string($value)
+                && preg_match('/^[\s\x00-\x1F]*[=+\-@]/u', $value)
+            ) {
+                return "'" . $value;
             }
 
             return $value;
-
         }, $this->selectedColumns);
     }
 }
