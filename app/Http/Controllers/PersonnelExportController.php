@@ -3,30 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Exports\PersonnelDataExport;
-use App\Models\User;
 use App\Models\BasicInformation;
 use App\Models\EmploymentStatus;
 use App\Models\MedicalAllowance;
-use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Models\PlantillaDb;
 use App\Models\SchoolDb;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PersonnelExportController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Exportable Columns
-    |--------------------------------------------------------------------------
-    |
-    | Only approved fields are available for export.
-    | The path corresponds to an actual Eloquent relationship.
-    |
-    */
-
     private function columnGroups(): array
     {
         return [
@@ -52,7 +41,6 @@ class PersonnelExportController extends Controller
                     'path' => 'status',
                 ],
             ],
-
             'Basic Information' => [
                 'first_name' => [
                     'label' => 'First Name',
@@ -123,7 +111,6 @@ class PersonnelExportController extends Controller
                     'path' => 'basicInformation.specialization',
                 ],
             ],
-
             'Issued IDs' => [
                 'employee_id' => [
                     'label' => 'Employee ID',
@@ -154,7 +141,6 @@ class PersonnelExportController extends Controller
                     'path' => 'basicInformation.issuedId.philhealth_no',
                 ],
             ],
-
             'Employment Information' => [
                 'plantilla_db_id' => [
                     'label' => 'Plantilla DB ID',
@@ -201,7 +187,6 @@ class PersonnelExportController extends Controller
                     'path' => 'employmentStatus.contract_duration',
                 ],
             ],
-
             'Medical Allowance' => [
                 'medical_year' => [
                     'label' => 'Medical Allowance Year',
@@ -220,119 +205,80 @@ class PersonnelExportController extends Controller
                     'path' => 'medicalAllowance.validation_status',
                 ],
             ],
-
-            /*
-            |--------------------------------------------------------------------------
-            | School Database
-            |--------------------------------------------------------------------------
-            */
-
             'School Information' => [
-
                 'school_id' => [
                     'label' => 'School ID',
                     'path' => 'employmentStatus.school.school_id',
                 ],
-
                 'school_name' => [
                     'label' => 'School Name',
                     'path' => 'employmentStatus.school.school_name',
                 ],
-
                 'school_area' => [
                     'label' => 'School Area',
                     'path' => 'employmentStatus.school.school_area',
                 ],
-
                 'legislative_district' => [
                     'label' => 'Legislative District',
                     'path' => 'employmentStatus.school.legislative_district',
                 ],
-
                 'school_district' => [
                     'label' => 'School District',
                     'path' => 'employmentStatus.school.school_district',
                 ],
-
                 'school_municipality' => [
                     'label' => 'School Municipality',
                     'path' => 'employmentStatus.school.school_municipality',
                 ],
-
                 'school_sector' => [
                     'label' => 'School Sector',
                     'path' => 'employmentStatus.school.school_sector',
                 ],
-
                 'school_curricular_offering' => [
                     'label' => 'School Curricular Offering',
                     'path' => 'employmentStatus.school.school_curricular_offering',
                 ],
-
             ],
-
-            /*
-            |--------------------------------------------------------------------------
-            | Plantilla Database
-            |--------------------------------------------------------------------------
-            */
-
             'Plantilla Information' => [
-
                 'item_number' => [
                     'label' => 'Plantilla Item Number',
                     'path' => 'employmentStatus.plantilla.item_number',
                 ],
-
                 'item_from' => [
                     'label' => 'Item From',
                     'path' => 'employmentStatus.plantilla.item_from',
                 ],
-
                 'item_from_school_level' => [
                     'label' => 'Item From School Level',
                     'path' => 'employmentStatus.plantilla.item_from_school_level',
                 ],
-
                 'position_title' => [
                     'label' => 'Position Title',
                     'path' => 'employmentStatus.plantilla.position_title',
                 ],
-
                 'salary_grade' => [
                     'label' => 'Salary Grade',
                     'path' => 'employmentStatus.plantilla.salary_grade',
                 ],
-
                 'area_code' => [
                     'label' => 'Area Code',
                     'path' => 'employmentStatus.plantilla.area_code',
                 ],
-
                 'area_type' => [
                     'label' => 'Area Type',
                     'path' => 'employmentStatus.plantilla.area_type',
                 ],
-
                 'plantilla_level' => [
                     'label' => 'Plantilla Level',
                     'path' => 'employmentStatus.plantilla.plantilla_level',
                 ],
-
                 'pppa_attribution' => [
                     'label' => 'PPPA Attribution',
                     'path' => 'employmentStatus.plantilla.pppa_attribution',
                 ],
-
             ],
         ];
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Flatten Column Definitions
-    |--------------------------------------------------------------------------
-    */
 
     private function columnDefinitions(): array
     {
@@ -347,12 +293,6 @@ class PersonnelExportController extends Controller
         return $definitions;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Default Columns
-    |--------------------------------------------------------------------------
-    */
-
     private function defaultColumns(): array
     {
         return [
@@ -362,34 +302,24 @@ class PersonnelExportController extends Controller
             'last_name',
             'extension_name',
             'sex',
-
-            // School Information
             'school_id',
             'school_name',
             'school_district',
             'school_municipality',
-
-            // Plantilla Information
             'item_number',
             'position_title',
             'salary_grade',
-
-            // Employment Information
             'employment_status',
             'warm_body_status',
             'source_of_fund',
         ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Filter Options
-    |--------------------------------------------------------------------------
-    */
-
     private function filterOptions(): array
     {
-        $employmentFields = [
+        $options = [];
+
+        foreach ([
             'employment_status',
             'warm_body_status',
             'nature_of_work',
@@ -397,11 +327,7 @@ class PersonnelExportController extends Controller
             'school_db_id',
             'office_unit_id',
             'plantilla_db_id',
-        ];
-
-        $options = [];
-
-        foreach ($employmentFields as $field) {
+        ] as $field) {
             $options[$field] = EmploymentStatus::query()
                 ->whereNotNull($field)
                 ->where($field, '<>', '')
@@ -436,12 +362,6 @@ class PersonnelExportController extends Controller
                 ->pluck($field);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | School Database Filters
-        |--------------------------------------------------------------------------
-        */
-
         foreach ([
             'school_id',
             'school_name',
@@ -451,7 +371,6 @@ class PersonnelExportController extends Controller
             'legislative_district',
             'school_sector',
         ] as $field) {
-
             $options[$field] = SchoolDb::query()
                 ->whereNotNull($field)
                 ->where($field, '<>', '')
@@ -460,13 +379,6 @@ class PersonnelExportController extends Controller
                 ->pluck($field);
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Plantilla Database Filters
-        |--------------------------------------------------------------------------
-        */
-
         foreach ([
             'item_number',
             'position_title',
@@ -474,7 +386,6 @@ class PersonnelExportController extends Controller
             'plantilla_level',
             'area_type',
         ] as $field) {
-
             $options[$field] = PlantillaDb::query()
                 ->whereNotNull($field)
                 ->distinct()
@@ -485,41 +396,32 @@ class PersonnelExportController extends Controller
         return $options;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Validate Filters
-    |--------------------------------------------------------------------------
-    */
-
     private function validatedFilters(Request $request): array
     {
         return $request->validate([
             'search' => ['nullable', 'string', 'max:150'],
-
             'sex' => ['nullable', 'string', 'max:255'],
             'civil_status' => ['nullable', 'string', 'max:255'],
             'specialization' => ['nullable', 'string', 'max:255'],
-
             'employment_status' => ['nullable', 'string', 'max:255'],
             'warm_body_status' => ['nullable', 'string', 'max:255'],
             'nature_of_work' => ['nullable', 'string', 'max:255'],
             'source_of_fund' => ['nullable', 'string', 'max:255'],
-
             'school_db_id' => ['nullable', 'integer'],
             'office_unit_id' => ['nullable', 'integer'],
             'plantilla_db_id' => ['nullable', 'integer'],
-
             'employment_filter' => [
                 'nullable',
                 Rule::in(['all', 'active', 'inactive']),
             ],
-
-            'medical_year' => ['nullable', 'integer', 'between:2000,2100'],
+            'medical_year' => [
+                'nullable',
+                'integer',
+                'between:2000,2100',
+            ],
             'mode_of_availment' => ['nullable', 'string', 'max:255'],
             'disbursement_status' => ['nullable', 'string', 'max:255'],
             'validation_status' => ['nullable', 'string', 'max:255'],
-
-            // School Information
             'school_id' => ['nullable', 'string', 'max:255'],
             'school_name' => ['nullable', 'string', 'max:255'],
             'school_district' => ['nullable', 'string', 'max:255'],
@@ -527,8 +429,6 @@ class PersonnelExportController extends Controller
             'school_area' => ['nullable', 'string', 'max:255'],
             'legislative_district' => ['nullable', 'string', 'max:255'],
             'school_sector' => ['nullable', 'string', 'max:255'],
-
-            // Plantilla Information
             'item_number' => ['nullable', 'string', 'max:255'],
             'position_title' => ['nullable', 'string', 'max:255'],
             'salary_grade' => ['nullable', 'integer'],
@@ -537,118 +437,42 @@ class PersonnelExportController extends Controller
         ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Build Personnel Query
-    |--------------------------------------------------------------------------
-    |
-    | Export only non-deleted personnel accounts.
-    |
-    | Exclusions:
-    | 1. Soft-deleted employees (Trash Bin)
-    | 2. Super Admin accounts
-    | 3. System account with User ID 1
-    | 4. Employee ID 1000001
-    |
-    | Include only user and admin accounts.
-    |
-    */
-
     private function buildQuery(array $filters): Builder
     {
-         $query = User::query()
+        $query = User::query()
+            ->whereNull('users.deleted_at')
+            ->whereIn('users.role', ['user', 'admin'])
+            ->where('users.id', '<>', 1)
+            ->whereHas('basicInformation')
+            ->whereDoesntHave('basicInformation.issuedId', function ($q) {
+                $q->where('employee_id', '1000001');
+            });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Exclude Deleted Employees
-        |--------------------------------------------------------------------------
-        */
-
-        ->whereNull('users.deleted_at')
-
-        /*
-        |--------------------------------------------------------------------------
-        | Include Only Personnel Accounts
-        |--------------------------------------------------------------------------
-        */
-
-        ->whereIn('users.role', [
-            'user',
-            'admin',
-        ])
-
-        /*
-        |--------------------------------------------------------------------------
-        | Exclude System Super Admin
-        |--------------------------------------------------------------------------
-        */
-
-        ->where('users.id', '<>', 1)
-
-        /*
-        |--------------------------------------------------------------------------
-        | Require Basic Information
-        |--------------------------------------------------------------------------
-        */
-
-        ->whereHas('basicInformation')
-
-        /*
-        |--------------------------------------------------------------------------
-        | Exclude Employee ID 1000001
-        |--------------------------------------------------------------------------
-        */
-
-        ->whereDoesntHave(
-            'basicInformation.issuedId',
-            function ($query) {
-                $query->where(
-                    'employee_id',
-                    '1000001'
-                );
-            }
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Search Employee
-        |--------------------------------------------------------------------------
-        */
-
+        // Search personnel.
         if (!empty($filters['search'])) {
             $search = trim($filters['search']);
 
             $query->where(function ($q) use ($search) {
                 $q->where('users.name', 'like', "%{$search}%")
-                  ->orWhere('users.email', 'like', "%{$search}%")
-                  ->orWhereHas('basicInformation', function ($b) use ($search) {
-                      $b->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('middle_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas(
-                      'basicInformation.issuedId',
-                      fn ($id) => $id->where(
-                          'employee_id',
-                          'like',
-                          "%{$search}%"
-                      )
-                  );
+                    ->orWhere('users.email', 'like', "%{$search}%")
+                    ->orWhereHas('basicInformation', function ($basic) use ($search) {
+                        $basic->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('middle_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('basicInformation.issuedId', function ($id) use ($search) {
+                        $id->where('employee_id', 'like', "%{$search}%");
+                    });
             });
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Basic Information Filters
-        |--------------------------------------------------------------------------
-        */
-
+        // Basic information filters.
         foreach ([
             'sex',
             'civil_status',
             'specialization',
         ] as $field) {
-            if (!empty($filters[$field])) {
+            if (isset($filters[$field]) && $filters[$field] !== '') {
                 $value = $filters[$field];
 
                 $query->whereHas(
@@ -658,13 +482,8 @@ class PersonnelExportController extends Controller
             }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Employment Filters
-        |--------------------------------------------------------------------------
-        */
-
-        $employmentFields = [
+        // Employment filters.
+        foreach ([
             'employment_status',
             'warm_body_status',
             'nature_of_work',
@@ -672,13 +491,8 @@ class PersonnelExportController extends Controller
             'school_db_id',
             'office_unit_id',
             'plantilla_db_id',
-        ];
-
-        foreach ($employmentFields as $field) {
-            if (
-                isset($filters[$field])
-                && $filters[$field] !== ''
-            ) {
+        ] as $field) {
+            if (isset($filters[$field]) && $filters[$field] !== '') {
                 $value = $filters[$field];
 
                 $query->whereHas(
@@ -688,12 +502,7 @@ class PersonnelExportController extends Controller
             }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Active / Inactive Classification
-        |--------------------------------------------------------------------------
-        */
-
+        // Active / inactive classification.
         $inactiveStatuses = [
             'Vacant (Retired)',
             'Vacant (Resigned)',
@@ -706,7 +515,7 @@ class PersonnelExportController extends Controller
             $query->whereHas('employmentStatus', function ($q) use ($inactiveStatuses) {
                 $q->where(function ($inner) use ($inactiveStatuses) {
                     $inner->whereNull('warm_body_status')
-                          ->orWhereNotIn('warm_body_status', $inactiveStatuses);
+                        ->orWhereNotIn('warm_body_status', $inactiveStatuses);
                 });
             });
         }
@@ -714,22 +523,11 @@ class PersonnelExportController extends Controller
         if ($classification === 'inactive') {
             $query->whereHas(
                 'employmentStatus',
-                fn ($q) => $q->whereIn(
-                    'warm_body_status',
-                    $inactiveStatuses
-                )
+                fn ($q) => $q->whereIn('warm_body_status', $inactiveStatuses)
             );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Medical Allowance Filters
-        |--------------------------------------------------------------------------
-        |
-        | Apply all medical conditions to the same related record.
-        |
-        */
-
+        // Build the medical conditions once.
         $medicalMap = [
             'medical_year' => 'year',
             'mode_of_availment' => 'mode_of_availment',
@@ -740,29 +538,33 @@ class PersonnelExportController extends Controller
         $medicalFilters = [];
 
         foreach ($medicalMap as $input => $column) {
-            if (
-                isset($filters[$input])
-                && $filters[$input] !== ''
-            ) {
+            if (isset($filters[$input]) && $filters[$input] !== '') {
                 $medicalFilters[$column] = $filters[$input];
             }
         }
 
+        $applyMedicalFilters = function ($q) use ($medicalFilters) {
+            foreach ($medicalFilters as $column => $value) {
+                $q->where($column, $value);
+            }
+        };
+
+        // All selected medical conditions must match the same record.
         if (!empty($medicalFilters)) {
-            $query->whereHas('medicalAllowance', function ($q) use ($medicalFilters) {
-                foreach ($medicalFilters as $column => $value) {
-                    $q->where($column, $value);
-                }
-            });
+            $query->whereHas('medicalAllowance', $applyMedicalFilters);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | School Database Filters
-        |--------------------------------------------------------------------------
-        */
+        // Load the same matching medical record for preview and export.
+        $query->with([
+            'basicInformation.issuedId',
+            'employmentStatus.school',
+            'employmentStatus.plantilla',
+            'employmentStatus.officeUnit',
+            'medicalAllowance' => $applyMedicalFilters,
+        ]);
 
-        $schoolFilters = [
+        // School database filters.
+        foreach ([
             'school_id',
             'school_name',
             'school_district',
@@ -770,67 +572,37 @@ class PersonnelExportController extends Controller
             'school_area',
             'legislative_district',
             'school_sector',
-        ];
-
-        foreach ($schoolFilters as $field) {
-
-            if (
-                isset($filters[$field])
-                && $filters[$field] !== ''
-            ) {
-
+        ] as $field) {
+            if (isset($filters[$field]) && $filters[$field] !== '') {
                 $value = $filters[$field];
 
                 $query->whereHas(
                     'employmentStatus.school',
-                    function ($q) use ($field, $value) {
-                        $q->where($field, $value);
-                    }
+                    fn ($q) => $q->where($field, $value)
                 );
             }
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Plantilla Database Filters
-        |--------------------------------------------------------------------------
-        */
-
-        $plantillaFilters = [
+        // Plantilla database filters.
+        foreach ([
             'item_number',
             'position_title',
             'salary_grade',
             'plantilla_level',
             'area_type',
-        ];
-
-        foreach ($plantillaFilters as $field) {
-
-            if (
-                isset($filters[$field])
-                && $filters[$field] !== ''
-            ) {
-
+        ] as $field) {
+            if (isset($filters[$field]) && $filters[$field] !== '') {
                 $value = $filters[$field];
 
                 $query->whereHas(
                     'employmentStatus.plantilla',
-                    function ($q) use ($field, $value) {
-                        $q->where($field, $value);
-                    }
+                    fn ($q) => $q->where($field, $value)
                 );
             }
         }
 
         return $query;
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Export Data Page
-    |--------------------------------------------------------------------------
-    */
 
     public function index(Request $request)
     {
@@ -841,18 +613,8 @@ class PersonnelExportController extends Controller
 
         $filters = $this->validatedFilters($request);
 
+        // Relationships and medical constraints are loaded in buildQuery().
         $records = $this->buildQuery($filters)
-            ->with([
-                'basicInformation.issuedId',
-
-                'employmentStatus.school',
-
-                'employmentStatus.plantilla',
-
-                'employmentStatus.officeUnit',
-
-                'medicalAllowance',
-            ])
             ->orderBy('users.id')
             ->paginate(15)
             ->withQueryString();
@@ -867,12 +629,6 @@ class PersonnelExportController extends Controller
         ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Download Excel
-    |--------------------------------------------------------------------------
-    */
-
     public function download(Request $request)
     {
         abort_unless(
@@ -881,7 +637,6 @@ class PersonnelExportController extends Controller
         );
 
         $filters = $this->validatedFilters($request);
-
         $definitions = $this->columnDefinitions();
 
         $validated = $request->validate([
@@ -895,7 +650,6 @@ class PersonnelExportController extends Controller
         ]);
 
         $selectedColumns = $validated['columns'];
-
         $query = $this->buildQuery($filters);
 
         if (!(clone $query)->exists()) {
